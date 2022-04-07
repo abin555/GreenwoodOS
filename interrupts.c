@@ -3,6 +3,7 @@
 #include "keyboard.h"
 #include "frame_buffer.h"
 #include "pic.h"
+#include "terminal.h"
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 #define INTERRUPTS_KEYBOARD 33
@@ -60,10 +61,12 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 
 			break;
 		case INTERRUPTS_KERNEL:
+			/*
 			for(int i = 0; i < (int) sizeof softint; i++){
 				keyboard_KEYBUFFER[i] = softint[i];
 				keyboard_KEYBUFFER_POINTER = 0;
-			}
+			} */
+			terminal_handler();
 			break;
 		default:
 			break;

@@ -43,6 +43,18 @@ int fb_write_start(char *buf, unsigned int len, unsigned int start){
     //fb_move_cursor(fb_cursor);
     return 0;
 }
+/*
+int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x, unsigned int y){
+    unsigned int real_index = start;
+    for(unsigned int index = 0; index < len, index++){
+        real_index++;
+        if(real_index > len){
+            real_index = 0;
+        }
+        fb_write_cell((y*80)+x, buf[real_index], FB_WHITE, FB_BLACK);
+    }
+    return 0;
+}*/
 
 void fb_move_cursor(unsigned short pos)
 {
