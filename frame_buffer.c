@@ -1,0 +1,61 @@
+#include "frame_buffer.h"
+#include "io.h"
+
+char *fb = (char *)0x000B8000;
+int fb_cursor = 0;
+
+void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
+{
+    fb[2 * i] = c;
+    fb[2 * i + 1] = ((bg & 0x0F) << 4) | (fg & 0x0F);
+}
+
+void printChar(unsigned int x, unsigned int y, char c)
+{
+    int index = y * 80 + x;
+    fb_write_cell(index, c, FB_WHITE, FB_BLACK);
+}
+
+void fb_clear(char c, unsigned char fg, unsigned char bg)
+{
+    for (int i = 0; i < 80 * 15; i++)
+    {
+        fb_write_cell(i, c, fg, bg);
+    }
+}
+
+int fb_write(char *buf, unsigned int len)
+{
+    for (unsigned int index = 0; index < len; index++)
+    {
+        fb_write_cell(fb_cursor+index, buf[index], FB_WHITE, FB_BLACK);
+    }
+    //fb_cursor+=len;
+    //fb_move_cursor(fb_cursor);
+    return 0;
+}
+int fb_write_start(char *buf, unsigned int len, unsigned int start){
+    for (unsigned int index = 0; index < len; index++)
+    {
+        fb_write_cell(fb_cursor+index, buf[index+start], FB_WHITE, FB_BLACK);
+    }
+    //fb_cursor+=len;
+    //fb_move_cursor(fb_cursor);
+    return 0;
+}
+
+void fb_move_cursor(unsigned short pos)
+{
+    fb_cursor = pos;
+    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+    outb(FB_DATA_PORT, ((pos >> 8) & 0x00FF));
+    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+    outb(FB_DATA_PORT, pos & 0x00FF);
+}
+void fb_move_cursor_xy(unsigned int x, unsigned int y){
+    fb_cursor = 80*y+x;
+    outb(FB_COMMAND_PORT, FB_HIGH_BYTE_COMMAND);
+    outb(FB_DATA_PORT, ((fb_cursor >> 8) & 0x00FF));
+    outb(FB_COMMAND_PORT, FB_LOW_BYTE_COMMAND);
+    outb(FB_DATA_PORT, fb_cursor & 0x00FF);
+}
