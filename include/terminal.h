@@ -5,7 +5,7 @@
 #include "io.h"
 #include "keyboard.h"
 #include "string.h"
-#include "keyboard_ascii_tables.h"
+#include "ascii_tables.h"
 
 #define TERMINAL_Buffer_Size 70
 

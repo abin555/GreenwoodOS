@@ -9,7 +9,7 @@
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
 
-unsigned char SYS_MODE = 1;
+unsigned char SYS_MODE = 4;
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT];
 struct IDT idt;
@@ -79,6 +79,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 			pic_acknowledge(interrupt);
 			break;
 		case INTERRUPTS_KERNEL:
+			printChar(SYS_MODE, 10, 'S');
 			KERNEL_INTERRUPT();
 			break;
 		default:

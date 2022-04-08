@@ -1,9 +1,10 @@
 #include "keyboard.h"
 #include "frame_buffer.h"
-#include "keyboard_ascii_tables.h"
+#include "ascii_tables.h"
 
 unsigned char prev_Scancode = 0;
 unsigned int keyboard_KEYBUFFER_POINTER = 0;
+unsigned int keyboard_ascii_pointer = 0;
 bool _keyboard_disable = 1;
 bool KYBRD_SHIFT = false;
 
@@ -90,9 +91,6 @@ void keyboard_flag_handler(unsigned char scan_code){
         KYBRD_SHIFT = false;
         keyboard_set_leds(false,false,false);
         break;
-        case 0x0E:
-        keyboard_KEYBUFFER_POINTER--;
-        break;
         
         case 0x1D:
         //software_int();
@@ -122,7 +120,16 @@ void keyboard_handle_interrupt(){
 
     scan_code = keyboard_enc_read_buf();
     if(scan_code){
-        if(kbd_US[scan_code]){
+        if(kbd_US[scan_code] != 0){
+            if(KYBRD_SHIFT){
+                keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US_shift[scan_code];
+            }
+            else{
+                keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US[scan_code];
+            }
+            keyboard_ascii_pointer++;
+        }
+        else{
             keyboard_flag_handler(scan_code);
         }
         keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = scan_code;

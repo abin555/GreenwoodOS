@@ -2,8 +2,9 @@
 #define Terminal_Y 20
 
 int Terminal_OUT_pointer = 0;
-int Terminal_Buffer_Pointer = 0;
-unsigned int previousKYBD_pointer = 0;
+unsigned int Terminal_Buffer_Pointer = 0;
+unsigned int previousASCII_pointer = 0;
+unsigned int previousKEY_pointer = 0;
 
 void terminal_renderer(){
     fb_clear(' ', FB_WHITE, FB_BLACK);
@@ -14,34 +15,36 @@ void terminal_renderer(){
 }
 
 void terminal_console(){
-    char ascii = 0;
-    if(KYBRD_SHIFT){
-        ascii = kbd_US[(unsigned char) keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]];
-    }
-    else{
-        ascii = kbd_US_shift[(unsigned char) keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]];
-    }
+    Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
+    printChar(Terminal_Buffer_Pointer, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
     
-    if(ascii){
-        Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1];
-        printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
-        Terminal_Buffer_Pointer++;
-        fb_move_cursor_xy(Terminal_Buffer_Pointer+1, Terminal_Y);
-    }
-    
+    fb_move_cursor_xy(Terminal_Buffer_Pointer+1, Terminal_Y);
+    Terminal_Buffer_Pointer++;
+
     printChar(0, Terminal_Y, '>');
 }
 
 void terminal_handler(){
-    
+    /*
     STR_INSERT("Testing Buffer System", Terminal_OUT_Buffer, 20, 0);
     STR_INSERT("Command Buffer", Terminal_Buffer, 16, 0);
-    if(keyboard_KEYBUFFER_POINTER-1 != previousKYBD_pointer){
+    */
+    if(keyboard_ascii_pointer-1 != previousASCII_pointer && Terminal_Buffer_Pointer < TERMINAL_Buffer_Size){
         //printChar(keyboard_KEYBUFFER_POINTER-1, Terminal_Y, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]);
         terminal_console();
-        previousKYBD_pointer = keyboard_KEYBUFFER_POINTER-1;
+        previousASCII_pointer = keyboard_ascii_pointer-1;
     }
-    /*
-    Terminal_OUT_Buffer[0] = 'A';
-    terminal_renderer();*/
+    else if(keyboard_KEYBUFFER_POINTER-1 != previousKEY_pointer){
+        switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]){
+            case 0x0E:
+            Terminal_Buffer[Terminal_Buffer_Pointer-1] = ' ';
+            printChar(Terminal_Buffer_Pointer-1, Terminal_Y, ' ');
+
+            fb_move_cursor_xy(Terminal_Buffer_Pointer-1, Terminal_Y);
+            Terminal_Buffer_Pointer = 0;
+            break;
+        }
+    }
+    //Terminal_OUT_Buffer[0] = 'A';
+    //terminal_renderer();
 }

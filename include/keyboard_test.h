@@ -5,6 +5,8 @@
 #include "frame_buffer.h"
 #include "keyboard.h"
 
+#include "ascii_tables.h"
+
 char decode[100];
 
 void KYBRD_DEBUG_DISPLAY();

@@ -54,9 +54,12 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-char kbd_US[KEYBOARD_MAX_ASCII];
 char keyboard_KEYBUFFER[KEYBOARD_BUFFERSIZE];
+char keyboard_ASCIIBuffer[KEYBOARD_BUFFERSIZE];
+
 unsigned int keyboard_KEYBUFFER_POINTER;
+unsigned int keyboard_ascii_pointer;
+
 unsigned char prev_Scancode;
 unsigned char char_scancode;
 

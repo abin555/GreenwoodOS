@@ -8,7 +8,8 @@ OBJECTS = \
 		kernel_programs/terminal.o \
 		keyboard.o \
 		string.o \
-		kernel_programs/keyboard_test.o
+		kernel_programs/keyboard_test.o \
+		ascii_tables.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -c
