@@ -1,6 +1,7 @@
 #ifndef KYBRD_ASCII_T_H
 #define KYBRD_ASCII_T_H
 #include "keyboard.h"
+
 char kbd_US [KEYBOARD_MAX_ASCII] =
 {
     0,  0, '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 0,   
@@ -35,7 +36,7 @@ char kbd_US [KEYBOARD_MAX_ASCII] =
     0,  /* F12 Key */
     0,  /* All other keys are undefined */
 };
-char kdb_US_shift [KEYBOARD_MAX_ASCII] =
+char kbd_US_shift [KEYBOARD_MAX_ASCII] =
 {
     0,  0, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', 0,   
   '\t', /* <-- Tab */
@@ -69,5 +70,6 @@ char kdb_US_shift [KEYBOARD_MAX_ASCII] =
     0,  /* F12 Key */
     0,  /* All other keys are undefined */
 };
+
 
 #endif

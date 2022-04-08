@@ -1,5 +1,4 @@
 OBJECTS = \
-		keyboard.o \
 		boot.o \
 		main.o \
 		serial.o \
@@ -7,6 +6,7 @@ OBJECTS = \
 		io.o interrupts.o \
 		pic.o \
 		kernel_programs/terminal.o \
+		keyboard.o \
 		string.o \
 		kernel_programs/keyboard_test.o
 CC = gcc

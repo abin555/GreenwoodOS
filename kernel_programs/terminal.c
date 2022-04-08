@@ -14,14 +14,22 @@ void terminal_renderer(){
 }
 
 void terminal_console(){
-    Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1];
+    char ascii = 0;
+    if(KYBRD_SHIFT){
+        ascii = kbd_US[(unsigned char) keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]];
+    }
+    else{
+        ascii = kbd_US_shift[(unsigned char) keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]];
+    }
+    
+    if(ascii){
+        Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1];
+        printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
+        Terminal_Buffer_Pointer++;
+        fb_move_cursor_xy(Terminal_Buffer_Pointer+1, Terminal_Y);
+    }
     
     printChar(0, Terminal_Y, '>');
-    
-    printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
-    
-    Terminal_Buffer_Pointer+=1;
-    fb_move_cursor_xy(Terminal_Buffer_Pointer+1, Terminal_Y);
 }
 
 void terminal_handler(){

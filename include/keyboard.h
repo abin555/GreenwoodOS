@@ -52,6 +52,8 @@ int keyboard_keyread();
 void keyboard_flag_handler(unsigned char scan_code);
 void keyboard_handle_interrupt();
 
+char convertascii(unsigned char scan_code);
+
 char kbd_US[KEYBOARD_MAX_ASCII];
 char keyboard_KEYBUFFER[KEYBOARD_BUFFERSIZE];
 unsigned int keyboard_KEYBUFFER_POINTER;

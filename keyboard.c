@@ -105,28 +105,27 @@ void keyboard_flag_handler(unsigned char scan_code){
     }
 }
 
-void keyboard_handle_interrupt(){
-    unsigned char scan_code;
-    unsigned char ascii;
-
-    scan_code = keyboard_enc_read_buf();
-    prev_Scancode = scan_code;
-    if(scan_code){
-        ascii = kbd_US[scan_code];
-        if(ascii != 0){
-            char_scancode = scan_code;
-            if(KYBRD_SHIFT){
-                ascii = kdb_US_shift[scan_code];
-            }
-            keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = ascii;
-            keyboard_KEYBUFFER_POINTER++;
-            keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = 0;
-            if(keyboard_KEYBUFFER_POINTER > sizeof keyboard_KEYBUFFER){
-                keyboard_KEYBUFFER_POINTER = 0;
-            }
+char convertascii(unsigned char scan_code){
+    if(kbd_US[scan_code] != 0){
+        if(KYBRD_SHIFT){
+            return kbd_US_shift[scan_code];
         }
         else{
+            return kbd_US[scan_code];
+        }
+    }
+    return 0;
+}
+
+void keyboard_handle_interrupt(){
+    unsigned char scan_code;
+
+    scan_code = keyboard_enc_read_buf();
+    if(scan_code){
+        if(kbd_US[scan_code]){
             keyboard_flag_handler(scan_code);
         }
+        keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = scan_code;
+        keyboard_KEYBUFFER_POINTER++;
     }
 }

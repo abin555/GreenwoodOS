@@ -9,7 +9,7 @@
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
 
-unsigned char SYS_MODE = 4;
+unsigned char SYS_MODE = 1;
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT];
 struct IDT idt;
