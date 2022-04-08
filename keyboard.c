@@ -1,5 +1,5 @@
 #include "keyboard.h"
-//#include "frame_buffer.h"
+#include "frame_buffer.h"
 #include "keyboard_ascii_tables.h"
 
 unsigned char prev_Scancode = 0;
@@ -95,7 +95,12 @@ void keyboard_flag_handler(unsigned char scan_code){
         break;
         
         case 0x1D:
-        software_int();
+        //software_int();
+        software_interrupt(1);
+        break;
+
+        case 0x5B:
+        software_interrupt(4);
         break;
     }
 }

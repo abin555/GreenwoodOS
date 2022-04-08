@@ -12,4 +12,6 @@ void pic_acknowledge(unsigned int interrupt);
 extern void software_int();
 unsigned char INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
+
+extern void restore_kernel();
 #endif

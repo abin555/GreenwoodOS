@@ -1,6 +1,8 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
+unsigned char SYS_MODE;
+
 struct IDT 
 {
 	unsigned short size;
@@ -41,9 +43,11 @@ struct stack_state {
 void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
+extern void int_handler_35();
 
 void load_idt(unsigned int idt_address);
 
+void KERNEL_INTERRUPT();
 
 void interrupt_handler(
     struct cpu_state cpu, 

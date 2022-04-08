@@ -9,6 +9,8 @@
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
 
+unsigned char SYS_MODE = 4;
+
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT];
 struct IDT idt;
 
@@ -49,6 +51,23 @@ void interrupt_install_idt()
 }
 
 char softint[] = "SOFTWARE INTERRUPT!";
+void KERNEL_INTERRUPT(){
+	switch(INT_Software_Value){
+		case 1:
+			SYS_MODE = 1;
+			break;
+		case 2:
+			SYS_MODE = 2;
+			break;
+		case 3:
+			SYS_MODE = 3;
+			break;
+		case 4:
+			SYS_MODE = 4;
+			break;
+	}
+}
+
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
 {
 	//unsigned char scan_code;
@@ -58,15 +77,9 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 		case INTERRUPTS_KEYBOARD:
             keyboard_handle_interrupt();
 			pic_acknowledge(interrupt);
-
 			break;
 		case INTERRUPTS_KERNEL:
-			/*
-			for(int i = 0; i < (int) sizeof softint; i++){
-				keyboard_KEYBUFFER[i] = softint[i];
-				keyboard_KEYBUFFER_POINTER = 0;
-			} */
-			terminal_handler();
+			KERNEL_INTERRUPT();
 			break;
 		default:
 			break;

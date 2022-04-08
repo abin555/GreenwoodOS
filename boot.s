@@ -114,3 +114,7 @@ load_idt:
 global software_int
 software_int:
 	INT 34
+
+global restore_kernel
+restore_kernel:
+	jmp loader

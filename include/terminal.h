@@ -4,16 +4,18 @@
 #include "frame_buffer.h"
 #include "io.h"
 #include "keyboard.h"
+#include "string.h"
 
 #define TERMINAL_Buffer_Size 70
 
+
 char Terminal_Buffer[TERMINAL_Buffer_Size];
-char Terminal_Buffer_Pointer;
 char Terminal_OUT_Buffer[70*40];
-unsigned short Terminal_OUT_pointer;
+
+void write_terminal(char *Buffer, int len, int start, int x, int y);
 
 void terminal_renderer();
-
+void terminal_console();
 void terminal_handler();
 
 #endif

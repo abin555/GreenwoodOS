@@ -2,6 +2,9 @@
     "C_Cpp.errorSquiggles": "Disabled",
     "files.associations": {
         "stdint.h": "c",
-        "frame_buffer.h": "c"
+        "frame_buffer.h": "c",
+        "keyboard_test.h": "c",
+        "serial.h": "c",
+        "system_state.h": "c"
     }
 }

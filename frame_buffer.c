@@ -34,6 +34,7 @@ int fb_write(char *buf, unsigned int len)
     //fb_move_cursor(fb_cursor);
     return 0;
 }
+
 int fb_write_start(char *buf, unsigned int len, unsigned int start){
     for (unsigned int index = 0; index < len; index++)
     {
@@ -43,10 +44,18 @@ int fb_write_start(char *buf, unsigned int len, unsigned int start){
     //fb_move_cursor(fb_cursor);
     return 0;
 }
-/*
+
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y){
+    for(int index = 0; index < len; index++){
+        //fb_write_cell((y*80)+x, Buffer[index], FB_WHITE, FB_BLACK);
+        //printChar(x+index,y, Buffer[index+start]);
+        fb_write_cell((y*80)+x+index+start, Buffer[index+start], FB_WHITE, FB_BLACK);
+    }
+}
+
 int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x, unsigned int y){
     unsigned int real_index = start;
-    for(unsigned int index = 0; index < len, index++){
+    for(unsigned int index = 0; index < len; index++){
         real_index++;
         if(real_index > len){
             real_index = 0;
@@ -54,7 +63,7 @@ int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x
         fb_write_cell((y*80)+x, buf[real_index], FB_WHITE, FB_BLACK);
     }
     return 0;
-}*/
+}
 
 void fb_move_cursor(unsigned short pos)
 {

@@ -1,4 +1,14 @@
-OBJECTS = keyboard.o boot.o main.o serial.o frame_buffer.o io.o interrupts.o pic.o terminal.o
+OBJECTS = \
+		keyboard.o \
+		boot.o \
+		main.o \
+		serial.o \
+		frame_buffer.o \
+		io.o interrupts.o \
+		pic.o \
+		kernel_programs/terminal.o \
+		string.o \
+		kernel_programs/keyboard_test.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -c

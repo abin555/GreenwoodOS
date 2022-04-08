@@ -20,7 +20,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
-//int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x, unsigned int y)
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
 
 //CURSOR SETTINGS
 //Define I/O Ports
