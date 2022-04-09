@@ -135,4 +135,10 @@ void keyboard_handle_interrupt(){
         keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = scan_code;
         keyboard_KEYBUFFER_POINTER++;
     }
+    if(keyboard_ascii_pointer > KEYBOARD_BUFFERSIZE){
+        keyboard_ascii_pointer = 0;
+    }
+    if(keyboard_KEYBUFFER_POINTER > KEYBOARD_BUFFERSIZE){
+        keyboard_KEYBUFFER_POINTER = 0;
+    }
 }

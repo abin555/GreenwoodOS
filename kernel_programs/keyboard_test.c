@@ -13,4 +13,15 @@ void KYBRD_DEBUG_DISPLAY(){
     fb_write(decode, 8);
     fb_move_cursor_xy(0,3);
     fb_write_start(decode, 40, 0);
+
+    unsigned short y_shift = 0;
+    for(int i = 0; i < 2*KEYBOARD_BUFFERSIZE; i++){
+        decodeHex(decode, keyboard_KEYBUFFER[i], 8, 3*i+50);
+        for(int c = 0 ; c < 3; c++){
+            if(c != 2){
+                printChar(i+c, 5+y_shift, decode[i+c+50]);
+            }
+            printChar(i+c, 5+y_shift, decode[i+c+50]);
+        }
+    }
 }

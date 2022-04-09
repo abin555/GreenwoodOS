@@ -3,6 +3,8 @@
 
 #include "ascii_tables.h"
 
+char STR_edit[128];
+
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);

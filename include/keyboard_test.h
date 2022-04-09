@@ -7,7 +7,7 @@
 
 #include "ascii_tables.h"
 
-char decode[100];
+char decode[500];
 
 void KYBRD_DEBUG_DISPLAY();
 
