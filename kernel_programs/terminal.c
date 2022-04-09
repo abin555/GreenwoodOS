@@ -55,8 +55,6 @@ void terminal_handler(){
                 fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
                 Terminal_Buffer[Terminal_Buffer_Pointer] = ' ';
                 printChar(Terminal_Buffer_Pointer, Terminal_Y, ' ');
-
-                
             }
             break;
             case 0x9C:
