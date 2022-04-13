@@ -16,10 +16,10 @@ void terminal_renderer(){
 void terminal_console(){
     Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
     printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
-    Terminal_Buffer_Pointer++;
     
-    fb_move_cursor_xy(Terminal_Buffer_Pointer+1, Terminal_Y);
+    fb_move_cursor_xy(Terminal_Buffer_Pointer+2, Terminal_Y);
 
+    Terminal_Buffer_Pointer++;
     printChar(0, Terminal_Y, '>');
 }
 
@@ -33,6 +33,7 @@ void terminal_enter(){
         printChar(i+1, Terminal_Y, ' ');
     }
     fb_move_cursor_xy(1, Terminal_Y);
+    printChar(0, Terminal_Y, '>');
 }
 
 void terminal_handler(){
@@ -49,12 +50,12 @@ void terminal_handler(){
         switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]){
             case 0x0E:
             if(Terminal_Buffer != 0){
-                if(Terminal_Buffer_Pointer > 1){
+                fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
+                Terminal_Buffer[Terminal_Buffer_Pointer-1] = 0;
+                printChar(Terminal_Buffer_Pointer, Terminal_Y, ' ');
+                if(Terminal_Buffer_Pointer > 0){
                     Terminal_Buffer_Pointer -= 1;
                 }
-                fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
-                Terminal_Buffer[Terminal_Buffer_Pointer] = ' ';
-                printChar(Terminal_Buffer_Pointer, Terminal_Y, ' ');
             }
             break;
             case 0x9C:

@@ -7,6 +7,8 @@
 #include "terminal.h"
 #include "keyboard_test.h"
 
+
+
 struct gdt {
   unsigned int address;
   unsigned short size;

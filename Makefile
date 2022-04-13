@@ -12,7 +12,7 @@ OBJECTS = \
 		ascii_tables.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
@@ -43,6 +43,14 @@ clean:
 	rm -rf *.o *.i main.s *\~  kernel.elf GreenwoodOS.iso
 cleanup:
 	rm -rf *.o *.i main.s *\~
-build: os.iso
+build: os.iso transfer-compiled
 
-build_clean: os.iso cleanup
+transfer-compiled:
+	rm ./compile/*
+	cp *.o ./compile
+	cp *.i ./compile
+	cp *.s ./compile
+	rm -rf *.o *.i *.s
+	cp ./compile/boot.s .
+
+build_clean: os.iso transfer-compiled

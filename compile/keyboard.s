@@ -1,5 +1,6 @@
 	.file	"keyboard.c"
 	.text
+	.comm	INT_Software_Value,1,1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.globl	KYBRD_SHIFT
 	.bss
@@ -7,65 +8,30 @@
 	.size	KYBRD_SHIFT, 1
 KYBRD_SHIFT:
 	.zero	1
-	.globl	kbd_US
-	.data
-	.align 32
-	.type	kbd_US, @object
-	.size	kbd_US, 128
-kbd_US:
-	.string	""
-	.string	""
-	.string	"1234567890-=\b\tqwertyuiop[]\n"
-	.string	"asdfghjkl;'`"
-	.string	"\\zxcvbnm,./"
-	.string	"*"
-	.string	" "
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	"-"
-	.string	""
-	.string	""
-	.string	"+"
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.string	""
-	.zero	37
 	.comm	keyboard_KEYBUFFER,100,32
+	.comm	keyboard_ASCIIBuffer,100,32
 	.globl	keyboard_KEYBUFFER_POINTER
-	.bss
 	.align 4
 	.type	keyboard_KEYBUFFER_POINTER, @object
 	.size	keyboard_KEYBUFFER_POINTER, 4
 keyboard_KEYBUFFER_POINTER:
+	.zero	4
+	.globl	keyboard_ascii_pointer
+	.align 4
+	.type	keyboard_ascii_pointer, @object
+	.size	keyboard_ascii_pointer, 4
+keyboard_ascii_pointer:
 	.zero	4
 	.globl	prev_Scancode
 	.type	prev_Scancode, @object
 	.size	prev_Scancode, 1
 prev_Scancode:
 	.zero	1
+	.comm	char_scancode,1,1
 	.comm	fb,4,4
 	.comm	fb_cursor,4,4
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
 	.globl	_keyboard_disable
 	.data
 	.type	_keyboard_disable, @object
@@ -435,29 +401,116 @@ keyboard_flag_handler:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$20, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.dx
+	addl	$_GLOBAL_OFFSET_TABLE_, %edx
+	movl	8(%ebp), %eax
+	movb	%al, -12(%ebp)
+	movzbl	-12(%ebp), %eax
+	cmpl	$170, %eax
+	je	.L41
+	cmpl	$170, %eax
+	jg	.L45
+	cmpl	$91, %eax
+	je	.L43
+	cmpl	$91, %eax
+	jg	.L45
+	cmpl	$29, %eax
+	je	.L44
+	cmpl	$42, %eax
+	jne	.L45
+	movb	$1, KYBRD_SHIFT@GOTOFF(%edx)
+	subl	$4, %esp
+	pushl	$0
+	pushl	$1
+	pushl	$0
+	call	keyboard_set_leds
+	addl	$16, %esp
+	jmp	.L42
+.L41:
+	movb	$0, KYBRD_SHIFT@GOTOFF(%edx)
+	subl	$4, %esp
+	pushl	$0
+	pushl	$0
+	pushl	$0
+	call	keyboard_set_leds
+	addl	$16, %esp
+	jmp	.L42
+.L44:
+	subl	$12, %esp
+	pushl	$1
+	movl	%edx, %ebx
+	call	software_interrupt@PLT
+	addl	$16, %esp
+	jmp	.L42
+.L43:
+	subl	$12, %esp
+	pushl	$4
+	movl	%edx, %ebx
+	call	software_interrupt@PLT
+	addl	$16, %esp
+	nop
+.L42:
+.L45:
+	nop
+	movl	-4(%ebp), %ebx
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE9:
+	.size	keyboard_flag_handler, .-keyboard_flag_handler
+	.globl	convertascii
+	.type	convertascii, @function
+convertascii:
+.LFB10:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
 	subl	$4, %esp
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	8(%ebp), %edx
 	movb	%dl, -4(%ebp)
 	movzbl	-4(%ebp), %edx
-	cmpl	$42, %edx
-	jne	.L42
-	movb	$1, KYBRD_SHIFT@GOTOFF(%eax)
-	nop
-.L42:
-	nop
+	movl	kbd_US@GOT(%eax), %ecx
+	movzbl	(%ecx,%edx), %edx
+	testb	%dl, %dl
+	je	.L47
+	movzbl	KYBRD_SHIFT@GOTOFF(%eax), %edx
+	testb	%dl, %dl
+	je	.L48
+	movzbl	-4(%ebp), %edx
+	movl	kbd_US_shift@GOT(%eax), %eax
+	movzbl	(%eax,%edx), %eax
+	jmp	.L49
+.L48:
+	movzbl	-4(%ebp), %edx
+	movl	kbd_US@GOT(%eax), %eax
+	movzbl	(%eax,%edx), %eax
+	jmp	.L49
+.L47:
+	movl	$0, %eax
+.L49:
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE9:
-	.size	keyboard_flag_handler, .-keyboard_flag_handler
+.LFE10:
+	.size	convertascii, .-convertascii
 	.globl	keyboard_handle_interrupt
 	.type	keyboard_handle_interrupt, @function
 keyboard_handle_interrupt:
-.LFB10:
+.LFB11:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -472,38 +525,60 @@ keyboard_handle_interrupt:
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	call	keyboard_enc_read_buf
 	movb	%al, -9(%ebp)
+	cmpb	$0, -9(%ebp)
+	je	.L51
 	movzbl	-9(%ebp), %eax
-	movb	%al, prev_Scancode@GOTOFF(%ebx)
-	movzbl	-9(%ebp), %eax
+	movl	kbd_US@GOT(%ebx), %edx
+	movzbl	(%edx,%eax), %eax
 	testb	%al, %al
-	js	.L46
-	movzbl	-9(%ebp), %eax
-	movzbl	kbd_US@GOTOFF(%ebx,%eax), %eax
-	movb	%al, -10(%ebp)
-	cmpb	$0, -10(%ebp)
-	je	.L45
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	movzbl	-10(%ebp), %ecx
-	movl	keyboard_KEYBUFFER@GOT(%ebx), %edx
+	je	.L52
+	movzbl	KYBRD_SHIFT@GOTOFF(%ebx), %eax
+	testb	%al, %al
+	je	.L53
+	movzbl	-9(%ebp), %edx
+	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
+	movl	kbd_US_shift@GOT(%ebx), %ecx
+	movzbl	(%ecx,%edx), %ecx
+	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
 	movb	%cl, (%edx,%eax)
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
+	jmp	.L54
+.L53:
+	movzbl	-9(%ebp), %edx
+	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
+	movl	kbd_US@GOT(%ebx), %ecx
+	movzbl	(%ecx,%edx), %ecx
+	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
+	movb	%cl, (%edx,%eax)
+.L54:
+	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
 	addl	$1, %eax
-	movl	%eax, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	movl	keyboard_KEYBUFFER@GOT(%ebx), %edx
-	movb	$0, (%edx,%eax)
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	cmpl	$100, %eax
-	jbe	.L46
-	movl	$0, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
-	jmp	.L46
-.L45:
+	movl	%eax, keyboard_ascii_pointer@GOTOFF(%ebx)
+	jmp	.L55
+.L52:
 	movzbl	-9(%ebp), %eax
 	subl	$12, %esp
 	pushl	%eax
 	call	keyboard_flag_handler
 	addl	$16, %esp
-.L46:
+.L55:
+	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
+	movl	keyboard_KEYBUFFER@GOT(%ebx), %edx
+	movzbl	-9(%ebp), %ecx
+	movb	%cl, (%edx,%eax)
+	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
+	addl	$1, %eax
+	movl	%eax, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
+.L51:
+	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
+	cmpl	$100, %eax
+	jbe	.L56
+	movl	$0, keyboard_ascii_pointer@GOTOFF(%ebx)
+.L56:
+	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
+	cmpl	$100, %eax
+	jbe	.L58
+	movl	$0, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
+.L58:
 	nop
 	movl	-4(%ebp), %ebx
 	leave
@@ -512,30 +587,41 @@ keyboard_handle_interrupt:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE11:
 	.size	keyboard_handle_interrupt, .-keyboard_handle_interrupt
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB11:
+.LFB12:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE12:
+	.section	.text.__x86.get_pc_thunk.dx,"axG",@progbits,__x86.get_pc_thunk.dx,comdat
+	.globl	__x86.get_pc_thunk.dx
+	.hidden	__x86.get_pc_thunk.dx
+	.type	__x86.get_pc_thunk.dx, @function
+__x86.get_pc_thunk.dx:
+.LFB13:
+	.cfi_startproc
+	movl	(%esp), %edx
+	ret
+	.cfi_endproc
+.LFE13:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB12:
+.LFB14:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE12:
+.LFE14:
 	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

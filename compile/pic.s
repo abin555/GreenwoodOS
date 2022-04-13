@@ -1,5 +1,6 @@
 	.file	"pic.c"
 	.text
+	.comm	INT_Software_Value,1,1
 	.globl	pic_acknowledge
 	.type	pic_acknowledge, @function
 pic_acknowledge:

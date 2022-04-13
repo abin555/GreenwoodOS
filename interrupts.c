@@ -50,7 +50,6 @@ void interrupt_install_idt()
 	pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
 }
 
-char softint[] = "SOFTWARE INTERRUPT!";
 void KERNEL_INTERRUPT(){
 	switch(INT_Software_Value){
 		case 1:

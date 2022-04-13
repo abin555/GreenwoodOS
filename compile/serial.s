@@ -1,5 +1,6 @@
 	.file	"serial.c"
 	.text
+	.comm	INT_Software_Value,1,1
 	.globl	serial_configure_baud_rate
 	.type	serial_configure_baud_rate, @function
 serial_configure_baud_rate:
