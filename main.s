@@ -107,60 +107,34 @@ main:
 	pushl	%ecx
 	.cfi_escape 0xf,0x3,0x75,0x78,0x6
 	.cfi_escape 0x10,0x3,0x2,0x75,0x7c
-	subl	$16, %esp
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	call	interrupt_install_idt@PLT
 	subl	$4, %esp
 	pushl	$0
 	pushl	$15
 	pushl	$32
 	call	fb_clear@PLT
 	addl	$16, %esp
-	movl	$0, -12(%ebp)
-	jmp	.L9
-.L10:
-	movl	keyboard_KEYBUFFER@GOT(%ebx), %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %eax
-	pushl	$0
-	pushl	$16
-	pushl	%eax
-	movl	STR_edit@GOT(%ebx), %eax
-	pushl	%eax
-	call	decodeHex@PLT
-	addl	$16, %esp
-	subl	$12, %esp
-	pushl	$10
-	pushl	$0
-	pushl	$0
-	pushl	$16
-	movl	STR_edit@GOT(%ebx), %eax
-	pushl	%eax
-	call	fb_write_xy@PLT
-	addl	$32, %esp
-	addl	$1, -12(%ebp)
-.L9:
-	cmpl	$9, -12(%ebp)
-	jle	.L10
-.L15:
+.L13:
 	movl	SYS_MODE@GOT(%ebx), %eax
 	movzbl	(%eax), %eax
 	movzbl	%al, %eax
 	cmpl	$1, %eax
-	je	.L11
+	je	.L9
 	cmpl	$4, %eax
-	je	.L12
-	jmp	.L16
-.L11:
+	je	.L10
+	jmp	.L14
+.L9:
 	call	terminal_handler@PLT
-	jmp	.L14
-.L12:
+	jmp	.L12
+.L10:
 	call	KYBRD_DEBUG_DISPLAY@PLT
-	jmp	.L14
-.L16:
-	call	KYBRD_DEBUG_DISPLAY@PLT
+	jmp	.L12
 .L14:
-	jmp	.L15
+	call	KYBRD_DEBUG_DISPLAY@PLT
+.L12:
+	jmp	.L13
 	.cfi_endproc
 .LFE2:
 	.size	main, .-main

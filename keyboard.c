@@ -100,6 +100,13 @@ void keyboard_flag_handler(unsigned char scan_code){
         case 0x5B:
         software_interrupt(4);
         break;
+
+        case 0xD3:
+        for(int i = 0; i < 2*KEYBOARD_BUFFERSIZE; i++){
+            keyboard_KEYBUFFER[i] = 0xaa;
+            keyboard_ASCIIBuffer[i] = 'X';
+        }
+        break;
     }
 }
 

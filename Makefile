@@ -54,3 +54,4 @@ transfer-compiled:
 	cp ./compile/boot.s .
 
 build_clean: os.iso transfer-compiled
+build_clean_run: os.iso transfer-compiled run

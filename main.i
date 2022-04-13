@@ -1,7 +1,7 @@
-# 1 "interrupts.c"
+# 1 "main.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "interrupts.c"
+# 1 "main.c"
 # 1 "./include/io.h" 1
 
 
@@ -19,64 +19,7 @@ unsigned char INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-# 2 "interrupts.c" 2
-# 1 "./include/interrupts.h" 1
-
-
-
-unsigned char SYS_MODE;
-
-struct IDT
-{
- unsigned short size;
- unsigned int address;
-} __attribute__((packed));
-
-struct IDTDescriptor {
-
-
- unsigned short offset_low;
- unsigned short segment_selector;
-
-
- unsigned char reserved;
- unsigned char type_and_attr;
- unsigned short offset_high;
-} __attribute__((packed));
-
-struct cpu_state {
-
- unsigned int eax;
- unsigned int ebx;
- unsigned int ecx;
- unsigned int edx;
- unsigned int ebp;
- unsigned int esi;
- unsigned int edi;
-} __attribute__((packed));
-
-struct stack_state {
-
- unsigned int error_code;
- unsigned int eip;
- unsigned int cs;
- unsigned int eflags;
-} __attribute__((packed));
-
-void interrupt_install_idt();
-extern void int_handler_33();
-extern void int_handler_34();
-extern void int_handler_35();
-
-void load_idt(unsigned int idt_address);
-
-void KERNEL_INTERRUPT();
-
-void interrupt_handler(
-    struct cpu_state cpu,
-    unsigned int interrupt,
-    struct stack_state stack);
-# 3 "interrupts.c" 2
+# 2 "main.c" 2
 # 1 "./include/keyboard.h" 1
 
 
@@ -144,7 +87,64 @@ unsigned int keyboard_ascii_pointer;
 
 unsigned char prev_Scancode;
 unsigned char char_scancode;
-# 4 "interrupts.c" 2
+# 3 "main.c" 2
+# 1 "./include/interrupts.h" 1
+
+
+
+unsigned char SYS_MODE;
+
+struct IDT
+{
+ unsigned short size;
+ unsigned int address;
+} __attribute__((packed));
+
+struct IDTDescriptor {
+
+
+ unsigned short offset_low;
+ unsigned short segment_selector;
+
+
+ unsigned char reserved;
+ unsigned char type_and_attr;
+ unsigned short offset_high;
+} __attribute__((packed));
+
+struct cpu_state {
+
+ unsigned int eax;
+ unsigned int ebx;
+ unsigned int ecx;
+ unsigned int edx;
+ unsigned int ebp;
+ unsigned int esi;
+ unsigned int edi;
+} __attribute__((packed));
+
+struct stack_state {
+
+ unsigned int error_code;
+ unsigned int eip;
+ unsigned int cs;
+ unsigned int eflags;
+} __attribute__((packed));
+
+void interrupt_install_idt();
+extern void int_handler_33();
+extern void int_handler_34();
+extern void int_handler_35();
+
+void load_idt(unsigned int idt_address);
+
+void KERNEL_INTERRUPT();
+
+void interrupt_handler(
+    struct cpu_state cpu,
+    unsigned int interrupt,
+    struct stack_state stack);
+# 4 "main.c" 2
 # 1 "./include/frame_buffer.h" 1
 # 12 "./include/frame_buffer.h"
 char *fb;
@@ -162,21 +162,18 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
 # 33 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
-# 5 "interrupts.c" 2
-# 1 "./include/pic.h" 1
-# 44 "./include/pic.h"
-void pic_acknowledge(unsigned int interrupt);
-void pic_remap(int offset1, int offset2);
-# 6 "interrupts.c" 2
-# 1 "./include/terminal.h" 1
+# 5 "main.c" 2
+# 1 "./include/serial.h" 1
 
 
 
-# 1 "./include/frame_buffer.h" 1
-# 5 "./include/terminal.h" 2
 
-# 1 "./include/keyboard.h" 1
-# 7 "./include/terminal.h" 2
+void serial_configure_baud_rate(unsigned short com, unsigned short divisor);
+void serial_configure_line(unsigned short com);
+int serial_is_transmit_fifo_empty(unsigned int com);
+void serial_write(unsigned int com, char b);
+int init_serial();
+# 6 "main.c" 2
 # 1 "./include/string.h" 1
 
 
@@ -184,7 +181,8 @@ void pic_remap(int offset1, int offset2);
 # 1 "./include/ascii_tables.h" 1
 
 
-
+# 1 "./include/keyboard.h" 1
+# 4 "./include/ascii_tables.h" 2
 
 
 char kbd_US[256];
@@ -198,6 +196,16 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
+# 7 "main.c" 2
+# 1 "./include/terminal.h" 1
+
+
+
+# 1 "./include/frame_buffer.h" 1
+# 5 "./include/terminal.h" 2
+
+
+# 1 "./include/string.h" 1
 # 8 "./include/terminal.h" 2
 
 
@@ -213,77 +221,50 @@ void terminal_enter();
 void terminal_renderer();
 void terminal_console();
 void terminal_handler();
-# 7 "interrupts.c" 2
+# 8 "main.c" 2
+# 1 "./include/keyboard_test.h" 1
+# 10 "./include/keyboard_test.h"
+char decode[500];
+
+void KYBRD_DEBUG_DISPLAY();
+# 9 "main.c" 2
 
 
 
+struct gdt {
+  unsigned int address;
+  unsigned short size;
+} __attribute__((packed));
 
 
-unsigned char SYS_MODE = 4;
-
-struct IDTDescriptor idt_descriptors[256];
-struct IDT idt;
-
-unsigned int BUFFER_COUNT;
-
-void interrupts_init_descriptor(int index, unsigned int address)
-{
- idt_descriptors[index].offset_high = (address >> 16) & 0xFFFF;
- idt_descriptors[index].offset_low = (address & 0xFFFF);
-
- idt_descriptors[index].segment_selector = 0x08;
- idt_descriptors[index].reserved = 0x00;
-# 35 "interrupts.c"
- idt_descriptors[index].type_and_attr = (0x01 << 7) |
-      (0x00 << 6) | (0x00 << 5) |
-      0xe;
+int sum_of_three(int arg1, int arg2, int arg3){
+ return arg1 + arg2 + arg3;
 }
 
-void interrupt_install_idt()
-{
- interrupts_init_descriptor(33, (unsigned int) int_handler_33);
- interrupts_init_descriptor(34, (unsigned int) int_handler_34);
+void delay(int times){
+  for(int x = 0; x < 10*times; x++){
+    for(int y = 0; y < 10*times; y++){
 
- idt.address = (int) &idt_descriptors;
- idt.size = sizeof(struct IDTDescriptor) * 256;
- load_idt((int) &idt);
-
-
- pic_remap(0x20, 0x28);
-}
-
-void KERNEL_INTERRUPT(){
- switch(INT_Software_Value){
-  case 1:
-   SYS_MODE = 1;
-   break;
-  case 2:
-   SYS_MODE = 2;
-   break;
-  case 3:
-   SYS_MODE = 3;
-   break;
-  case 4:
-   SYS_MODE = 4;
-   break;
- }
-}
-
-void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
-{
-
-
-
- switch (interrupt){
-  case 33:
-            keyboard_handle_interrupt();
-   pic_acknowledge(interrupt);
-   break;
-  case 34:
-   printChar(SYS_MODE, 10, 'S');
-   KERNEL_INTERRUPT();
-   break;
-  default:
-   break;
     }
+  }
+}
+
+int main(){
+  interrupt_install_idt();
+  fb_clear(' ', 15, 0);
+
+  while(1){
+    switch(SYS_MODE){
+      case 1:
+        terminal_handler();
+        break;
+      case 4:
+        KYBRD_DEBUG_DISPLAY();
+        break;
+      default:
+        KYBRD_DEBUG_DISPLAY();
+
+    }
+  }
+  return 0;
 }

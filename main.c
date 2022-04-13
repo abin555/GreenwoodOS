@@ -30,6 +30,7 @@ void delay(int times){
 int main(){
   interrupt_install_idt();
   fb_clear(' ', FB_WHITE, FB_BLACK);
+
   while(1){
     switch(SYS_MODE){
       case 1:
@@ -40,6 +41,7 @@ int main(){
         break;
       default:
         KYBRD_DEBUG_DISPLAY();
+        
     }
   }
   return 0;

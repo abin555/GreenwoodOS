@@ -250,8 +250,15 @@ void delay(int times){
 }
 
 int main(){
-  interrupt_install_idt();
+
   fb_clear(' ', 15, 0);
+
+  for(int i = 0; i < 10; i++){
+    decodeHex(STR_edit, keyboard_KEYBUFFER[0], 16, 0);
+    fb_write_xy(STR_edit, 16, 0, 0, 10);
+  }
+
+
   while(1){
     switch(SYS_MODE){
       case 1:

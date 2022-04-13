@@ -14,8 +14,6 @@ CHECKSUM 	equ -MAGIC_NUMBER
 gdtr DW 0 ; For limit storage
      DD 0 ; For base storage
 
-lea ebx, [loader]
-jmp ebx
 
 ;;Begin Executing C Code
 

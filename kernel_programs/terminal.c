@@ -14,6 +14,8 @@ void terminal_renderer(){
 }
 
 void terminal_console(){
+    decodeData(STR_edit, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER], 9, 0);
+    fb_write_xy(STR_edit, 9, 0, 1, Terminal_Y+1);
     Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
     printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
     
@@ -49,7 +51,7 @@ void terminal_handler(){
     else if(keyboard_KEYBUFFER_POINTER != previousKEY_pointer){
         switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]){
             case 0x0E:
-            if(Terminal_Buffer != 0){
+            if(Terminal_Buffer_Pointer != 0){
                 fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
                 Terminal_Buffer[Terminal_Buffer_Pointer-1] = 0;
                 printChar(Terminal_Buffer_Pointer, Terminal_Y, ' ');
@@ -60,6 +62,20 @@ void terminal_handler(){
             break;
             case 0x9C:
             terminal_enter();
+            break;
+            case 0xCB:
+            if(Terminal_Buffer_Pointer != 0){
+                fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
+                Terminal_Buffer_Pointer--;
+            }
+            break;
+            case 0xCD:
+            if(Terminal_Buffer_Pointer < TERMINAL_Buffer_Size){
+                Terminal_Buffer_Pointer++;
+                fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
+            }
+            break;
+            case 0xC8:
             break;
         }
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
