@@ -149,6 +149,10 @@ void interrupt_handler(
 # 12 "./include/frame_buffer.h"
 char *fb;
 int fb_cursor;
+unsigned char FG;
+unsigned char BG;
+
+void fb_set_color(unsigned char fg, unsigned char bg);
 
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 
@@ -159,7 +163,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 33 "./include/frame_buffer.h"
+# 37 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 5 "main.c" 2
@@ -212,8 +216,12 @@ void decodeHex(char *Buffer, int in, int len, int start);
 
 
 
-char Terminal_Buffer[70];
-char Terminal_OUT_Buffer[70*40];
+char Terminal_Buffer[80];
+char Terminal_OUT_Buffer[80*40];
+
+char Terminal_Arguments[80];
+
+void terminal_interpret();
 
 void write_terminal(char *Buffer, int len, int start, int x, int y);
 void terminal_enter();
@@ -250,14 +258,8 @@ void delay(int times){
 }
 
 int main(){
-
+  interrupt_install_idt();
   fb_clear(' ', 15, 0);
-
-  for(int i = 0; i < 10; i++){
-    decodeHex(STR_edit, keyboard_KEYBUFFER[0], 16, 0);
-    fb_write_xy(STR_edit, 16, 0, 0, 10);
-  }
-
 
   while(1){
     switch(SYS_MODE){
@@ -269,6 +271,7 @@ int main(){
         break;
       default:
         KYBRD_DEBUG_DISPLAY();
+
     }
   }
   return 0;

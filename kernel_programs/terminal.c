@@ -14,28 +14,47 @@ void terminal_renderer(){
 }
 
 void terminal_console(){
-    decodeData(STR_edit, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER], 9, 0);
-    fb_write_xy(STR_edit, 9, 0, 1, Terminal_Y+1);
     Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
     printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
     
     fb_move_cursor_xy(Terminal_Buffer_Pointer+2, Terminal_Y);
 
     Terminal_Buffer_Pointer++;
+    fb_set_color(FB_GREEN, FB_BLACK);
     printChar(0, Terminal_Y, '>');
+    fb_set_color(FB_WHITE, FB_BLACK);
 }
 
-void terminal_enter(){
+void terminal_interpret(){
+    int found_splits = 0;
+    for(int i = 0; i < TERMINAL_Buffer_Size; i++){
+        Terminal_Arguments[i] = 0;
+        if(Terminal_Buffer[i] == TERMINAL_SPLIT){
+            Terminal_Arguments[found_splits] = i;
+            found_splits++;
+        }
+    }
+
+    fb_write_xy(Terminal_Buffer, Terminal_Arguments[0], 0, 2, 21);
+}
+
+void terminal_enter(){    
+    terminal_interpret();
+
+
     STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, TERMINAL_Buffer_Size, Terminal_OUT_pointer);
     fb_write_xy(Terminal_OUT_Buffer, TERMINAL_Buffer_Size*19, Terminal_OUT_pointer, 0, 0);
-    Terminal_OUT_pointer += 80;
+    Terminal_OUT_pointer += TERMINAL_Buffer_Size + (TERMINAL_Buffer_Size % 80);
     Terminal_Buffer_Pointer = 0;
+
     for(int i = 0; i < TERMINAL_Buffer_Size; i++){
         Terminal_Buffer[i] = 0;
         printChar(i+1, Terminal_Y, ' ');
     }
     fb_move_cursor_xy(1, Terminal_Y);
+    fb_set_color(FB_GREEN, FB_BLACK);
     printChar(0, Terminal_Y, '>');
+    fb_set_color(FB_WHITE, FB_BLACK);
 }
 
 void terminal_handler(){
@@ -76,6 +95,15 @@ void terminal_handler(){
             }
             break;
             case 0xC8:
+            for(int i = 0; i < TERMINAL_Buffer_Size; i++){
+                Terminal_Buffer[i] = Terminal_OUT_Buffer[Terminal_OUT_pointer-80+i];
+                printChar(i+1, Terminal_Y, Terminal_Buffer[i]);
+                if(Terminal_Buffer[i] == 0){
+                    fb_move_cursor_xy(i+1, Terminal_Y);
+                    Terminal_Buffer_Pointer=i;
+                    break;
+                }
+            }
             break;
         }
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
@@ -84,7 +112,7 @@ void terminal_handler(){
         Terminal_Buffer_Pointer = 0;
     }
     decodeData(STR_edit, (Terminal_Buffer_Pointer << 1), 16, 0);
-    fb_write_xy(STR_edit, 16, 0, 0, 22);
+    fb_write_xy(STR_edit, 16, 0, 0, 23);
     //Terminal_OUT_Buffer[0] = 'A';
     //terminal_renderer();
 }

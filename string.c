@@ -1,5 +1,12 @@
 #include "string.h"
 
+int STR_Compare(char *elem1, char *elem2, int start, int end){
+  int equal = 0;
+  for(int i = start; i < end; i++){
+    
+  }
+}
+
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index){
     for(int index = 0; index < len; index++){
         out_str[index+write_index] = in_str[index];

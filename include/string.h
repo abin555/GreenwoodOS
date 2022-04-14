@@ -5,6 +5,8 @@
 
 char STR_edit[128];
 
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);

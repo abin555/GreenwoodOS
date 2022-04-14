@@ -11,6 +11,10 @@
 
 char *fb;
 int fb_cursor;
+unsigned char FG;
+unsigned char BG;
+
+void fb_set_color(unsigned char fg, unsigned char bg);
 
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 

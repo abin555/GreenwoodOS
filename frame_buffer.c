@@ -3,6 +3,13 @@
 
 char *fb = (char *)0x000B8000;
 int fb_cursor = 0;
+unsigned char FG = FB_WHITE;
+unsigned char BG = FB_BLACK;
+
+void fb_set_color(unsigned char fg, unsigned char bg){
+    FG = fg;
+    BG = bg;
+}
 
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 {
@@ -13,7 +20,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 void printChar(unsigned int x, unsigned int y, char c)
 {
     int index = y * 80 + x;
-    fb_write_cell(index, c, FB_WHITE, FB_BLACK);
+    fb_write_cell(index, c, FG, BG);
 }
 
 void fb_clear(char c, unsigned char fg, unsigned char bg)
@@ -28,7 +35,7 @@ int fb_write(char *buf, unsigned int len)
 {
     for (unsigned int index = 0; index < len; index++)
     {
-        fb_write_cell(fb_cursor+index, buf[index], FB_WHITE, FB_BLACK);
+        fb_write_cell(fb_cursor+index, buf[index], FG, BG);
     }
     //fb_cursor+=len;
     //fb_move_cursor(fb_cursor);
@@ -38,7 +45,7 @@ int fb_write(char *buf, unsigned int len)
 int fb_write_start(char *buf, unsigned int len, unsigned int start){
     for (unsigned int index = 0; index < len; index++)
     {
-        fb_write_cell(fb_cursor+index, buf[index+start], FB_WHITE, FB_BLACK);
+        fb_write_cell(fb_cursor+index, buf[index+start], FG, BG);
     }
     //fb_cursor+=len;
     //fb_move_cursor(fb_cursor);
@@ -49,7 +56,7 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
     for(int index = 0; index < len; index++){
         //fb_write_cell((y*80)+x, Buffer[index], FB_WHITE, FB_BLACK);
         //printChar(x+index,y, Buffer[index+start]);
-        fb_write_cell((y*80)+x+index+start, Buffer[index+start], FB_WHITE, FB_BLACK);
+        fb_write_cell((y*80)+x+index+start, Buffer[index+start], FG, BG);
     }
 }
 
@@ -60,7 +67,7 @@ int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x
         if(real_index > len){
             real_index = 0;
         }
-        fb_write_cell((y*80)+x, buf[real_index], FB_WHITE, FB_BLACK);
+        fb_write_cell((y*80)+x, buf[real_index], FG, BG);
     }
     return 0;
 }

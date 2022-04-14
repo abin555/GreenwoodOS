@@ -17,11 +17,14 @@ SYS_MODE:
 	.comm	char_scancode,1,1
 	.comm	fb,4,4
 	.comm	fb_cursor,4,4
+	.comm	FG,1,1
+	.comm	BG,1,1
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.comm	Terminal_Buffer,70,32
-	.comm	Terminal_OUT_Buffer,2800,32
+	.comm	Terminal_Buffer,80,32
+	.comm	Terminal_OUT_Buffer,3200,32
+	.comm	Terminal_Arguments,80,32
 	.comm	idt_descriptors,2048,32
 	.comm	idt,6,4
 	.comm	BUFFER_COUNT,4,4
@@ -246,7 +249,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE5:
-	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

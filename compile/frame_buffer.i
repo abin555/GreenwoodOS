@@ -6,6 +6,10 @@
 # 12 "./include/frame_buffer.h"
 char *fb;
 int fb_cursor;
+unsigned char FG;
+unsigned char BG;
+
+void fb_set_color(unsigned char fg, unsigned char bg);
 
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
 
@@ -16,7 +20,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 33 "./include/frame_buffer.h"
+# 37 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 2 "frame_buffer.c" 2
@@ -41,6 +45,13 @@ extern void restore_kernel();
 
 char *fb = (char *)0x000B8000;
 int fb_cursor = 0;
+unsigned char FG = 15;
+unsigned char BG = 0;
+
+void fb_set_color(unsigned char fg, unsigned char bg){
+    FG = fg;
+    BG = bg;
+}
 
 void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 {
@@ -51,7 +62,7 @@ void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg)
 void printChar(unsigned int x, unsigned int y, char c)
 {
     int index = y * 80 + x;
-    fb_write_cell(index, c, 15, 0);
+    fb_write_cell(index, c, FG, BG);
 }
 
 void fb_clear(char c, unsigned char fg, unsigned char bg)
@@ -66,7 +77,7 @@ int fb_write(char *buf, unsigned int len)
 {
     for (unsigned int index = 0; index < len; index++)
     {
-        fb_write_cell(fb_cursor+index, buf[index], 15, 0);
+        fb_write_cell(fb_cursor+index, buf[index], FG, BG);
     }
 
 
@@ -76,7 +87,7 @@ int fb_write(char *buf, unsigned int len)
 int fb_write_start(char *buf, unsigned int len, unsigned int start){
     for (unsigned int index = 0; index < len; index++)
     {
-        fb_write_cell(fb_cursor+index, buf[index+start], 15, 0);
+        fb_write_cell(fb_cursor+index, buf[index+start], FG, BG);
     }
 
 
@@ -87,7 +98,7 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
     for(int index = 0; index < len; index++){
 
 
-        fb_write_cell((y*80)+x+index+start, Buffer[index+start], 15, 0);
+        fb_write_cell((y*80)+x+index+start, Buffer[index+start], FG, BG);
     }
 }
 
@@ -98,7 +109,7 @@ int fb_print_buf(char *buf, unsigned int len, unsigned int start, unsigned int x
         if(real_index > len){
             real_index = 0;
         }
-        fb_write_cell((y*80)+x, buf[real_index], 15, 0);
+        fb_write_cell((y*80)+x, buf[real_index], FG, BG);
     }
     return 0;
 }
