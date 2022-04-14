@@ -1,5 +1,4 @@
 #include "terminal.h"
-#define Terminal_Y 20
 
 int Terminal_OUT_pointer = 0;
 unsigned short Terminal_Buffer_Pointer = 0;
@@ -27,15 +26,28 @@ void terminal_console(){
 
 void terminal_interpret(){
     int found_splits = 0;
+
+
+    
     for(int i = 0; i < TERMINAL_Buffer_Size; i++){
-        Terminal_Arguments[i] = 0;
         if(Terminal_Buffer[i] == TERMINAL_SPLIT){
             Terminal_Arguments[found_splits] = i;
             found_splits++;
         }
     }
+    Terminal_Arguments[found_splits+1] = -1;
+    
+
+    if(STR_Compare(Terminal_Buffer, "PRINT", 0, Terminal_Arguments[0]-1)){
+        printChar(79, 0, 'P');
+    }
 
     fb_write_xy(Terminal_Buffer, Terminal_Arguments[0], 0, 2, 21);
+
+    decodeData(STR_edit, (Terminal_Arguments[0] << 1), 8, 0);
+    fb_write_xy(STR_edit, 8, 0, 0, 22);
+    decodeData(STR_edit, (Terminal_Arguments[1] << 1), 8, 0);
+    fb_write_xy(STR_edit, 8, 0, 9, 22);
 }
 
 void terminal_enter(){    
@@ -108,11 +120,6 @@ void terminal_handler(){
         }
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
     }
-    else if(Terminal_Buffer_Pointer > 0b100000000000000){
-        Terminal_Buffer_Pointer = 0;
-    }
     decodeData(STR_edit, (Terminal_Buffer_Pointer << 1), 16, 0);
     fb_write_xy(STR_edit, 16, 0, 0, 23);
-    //Terminal_OUT_Buffer[0] = 'A';
-    //terminal_renderer();
 }

@@ -10,6 +10,9 @@
 #define TERMINAL_Buffer_Size 80
 #define TERMINAL_SPLIT ' '
 
+#define Terminal_Y 20
+
+
 char Terminal_Buffer[TERMINAL_Buffer_Size];
 char Terminal_OUT_Buffer[TERMINAL_Buffer_Size*40];
 
