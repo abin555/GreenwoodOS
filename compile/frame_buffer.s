@@ -380,8 +380,6 @@ fb_write_xy:
 	movl	20(%ebp), %eax
 	addl	%eax, %edx
 	movl	-16(%ebp), %eax
-	addl	%eax, %edx
-	movl	16(%ebp), %eax
 	addl	%edx, %eax
 	pushl	%edi
 	pushl	%esi

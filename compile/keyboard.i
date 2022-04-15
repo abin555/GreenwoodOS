@@ -77,8 +77,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[20];
+char keyboard_ASCIIBuffer[20];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -219,7 +219,7 @@ void keyboard_flag_handler(unsigned char scan_code){
         break;
 
         case 0xD3:
-        for(int i = 0; i < 2*100; i++){
+        for(int i = 0; i < 2*20; i++){
             keyboard_KEYBUFFER[i] = 0xaa;
             keyboard_ASCIIBuffer[i] = 'X';
         }
@@ -259,10 +259,10 @@ void keyboard_handle_interrupt(){
         keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = scan_code;
         keyboard_KEYBUFFER_POINTER++;
     }
-    if(keyboard_ascii_pointer > 100){
+    if(keyboard_ascii_pointer > 20){
         keyboard_ascii_pointer = 0;
     }
-    if(keyboard_KEYBUFFER_POINTER > 100){
+    if(keyboard_KEYBUFFER_POINTER > 20){
         keyboard_KEYBUFFER_POINTER = 0;
     }
 }

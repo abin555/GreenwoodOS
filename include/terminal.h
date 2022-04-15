@@ -10,7 +10,7 @@
 #define TERMINAL_Buffer_Size 80
 #define TERMINAL_SPLIT ' '
 
-#define Terminal_Y 20
+//#define Terminal_Y 20
 
 
 char Terminal_Buffer[TERMINAL_Buffer_Size];
@@ -19,8 +19,8 @@ char Terminal_OUT_Buffer[TERMINAL_Buffer_Size*40];
 char Terminal_Arguments[TERMINAL_Buffer_Size];
 
 void terminal_interpret();
+void terminal_output(char *Buffer, int start, int end);
 
-void write_terminal(char *Buffer, int len, int start, int x, int y);
 void terminal_enter();
 
 void terminal_renderer();

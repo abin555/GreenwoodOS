@@ -136,8 +136,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[20];
+char keyboard_ASCIIBuffer[20];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -197,25 +197,23 @@ char kbd_US_shift[256];
 
 char STR_edit[128];
 
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
 # 8 "./include/terminal.h" 2
-
-
-
-
-
+# 16 "./include/terminal.h"
 char Terminal_Buffer[80];
 char Terminal_OUT_Buffer[80*40];
 
 char Terminal_Arguments[80];
 
 void terminal_interpret();
+void terminal_output(char *Buffer, int start, int end);
 
-void write_terminal(char *Buffer, int len, int start, int x, int y);
 void terminal_enter();
 
 void terminal_renderer();

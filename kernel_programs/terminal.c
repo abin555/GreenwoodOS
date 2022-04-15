@@ -5,6 +5,11 @@ unsigned short Terminal_Buffer_Pointer = 0;
 unsigned int previousASCII_pointer = 0;
 unsigned int previousKEY_pointer = 0;
 
+#ifndef Terminal_Y
+int Terminal_Y = 20;
+#endif
+
+
 void terminal_renderer(){
     fb_clear(' ', FB_WHITE, FB_BLACK);
     fb_move_cursor_xy(1,Terminal_Y);
@@ -24,6 +29,12 @@ void terminal_console(){
     fb_set_color(FB_WHITE, FB_BLACK);
 }
 
+void terminal_output(char *Buffer, int start, int end){
+    fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+    fb_write_xy(Buffer, end-start, start, end, 0);
+    Terminal_OUT_pointer+=80;
+}
+
 void terminal_interpret(){
     int found_splits = 0;
 
@@ -38,8 +49,14 @@ void terminal_interpret(){
     Terminal_Arguments[found_splits+1] = -1;
     
 
-    if(STR_Compare(Terminal_Buffer, "PRINT", 0, Terminal_Arguments[0]-1)){
+    if(STR_Compare(Terminal_Buffer, "PRINT", 0, Terminal_Arguments[0]-1) == 4){
+        
         printChar(79, 0, 'P');
+        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+        fb_write_xy(Terminal_Buffer, TERMINAL_Buffer_Size-Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
+        Terminal_OUT_pointer+=80;
+        
+       //terminal_output(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_OUT_pointer+1);
     }
 
     fb_write_xy(Terminal_Buffer, Terminal_Arguments[0], 0, 2, 21);
@@ -48,17 +65,22 @@ void terminal_interpret(){
     fb_write_xy(STR_edit, 8, 0, 0, 22);
     decodeData(STR_edit, (Terminal_Arguments[1] << 1), 8, 0);
     fb_write_xy(STR_edit, 8, 0, 9, 22);
+
+    decodeData(STR_edit, STR_Compare(Terminal_Buffer, "PRINT", 0, Terminal_Arguments[0]-1) << 1, 8, 0);
+    fb_write_xy(STR_edit, 8, 0, 18, 22);
 }
 
 void terminal_enter(){    
-    terminal_interpret();
 
 
     STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, TERMINAL_Buffer_Size, Terminal_OUT_pointer);
-    fb_write_xy(Terminal_OUT_Buffer, TERMINAL_Buffer_Size*19, Terminal_OUT_pointer, 0, 0);
+    fb_write_xy(Terminal_OUT_Buffer, TERMINAL_Buffer_Size, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
     Terminal_OUT_pointer += TERMINAL_Buffer_Size + (TERMINAL_Buffer_Size % 80);
     Terminal_Buffer_Pointer = 0;
 
+
+    
+    terminal_interpret();
     for(int i = 0; i < TERMINAL_Buffer_Size; i++){
         Terminal_Buffer[i] = 0;
         printChar(i+1, Terminal_Y, ' ');
@@ -67,6 +89,11 @@ void terminal_enter(){
     fb_set_color(FB_GREEN, FB_BLACK);
     printChar(0, Terminal_Y, '>');
     fb_set_color(FB_WHITE, FB_BLACK);
+
+    if(Terminal_OUT_pointer > (Terminal_Y-1) * 80){
+        Terminal_OUT_pointer = 0;
+        fb_clear(' ', FB_WHITE, FB_BLACK);
+    }
 }
 
 void terminal_handler(){

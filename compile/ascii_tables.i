@@ -80,8 +80,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[20];
+char keyboard_ASCIIBuffer[20];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;

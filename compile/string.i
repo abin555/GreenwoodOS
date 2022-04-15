@@ -84,8 +84,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[20];
+char keyboard_ASCIIBuffer[20];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -101,12 +101,26 @@ char kbd_US_shift[256];
 
 char STR_edit[128];
 
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
 # 2 "string.c" 2
+
+int STR_Compare(char *elem1, char *elem2, int start, int end){
+  int equal = 0;
+  if(sizeof elem2 == end - start){
+    for(int i = start; i < end; i++){
+      if(elem1[i] == elem2[i]){
+        equal++;
+      }
+    }
+  }
+  return equal;
+}
 
 void STR_INSERT(char *in_str, char *out_str, int len, int write_index){
     for(int index = 0; index < len; index++){

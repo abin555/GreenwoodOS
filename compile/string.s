@@ -3,8 +3,8 @@
 	.comm	INT_Software_Value,1,1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
-	.comm	keyboard_KEYBUFFER,100,32
-	.comm	keyboard_ASCIIBuffer,100,32
+	.comm	keyboard_KEYBUFFER,20,4
+	.comm	keyboard_ASCIIBuffer,20,4
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
@@ -12,9 +12,9 @@
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.globl	STR_INSERT
-	.type	STR_INSERT, @function
-STR_INSERT:
+	.globl	STR_Compare
+	.type	STR_Compare, @function
+STR_Compare:
 .LFB0:
 	.cfi_startproc
 	endbr32
@@ -27,8 +27,57 @@ STR_INSERT:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	$0, -4(%ebp)
-	jmp	.L2
+	movl	20(%ebp), %eax
+	subl	16(%ebp), %eax
+	cmpl	$4, %eax
+	jne	.L2
+	movl	16(%ebp), %eax
+	movl	%eax, -8(%ebp)
+	jmp	.L3
+.L5:
+	movl	-8(%ebp), %edx
+	movl	8(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %edx
+	movl	-8(%ebp), %ecx
+	movl	12(%ebp), %eax
+	addl	%ecx, %eax
+	movzbl	(%eax), %eax
+	cmpb	%al, %dl
+	jne	.L4
+	addl	$1, -4(%ebp)
+.L4:
+	addl	$1, -8(%ebp)
 .L3:
+	movl	-8(%ebp), %eax
+	cmpl	20(%ebp), %eax
+	jl	.L5
+.L2:
+	movl	-4(%ebp), %eax
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE0:
+	.size	STR_Compare, .-STR_Compare
+	.globl	STR_INSERT
+	.type	STR_INSERT, @function
+STR_INSERT:
+.LFB1:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	subl	$16, %esp
+	call	__x86.get_pc_thunk.ax
+	addl	$_GLOBAL_OFFSET_TABLE_, %eax
+	movl	$0, -4(%ebp)
+	jmp	.L8
+.L9:
 	movl	-4(%ebp), %edx
 	movl	8(%ebp), %eax
 	addl	%edx, %eax
@@ -41,10 +90,10 @@ STR_INSERT:
 	movzbl	(%eax), %eax
 	movb	%al, (%edx)
 	addl	$1, -4(%ebp)
-.L2:
+.L8:
 	movl	-4(%ebp), %eax
 	cmpl	16(%ebp), %eax
-	jl	.L3
+	jl	.L9
 	nop
 	nop
 	leave
@@ -52,12 +101,12 @@ STR_INSERT:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE1:
 	.size	STR_INSERT, .-STR_INSERT
 	.globl	decodeData
 	.type	decodeData, @function
 decodeData:
-.LFB1:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -69,8 +118,8 @@ decodeData:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	$1, -4(%ebp)
-	jmp	.L5
-.L8:
+	jmp	.L11
+.L14:
 	movl	-4(%ebp), %eax
 	movl	12(%ebp), %edx
 	movl	%eax, %ecx
@@ -78,7 +127,7 @@ decodeData:
 	movl	%edx, %eax
 	andl	$1, %eax
 	testl	%eax, %eax
-	je	.L6
+	je	.L12
 	movl	16(%ebp), %eax
 	subl	-4(%ebp), %eax
 	movl	%eax, %edx
@@ -88,8 +137,8 @@ decodeData:
 	movl	8(%ebp), %eax
 	addl	%edx, %eax
 	movb	$49, (%eax)
-	jmp	.L7
-.L6:
+	jmp	.L13
+.L12:
 	movl	16(%ebp), %eax
 	subl	-4(%ebp), %eax
 	movl	%eax, %edx
@@ -99,12 +148,12 @@ decodeData:
 	movl	8(%ebp), %eax
 	addl	%edx, %eax
 	movb	$48, (%eax)
-.L7:
+.L13:
 	addl	$1, -4(%ebp)
-.L5:
+.L11:
 	movl	-4(%ebp), %eax
 	cmpl	16(%ebp), %eax
-	jl	.L8
+	jl	.L14
 	nop
 	nop
 	leave
@@ -112,12 +161,12 @@ decodeData:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE2:
 	.size	decodeData, .-decodeData
 	.globl	quadtoHex
 	.type	quadtoHex, @function
 quadtoHex:
-.LFB2:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -132,15 +181,21 @@ quadtoHex:
 	movb	%dl, -4(%ebp)
 	movsbl	-4(%ebp), %edx
 	cmpl	$15, %edx
-	ja	.L10
+	ja	.L16
 	sall	$2, %edx
-	movl	.L12@GOTOFF(%edx,%eax), %edx
+	movl	.L18@GOTOFF(%edx,%eax), %edx
 	addl	%edx, %eax
 	notrack jmp	*%eax
 	.section	.rodata
 	.align 4
 	.align 4
-.L12:
+.L18:
+	.long	.L33@GOTOFF
+	.long	.L32@GOTOFF
+	.long	.L31@GOTOFF
+	.long	.L30@GOTOFF
+	.long	.L29@GOTOFF
+	.long	.L28@GOTOFF
 	.long	.L27@GOTOFF
 	.long	.L26@GOTOFF
 	.long	.L25@GOTOFF
@@ -150,76 +205,70 @@ quadtoHex:
 	.long	.L21@GOTOFF
 	.long	.L20@GOTOFF
 	.long	.L19@GOTOFF
-	.long	.L18@GOTOFF
 	.long	.L17@GOTOFF
-	.long	.L16@GOTOFF
-	.long	.L15@GOTOFF
-	.long	.L14@GOTOFF
-	.long	.L13@GOTOFF
-	.long	.L11@GOTOFF
 	.text
-.L27:
+.L33:
 	movl	$48, %eax
-	jmp	.L28
-.L26:
+	jmp	.L34
+.L32:
 	movl	$49, %eax
-	jmp	.L28
-.L25:
+	jmp	.L34
+.L31:
 	movl	$50, %eax
-	jmp	.L28
-.L24:
+	jmp	.L34
+.L30:
 	movl	$51, %eax
-	jmp	.L28
-.L23:
+	jmp	.L34
+.L29:
 	movl	$52, %eax
-	jmp	.L28
-.L22:
-	movl	$53, %eax
-	jmp	.L28
-.L21:
-	movl	$54, %eax
-	jmp	.L28
-.L20:
-	movl	$55, %eax
-	jmp	.L28
-.L19:
-	movl	$56, %eax
-	jmp	.L28
-.L18:
-	movl	$57, %eax
-	jmp	.L28
-.L17:
-	movl	$65, %eax
-	jmp	.L28
-.L16:
-	movl	$66, %eax
-	jmp	.L28
-.L15:
-	movl	$67, %eax
-	jmp	.L28
-.L14:
-	movl	$68, %eax
-	jmp	.L28
-.L13:
-	movl	$69, %eax
-	jmp	.L28
-.L11:
-	movl	$70, %eax
-	jmp	.L28
-.L10:
-	movl	$120, %eax
+	jmp	.L34
 .L28:
+	movl	$53, %eax
+	jmp	.L34
+.L27:
+	movl	$54, %eax
+	jmp	.L34
+.L26:
+	movl	$55, %eax
+	jmp	.L34
+.L25:
+	movl	$56, %eax
+	jmp	.L34
+.L24:
+	movl	$57, %eax
+	jmp	.L34
+.L23:
+	movl	$65, %eax
+	jmp	.L34
+.L22:
+	movl	$66, %eax
+	jmp	.L34
+.L21:
+	movl	$67, %eax
+	jmp	.L34
+.L20:
+	movl	$68, %eax
+	jmp	.L34
+.L19:
+	movl	$69, %eax
+	jmp	.L34
+.L17:
+	movl	$70, %eax
+	jmp	.L34
+.L16:
+	movl	$120, %eax
+.L34:
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE3:
 	.size	quadtoHex, .-quadtoHex
 	.globl	decodeHex
 	.type	decodeHex, @function
 decodeHex:
-.LFB3:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -233,8 +282,8 @@ decodeHex:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	$0, -8(%ebp)
-	jmp	.L30
-.L31:
+	jmp	.L36
+.L37:
 	movl	-8(%ebp), %eax
 	sall	$2, %eax
 	movl	12(%ebp), %edx
@@ -261,14 +310,14 @@ decodeHex:
 	addl	$4, %esp
 	movb	%al, (%ebx)
 	addl	$1, -8(%ebp)
-.L30:
+.L36:
 	movl	16(%ebp), %eax
 	leal	3(%eax), %edx
 	testl	%eax, %eax
 	cmovs	%edx, %eax
 	sarl	$2, %eax
 	cmpl	%eax, -8(%ebp)
-	jl	.L31
+	jl	.L37
 	nop
 	nop
 	movl	-4(%ebp), %ebx
@@ -278,19 +327,19 @@ decodeHex:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE4:
 	.size	decodeHex, .-decodeHex
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB4:
+.LFB5:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE5:
 	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -98,7 +98,7 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
     for(int index = 0; index < len; index++){
 
 
-        fb_write_cell((y*80)+x+index+start, Buffer[index+start], FG, BG);
+        fb_write_cell((y*80)+x+index, Buffer[index+start], FG, BG);
     }
 }
 

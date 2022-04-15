@@ -19,18 +19,11 @@ int sum_of_three(int arg1, int arg2, int arg3){
 	return arg1 + arg2 + arg3;
 }
 
-void delay(int times){
-  for(int x = 0; x < 10*times; x++){
-    for(int y = 0; y < 10*times; y++){
-
-    }
-  }
-}
+void PROGRAMA();
 
 int main(){
   interrupt_install_idt();
   fb_clear(' ', FB_WHITE, FB_BLACK);
-
   while(1){
     switch(SYS_MODE){
       case 1:

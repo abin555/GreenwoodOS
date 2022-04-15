@@ -3,8 +3,8 @@
 	.comm	INT_Software_Value,1,1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
-	.comm	keyboard_KEYBUFFER,100,32
-	.comm	keyboard_ASCIIBuffer,100,32
+	.comm	keyboard_KEYBUFFER,20,4
+	.comm	keyboard_ASCIIBuffer,20,4
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
@@ -46,57 +46,10 @@ sum_of_three:
 	.cfi_endproc
 .LFE0:
 	.size	sum_of_three, .-sum_of_three
-	.globl	delay
-	.type	delay, @function
-delay:
-.LFB1:
-	.cfi_startproc
-	endbr32
-	pushl	%ebp
-	.cfi_def_cfa_offset 8
-	.cfi_offset 5, -8
-	movl	%esp, %ebp
-	.cfi_def_cfa_register 5
-	subl	$16, %esp
-	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
-	jmp	.L4
-.L7:
-	movl	$0, -8(%ebp)
-	jmp	.L5
-.L6:
-	addl	$1, -8(%ebp)
-.L5:
-	movl	8(%ebp), %edx
-	movl	%edx, %eax
-	sall	$2, %eax
-	addl	%edx, %eax
-	addl	%eax, %eax
-	cmpl	%eax, -8(%ebp)
-	jl	.L6
-	addl	$1, -4(%ebp)
-.L4:
-	movl	8(%ebp), %edx
-	movl	%edx, %eax
-	sall	$2, %eax
-	addl	%edx, %eax
-	addl	%eax, %eax
-	cmpl	%eax, -4(%ebp)
-	jl	.L7
-	nop
-	nop
-	leave
-	.cfi_restore 5
-	.cfi_def_cfa 4, 4
-	ret
-	.cfi_endproc
-.LFE1:
-	.size	delay, .-delay
 	.globl	main
 	.type	main, @function
 main:
-.LFB2:
+.LFB1:
 	.cfi_startproc
 	endbr32
 	leal	4(%esp), %ecx
@@ -119,50 +72,50 @@ main:
 	pushl	$32
 	call	fb_clear@PLT
 	addl	$16, %esp
-.L13:
+.L8:
 	movl	SYS_MODE@GOT(%ebx), %eax
 	movzbl	(%eax), %eax
 	movzbl	%al, %eax
 	cmpl	$1, %eax
-	je	.L9
+	je	.L4
 	cmpl	$4, %eax
-	je	.L10
-	jmp	.L14
-.L9:
+	je	.L5
+	jmp	.L9
+.L4:
 	call	terminal_handler@PLT
-	jmp	.L12
-.L10:
+	jmp	.L7
+.L5:
 	call	KYBRD_DEBUG_DISPLAY@PLT
-	jmp	.L12
-.L14:
+	jmp	.L7
+.L9:
 	call	KYBRD_DEBUG_DISPLAY@PLT
-.L12:
-	jmp	.L13
+.L7:
+	jmp	.L8
 	.cfi_endproc
-.LFE2:
+.LFE1:
 	.size	main, .-main
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB3:
+.LFB2:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE2:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB4:
+.LFB3:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

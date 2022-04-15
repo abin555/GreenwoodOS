@@ -25,7 +25,7 @@ align 4
 
 loader:
 	cli
-	;jmp setGdt
+	;jmp PROGRAMA
 	call main
 	jmp .loop
 	
@@ -119,3 +119,17 @@ software_int:
 global restore_kernel
 restore_kernel:
 	jmp loader
+
+
+section .progA
+PROGRAMA:
+	mov [0x1], byte 10
+	mov eax, [0x1]
+	add eax, 50
+	mov [0x1], eax
+	mov ebx, [0x1]
+	mov eax, $
+	mov [eax], dword 0xAA
+	mov ecx, [eax]
+	jmp $
+global PROGRAMA

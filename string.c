@@ -2,9 +2,11 @@
 
 int STR_Compare(char *elem1, char *elem2, int start, int end){
   int equal = 0;
-  for(int i = start; i < end; i++){
-    if(elem1[i] == elem2[i]){
-      equal++;
+  if(sizeof elem2 == end - start){
+    for(int i = start; i < end; i++){
+      if(elem1[i] == elem2[i]){
+        equal++;
+      }
     }
   }
   return equal;
