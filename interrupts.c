@@ -9,7 +9,7 @@
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
 
-unsigned char SYS_MODE = 4;
+unsigned char SYS_MODE = 1;
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT];
 struct IDT idt;
@@ -51,7 +51,7 @@ void interrupt_install_idt()
 }
 
 void KERNEL_INTERRUPT(){
-	switch(INT_Software_Value){
+	switch(INT_Software_Value[0]){
 		case 1:
 			SYS_MODE = 1;
 			break;

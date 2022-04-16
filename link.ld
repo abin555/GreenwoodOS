@@ -21,8 +21,9 @@ SECTIONS {
 		*(COMMON)
 		*(.bss)
 	}
-	.progA ALIGN(0x2000):
+	. = 0x01000000;
+	.PROGA ALIGN (0x2000):
 	{
-		*(.progA)
+		*(.PROGA)	
 	}
 }	

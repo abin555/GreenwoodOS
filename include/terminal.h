@@ -18,6 +18,8 @@ char Terminal_OUT_Buffer[TERMINAL_Buffer_Size*40];
 
 char Terminal_Arguments[TERMINAL_Buffer_Size];
 
+int terminal_compare(char *buffer, int start, int end, int len);
+
 void terminal_interpret();
 void terminal_output(char *Buffer, int start, int end);
 

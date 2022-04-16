@@ -6,19 +6,87 @@
 
 
 
+# 1 "./include/gcc_stdint.h" 1
+# 34 "./include/gcc_stdint.h"
+typedef signed char int8_t;
+
+
+typedef short int int16_t;
+
+
+typedef int int32_t;
+
+
+typedef long long int int64_t;
+
+
+typedef unsigned char uint8_t;
+
+
+typedef short unsigned int uint16_t;
+
+
+typedef unsigned int uint32_t;
+
+
+typedef long long unsigned int uint64_t;
+
+
+
+
+typedef signed char int_least8_t;
+typedef short int int_least16_t;
+typedef int int_least32_t;
+typedef long long int int_least64_t;
+typedef unsigned char uint_least8_t;
+typedef short unsigned int uint_least16_t;
+typedef unsigned int uint_least32_t;
+typedef long long unsigned int uint_least64_t;
+
+
+
+typedef signed char int_fast8_t;
+typedef int int_fast16_t;
+typedef int int_fast32_t;
+typedef long long int int_fast64_t;
+typedef unsigned char uint_fast8_t;
+typedef unsigned int uint_fast16_t;
+typedef unsigned int uint_fast32_t;
+typedef long long unsigned int uint_fast64_t;
+
+
+
+
+typedef int intptr_t;
+
+
+typedef unsigned int uintptr_t;
+
+
+
+
+typedef long long int intmax_t;
+typedef long long unsigned int uintmax_t;
+# 5 "./include/io.h" 2
+
 extern void outb(unsigned short port, unsigned char data);
 
 extern unsigned char inb(unsigned short pos);
+
+void WriteMem(uint32_t Address, uint32_t Value);
+uint32_t ReadMem(uint32_t Address);
 
 extern void loadGDT(unsigned short GDT);
 
 void pic_acknowledge(unsigned int interrupt);
 
 extern void software_int();
-unsigned char INT_Software_Value;
+unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+
+extern void PROGA();
 # 2 "interrupts.c" 2
 # 1 "./include/interrupts.h" 1
 
@@ -136,8 +204,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[20];
-char keyboard_ASCIIBuffer[20];
+unsigned char keyboard_KEYBUFFER[100];
+char keyboard_ASCIIBuffer[100];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -204,12 +272,19 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
 # 8 "./include/terminal.h" 2
 # 16 "./include/terminal.h"
 char Terminal_Buffer[80];
 char Terminal_OUT_Buffer[80*40];
 
 char Terminal_Arguments[80];
+
+int terminal_compare(char *buffer, int start, int end, int len);
 
 void terminal_interpret();
 void terminal_output(char *Buffer, int start, int end);
@@ -225,7 +300,7 @@ void terminal_handler();
 
 
 
-unsigned char SYS_MODE = 4;
+unsigned char SYS_MODE = 1;
 
 struct IDTDescriptor idt_descriptors[256];
 struct IDT idt;
@@ -259,7 +334,7 @@ void interrupt_install_idt()
 }
 
 void KERNEL_INTERRUPT(){
- switch(INT_Software_Value){
+ switch(INT_Software_Value[0]){
   case 1:
    SYS_MODE = 1;
    break;

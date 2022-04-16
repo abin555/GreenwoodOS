@@ -1,16 +1,16 @@
 	.file	"interrupts.c"
 	.text
-	.comm	INT_Software_Value,1,1
+	.comm	INT_Software_Value,4,4
 	.globl	SYS_MODE
 	.data
 	.type	SYS_MODE, @object
 	.size	SYS_MODE, 1
 SYS_MODE:
-	.byte	4
+	.byte	1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
-	.comm	keyboard_KEYBUFFER,20,4
-	.comm	keyboard_ASCIIBuffer,20,4
+	.comm	keyboard_KEYBUFFER,100,32
+	.comm	keyboard_ASCIIBuffer,100,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
@@ -140,6 +140,7 @@ KERNEL_INTERRUPT:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	INT_Software_Value@GOT(%eax), %edx
+	movl	(%edx), %edx
 	movzbl	(%edx), %edx
 	movzbl	%dl, %edx
 	cmpl	$4, %edx

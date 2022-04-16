@@ -18,14 +18,16 @@ gdtr DW 0 ; For limit storage
 ;;Begin Executing C Code
 
 section .text
+
 align 4
 	dd MAGIC_NUMBER
 	dd FLAGS
 	dd CHECKSUM
 
+jmp loader
+
 loader:
 	cli
-	;jmp PROGRAMA
 	call main
 	jmp .loop
 	
@@ -50,6 +52,12 @@ inb:
 global loadGDT:
 	lgdt [esp]
 	ret
+
+global PROGA:
+PROGA:
+	mov eax, 0x000B8000
+	mov ebx, 0
+	jmp 0x01000000
 
 ;Produce Interrupt Call System | interrupts_new.c
 extern interrupt_handler
@@ -120,16 +128,11 @@ global restore_kernel
 restore_kernel:
 	jmp loader
 
-
-section .progA
-PROGRAMA:
-	mov [0x1], byte 10
-	mov eax, [0x1]
-	add eax, 50
-	mov [0x1], eax
-	mov ebx, [0x1]
-	mov eax, $
-	mov [eax], dword 0xAA
-	mov ecx, [eax]
-	jmp $
-global PROGRAMA
+section .PROGA
+program_A:
+	mov [eax], dword 0x0E580D58
+	add eax, dword 0x04
+	add ebx, 1
+	cmp ebx, 20
+	jne program_A
+	hlt

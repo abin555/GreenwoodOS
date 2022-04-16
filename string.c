@@ -2,11 +2,9 @@
 
 int STR_Compare(char *elem1, char *elem2, int start, int end){
   int equal = 0;
-  if(sizeof elem2 == end - start){
-    for(int i = start; i < end; i++){
-      if(elem1[i] == elem2[i]){
-        equal++;
-      }
+  for(int i = start; i < end; i++){
+    if(elem1[i] == elem2[i]){
+      equal++;
     }
   }
   return equal;
@@ -19,7 +17,7 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index){
 }
 
 void decodeData(char *Buffer, int in, int len, int start){
-  for(int x = 1; x < len; x++){
+  for(int x = 0; x < len; x++){
     if((in >> x) & 1){
       Buffer[len-x+start] = '1';
     }
@@ -83,8 +81,78 @@ char quadtoHex(char quad){
   return 'x';
 }
 
+char hexToQuad(char hex){
+  switch(hex){
+    case '0':
+      return 0x0;
+      break;
+    case '1':
+      return 0x1;
+      break;
+    case '2':
+      return 0x2;
+      break;
+    case '3':
+      return 0x3;
+      break;
+    case '4':
+      return 0x4;
+      break;
+    case '5':
+      return 0x5;
+      break;
+    case '6':
+      return 0x6;
+      break;
+    case '7':
+      return 0x7;
+      break;
+    case '8':
+      return 0x8;
+      break;
+    case '9':
+      return 0x9;
+      break;
+    case 'A':
+    case 'a':
+      return 0xa;
+      break;
+    case 'B':
+    case 'b':
+      return 0xb;
+      break;
+    case 'C':
+    case 'c':
+      return 0xc;
+      break;
+    case 'D':
+    case 'd':
+      return 0xd;
+      break;
+    case 'E':
+    case 'e':
+      return 0xe;
+      break;
+    case 'F':
+    case 'f':
+      return 0xf;
+      break;
+  }
+  return 0;
+}
+
 void decodeHex(char *Buffer, int in, int len, int start){
   for(int i = 0; i < len/4; i++){
     Buffer[start+(len/4 - i)] = quadtoHex((in >> 4*i) & 0x0F);
   }
+}
+
+unsigned int encodeHex(char *Buffer, int start, int end){
+  unsigned int workInt = 0;
+  
+  for(int i = 0; i < (end-start); i++){
+    workInt = (workInt << 4) | hexToQuad(Buffer[start+i]);
+  }
+  
+  return workInt;
 }

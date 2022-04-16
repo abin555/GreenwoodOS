@@ -26,7 +26,7 @@ FG:
 	.size	BG, 1
 BG:
 	.zero	1
-	.comm	INT_Software_Value,1,1
+	.comm	INT_Software_Value,4,4
 	.text
 	.globl	fb_set_color
 	.type	fb_set_color, @function
@@ -197,7 +197,7 @@ fb_clear:
 	addl	$16, %esp
 	addl	$1, -8(%ebp)
 .L5:
-	cmpl	$1199, -8(%ebp)
+	cmpl	$1919, -8(%ebp)
 	jle	.L6
 	nop
 	nop

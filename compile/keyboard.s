@@ -1,6 +1,6 @@
 	.file	"keyboard.c"
 	.text
-	.comm	INT_Software_Value,1,1
+	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.globl	KYBRD_SHIFT
 	.bss
@@ -8,8 +8,8 @@
 	.size	KYBRD_SHIFT, 1
 KYBRD_SHIFT:
 	.zero	1
-	.comm	keyboard_KEYBUFFER,20,4
-	.comm	keyboard_ASCIIBuffer,20,4
+	.comm	keyboard_KEYBUFFER,100,32
+	.comm	keyboard_ASCIIBuffer,100,32
 	.globl	keyboard_KEYBUFFER_POINTER
 	.align 4
 	.type	keyboard_KEYBUFFER_POINTER, @object
@@ -472,7 +472,7 @@ keyboard_flag_handler:
 	movb	$88, (%eax)
 	addl	$1, -12(%ebp)
 .L46:
-	cmpl	$39, -12(%ebp)
+	cmpl	$199, -12(%ebp)
 	jle	.L47
 	nop
 .L42:
@@ -593,12 +593,12 @@ keyboard_handle_interrupt:
 	movl	%eax, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
 .L54:
 	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
-	cmpl	$20, %eax
+	cmpl	$99, %eax
 	jbe	.L59
 	movl	$0, keyboard_ascii_pointer@GOTOFF(%ebx)
 .L59:
 	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	cmpl	$20, %eax
+	cmpl	$99, %eax
 	jbe	.L61
 	movl	$0, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
 .L61:

@@ -25,7 +25,7 @@ void printChar(unsigned int x, unsigned int y, char c)
 
 void fb_clear(char c, unsigned char fg, unsigned char bg)
 {
-    for (int i = 0; i < 80 * 15; i++)
+    for (int i = 0; i < 80 * 24; i++)
     {
         fb_write_cell(i, c, fg, bg);
     }

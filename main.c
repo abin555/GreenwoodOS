@@ -24,6 +24,7 @@ void PROGRAMA();
 int main(){
   interrupt_install_idt();
   fb_clear(' ', FB_WHITE, FB_BLACK);
+  
   while(1){
     switch(SYS_MODE){
       case 1:
