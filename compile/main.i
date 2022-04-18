@@ -85,8 +85,9 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 2 "main.c" 2
 # 1 "./include/keyboard.h" 1
 
@@ -147,8 +148,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[0xFF];
+char keyboard_ASCIIBuffer[0xFF];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -161,6 +162,8 @@ unsigned char char_scancode;
 
 
 unsigned char SYS_MODE;
+# 1 "./include/system_calls.h" 1
+# 6 "./include/interrupts.h" 2
 
 struct IDT
 {
@@ -203,10 +206,15 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);
 
 void KERNEL_INTERRUPT();
+void SYS_CALL(
+ struct cpu_state cpu;
+);
+
 
 void interrupt_handler(
     struct cpu_state cpu,

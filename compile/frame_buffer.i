@@ -107,8 +107,9 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 3 "frame_buffer.c" 2
 
 char *fb = (char *)0x000B8000;

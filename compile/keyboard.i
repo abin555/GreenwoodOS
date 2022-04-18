@@ -89,8 +89,9 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 5 "./include/keyboard.h" 2
 # 1 "./include/stdint.h" 1
 # 6 "./include/keyboard.h" 2
@@ -145,8 +146,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[0xFF];
+char keyboard_ASCIIBuffer[0xFF];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -279,7 +280,7 @@ void keyboard_flag_handler(unsigned char scan_code){
 
         case 0x1D:
 
-        software_interrupt(1);
+
         break;
 
         case 0x5B:
@@ -287,10 +288,7 @@ void keyboard_flag_handler(unsigned char scan_code){
         break;
 
         case 0xD3:
-        for(int i = 0; i < 2*100; i++){
-            keyboard_KEYBUFFER[i] = 0xaa;
-            keyboard_ASCIIBuffer[i] = 'X';
-        }
+        software_interrupt(1);
         break;
     }
 }
@@ -327,10 +325,10 @@ void keyboard_handle_interrupt(){
         keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER] = scan_code;
         keyboard_KEYBUFFER_POINTER++;
     }
-    if(keyboard_ascii_pointer >= 100){
+    if(keyboard_ascii_pointer >= 0xFF){
         keyboard_ascii_pointer = 0;
     }
-    if(keyboard_KEYBUFFER_POINTER >= 100){
+    if(keyboard_KEYBUFFER_POINTER >= 0xFF){
         keyboard_KEYBUFFER_POINTER = 0;
     }
 }

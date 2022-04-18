@@ -85,8 +85,9 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 2 "io.c" 2
 
 

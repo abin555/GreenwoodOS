@@ -26,4 +26,9 @@ SECTIONS {
 	{
 		*(.PROGA)	
 	}
+	. = 0x02000000;
+	.PROGB ALIGN (0x2000):
+	{
+		*(.PROGB)
+	}
 }	

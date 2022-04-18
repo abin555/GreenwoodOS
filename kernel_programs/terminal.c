@@ -18,7 +18,12 @@ void terminal_renderer(){
 }
 
 void terminal_console(){
-    Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
+    if(keyboard_ascii_pointer-1 != 0xFFFFFFFF){
+        Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[keyboard_ascii_pointer-1];
+    }
+    else{
+        Terminal_Buffer[Terminal_Buffer_Pointer] = keyboard_ASCIIBuffer[KEYBOARD_BUFFERSIZE-1];
+    }
     printChar(Terminal_Buffer_Pointer+1, Terminal_Y, Terminal_Buffer[Terminal_Buffer_Pointer]);
     
     fb_move_cursor_xy(Terminal_Buffer_Pointer+2, Terminal_Y);
@@ -92,14 +97,37 @@ void terminal_interpret(){
         Terminal_OUT_pointer+=80;
     }
     if(terminal_compare("load", 0, Terminal_Arguments[0], 4)){
-        WriteMem(0x01000000, 0xfa1e0ff3);
-        WriteMem(0x01000004, 0xe5894855);
-        WriteMem(0x01000008, 0x58fc45c7);
-        WriteMem(0x0100000b, 0x8b000000);
-        WriteMem(0x0100000d, 0xc35dfc45);
+        WriteMem((int) externalProgram, 0x000001b8);
+        WriteMem((int) externalProgram + 0x05, 0x0000efbb);
+        WriteMem((int) externalProgram + 0x0a, 0x000054b9);
+        WriteMem((int) externalProgram + 0x0f, 0x000080cd);
+        WriteMem((int) externalProgram + 0x11, 0x000000c3);
     }
     if(terminal_compare("exec", 0, Terminal_Arguments[0], 4)){
         PROGA();
+    }
+    if(terminal_compare("wipe", 0, Terminal_Arguments[0], 4)){
+        for(int i = 0; i < 50; i++){
+            WriteMem((int)externalProgram+4*i, 0x00000000);
+        }
+    }
+    if(terminal_compare("check", 0, Terminal_Arguments[0], 5)){
+        decodeHex(STR_edit, (int) externalProgram, 32, 0);
+        fb_write_xy(STR_edit, 9, 0, Terminal_OUT_pointer+1, 0);
+        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+        Terminal_OUT_pointer+=80;
+    }
+    if(terminal_compare("swap_PROG", 0, Terminal_Arguments[0], 9)){
+        if((int) externalProgram == 0x01000000){
+            externalProgram = (unsigned int *) 0x02000000;
+        }
+        else if((int) externalProgram == 0x02000000){
+            externalProgram = (unsigned int *) 0x01000000;
+        }
+    }
+    if(terminal_compare("set_PROG", 0, Terminal_Arguments[0], 8)){
+        unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        externalProgram = (unsigned int *) addr;
     }
 
     fb_write_xy(Terminal_Buffer, Terminal_Arguments[0], 0, 2, 21);
@@ -144,10 +172,16 @@ void terminal_handler(){
     STR_INSERT("Testing Buffer System", Terminal_OUT_Buffer, 20, 0);
     STR_INSERT("Command Buffer", Terminal_Buffer, 16, 0);
     */
-    if(keyboard_ascii_pointer-1 != previousASCII_pointer && Terminal_Buffer_Pointer < TERMINAL_Buffer_Size && previousASCII_pointer != KEYBOARD_BUFFERSIZE-1){
+    
+    decodeHex(STR_edit, keyboard_ascii_pointer, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, 34, 23);
+    decodeHex(STR_edit, previousASCII_pointer, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, 43, 23);
+
+    if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < TERMINAL_Buffer_Size){
         //printChar(keyboard_KEYBUFFER_POINTER-1, Terminal_Y, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]);
         terminal_console();
-        previousASCII_pointer = keyboard_ascii_pointer-1;
+        previousASCII_pointer = keyboard_ascii_pointer;
     }
     else if(keyboard_KEYBUFFER_POINTER != previousKEY_pointer){
         switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]){
@@ -192,4 +226,8 @@ void terminal_handler(){
     }
     decodeData(STR_edit, (Terminal_Buffer_Pointer << 1), 16, 0);
     fb_write_xy(STR_edit, 16, 0, 0, 23);
+    decodeHex(STR_edit, keyboard_ascii_pointer, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, 16, 23);
+    decodeHex(STR_edit, previousASCII_pointer, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, 25, 23);
 }

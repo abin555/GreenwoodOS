@@ -8,6 +8,7 @@
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
+#define INTERRUPTS_SYSCALL 0x80
 
 unsigned char SYS_MODE = 1;
 
@@ -41,6 +42,7 @@ void interrupt_install_idt()
 {
 	interrupts_init_descriptor(INTERRUPTS_KEYBOARD, (unsigned int) int_handler_33);
 	interrupts_init_descriptor(INTERRUPTS_KERNEL, (unsigned int) int_handler_34);
+	interrupts_init_descriptor(INTERRUPTS_SYSCALL, (unsigned int) int_handler_128);
 
 	idt.address = (int) &idt_descriptors;
 	idt.size = sizeof(struct IDTDescriptor) * INTERRUPT_DESCRIPTOR_COUNT;
@@ -66,6 +68,17 @@ void KERNEL_INTERRUPT(){
 			break;
 	}
 }
+void SYS_CALL(struct cpu_state cpu){
+	printChar(79, 1, 'S');
+	decodeHex(STR_edit, cpu.eax, 32, 0);
+	fb_write_xy(STR_edit, 9, 0, 0, 21);
+	switch(cpu.eax){
+		case SYS_PRINT_CHAR:
+			printChar(79, 2, 'P');
+			fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
+			break;
+	}
+}
 
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
 {
@@ -78,8 +91,10 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 			pic_acknowledge(interrupt);
 			break;
 		case INTERRUPTS_KERNEL:
-			printChar(SYS_MODE, 10, 'S');
 			KERNEL_INTERRUPT();
+			break;
+		case INTERRUPTS_SYSCALL:
+			SYS_CALL(cpu);
 			break;
 		default:
 			break;

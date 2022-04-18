@@ -8,13 +8,13 @@ void KYBRD_DEBUG_DISPLAY(){
     decodeHex(decode, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1], 8, 27);
 
     fb_move_cursor(0);
-    fb_write(keyboard_ASCIIBuffer, 100);
-    fb_move_cursor(160);
+    fb_write(keyboard_ASCIIBuffer, KEYBOARD_BUFFERSIZE);
+    fb_move_cursor_xy(0,5);
     fb_write(decode, 8);
-    fb_move_cursor_xy(0,3);
+    fb_move_cursor_xy(0,6);
     fb_write_start(decode, 40, 0);
 
-    unsigned short y_shift = 0;
+    unsigned short y_shift = 3;
     for(int i = 0; i < 2*KEYBOARD_BUFFERSIZE; i++){
         decodeHex(decode, keyboard_KEYBUFFER[i], 8, 3*i+50);
         for(int c = 0 ; c < 3; c++){

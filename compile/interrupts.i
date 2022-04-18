@@ -85,14 +85,17 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 2 "interrupts.c" 2
 # 1 "./include/interrupts.h" 1
 
 
 
 unsigned char SYS_MODE;
+# 1 "./include/system_calls.h" 1
+# 6 "./include/interrupts.h" 2
 
 struct IDT
 {
@@ -135,10 +138,15 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);
 
 void KERNEL_INTERRUPT();
+void SYS_CALL(
+ struct cpu_state cpu;
+);
+
 
 void interrupt_handler(
     struct cpu_state cpu,
@@ -204,8 +212,8 @@ void keyboard_handle_interrupt();
 
 char convertascii(unsigned char scan_code);
 
-unsigned char keyboard_KEYBUFFER[100];
-char keyboard_ASCIIBuffer[100];
+unsigned char keyboard_KEYBUFFER[0xFF];
+char keyboard_ASCIIBuffer[0xFF];
 
 unsigned int keyboard_KEYBUFFER_POINTER;
 unsigned int keyboard_ascii_pointer;
@@ -300,6 +308,7 @@ void terminal_handler();
 
 
 
+
 unsigned char SYS_MODE = 1;
 
 struct IDTDescriptor idt_descriptors[256];
@@ -314,7 +323,7 @@ void interrupts_init_descriptor(int index, unsigned int address)
 
  idt_descriptors[index].segment_selector = 0x08;
  idt_descriptors[index].reserved = 0x00;
-# 35 "interrupts.c"
+# 36 "interrupts.c"
  idt_descriptors[index].type_and_attr = (0x01 << 7) |
       (0x00 << 6) | (0x00 << 5) |
       0xe;
@@ -324,6 +333,7 @@ void interrupt_install_idt()
 {
  interrupts_init_descriptor(33, (unsigned int) int_handler_33);
  interrupts_init_descriptor(34, (unsigned int) int_handler_34);
+ interrupts_init_descriptor(0x80, (unsigned int) int_handler_128);
 
  idt.address = (int) &idt_descriptors;
  idt.size = sizeof(struct IDTDescriptor) * 256;
@@ -349,6 +359,17 @@ void KERNEL_INTERRUPT(){
    break;
  }
 }
+void SYS_CALL(struct cpu_state cpu){
+ printChar(79, 1, 'S');
+ decodeHex(STR_edit, cpu.eax, 32, 0);
+ fb_write_xy(STR_edit, 9, 0, 0, 21);
+ switch(cpu.eax){
+  case 0x01:
+   printChar(79, 2, 'P');
+   fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
+   break;
+ }
+}
 
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
 {
@@ -361,8 +382,10 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
    pic_acknowledge(interrupt);
    break;
   case 34:
-   printChar(SYS_MODE, 10, 'S');
    KERNEL_INTERRUPT();
+   break;
+  case 0x80:
+   SYS_CALL(cpu);
    break;
   default:
    break;

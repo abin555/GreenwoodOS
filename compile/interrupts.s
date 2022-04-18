@@ -9,8 +9,8 @@ SYS_MODE:
 	.byte	1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
-	.comm	keyboard_KEYBUFFER,100,32
-	.comm	keyboard_ASCIIBuffer,100,32
+	.comm	keyboard_KEYBUFFER,255,32
+	.comm	keyboard_ASCIIBuffer,255,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
@@ -100,6 +100,11 @@ interrupt_install_idt:
 	pushl	$34
 	call	interrupts_init_descriptor
 	addl	$8, %esp
+	movl	int_handler_128@GOT(%ebx), %eax
+	pushl	%eax
+	pushl	$128
+	call	interrupts_init_descriptor
+	addl	$8, %esp
 	movl	idt_descriptors@GOT(%ebx), %eax
 	movl	%eax, %edx
 	movl	idt@GOT(%ebx), %eax
@@ -178,10 +183,89 @@ KERNEL_INTERRUPT:
 	.cfi_endproc
 .LFE2:
 	.size	KERNEL_INTERRUPT, .-KERNEL_INTERRUPT
+	.globl	SYS_CALL
+	.type	SYS_CALL, @function
+SYS_CALL:
+.LFB3:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%esi
+	pushl	%ebx
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
+	call	__x86.get_pc_thunk.bx
+	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	subl	$4, %esp
+	pushl	$83
+	pushl	$1
+	pushl	$79
+	call	printChar@PLT
+	addl	$16, %esp
+	movl	8(%ebp), %eax
+	pushl	$0
+	pushl	$32
+	pushl	%eax
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	decodeHex@PLT
+	addl	$16, %esp
+	subl	$12, %esp
+	pushl	$21
+	pushl	$0
+	pushl	$0
+	pushl	$9
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	fb_write_xy@PLT
+	addl	$32, %esp
+	movl	8(%ebp), %eax
+	cmpl	$1, %eax
+	jne	.L12
+	subl	$4, %esp
+	pushl	$80
+	pushl	$2
+	pushl	$79
+	call	printChar@PLT
+	addl	$16, %esp
+	movl	BG@GOT(%ebx), %eax
+	movzbl	(%eax), %eax
+	movzbl	%al, %esi
+	movl	FG@GOT(%ebx), %eax
+	movzbl	(%eax), %eax
+	movzbl	%al, %ecx
+	movl	16(%ebp), %eax
+	movsbl	%al, %edx
+	movl	12(%ebp), %eax
+	pushl	%esi
+	pushl	%ecx
+	pushl	%edx
+	pushl	%eax
+	call	fb_write_cell@PLT
+	addl	$16, %esp
+	nop
+.L12:
+	nop
+	leal	-8(%ebp), %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%esi
+	.cfi_restore 6
+	popl	%ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE3:
+	.size	SYS_CALL, .-SYS_CALL
 	.globl	interrupt_handler
 	.type	interrupt_handler, @function
 interrupt_handler:
-.LFB3:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -194,30 +278,40 @@ interrupt_handler:
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	cmpl	$128, 36(%ebp)
+	je	.L14
+	cmpl	$128, 36(%ebp)
+	ja	.L19
 	cmpl	$33, 36(%ebp)
-	je	.L11
+	je	.L16
 	cmpl	$34, 36(%ebp)
-	je	.L12
-	jmp	.L14
-.L11:
+	je	.L17
+	jmp	.L19
+.L16:
 	call	keyboard_handle_interrupt@PLT
 	subl	$12, %esp
 	pushl	36(%ebp)
 	call	pic_acknowledge@PLT
 	addl	$16, %esp
-	jmp	.L14
-.L12:
-	movzbl	SYS_MODE@GOTOFF(%ebx), %eax
-	movzbl	%al, %eax
-	subl	$4, %esp
-	pushl	$83
-	pushl	$10
-	pushl	%eax
-	call	printChar@PLT
-	addl	$16, %esp
+	jmp	.L18
+.L17:
 	call	KERNEL_INTERRUPT
-	nop
+	jmp	.L18
 .L14:
+	subl	$4, %esp
+	pushl	32(%ebp)
+	pushl	28(%ebp)
+	pushl	24(%ebp)
+	pushl	20(%ebp)
+	pushl	16(%ebp)
+	pushl	12(%ebp)
+	pushl	8(%ebp)
+	call	SYS_CALL
+	addl	$32, %esp
+	jmp	.L18
+.L19:
+	nop
+.L18:
 	nop
 	movl	-4(%ebp), %ebx
 	leave
@@ -226,30 +320,30 @@ interrupt_handler:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE4:
 	.size	interrupt_handler, .-interrupt_handler
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB4:
+.LFB5:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE5:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB5:
+.LFB6:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE6:
 	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

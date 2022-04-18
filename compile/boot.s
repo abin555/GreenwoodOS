@@ -53,11 +53,13 @@ global loadGDT:
 	lgdt [esp]
 	ret
 
+global externalProgram
+externalProgram: dd program_A
+
 global PROGA:
 PROGA:
-	mov eax, 0x000B8000
-	mov ebx, 0
-	jmp 0x01000000
+	mov eax, externalProgram
+	jmp [externalProgram]
 
 ;Produce Interrupt Call System | interrupts_new.c
 extern interrupt_handler
@@ -80,25 +82,25 @@ int_handler_%1:
 
 common_interrupt_handler:
 	;save registers
-	push EAX
-	push ebx
-	push ecx
-	push edx
-	push ebp
-	push esi
 	push edi
+	push esi
+	push ebp
+	push edx
+	push ecx
+	push ebx
+	push eax
 
 	;Call C function handler
 	call interrupt_handler
 
 	;restore registers
-	pop edi
-	pop esi
-	pop ebp
-	pop edx
-	pop ecx
-	pop ebx
 	pop eax
+	pop ebx
+	pop ecx
+	pop edx
+	pop ebp
+	pop esi
+	pop edi
 
 	;restore stack pointer
 	add esp, 8
@@ -108,6 +110,7 @@ common_interrupt_handler:
 
 no_err_int 33 ; handler for interrupt 1 (keyboard)
 no_err_int 34 ; kernel interrupt handler
+no_err_int 128 ; SYSTEM CALL INTERRUPT HANDLER
 
 global load_idt
 ;load_idt - Loads the interrupt descriptor table
@@ -130,9 +133,24 @@ restore_kernel:
 
 section .PROGA
 program_A:
-	mov [eax], dword 0x0E580D58
-	add eax, dword 0x04
+	mov eax, 0x00000001
+	mov ebx, 0x00000000
+	mov ecx, 'A'
+	jmp program_A_loop
+program_A_loop:
+	cmp ecx, 'z'+1
+	je program_A_end
+	int 0x80
 	add ebx, 1
-	cmp ebx, 20
-	jne program_A
-	hlt
+	inc ecx
+	jmp program_A_loop
+program_A_end:
+	ret
+
+section .PROGB
+program_B:
+	mov eax, 0x00000001
+	mov ebx, 0x0000004E
+	mov ecx, 'T'
+	int 0x80
+	ret

@@ -88,8 +88,9 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
-
 extern void PROGA();
+
+extern unsigned int *externalProgram;
 # 4 "./include/serial.h" 2
 
 void serial_configure_baud_rate(unsigned short com, unsigned short divisor);

@@ -2,6 +2,7 @@
 #define INTERRUPT_H
 
 unsigned char SYS_MODE;
+#include "system_calls.h"
 
 struct IDT 
 {
@@ -44,10 +45,15 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);
 
 void KERNEL_INTERRUPT();
+void SYS_CALL(
+	struct cpu_state cpu;
+);
+
 
 void interrupt_handler(
     struct cpu_state cpu, 

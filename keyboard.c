@@ -94,7 +94,7 @@ void keyboard_flag_handler(unsigned char scan_code){
         
         case 0x1D:
         //software_int();
-        software_interrupt(1);
+        //software_interrupt(1);
         break;
 
         case 0x5B:
@@ -102,10 +102,7 @@ void keyboard_flag_handler(unsigned char scan_code){
         break;
 
         case 0xD3:
-        for(int i = 0; i < 2*KEYBOARD_BUFFERSIZE; i++){
-            keyboard_KEYBUFFER[i] = 0xaa;
-            keyboard_ASCIIBuffer[i] = 'X';
-        }
+        software_interrupt(1);
         break;
     }
 }
