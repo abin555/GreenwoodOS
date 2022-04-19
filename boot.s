@@ -4,8 +4,8 @@ extern main
 extern interrupt_handler
 
 MAGIC_NUMBER 	equ 0x1BADB002
-FLAGS		equ 0x0
-CHECKSUM 	equ -MAGIC_NUMBER
+FLAGS			equ 0x0
+CHECKSUM 		equ -MAGIC_NUMBER
 
 
 
