@@ -9,7 +9,7 @@ OBJECTS = \
 		keyboard.o \
 		string.o \
 		kernel_programs/keyboard_test.o \
-		ascii_tables.o
+		ascii_tables.o 
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -c
@@ -33,8 +33,11 @@ os.iso: kernel.elf
 		-boot-info-table \
 		-o GreenwoodOS.iso \
 		iso
+	grub-mkrescue -o grubGWOS.iso iso
 run: os.iso
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.iso -m 512 -monitor stdio
+grub-run: os.iso
+	qemu-system-x86_64 -boot d -cdrom grubGWOS.iso -m 512 -monitor stdio
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 %.o: %.s
@@ -52,6 +55,7 @@ transfer-compiled:
 	cp *.s ./compile
 	rm -rf *.o *.i *.s
 	cp ./compile/boot.s .
+	cp ./compile/multiboot_header.s .
 
 build_clean: os.iso transfer-compiled
 build_clean_run: os.iso transfer-compiled run
