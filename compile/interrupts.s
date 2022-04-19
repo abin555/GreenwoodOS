@@ -224,8 +224,15 @@ SYS_CALL:
 	call	fb_write_xy@PLT
 	addl	$32, %esp
 	movl	8(%ebp), %eax
+	cmpl	$3, %eax
+	je	.L15
+	cmpl	$3, %eax
+	ja	.L16
 	cmpl	$1, %eax
-	jne	.L12
+	je	.L13
+	cmpl	$2, %eax
+	jmp	.L12
+.L13:
 	subl	$4, %esp
 	pushl	$80
 	pushl	$2
@@ -247,8 +254,11 @@ SYS_CALL:
 	pushl	%eax
 	call	fb_write_cell@PLT
 	addl	$16, %esp
+	jmp	.L12
+.L15:
 	nop
 .L12:
+.L16:
 	nop
 	leal	-8(%ebp), %esp
 	popl	%ebx
@@ -279,25 +289,25 @@ interrupt_handler:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	cmpl	$128, 36(%ebp)
-	je	.L14
+	je	.L18
 	cmpl	$128, 36(%ebp)
-	ja	.L19
+	ja	.L23
 	cmpl	$33, 36(%ebp)
-	je	.L16
+	je	.L20
 	cmpl	$34, 36(%ebp)
-	je	.L17
-	jmp	.L19
-.L16:
+	je	.L21
+	jmp	.L23
+.L20:
 	call	keyboard_handle_interrupt@PLT
 	subl	$12, %esp
 	pushl	36(%ebp)
 	call	pic_acknowledge@PLT
 	addl	$16, %esp
-	jmp	.L18
-.L17:
+	jmp	.L22
+.L21:
 	call	KERNEL_INTERRUPT
-	jmp	.L18
-.L14:
+	jmp	.L22
+.L18:
 	subl	$4, %esp
 	pushl	32(%ebp)
 	pushl	28(%ebp)
@@ -308,10 +318,10 @@ interrupt_handler:
 	pushl	8(%ebp)
 	call	SYS_CALL
 	addl	$32, %esp
-	jmp	.L18
-.L19:
+	jmp	.L22
+.L23:
 	nop
-.L18:
+.L22:
 	nop
 	movl	-4(%ebp), %ebx
 	leave
@@ -344,7 +354,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE6:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

@@ -34,8 +34,8 @@ void interrupts_init_descriptor(int index, unsigned int address)
 		D	Size of gate, (1 = 32 bits, 0 = 16 bits).
 	*/
 	idt_descriptors[index].type_and_attr =	(0x01 << 7) |			// P
-						(0x00 << 6) | (0x00 << 5) |	// DPL
-						0xe;				// 0b1110=0xE 32-bit interrupt gate
+											(0x00 << 6) | (0x00 << 5) |	// DPL
+											0xe;				// 0b1110=0xE 32-bit interrupt gate
 }
 
 void interrupt_install_idt()
@@ -76,6 +76,10 @@ void SYS_CALL(struct cpu_state cpu){
 		case SYS_PRINT_CHAR:
 			printChar(79, 2, 'P');
 			fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
+			break;
+		case SYS_PRINT_F:
+			break;
+		case SYS_YIELD:
 			break;
 	}
 }

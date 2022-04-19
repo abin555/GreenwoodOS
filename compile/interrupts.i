@@ -325,8 +325,8 @@ void interrupts_init_descriptor(int index, unsigned int address)
  idt_descriptors[index].reserved = 0x00;
 # 36 "interrupts.c"
  idt_descriptors[index].type_and_attr = (0x01 << 7) |
-      (0x00 << 6) | (0x00 << 5) |
-      0xe;
+           (0x00 << 6) | (0x00 << 5) |
+           0xe;
 }
 
 void interrupt_install_idt()
@@ -367,6 +367,10 @@ void SYS_CALL(struct cpu_state cpu){
   case 0x01:
    printChar(79, 2, 'P');
    fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
+   break;
+  case 0x02:
+   break;
+  case 0x03:
    break;
  }
 }

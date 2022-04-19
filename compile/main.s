@@ -57,8 +57,8 @@ main:
 	andl	$-16, %esp
 	pushl	-4(%ecx)
 	pushl	%ebp
-	.cfi_escape 0x10,0x5,0x2,0x75,0
 	movl	%esp, %ebp
+	.cfi_escape 0x10,0x5,0x2,0x75,0
 	pushl	%ebx
 	pushl	%ecx
 	.cfi_escape 0xf,0x3,0x75,0x78,0x6
@@ -116,7 +116,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE3:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4
