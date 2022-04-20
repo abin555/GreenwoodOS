@@ -6,7 +6,7 @@ unsigned int previousASCII_pointer = 0;
 unsigned int previousKEY_pointer = 0;
 
 #ifndef Terminal_Y
-int Terminal_Y = 20;
+int Terminal_Y = 24;
 #endif
 
 
@@ -129,16 +129,6 @@ void terminal_interpret(){
         unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
         externalProgram = (unsigned int *) addr;
     }
-
-    fb_write_xy(Terminal_Buffer, Terminal_Arguments[0], 0, 2, 21);
-
-    decodeData(STR_edit, (Terminal_Arguments[0] << 1), 8, 0);
-    fb_write_xy(STR_edit, 8, 0, 0, 22);
-    decodeData(STR_edit, (Terminal_Arguments[1] << 1), 8, 0);
-    fb_write_xy(STR_edit, 8, 0, 9, 22);
-
-    decodeData(STR_edit, STR_Compare(Terminal_Buffer, "print", 0, Terminal_Arguments[0]) << 1, 8, 0);
-    fb_write_xy(STR_edit, 8, 0, 18, 22);
 }
 
 void terminal_enter(){    
@@ -172,11 +162,6 @@ void terminal_handler(){
     STR_INSERT("Testing Buffer System", Terminal_OUT_Buffer, 20, 0);
     STR_INSERT("Command Buffer", Terminal_Buffer, 16, 0);
     */
-    
-    decodeHex(STR_edit, keyboard_ascii_pointer, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, 34, 23);
-    decodeHex(STR_edit, previousASCII_pointer, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, 43, 23);
 
     if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < TERMINAL_Buffer_Size){
         //printChar(keyboard_KEYBUFFER_POINTER-1, Terminal_Y, keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1]);
@@ -224,10 +209,4 @@ void terminal_handler(){
         }
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
     }
-    decodeData(STR_edit, (Terminal_Buffer_Pointer << 1), 16, 0);
-    fb_write_xy(STR_edit, 16, 0, 0, 23);
-    decodeHex(STR_edit, keyboard_ascii_pointer, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, 16, 23);
-    decodeHex(STR_edit, previousASCII_pointer, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, 25, 23);
 }

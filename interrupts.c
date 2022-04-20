@@ -78,6 +78,10 @@ void SYS_CALL(struct cpu_state cpu){
 			fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
 			break;
 		case SYS_PRINT_F:
+			fb_write_start((char *) cpu.ebx, cpu.ecx, cpu.edx);
+			break;
+		case SYS_SET_CURSOR:
+			fb_move_cursor(cpu.ebx);
 			break;
 		case SYS_YIELD:
 			break;

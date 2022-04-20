@@ -369,6 +369,10 @@ void SYS_CALL(struct cpu_state cpu){
    fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
    break;
   case 0x02:
+   fb_write_start((char *) cpu.ebx, cpu.ecx, cpu.edx);
+   break;
+  case 0x04:
+   fb_move_cursor(cpu.ebx);
    break;
   case 0x03:
    break;

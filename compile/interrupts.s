@@ -224,15 +224,20 @@ SYS_CALL:
 	call	fb_write_xy@PLT
 	addl	$32, %esp
 	movl	8(%ebp), %eax
+	cmpl	$4, %eax
+	je	.L11
+	cmpl	$4, %eax
+	ja	.L16
 	cmpl	$3, %eax
-	je	.L15
+	je	.L17
 	cmpl	$3, %eax
 	ja	.L16
 	cmpl	$1, %eax
-	je	.L13
+	je	.L14
 	cmpl	$2, %eax
-	jmp	.L12
-.L13:
+	je	.L15
+	jmp	.L16
+.L14:
 	subl	$4, %esp
 	pushl	$80
 	pushl	$2
@@ -256,6 +261,25 @@ SYS_CALL:
 	addl	$16, %esp
 	jmp	.L12
 .L15:
+	movl	20(%ebp), %edx
+	movl	16(%ebp), %eax
+	movl	12(%ebp), %ecx
+	subl	$4, %esp
+	pushl	%edx
+	pushl	%eax
+	pushl	%ecx
+	call	fb_write_start@PLT
+	addl	$16, %esp
+	jmp	.L12
+.L11:
+	movl	12(%ebp), %eax
+	movzwl	%ax, %eax
+	subl	$12, %esp
+	pushl	%eax
+	call	fb_move_cursor@PLT
+	addl	$16, %esp
+	jmp	.L12
+.L17:
 	nop
 .L12:
 .L16:
@@ -289,25 +313,25 @@ interrupt_handler:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	cmpl	$128, 36(%ebp)
-	je	.L18
+	je	.L19
 	cmpl	$128, 36(%ebp)
-	ja	.L23
+	ja	.L24
 	cmpl	$33, 36(%ebp)
-	je	.L20
-	cmpl	$34, 36(%ebp)
 	je	.L21
-	jmp	.L23
-.L20:
+	cmpl	$34, 36(%ebp)
+	je	.L22
+	jmp	.L24
+.L21:
 	call	keyboard_handle_interrupt@PLT
 	subl	$12, %esp
 	pushl	36(%ebp)
 	call	pic_acknowledge@PLT
 	addl	$16, %esp
-	jmp	.L22
-.L21:
+	jmp	.L23
+.L22:
 	call	KERNEL_INTERRUPT
-	jmp	.L22
-.L18:
+	jmp	.L23
+.L19:
 	subl	$4, %esp
 	pushl	32(%ebp)
 	pushl	28(%ebp)
@@ -318,10 +342,10 @@ interrupt_handler:
 	pushl	8(%ebp)
 	call	SYS_CALL
 	addl	$32, %esp
-	jmp	.L22
-.L23:
+	jmp	.L23
+.L24:
 	nop
-.L22:
+.L23:
 	nop
 	movl	-4(%ebp), %ebx
 	leave
@@ -354,7 +378,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE6:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

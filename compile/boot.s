@@ -6,7 +6,6 @@ extern main	;Main Kernal Function
 extern interrupt_handler ; Interrupt Handler External
 
 
-
 ;;Section to define GRUB system boot headers
 section .multiboot
 header_start:
@@ -207,4 +206,13 @@ program_B:
 	mov ebx, 0x0000004E
 	mov ecx, 'T'
 	int 0x80
+	mov eax, 0x00000004
+	mov ebx, 80*8
+	int 0x80
+	mov eax, 0x00000002
+	mov ebx, Message_PROGB
+	mov ecx, 8
+	mov edx, 0
+	int 0x80
 	ret
+Message_PROGB: DB "Your Mom"

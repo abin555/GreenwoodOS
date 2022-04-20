@@ -21,6 +21,7 @@ all: kernel.elf
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+	cd ..
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
 #	genisoimage -R \
@@ -33,7 +34,7 @@ os.iso: kernel.elf
 		-boot-info-table \
 		-o GreenwoodOS_Defunct.iso \
 		iso
-	grub-mkrescue -o GreenwoodOS.iso iso
+	grub-mkrescue -o GreenwoodOS.img iso
 run: os.iso
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.iso -m 512 -monitor stdio
 
@@ -48,13 +49,11 @@ cleanup:
 build: os.iso transfer-compiled
 
 transfer-compiled:
-	rm ./compile/*
 	cp *.o ./compile
 	cp *.i ./compile
 	cp *.s ./compile
 	rm -rf *.o *.i *.s
 	cp ./compile/boot.s .
-	cp ./compile/multiboot_header.s .
 
 build_clean: os.iso transfer-compiled
 build_clean_run: os.iso transfer-compiled run
