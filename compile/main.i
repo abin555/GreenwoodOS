@@ -318,7 +318,7 @@ char decode[500];
 void KYBRD_DEBUG_DISPLAY();
 # 9 "main.c" 2
 
-
+extern void load_gdt();
 
 struct gdt {
   unsigned int address;
@@ -333,6 +333,7 @@ int sum_of_three(int arg1, int arg2, int arg3){
 void PROGRAMA();
 
 int main(){
+  load_gdt();
   interrupt_install_idt();
   fb_clear(' ', 15, 0);
 

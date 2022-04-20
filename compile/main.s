@@ -57,14 +57,15 @@ main:
 	andl	$-16, %esp
 	pushl	-4(%ecx)
 	pushl	%ebp
-	movl	%esp, %ebp
 	.cfi_escape 0x10,0x5,0x2,0x75,0
+	movl	%esp, %ebp
 	pushl	%ebx
 	pushl	%ecx
 	.cfi_escape 0xf,0x3,0x75,0x78,0x6
 	.cfi_escape 0x10,0x3,0x2,0x75,0x7c
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
 	subl	$4, %esp
 	pushl	$0
@@ -116,7 +117,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE3:
-	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
+	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4
