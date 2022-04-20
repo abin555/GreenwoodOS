@@ -23,7 +23,7 @@ kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	genisoimage -R \
+#	genisoimage -R \
 		-b boot/grub/stage2_eltorito \
 		-no-emul-boot \
 		-boot-load-size 4 \
@@ -31,13 +31,12 @@ os.iso: kernel.elf
 		-input-charset utf8 \
 		-quiet \
 		-boot-info-table \
-		-o GreenwoodOS.iso \
+		-o GreenwoodOS_Defunct.iso \
 		iso
-	grub-mkrescue -o grubGWOS.iso iso
+	grub-mkrescue -o GreenwoodOS.iso iso
 run: os.iso
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.iso -m 512 -monitor stdio
-grub-run: os.iso
-	qemu-system-x86_64 -boot d -cdrom grubGWOS.iso -m 512 -monitor stdio
+
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 %.o: %.s

@@ -1,27 +1,13 @@
+;Give kernal entry point a global access
 global loader
+;External C functions
 extern sum_of_three
-extern main	
-extern interrupt_handler
-
-;%define Guaranteed_Work
-%ifdef Guaranteed_Work
-MAGIC_NUMBER 	equ 0x1BADB002
-FLAGS			equ 0x0
-CHECKSUM 		equ -MAGIC_NUMBER
-%endif
-
-;;Begin Executing C Code
+extern main	;Main Kernal Function
+extern interrupt_handler ; Interrupt Handler External
 
 
-%ifdef Guaranteed_Work
-section .text
-align 4
-	dd MAGIC_NUMBER
-	dd FLAGS
-	dd CHECKSUM
-%endif
 
-%ifndef Guaranteed_Work
+;;Section to define GRUB system boot headers
 section .multiboot
 header_start:
     dd 0xe85250d6                ; magic number (multiboot 2)
@@ -37,49 +23,44 @@ header_start:
     dw 0    ; flags
     dd 8    ; size
 header_end:
-%endif
 
+
+;Main code section, all kernal software will be loaded here.
 section .text
-bits 32
-jmp loader
+bits 32		;System operates at 32 bits, all opcodes must match
+jmp loader	;Immediately jump to kernal loader
 
 
-loader:
-	cli
-
-	mov dword [0xb8000], 0x2f4b2f4f
-	call main
-	jmp .loop
+loader:					;Kernal Load entry point.
+	cli					;Clear interrupts
+	call main			;Call Kernal Main C Function *main.c*
+	jmp .loop			;If the kernal main ends, jump to infinite loop
 	
 .loop:
 	jmp .loop
 
 
 ;SECTION FOR I/O ASM INTERFACE
-global outb
+global outb			;Make OUTB function global to C kernal
 outb:
-	mov al, [esp+8]
-	mov dx, [esp+4]
-	out dx, al
-	ret
+	mov al, [esp+8] ;Load contents of stack into lower A register | OUTPUT PORT
+	mov dx, [esp+4] ;Load contents of stack into lower B register | OUTPUT DATA
+	out dx, al 		;Send OUTPUT
+	ret				;Return to caller
 
-global inb
+global inb			;Make INB function global to C kernal
 inb:
-	mov dx, [esp + 4]
-	in al, dx
-	ret
+	mov dx, [esp + 4] 	;Load contents of stack into lower D register | POS
+	in al, dx			;Recieve input and put into al register as 8 bit value (C lang Char)
+	ret					;Return to caller
 
-global loadGDT:
-	lgdt [esp]
-	ret
 
-global externalProgram
-externalProgram: dd program_A
+global externalProgram ;Pointer to the address of program regions
+externalProgram: dd program_A ;Used in C code to change the execution region of code.
 
-global PROGA:
+global PROGA: 					;Global function to call and execute external program.
 PROGA:
-	mov eax, externalProgram
-	jmp [externalProgram]
+	jmp [externalProgram]		;Jump to program pointer
 
 ;Produce Interrupt Call System | interrupts_new.c
 extern interrupt_handler
@@ -88,16 +69,16 @@ extern interrupt_handler
 %macro no_err_int 1
 global int_handler_%1
 int_handler_%1:
-	push dword 0
-	push dword %1
-	jmp common_interrupt_handler
+	push dword 0 	;Give a 0 for an errorless interrupt, prevents kernel panics
+	push dword %1	;Pass ID of interrupt to interrupt handler
+	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
 
 %macro err_int_handler 1
 global int_handler_%1
 int_handler_%1:
-	push dword %1
-	jmp common_interrupt_handler
+	push dword %1 ;Pass ID of interrupt to interrupt handler
+	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
 
 common_interrupt_handler:
@@ -143,6 +124,7 @@ load_idt:
 	ret
 
 ;Software Interrupt Function
+;*DEFUNCT*
 global software_int
 software_int:
 	INT 34
