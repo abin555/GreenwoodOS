@@ -52,8 +52,6 @@ int terminal_compare(char *Buffer, int start, int end, int len){
 void terminal_interpret(){
     int found_splits = 0;
 
-
-    
     for(int i = 0; i < TERMINAL_Buffer_Size; i++){
         if(Terminal_Buffer[i] == TERMINAL_SPLIT || Terminal_Buffer[i] == 0){
             Terminal_Arguments[found_splits] = i;
