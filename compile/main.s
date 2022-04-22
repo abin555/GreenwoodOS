@@ -11,6 +11,7 @@
 	.comm	char_scancode,1,1
 	.comm	SYS_MODE,1,1
 	.comm	fb,4,4
+	.comm	Buffer,4,4
 	.comm	fb_cursor,4,4
 	.comm	FG,1,1
 	.comm	BG,1,1
@@ -57,41 +58,32 @@ main:
 	andl	$-16, %esp
 	pushl	-4(%ecx)
 	pushl	%ebp
-	.cfi_escape 0x10,0x5,0x2,0x75,0
 	movl	%esp, %ebp
+	.cfi_escape 0x10,0x5,0x2,0x75,0
 	pushl	%ebx
 	pushl	%ecx
 	.cfi_escape 0xf,0x3,0x75,0x78,0x6
 	.cfi_escape 0x10,0x3,0x2,0x75,0x7c
+	subl	$16, %esp
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
-	subl	$4, %esp
-	pushl	$0
-	pushl	$15
-	pushl	$32
-	call	fb_clear@PLT
-	addl	$16, %esp
-.L8:
-	movl	SYS_MODE@GOT(%ebx), %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %eax
-	cmpl	$1, %eax
-	je	.L4
-	cmpl	$4, %eax
-	je	.L5
-	jmp	.L9
+	call	screen_init@PLT
+	movl	$0, -12(%ebp)
 .L4:
-	call	terminal_handler@PLT
-	jmp	.L7
-.L5:
-	call	KYBRD_DEBUG_DISPLAY@PLT
-	jmp	.L7
-.L9:
-	call	KYBRD_DEBUG_DISPLAY@PLT
-.L7:
-	jmp	.L8
+	movl	$16777215, %eax
+	subl	-12(%ebp), %eax
+	movl	%eax, %edx
+	movl	-12(%ebp), %eax
+	pushl	%edx
+	pushl	$0
+	pushl	%eax
+	pushl	$655360
+	call	fb_putpixel@PLT
+	addl	$16, %esp
+	addl	$1, -12(%ebp)
+	jmp	.L4
 	.cfi_endproc
 .LFE1:
 	.size	main, .-main
@@ -117,7 +109,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE3:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

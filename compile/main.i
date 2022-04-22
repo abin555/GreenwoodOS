@@ -224,9 +224,14 @@ void interrupt_handler(
 # 1 "./include/frame_buffer.h" 1
 # 12 "./include/frame_buffer.h"
 char *fb;
+unsigned char *Buffer;
 int fb_cursor;
 unsigned char FG;
 unsigned char BG;
+
+void screen_init();
+
+void fb_putpixel(unsigned int* screen, int x, int y, int color);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 
@@ -239,7 +244,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 37 "./include/frame_buffer.h"
+# 42 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 5 "main.c" 2
@@ -335,6 +340,14 @@ void PROGRAMA();
 int main(){
   load_gdt();
   interrupt_install_idt();
+  screen_init();
+
+  unsigned int i = 0;
+  while(1){
+    fb_putpixel((unsigned int *) 0xA0000, i, 0, 0xFFFFFF-i);
+    i++;
+  }
+  return 0;
   fb_clear(' ', 15, 0);
 
   while(1){

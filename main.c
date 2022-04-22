@@ -24,8 +24,16 @@ void PROGRAMA();
 int main(){
   load_gdt();
   interrupt_install_idt();
+  screen_init();
+  //fb_putPixel(5,5, 0xFFFFFF);
+  unsigned int i = 0;
+  while(1){
+    fb_putPixel(i*2, 0, 0xFFFFFF-i);
+    i++;
+  }
+  return 0;
   fb_clear(' ', FB_WHITE, FB_BLACK);
-  
+
   while(1){
     switch(SYS_MODE){
       case 1:

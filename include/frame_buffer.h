@@ -10,9 +10,14 @@
 #define FB_WHITE 15
 
 char *fb;
+unsigned char *Buffer;
 int fb_cursor;
 unsigned char FG;
 unsigned char BG;
+
+void screen_init();
+
+void fb_putPixel(int x, int y, unsigned int COLOR);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 

@@ -16,6 +16,7 @@ SYS_MODE:
 	.comm	prev_Scancode,1,1
 	.comm	char_scancode,1,1
 	.comm	fb,4,4
+	.comm	Buffer,4,4
 	.comm	fb_cursor,4,4
 	.comm	FG,1,1
 	.comm	BG,1,1
@@ -378,7 +379,7 @@ __x86.get_pc_thunk.bx:
 	ret
 	.cfi_endproc
 .LFE6:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

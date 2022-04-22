@@ -5,9 +5,14 @@
 # 1 "./include/frame_buffer.h" 1
 # 12 "./include/frame_buffer.h"
 char *fb;
+unsigned char *Buffer;
 int fb_cursor;
 unsigned char FG;
 unsigned char BG;
+
+void screen_init();
+
+void fb_putpixel(unsigned int* screen, int x, int y, int color);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 
@@ -20,7 +25,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 37 "./include/frame_buffer.h"
+# 42 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 2 "frame_buffer.c" 2
@@ -116,6 +121,29 @@ char *fb = (char *)0x000B8000;
 int fb_cursor = 0;
 unsigned char FG = 15;
 unsigned char BG = 0;
+# 17 "frame_buffer.c"
+void screen_init() {
+
+    outb(0x3C6, 0xFF);
+    outb(0x3C8, 0);
+    for (unsigned char i = 0; i < 255; i++) {
+        outb(0x3C9, (((i >> 5) & 0x7) * (256 / 8)) / 4);
+        outb(0x3C9, (((i >> 2) & 0x7) * (256 / 8)) / 4);
+        outb(0x3C9, (((i >> 0) & 0x3) * (256 / 4)) / 4);
+    }
+
+
+    outb(0x3C9, 0x3F);
+    outb(0x3C9, 0x3F);
+    outb(0x3C9, 0x3F);
+}
+
+void fb_putpixel(unsigned int* screen, int x,int y, int color) {
+    unsigned where = x*1 + y*1;
+    screen[where] = color & 255;
+    screen[where + 1] = (color >> 8) & 255;
+    screen[where + 2] = (color >> 16) & 255;
+}
 
 void fb_set_color(unsigned char fg, unsigned char bg){
     FG = fg;
