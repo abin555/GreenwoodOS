@@ -21,9 +21,9 @@
 	.comm	Terminal_OUT_Buffer,3200,32
 	.comm	Terminal_Arguments,80,32
 	.comm	decode,500,32
-	.globl	sum_of_three
-	.type	sum_of_three, @function
-sum_of_three:
+	.globl	kmain
+	.type	kmain, @function
+kmain:
 .LFB0:
 	.cfi_startproc
 	endbr32
@@ -32,37 +32,9 @@ sum_of_three:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
-	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movl	12(%ebp), %eax
-	addl	%eax, %edx
-	movl	16(%ebp), %eax
-	addl	%edx, %eax
-	popl	%ebp
-	.cfi_restore 5
-	.cfi_def_cfa 4, 4
-	ret
-	.cfi_endproc
-.LFE0:
-	.size	sum_of_three, .-sum_of_three
-	.globl	main
-	.type	main, @function
-main:
-.LFB1:
-	.cfi_startproc
-	endbr32
-	leal	4(%esp), %ecx
-	.cfi_def_cfa 1, 0
-	andl	$-16, %esp
-	pushl	-4(%ecx)
-	pushl	%ebp
-	.cfi_escape 0x10,0x5,0x2,0x75,0
-	movl	%esp, %ebp
 	pushl	%ebx
-	pushl	%ecx
-	.cfi_escape 0xf,0x3,0x75,0x78,0x6
-	.cfi_escape 0x10,0x3,0x2,0x75,0x7c
+	subl	$20, %esp
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	call	load_gdt@PLT
@@ -73,51 +45,77 @@ main:
 	pushl	$32
 	call	fb_clear@PLT
 	addl	$16, %esp
-.L8:
+	movl	$655365, -12(%ebp)
+	movl	-12(%ebp), %eax
+	movb	$15, (%eax)
+	movl	8(%ebp), %eax
+	pushl	$0
+	pushl	$32
+	pushl	%eax
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	decodeHex@PLT
+	addl	$16, %esp
+	subl	$12, %esp
+	pushl	$2
+	pushl	$0
+	pushl	$1
+	pushl	$8
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	fb_write_xy@PLT
+	addl	$32, %esp
+	movl	12(%ebp), %eax
+	pushl	$0
+	pushl	$32
+	pushl	%eax
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	decodeHex@PLT
+	addl	$16, %esp
+	subl	$12, %esp
+	pushl	$3
+	pushl	$0
+	pushl	$1
+	pushl	$8
+	movl	STR_edit@GOT(%ebx), %eax
+	pushl	%eax
+	call	fb_write_xy@PLT
+	addl	$32, %esp
+.L6:
 	movl	SYS_MODE@GOT(%ebx), %eax
 	movzbl	(%eax), %eax
 	movzbl	%al, %eax
 	cmpl	$1, %eax
-	je	.L4
+	je	.L2
 	cmpl	$4, %eax
-	je	.L5
-	jmp	.L9
-.L4:
+	je	.L3
+	jmp	.L7
+.L2:
 	call	terminal_handler@PLT
-	jmp	.L7
-.L5:
+	jmp	.L5
+.L3:
 	call	KYBRD_DEBUG_DISPLAY@PLT
-	jmp	.L7
-.L9:
-	call	KYBRD_DEBUG_DISPLAY@PLT
+	jmp	.L5
 .L7:
-	jmp	.L8
+	call	KYBRD_DEBUG_DISPLAY@PLT
+.L5:
+	jmp	.L6
 	.cfi_endproc
-.LFE1:
-	.size	main, .-main
-	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
-	.globl	__x86.get_pc_thunk.ax
-	.hidden	__x86.get_pc_thunk.ax
-	.type	__x86.get_pc_thunk.ax, @function
-__x86.get_pc_thunk.ax:
-.LFB2:
-	.cfi_startproc
-	movl	(%esp), %eax
-	ret
-	.cfi_endproc
-.LFE2:
+.LFE0:
+	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB1:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE3:
-	.ident	"GCC: (Ubuntu 9.3.0-10ubuntu2) 9.3.0"
+.LFE1:
+	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
 	.align 4

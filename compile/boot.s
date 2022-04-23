@@ -1,8 +1,7 @@
 ;Give kernal entry point a global access
 global loader
 ;External C functions
-extern sum_of_three
-extern main	;Main Kernal Function
+extern kmain	;Main Kernal Function
 extern interrupt_handler ; Interrupt Handler External
 
 
@@ -16,7 +15,19 @@ header_start:
     dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
 
     ; insert optional multiboot tags here
-
+%define FORMER_SYS
+%ifndef FORMER_SYS
+align 8
+framebuffer_tag_start:  
+	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
+	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
+	DD framebuffer_tag_end - framebuffer_tag_start
+	DD 1024
+	DD 768
+	DD 32
+framebuffer_tag_end:
+align 8
+%endif
     ; required end tag
     dw 0    ; type
     dw 0    ; flags
@@ -32,7 +43,9 @@ jmp loader	;Immediately jump to kernal loader
 
 loader:					;Kernal Load entry point.
 	cli					;Clear interrupts
-	call main			;Call Kernal Main C Function *main.c*
+	push ebx
+	push eax
+	call kmain			;Call Kernal Main C Function *main.c*
 	jmp .loop			;If the kernal main ends, jump to infinite loop
 	
 .loop:
