@@ -1,8 +1,7 @@
 ;Give kernal entry point a global access
 global loader
 ;External C functions
-extern sum_of_three
-extern main	;Main Kernal Function
+extern kmain	;Main Kernal Function
 extern interrupt_handler ; Interrupt Handler External
 
 ;%define FORMER_SYS
@@ -22,9 +21,9 @@ framebuffer_tag_start:
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 640
-	DD 480
-	DD 32
+	DD 1048
+	DD 720
+	DD 24
 framebuffer_tag_end:
 align 8
 %endif
@@ -44,7 +43,8 @@ jmp loader	;Immediately jump to kernal loader
 
 loader:					;Kernal Load entry point.
 	cli					;Clear interrupts
-	call main			;Call Kernal Main C Function *main.c*
+	call kmain			;Call Kernal Main C Function *main.c*
+	hlt
 	jmp .loop			;If the kernal main ends, jump to infinite loop
 	
 .loop:

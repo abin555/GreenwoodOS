@@ -163,7 +163,9 @@ int fb_cursor;
 unsigned char FG;
 unsigned char BG;
 
-void fb_putPixel(int x, int y, char COLOR);
+void screen_init();
+
+void fb_putPixel(int x, int y, unsigned int COLOR);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 
@@ -176,7 +178,7 @@ void fb_clear(char c, unsigned char fg, unsigned char bg);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 40 "./include/frame_buffer.h"
+# 42 "./include/frame_buffer.h"
 void fb_move_cursor(unsigned short pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 3 "keyboard.c" 2

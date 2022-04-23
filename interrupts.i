@@ -231,7 +231,7 @@ unsigned char BG;
 
 void screen_init();
 
-void fb_putpixel(unsigned int* screen, int x, int y, int color);
+void fb_putPixel(int x, int y, unsigned int COLOR);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 

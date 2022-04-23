@@ -325,43 +325,15 @@ void KYBRD_DEBUG_DISPLAY();
 
 extern void load_gdt();
 
-struct gdt {
-  unsigned int address;
-  unsigned short size;
-} __attribute__((packed));
-
-
-int sum_of_three(int arg1, int arg2, int arg3){
- return arg1 + arg2 + arg3;
-}
-
-void PROGRAMA();
-
-int main(){
+int kmain(){
   load_gdt();
   interrupt_install_idt();
-  screen_init();
-
-  unsigned int i = 0;
-  while(1){
-    fb_putPixel(i*2, 0, 0xFFFFFF-i);
-    i++;
-  }
-  return 0;
-  fb_clear(' ', 15, 0);
-
-  while(1){
-    switch(SYS_MODE){
-      case 1:
-        terminal_handler();
-        break;
-      case 4:
-        KYBRD_DEBUG_DISPLAY();
-        break;
-      default:
-        KYBRD_DEBUG_DISPLAY();
-
-    }
+  unsigned long* location = (unsigned long*)0xA0000;
+  unsigned long count = 0;
+  while(count < 0xFFFFFFFF){
+  *location = 0xFFFF;
+  location += 16;
+  count += 16;
   }
   return 0;
 }

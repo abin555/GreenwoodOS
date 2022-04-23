@@ -231,7 +231,7 @@ unsigned char BG;
 
 void screen_init();
 
-void fb_putpixel(unsigned int* screen, int x, int y, int color);
+void fb_putPixel(int x, int y, unsigned int COLOR);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 
@@ -325,43 +325,8 @@ void KYBRD_DEBUG_DISPLAY();
 
 extern void load_gdt();
 
-struct gdt {
-  unsigned int address;
-  unsigned short size;
-} __attribute__((packed));
-
-
-int sum_of_three(int arg1, int arg2, int arg3){
- return arg1 + arg2 + arg3;
-}
-
-void PROGRAMA();
-
-int main(){
+int kmain(){
   load_gdt();
   interrupt_install_idt();
-  screen_init();
-
-  unsigned int i = 0;
-  while(1){
-    fb_putpixel((unsigned int *) 0xA0000, i, 0, 0xFFFFFF-i);
-    i++;
-  }
-  return 0;
-  fb_clear(' ', 15, 0);
-
-  while(1){
-    switch(SYS_MODE){
-      case 1:
-        terminal_handler();
-        break;
-      case 4:
-        KYBRD_DEBUG_DISPLAY();
-        break;
-      default:
-        KYBRD_DEBUG_DISPLAY();
-
-    }
-  }
   return 0;
 }

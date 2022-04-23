@@ -132,12 +132,9 @@ fb_putPixel:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	8(%ebp), %edx
-	movl	%edx, %eax
-	addl	%eax, %eax
-	addl	%edx, %eax
-	movl	%eax, %edx
 	movl	12(%ebp), %eax
 	addl	%edx, %eax
+	addl	$3, %eax
 	addl	$655360, %eax
 	movl	%eax, -4(%ebp)
 	movl	16(%ebp), %eax

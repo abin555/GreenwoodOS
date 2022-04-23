@@ -117,9 +117,9 @@ screen_init:
 	.cfi_endproc
 .LFE0:
 	.size	screen_init, .-screen_init
-	.globl	fb_putpixel
-	.type	fb_putpixel, @function
-fb_putpixel:
+	.globl	fb_putPixel
+	.type	fb_putPixel, @function
+fb_putPixel:
 .LFB1:
 	.cfi_startproc
 	endbr32
@@ -131,37 +131,16 @@ fb_putpixel:
 	subl	$16, %esp
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	12(%ebp), %edx
-	movl	16(%ebp), %eax
-	addl	%edx, %eax
-	movl	%eax, -4(%ebp)
-	movl	20(%ebp), %eax
-	movl	-4(%ebp), %edx
-	leal	0(,%edx,4), %ecx
 	movl	8(%ebp), %edx
-	addl	%ecx, %edx
-	movzbl	%al, %eax
-	movl	%eax, (%edx)
-	movl	20(%ebp), %eax
-	sarl	$8, %eax
-	movl	%eax, %ecx
+	movl	12(%ebp), %eax
+	addl	%edx, %eax
+	addl	$3, %eax
+	addl	$655360, %eax
+	movl	%eax, -4(%ebp)
+	movl	16(%ebp), %eax
+	movl	%eax, %edx
 	movl	-4(%ebp), %eax
-	addl	$1, %eax
-	leal	0(,%eax,4), %edx
-	movl	8(%ebp), %eax
-	addl	%eax, %edx
-	movzbl	%cl, %eax
-	movl	%eax, (%edx)
-	movl	20(%ebp), %eax
-	sarl	$16, %eax
-	movl	%eax, %ecx
-	movl	-4(%ebp), %eax
-	addl	$2, %eax
-	leal	0(,%eax,4), %edx
-	movl	8(%ebp), %eax
-	addl	%eax, %edx
-	movzbl	%cl, %eax
-	movl	%eax, (%edx)
+	movb	%dl, (%eax)
 	nop
 	leave
 	.cfi_restore 5
@@ -169,7 +148,7 @@ fb_putpixel:
 	ret
 	.cfi_endproc
 .LFE1:
-	.size	fb_putpixel, .-fb_putpixel
+	.size	fb_putPixel, .-fb_putPixel
 	.globl	fb_set_color
 	.type	fb_set_color, @function
 fb_set_color:

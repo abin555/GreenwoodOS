@@ -30,7 +30,7 @@ void screen_init() {
 }
 
 void fb_putPixel(int x, int y, unsigned int COLOR){
-    unsigned char* location = (unsigned char*)0xA0000 + 3*x + y;
+    unsigned char* location = (unsigned char*)0xA0000 + x + y +3;
     *location = COLOR;
 }
 

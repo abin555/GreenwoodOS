@@ -12,7 +12,7 @@ unsigned char BG;
 
 void screen_init();
 
-void fb_putpixel(unsigned int* screen, int x, int y, int color);
+void fb_putPixel(int x, int y, unsigned int COLOR);
 
 void fb_set_color(unsigned char fg, unsigned char bg);
 
@@ -121,7 +121,7 @@ char *fb = (char *)0x000B8000;
 int fb_cursor = 0;
 unsigned char FG = 15;
 unsigned char BG = 0;
-# 17 "frame_buffer.c"
+# 16 "frame_buffer.c"
 void screen_init() {
 
     outb(0x3C6, 0xFF);
@@ -138,11 +138,9 @@ void screen_init() {
     outb(0x3C9, 0x3F);
 }
 
-void fb_putpixel(unsigned int* screen, int x,int y, int color) {
-    unsigned where = x*1 + y*1;
-    screen[where] = color & 255;
-    screen[where + 1] = (color >> 8) & 255;
-    screen[where + 2] = (color >> 16) & 255;
+void fb_putPixel(int x, int y, unsigned int COLOR){
+    unsigned char* location = (unsigned char*)0xA0000 + x + y +3;
+    *location = COLOR;
 }
 
 void fb_set_color(unsigned char fg, unsigned char bg){

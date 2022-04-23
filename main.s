@@ -22,9 +22,9 @@
 	.comm	Terminal_OUT_Buffer,3200,32
 	.comm	Terminal_Arguments,80,32
 	.comm	decode,500,32
-	.globl	sum_of_three
-	.type	sum_of_three, @function
-sum_of_three:
+	.globl	kmain
+	.type	kmain, @function
+kmain:
 .LFB0:
 	.cfi_startproc
 	endbr32
@@ -33,82 +33,46 @@ sum_of_three:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
-	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movl	12(%ebp), %eax
-	addl	%eax, %edx
-	movl	16(%ebp), %eax
-	addl	%edx, %eax
+	pushl	%ebx
+	subl	$20, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	call	load_gdt@PLT
+	call	interrupt_install_idt@PLT
+	movl	$655360, -12(%ebp)
+	movl	$0, -16(%ebp)
+	jmp	.L2
+.L3:
+	movl	-12(%ebp), %eax
+	movl	$65535, (%eax)
+	addl	$64, -12(%ebp)
+	addl	$16, -16(%ebp)
+.L2:
+	cmpl	$-1, -16(%ebp)
+	jne	.L3
+	movl	$0, %eax
+	addl	$20, %esp
+	popl	%ebx
+	.cfi_restore 3
 	popl	%ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
 .LFE0:
-	.size	sum_of_three, .-sum_of_three
-	.globl	main
-	.type	main, @function
-main:
-.LFB1:
-	.cfi_startproc
-	endbr32
-	leal	4(%esp), %ecx
-	.cfi_def_cfa 1, 0
-	andl	$-16, %esp
-	pushl	-4(%ecx)
-	pushl	%ebp
-	movl	%esp, %ebp
-	.cfi_escape 0x10,0x5,0x2,0x75,0
-	pushl	%ebx
-	pushl	%ecx
-	.cfi_escape 0xf,0x3,0x75,0x78,0x6
-	.cfi_escape 0x10,0x3,0x2,0x75,0x7c
-	subl	$16, %esp
-	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	call	load_gdt@PLT
-	call	interrupt_install_idt@PLT
-	call	screen_init@PLT
-	movl	$0, -12(%ebp)
-.L4:
-	movl	$16777215, %eax
-	subl	-12(%ebp), %eax
-	movl	-12(%ebp), %edx
-	addl	%edx, %edx
-	subl	$4, %esp
-	pushl	%eax
-	pushl	$0
-	pushl	%edx
-	call	fb_putPixel@PLT
-	addl	$16, %esp
-	addl	$1, -12(%ebp)
-	jmp	.L4
-	.cfi_endproc
-.LFE1:
-	.size	main, .-main
-	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
-	.globl	__x86.get_pc_thunk.ax
-	.hidden	__x86.get_pc_thunk.ax
-	.type	__x86.get_pc_thunk.ax, @function
-__x86.get_pc_thunk.ax:
-.LFB2:
-	.cfi_startproc
-	movl	(%esp), %eax
-	ret
-	.cfi_endproc
-.LFE2:
+	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB1:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE1:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
