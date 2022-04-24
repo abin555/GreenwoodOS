@@ -15,15 +15,16 @@ header_start:
     dd 0x100000000 - (0xe85250d6 + 0 + (header_end - header_start))
 
     ; insert optional multiboot tags here
+;%define FORMER_SYS
 %ifndef FORMER_SYS
 align 8
 framebuffer_tag_start:  
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 1048
-	DD 720
-	DD 24
+	DD 1024
+	DD 768
+	DD 32
 framebuffer_tag_end:
 align 8
 %endif
@@ -43,7 +44,10 @@ jmp loader	;Immediately jump to kernal loader
 
 loader:					;Kernal Load entry point.
 	cli					;Clear interrupts
+	push ebx			;push multiboot info struct pointer
+	push eax			;push magic number
 	call kmain			;Call Kernal Main C Function *main.c*
+	hlt
 	jmp .loop			;If the kernal main ends, jump to infinite loop
 	
 .loop:
@@ -65,12 +69,88 @@ inb:
 	ret					;Return to caller
 
 
+
+;GLOBAL DESCRIPTOR TABLE SETUP
+global load_gdt
+
+; GDT with a NULL Descriptor, a 32-Bit code Descriptor
+; and a 32-bit Data Descriptor
+gdt_start:
+gdt_null:
+    dd 0x0
+    dd 0x0
+
+gdt_code:
+    dw 0xffff
+    dw 0x0
+    db 0x0
+    db 10011010b
+    db 11001111b
+    db 0x0
+
+gdt_data:
+    dw 0xffff
+    dw 0x0
+    db 0x0
+    db 10010010b
+    db 11001111b
+    db 0x0
+gdt_end:
+
+; GDT descriptor record
+gdt_descriptor:
+    dw gdt_end - gdt_start - 1
+    dd gdt_start
+
+CODE_SEG equ gdt_code - gdt_start
+DATA_SEG equ gdt_data - gdt_start
+
+; Load GDT and set selectors for a flat memory model
+load_gdt:
+    lgdt [gdt_descriptor]
+    jmp CODE_SEG:.setcs              ; Set CS selector with far JMP
+.setcs:
+    mov eax, DATA_SEG                ; Set the Data selectors to defaults
+    mov ds, eax
+    mov es, eax
+    mov fs, eax
+    mov gs, eax
+    mov ss, eax
+    ret
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%define temp_disable
+%ifndef temp_disable
+
 global externalProgram ;Pointer to the address of program regions
 externalProgram: dd program_A ;Used in C code to change the execution region of code.
 
 global PROGA: 					;Global function to call and execute external program.
 PROGA:
 	jmp [externalProgram]		;Jump to program pointer
+
+
+
 
 ;Produce Interrupt Call System | interrupts_new.c
 extern interrupt_handler
@@ -144,55 +224,6 @@ restore_kernel:
 	jmp loader
 
 
-;GLOBAL DESCRIPTOR TABLE SETUP
-global load_gdt
-
-; GDT with a NULL Descriptor, a 32-Bit code Descriptor
-; and a 32-bit Data Descriptor
-gdt_start:
-gdt_null:
-    dd 0x0
-    dd 0x0
-
-gdt_code:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10011010b
-    db 11001111b
-    db 0x0
-
-gdt_data:
-    dw 0xffff
-    dw 0x0
-    db 0x0
-    db 10010010b
-    db 11001111b
-    db 0x0
-gdt_end:
-
-; GDT descriptor record
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start
-
-CODE_SEG equ gdt_code - gdt_start
-DATA_SEG equ gdt_data - gdt_start
-
-; Load GDT and set selectors for a flat memory model
-load_gdt:
-    lgdt [gdt_descriptor]
-    jmp CODE_SEG:.setcs              ; Set CS selector with far JMP
-.setcs:
-    mov eax, DATA_SEG                ; Set the Data selectors to defaults
-    mov ds, eax
-    mov es, eax
-    mov fs, eax
-    mov gs, eax
-    mov ss, eax
-    ret
-
-
 ;EXTERNAL TEST PROGRAMS
 
 section .PROGA
@@ -227,3 +258,5 @@ program_B:
 	int 0x80
 	ret
 Message_PROGB: DB "Your Mom"
+
+%endif

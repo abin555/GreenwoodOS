@@ -1,23 +1,52 @@
 #include "io.h"
-#include "keyboard.h"
-#include "interrupts.h"
-#include "frame_buffer.h"
-#include "serial.h"
-#include "string.h"
-#include "terminal.h"
-#include "keyboard_test.h"
+#include "multiboot.h"
+#include "types.h"
+#include "framebuffer.h"
 
 extern void load_gdt();
 
-int kmain(){
-  load_gdt();
-  interrupt_install_idt();
-  unsigned long* location = (unsigned long*)0xA0000;
-  unsigned long count = 0;
-  while(count < 0xFFFFFFFF){
-  *location = 0xFFFF;
-  location += 16;
-  count += 16;
+u32 vga_width;
+u32 vga_height;
+u64* screen;
+
+int kmain(unsigned long magic, unsigned long magic_addr){
+  struct multiboot_tag *tag;
+  //unsigned size;
+  if(magic != MULTIBOOT2_BOOTLOADER_MAGIC){
+    return 0xFF;
   }
+  //size = *(unsigned *) magic_addr;
+  for(
+    tag = (struct multiboot_tag *) (magic_addr + 8);
+    tag->type != MULTIBOOT_TAG_TYPE_END;
+    tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag + ((tag->size + 7) & ~7))
+  ){
+    switch(tag->type){
+      case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
+        {
+            struct multiboot_tag_framebuffer *tagfb
+              = (struct multiboot_tag_framebuffer *) tag;
+            init_fb(tagfb);
+        }
+    }
+  }
+  load_gdt();
+  fb_setPixel(1,1,0xFFFFFF);
+  fb_write_cell(1,1,'A',0xFFFFFF,0x000000);
+  return 0;
+  int color = 0;
+  while(1){
+    for(int y = 0; y < 768; y++){
+      for(int x = 0; x < 1024; x++){
+        fb[fb_width*y+x] = x + y + color;
+      }
+    }
+    color++;
+    if(color > 0xFFFFFF){
+      color=0;
+    }
+  }
+
+
   return 0;
 }
