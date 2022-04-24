@@ -425,27 +425,242 @@ typedef short i16;
 typedef int i32;
 typedef long long int i64;
 # 4 "main.c" 2
-# 1 "./include/framebuffer.h" 1
+# 1 "./include/frame_buffer.h" 1
 
 
 
 # 1 "./include/types.h" 1
-# 5 "./include/framebuffer.h" 2
+# 5 "./include/frame_buffer.h" 2
 # 1 "./include/multiboot.h" 1
-# 6 "./include/framebuffer.h" 2
-
+# 6 "./include/frame_buffer.h" 2
+# 15 "./include/frame_buffer.h"
 u32 fb_width;
 u32 fb_height;
 u64* fb;
 int fb_terminal_w;
 int fb_terminal_h;
 
+unsigned int FG;
+unsigned int BG;
+
 void fb_setPixel(u32 x, u32 y, u32 color);
 
 void init_fb(struct multiboot_tag_framebuffer *tagfb);
 
-void fb_write_cell(u32 x, u32 y, char c, u32 fb, u32 bg);
+void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
+
+void printChar(unsigned int x, unsigned int y, char c);
+
+void fb_set_color(unsigned int fg, unsigned int bg);
+
+void fb_clear(unsigned int color);
+
+int fb_write(char *buf, unsigned int len);
+int fb_write_start(char *buf, unsigned int len, unsigned int start);
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+
+void fb_move_cursor(unsigned int pos);
+void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 5 "main.c" 2
+# 1 "./include/keyboard.h" 1
+
+
+
+# 1 "./include/io.h" 1
+# 5 "./include/keyboard.h" 2
+# 1 "./include/stdint.h" 1
+# 6 "./include/keyboard.h" 2
+
+
+
+
+enum KEYBOARD_ENCODER_IO{
+    KEYBOARD_ENC_INPUT_BUF = 0x60,
+    KEYBOARD_ENC_CMD_REG = 0x60
+};
+
+enum KEYBOARD_CTRL_IO{
+    KEYBOARD_CTRL_STATS_REG = 0x64,
+    KEYBOARD_CTRL_CMD_REG = 0x64
+};
+
+enum KYBRD_CTRL_STATS_MASK {
+
+ KYBRD_CTRL_STATS_MASK_OUT_BUF = 1,
+ KYBRD_CTRL_STATS_MASK_IN_BUF = 2,
+ KYBRD_CTRL_STATS_MASK_SYSTEM = 4,
+ KYBRD_CTRL_STATS_MASK_CMD_DATA = 8,
+ KYBRD_CTRL_STATS_MASK_LOCKED = 0x10,
+ KYBRD_CTRL_STATS_MASK_AUX_BUF = 0x20,
+ KYBRD_CTRL_STATS_MASK_TIMEOUT = 0x40,
+ KYBRD_CTRL_STATS_MASK_PARITY = 0x80
+};
+
+_Bool KYBRD_CAPS_LOCK;
+_Bool KYBRD_SHIFT;
+
+char keyboard_ctrl_read_status ();
+
+void keyboard_ctrl_send_cmd(char cmd);
+
+char keyboard_enc_read_buf();
+
+void keyboard_enc_send_cmd(char cmd);
+
+void keyboard_set_leds(_Bool num, _Bool caps, _Bool scroll);
+
+_Bool keyboard_self_test();
+
+void keyboard_disable();
+void keyboard_enable();
+
+int keyboard_keyread();
+
+void keyboard_flag_handler(unsigned char scan_code);
+void keyboard_handle_interrupt();
+
+char convertascii(unsigned char scan_code);
+
+unsigned char keyboard_KEYBUFFER[0xFF];
+char keyboard_ASCIIBuffer[0xFF];
+
+unsigned int keyboard_KEYBUFFER_POINTER;
+unsigned int keyboard_ascii_pointer;
+
+unsigned char prev_Scancode;
+unsigned char char_scancode;
+# 6 "main.c" 2
+# 1 "./include/terminal.h" 1
+
+
+
+# 1 "./include/frame_buffer.h" 1
+# 5 "./include/terminal.h" 2
+
+# 1 "./include/keyboard.h" 1
+# 7 "./include/terminal.h" 2
+# 1 "./include/string.h" 1
+
+
+
+# 1 "./include/ascii_tables.h" 1
+
+
+
+
+
+char kbd_US[256];
+char kbd_US_shift[256];
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+# 8 "./include/terminal.h" 2
+
+
+
+
+
+
+
+char Terminal_Buffer[128];
+char Terminal_OUT_Buffer[128*40];
+
+char Terminal_Arguments[128];
+
+int terminal_compare(char *buffer, int start, int end, int len);
+
+void terminal_interpret();
+void terminal_output(char *Buffer, int start, int end);
+
+void terminal_enter();
+
+void terminal_renderer();
+void terminal_console();
+void terminal_handler();
+# 7 "main.c" 2
+# 1 "./include/interrupts.h" 1
+
+
+
+unsigned char SYS_MODE;
+# 1 "./include/system_calls.h" 1
+# 6 "./include/interrupts.h" 2
+
+struct IDT
+{
+ unsigned short size;
+ unsigned int address;
+} __attribute__((packed));
+
+struct IDTDescriptor {
+
+
+ unsigned short offset_low;
+ unsigned short segment_selector;
+
+
+ unsigned char reserved;
+ unsigned char type_and_attr;
+ unsigned short offset_high;
+} __attribute__((packed));
+
+struct cpu_state {
+
+ unsigned int eax;
+ unsigned int ebx;
+ unsigned int ecx;
+ unsigned int edx;
+ unsigned int ebp;
+ unsigned int esi;
+ unsigned int edi;
+} __attribute__((packed));
+
+struct stack_state {
+
+ unsigned int error_code;
+ unsigned int eip;
+ unsigned int cs;
+ unsigned int eflags;
+} __attribute__((packed));
+
+void interrupt_install_idt();
+extern void int_handler_33();
+extern void int_handler_34();
+extern void int_handler_35();
+extern void int_handler_128();
+
+void load_idt(unsigned int idt_address);
+
+void KERNEL_INTERRUPT();
+void SYS_CALL(
+ struct cpu_state cpu;
+);
+
+
+void interrupt_handler(
+    struct cpu_state cpu,
+    unsigned int interrupt,
+    struct stack_state stack);
+# 8 "main.c" 2
+# 1 "./include/keyboard_test.h" 1
+# 10 "./include/keyboard_test.h"
+char decode[500];
+
+void KYBRD_DEBUG_DISPLAY();
+# 9 "main.c" 2
 
 extern void load_gdt();
 
@@ -474,23 +689,15 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         }
     }
   }
+
+
   load_gdt();
-  fb_setPixel(1,1,0xFFFFFF);
-  fb_write_cell(1,1,'A',0xFFFFFF,0x000000);
-  return 0;
-  int color = 0;
+  interrupt_install_idt();
+
+  fb_set_color(0xFFFFFF, 0x000000);
+
   while(1){
-    for(int y = 0; y < 768; y++){
-      for(int x = 0; x < 1024; x++){
-        fb[fb_width*y+x] = x + y + color;
-      }
-    }
-    color++;
-    if(color > 0xFFFFFF){
-      color=0;
-    }
+    terminal_handler();
   }
-
-
   return 0;
 }

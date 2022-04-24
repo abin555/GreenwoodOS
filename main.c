@@ -1,7 +1,11 @@
 #include "io.h"
 #include "multiboot.h"
 #include "types.h"
-#include "framebuffer.h"
+#include "frame_buffer.h"
+#include "keyboard.h"
+#include "terminal.h"
+#include "interrupts.h"
+#include "keyboard_test.h"
 
 extern void load_gdt();
 
@@ -30,23 +34,15 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         }
     }
   }
+
+
   load_gdt();
-  fb_setPixel(1,1,0xFFFFFF);
-  fb_write_cell(1,1,'A',0xFFFFFF,0x000000);
-  return 0;
-  int color = 0;
+  interrupt_install_idt();
+
+  fb_set_color(0xFFFFFF, 0x000000);
+  //char string[] = "TEST MESSAGE";
   while(1){
-    for(int y = 0; y < 768; y++){
-      for(int x = 0; x < 1024; x++){
-        fb[fb_width*y+x] = x + y + color;
-      }
-    }
-    color++;
-    if(color > 0xFFFFFF){
-      color=0;
-    }
+    terminal_handler();
   }
-
-
   return 0;
 }

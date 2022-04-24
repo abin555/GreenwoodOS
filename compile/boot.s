@@ -118,30 +118,6 @@ load_gdt:
     mov ss, eax
     ret
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%define temp_disable
-%ifndef temp_disable
-
 global externalProgram ;Pointer to the address of program regions
 externalProgram: dd program_A ;Used in C code to change the execution region of code.
 
@@ -258,5 +234,3 @@ program_B:
 	int 0x80
 	ret
 Message_PROGB: DB "Your Mom"
-
-%endif

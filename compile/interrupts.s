@@ -15,17 +15,19 @@ SYS_MODE:
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
 	.comm	char_scancode,1,1
+	.comm	fb_width,4,4
+	.comm	fb_height,4,4
 	.comm	fb,4,4
-	.comm	Buffer,4,4
-	.comm	fb_cursor,4,4
-	.comm	FG,1,1
-	.comm	BG,1,1
+	.comm	fb_terminal_w,4,4
+	.comm	fb_terminal_h,4,4
+	.comm	FG,4,4
+	.comm	BG,4,4
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.comm	Terminal_Buffer,80,32
-	.comm	Terminal_OUT_Buffer,3200,32
-	.comm	Terminal_Arguments,80,32
+	.comm	Terminal_Buffer,128,32
+	.comm	Terminal_OUT_Buffer,5120,32
+	.comm	Terminal_Arguments,128,32
 	.comm	idt_descriptors,2048,32
 	.comm	idt,6,4
 	.comm	BUFFER_COUNT,4,4
@@ -226,18 +228,18 @@ SYS_CALL:
 	addl	$32, %esp
 	movl	8(%ebp), %eax
 	cmpl	$4, %eax
-	je	.L11
+	je	.L16
 	cmpl	$4, %eax
-	ja	.L16
+	ja	.L17
 	cmpl	$3, %eax
-	je	.L17
+	je	.L18
 	cmpl	$3, %eax
-	ja	.L16
+	ja	.L17
 	cmpl	$1, %eax
 	je	.L14
 	cmpl	$2, %eax
 	je	.L15
-	jmp	.L16
+	jmp	.L17
 .L14:
 	subl	$4, %esp
 	pushl	$80
@@ -246,11 +248,9 @@ SYS_CALL:
 	call	printChar@PLT
 	addl	$16, %esp
 	movl	BG@GOT(%ebx), %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %esi
+	movl	(%eax), %esi
 	movl	FG@GOT(%ebx), %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %ecx
+	movl	(%eax), %ecx
 	movl	16(%ebp), %eax
 	movsbl	%al, %edx
 	movl	12(%ebp), %eax
@@ -272,18 +272,13 @@ SYS_CALL:
 	call	fb_write_start@PLT
 	addl	$16, %esp
 	jmp	.L12
-.L11:
-	movl	12(%ebp), %eax
-	movzwl	%ax, %eax
-	subl	$12, %esp
-	pushl	%eax
-	call	fb_move_cursor@PLT
-	addl	$16, %esp
-	jmp	.L12
-.L17:
+.L16:
+	nop
+	jmp	.L17
+.L18:
 	nop
 .L12:
-.L16:
+.L17:
 	nop
 	leal	-8(%ebp), %esp
 	popl	%ebx
@@ -314,25 +309,25 @@ interrupt_handler:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	cmpl	$128, 36(%ebp)
-	je	.L19
+	je	.L20
 	cmpl	$128, 36(%ebp)
-	ja	.L24
+	ja	.L25
 	cmpl	$33, 36(%ebp)
-	je	.L21
-	cmpl	$34, 36(%ebp)
 	je	.L22
-	jmp	.L24
-.L21:
+	cmpl	$34, 36(%ebp)
+	je	.L23
+	jmp	.L25
+.L22:
 	call	keyboard_handle_interrupt@PLT
 	subl	$12, %esp
 	pushl	36(%ebp)
 	call	pic_acknowledge@PLT
 	addl	$16, %esp
-	jmp	.L23
-.L22:
+	jmp	.L24
+.L23:
 	call	KERNEL_INTERRUPT
-	jmp	.L23
-.L19:
+	jmp	.L24
+.L20:
 	subl	$4, %esp
 	pushl	32(%ebp)
 	pushl	28(%ebp)
@@ -343,10 +338,10 @@ interrupt_handler:
 	pushl	8(%ebp)
 	call	SYS_CALL
 	addl	$32, %esp
-	jmp	.L23
-.L24:
+	jmp	.L24
+.L25:
 	nop
-.L23:
+.L24:
 	nop
 	movl	-4(%ebp), %ebx
 	leave

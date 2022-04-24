@@ -353,7 +353,7 @@ void fb_setPixel(u32 x, u32 y, u32 color);
 
 void init_fb(struct multiboot_tag_framebuffer *tagfb);
 
-void fb_write_cell(u32 x, u32 y, char c, u32 fb, u32 bg);
+void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
 # 2 "framebuffer.c" 2
 # 1 "./include/font.h" 1
 
@@ -511,10 +511,16 @@ void init_fb(struct multiboot_tag_framebuffer *tagfb){
     fb_terminal_h = fb_height / 8;
 }
 
-void fb_write_cell(u32 x, u32 y, char c, u32 fg, u32 bg){
+void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
+    u32 x = (index % fb_terminal_w)*8;
+    u32 y = (index / fb_terminal_w)*8;
     for(int layer = 0; layer < 8; layer++){
         for(int pixel = 0; pixel < 8; pixel++){
             fb[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
         }
     }
+
+
+
+
 }

@@ -28,11 +28,13 @@ keyboard_ascii_pointer:
 prev_Scancode:
 	.zero	1
 	.comm	char_scancode,1,1
+	.comm	fb_width,4,4
+	.comm	fb_height,4,4
 	.comm	fb,4,4
-	.comm	Buffer,4,4
-	.comm	fb_cursor,4,4
-	.comm	FG,1,1
-	.comm	BG,1,1
+	.comm	fb_terminal_w,4,4
+	.comm	fb_terminal_h,4,4
+	.comm	FG,4,4
+	.comm	BG,4,4
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.globl	_keyboard_disable
@@ -559,6 +561,16 @@ keyboard_handle_interrupt:
 	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
 	movb	%cl, (%edx,%eax)
 .L56:
+	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
+	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
+	movzbl	(%edx,%eax), %eax
+	movsbl	%al, %eax
+	subl	$4, %esp
+	pushl	%eax
+	pushl	$1
+	pushl	$1
+	call	printChar@PLT
+	addl	$16, %esp
 	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
 	addl	$1, %eax
 	movl	%eax, keyboard_ascii_pointer@GOTOFF(%ebx)

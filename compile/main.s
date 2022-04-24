@@ -6,6 +6,24 @@
 	.comm	fb,4,4
 	.comm	fb_terminal_w,4,4
 	.comm	fb_terminal_h,4,4
+	.comm	FG,4,4
+	.comm	BG,4,4
+	.comm	KYBRD_CAPS_LOCK,1,1
+	.comm	KYBRD_SHIFT,1,1
+	.comm	keyboard_KEYBUFFER,255,32
+	.comm	keyboard_ASCIIBuffer,255,32
+	.comm	keyboard_KEYBUFFER_POINTER,4,4
+	.comm	keyboard_ascii_pointer,4,4
+	.comm	prev_Scancode,1,1
+	.comm	char_scancode,1,1
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
+	.comm	Terminal_Buffer,128,32
+	.comm	Terminal_OUT_Buffer,5120,32
+	.comm	Terminal_Arguments,128,32
+	.comm	SYS_MODE,1,1
+	.comm	decode,500,32
 	.comm	vga_width,4,4
 	.comm	vga_height,4,4
 	.comm	screen,4,4
@@ -28,7 +46,7 @@ kmain:
 	cmpl	$920085129, 8(%ebp)
 	je	.L2
 	movl	$255, %eax
-	jmp	.L3
+	jmp	.L8
 .L2:
 	movl	12(%ebp), %eax
 	addl	$8, %eax
@@ -57,22 +75,16 @@ kmain:
 	testl	%eax, %eax
 	jne	.L6
 	call	load_gdt@PLT
-	subl	$4, %esp
-	pushl	$16777215
-	pushl	$1
-	pushl	$1
-	call	fb_setPixel@PLT
-	addl	$16, %esp
-	subl	$12, %esp
+	call	interrupt_install_idt@PLT
+	subl	$8, %esp
 	pushl	$0
 	pushl	$16777215
-	pushl	$65
-	pushl	$1
-	pushl	$1
-	call	fb_write_cell@PLT
-	addl	$32, %esp
-	movl	$0, %eax
-.L3:
+	call	fb_set_color@PLT
+	addl	$16, %esp
+.L7:
+	call	terminal_handler@PLT
+	jmp	.L7
+.L8:
 	movl	-4(%ebp), %ebx
 	leave
 	.cfi_restore 5

@@ -1,0 +1,84 @@
+#include "frame_buffer.h"
+#include "font.h"
+
+#define CHAR_W 8
+#define CHAR_H 8
+int fb_cursor = 0;
+
+void fb_setPixel(u32 x, u32 y, u32 color){
+    if (fb_width <= x || fb_height <= y)
+        return;
+        
+    fb[ fb_width * y + x] = color;
+}
+
+void init_fb(struct multiboot_tag_framebuffer *tagfb){
+    fb = (u64 *) (unsigned long) tagfb->common.framebuffer_addr;
+    fb_height = tagfb->common.framebuffer_height;
+    fb_width = tagfb->common.framebuffer_width;
+    fb_terminal_w = fb_width / CHAR_W;
+    fb_terminal_h = fb_height / CHAR_H;
+}
+
+void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
+    u32 x = (index % fb_terminal_w)*CHAR_W;
+    u32 y = (index / fb_terminal_w)*CHAR_H;
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            fb[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}
+void printChar(unsigned int x, unsigned int y, char c){
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            fb[fb_width * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
+        }
+    }
+}
+void fb_set_color(unsigned int fg, unsigned int bg){
+    FG = fg;
+    BG = bg;
+}
+
+void fb_clear(unsigned int color){
+    for(int i = 0; i < fb_terminal_h*fb_terminal_w; i++){
+        fb[i] = color;
+    }
+}
+
+int fb_write(char *buf, unsigned int len)
+{
+    for (unsigned int index = 0; index < len; index++)
+    {
+        fb_write_cell(fb_cursor+index, buf[index], FG, BG);
+    }
+    //fb_cursor+=len;
+    //fb_move_cursor(fb_cursor);
+    return 0;
+}
+
+int fb_write_start(char *buf, unsigned int len, unsigned int start){
+    for (unsigned int index = 0; index < len; index++)
+    {
+        fb_write_cell(fb_cursor+index, buf[index+start], FG, BG);
+    }
+    //fb_cursor+=len;
+    //fb_move_cursor(fb_cursor);
+    return 0;
+}
+
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y){
+    for(int index = 0; index < len; index++){
+        //fb_write_cell((y*80)+x, Buffer[index], FB_WHITE, FB_BLACK);
+        //printChar(x+index,y, Buffer[index+start]);
+        fb_write_cell((y*80)+x+index, Buffer[index+start], FG, BG);
+    }
+}
+
+void fb_move_cursor(unsigned int pos){
+    fb_cursor = pos;
+}
+void fb_move_cursor_xy(unsigned int x, unsigned int y){
+    fb_cursor = fb_terminal_w*y+x;
+}

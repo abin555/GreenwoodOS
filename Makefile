@@ -2,7 +2,14 @@ OBJECTS = \
 		boot.o \
 		main.o \
 		io.o \
-		framebuffer.o
+		frame_buffer.o \
+		ascii_tables.o \
+		interrupts.o \
+		keyboard.o \
+		kernel_programs/terminal.o \
+		kernel_programs/keyboard_test.o \
+		pic.o \
+		string.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -c

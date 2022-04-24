@@ -1,9 +1,12 @@
 	.file	"terminal.c"
 	.text
+	.comm	fb_width,4,4
+	.comm	fb_height,4,4
 	.comm	fb,4,4
-	.comm	fb_cursor,4,4
-	.comm	FG,1,1
-	.comm	BG,1,1
+	.comm	fb_terminal_w,4,4
+	.comm	fb_terminal_h,4,4
+	.comm	FG,4,4
+	.comm	BG,4,4
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
@@ -68,10 +71,8 @@ terminal_renderer:
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	subl	$4, %esp
+	subl	$12, %esp
 	pushl	$0
-	pushl	$15
-	pushl	$32
 	call	fb_clear@PLT
 	addl	$16, %esp
 	movl	Terminal_Y@GOTOFF(%ebx), %eax
@@ -179,7 +180,7 @@ terminal_console:
 	movw	%ax, Terminal_Buffer_Pointer@GOTOFF(%ebx)
 	subl	$8, %esp
 	pushl	$0
-	pushl	$2
+	pushl	$65280
 	call	fb_set_color@PLT
 	addl	$16, %esp
 	movl	Terminal_Y@GOTOFF(%ebx), %eax
@@ -191,7 +192,7 @@ terminal_console:
 	addl	$16, %esp
 	subl	$8, %esp
 	pushl	$0
-	pushl	$15
+	pushl	$16777215
 	call	fb_set_color@PLT
 	addl	$16, %esp
 	nop
@@ -222,7 +223,7 @@ terminal_output:
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	$0
-	pushl	$4
+	pushl	$16711680
 	pushl	$45
 	pushl	%eax
 	call	fb_write_cell@PLT
@@ -238,8 +239,10 @@ terminal_output:
 	pushl	8(%ebp)
 	call	fb_write_xy@PLT
 	addl	$32, %esp
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 	nop
 	movl	-4(%ebp), %ebx
@@ -382,7 +385,7 @@ terminal_interpret:
 	addl	$16, %esp
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	$0
-	pushl	$4
+	pushl	$16711680
 	pushl	$45
 	pushl	%eax
 	call	fb_write_cell@PLT
@@ -409,8 +412,10 @@ terminal_interpret:
 	pushl	%eax
 	call	fb_write_xy@PLT
 	addl	$32, %esp
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 .L14:
 	movl	Terminal_Arguments@GOT(%ebx), %eax
@@ -433,7 +438,7 @@ terminal_interpret:
 	addl	$16, %esp
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	$0
-	pushl	$4
+	pushl	$16711680
 	pushl	$45
 	pushl	%eax
 	call	fb_write_cell@PLT
@@ -477,8 +482,10 @@ terminal_interpret:
 	pushl	%eax
 	call	fb_write_xy@PLT
 	addl	$32, %esp
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 .L15:
 	movl	Terminal_Arguments@GOT(%ebx), %eax
@@ -495,7 +502,7 @@ terminal_interpret:
 	je	.L16
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	$0
-	pushl	$4
+	pushl	$16711680
 	pushl	$45
 	pushl	%eax
 	call	fb_write_cell@PLT
@@ -564,8 +571,10 @@ terminal_interpret:
 	pushl	%eax
 	call	fb_write_xy@PLT
 	addl	$32, %esp
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 .L16:
 	movl	Terminal_Arguments@GOT(%ebx), %eax
@@ -698,13 +707,15 @@ terminal_interpret:
 	addl	$32, %esp
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	$0
-	pushl	$4
+	pushl	$16711680
 	pushl	$45
 	pushl	%eax
 	call	fb_write_cell@PLT
 	addl	$16, %esp
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 .L22:
 	movl	Terminal_Arguments@GOT(%ebx), %eax
@@ -815,8 +826,15 @@ terminal_enter:
 	pushl	%eax
 	call	fb_write_xy@PLT
 	addl	$32, %esp
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %ecx
+	movl	$80, %eax
+	cltd
+	idivl	%ecx
+	movl	%edx, %eax
+	leal	80(%eax), %edx
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	addl	$80, %eax
+	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
 	movw	$0, Terminal_Buffer_Pointer@GOTOFF(%ebx)
 	call	terminal_interpret
@@ -849,7 +867,7 @@ terminal_enter:
 	addl	$16, %esp
 	subl	$8, %esp
 	pushl	$0
-	pushl	$2
+	pushl	$65280
 	call	fb_set_color@PLT
 	addl	$16, %esp
 	movl	Terminal_Y@GOTOFF(%ebx), %eax
@@ -861,24 +879,20 @@ terminal_enter:
 	addl	$16, %esp
 	subl	$8, %esp
 	pushl	$0
-	pushl	$15
+	pushl	$16777215
 	call	fb_set_color@PLT
 	addl	$16, %esp
 	movl	Terminal_Y@GOTOFF(%ebx), %eax
 	leal	-1(%eax), %edx
-	movl	%edx, %eax
-	sall	$2, %eax
-	addl	%edx, %eax
-	sall	$4, %eax
-	movl	%eax, %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	imull	%eax, %edx
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	cmpl	%eax, %edx
 	jge	.L32
 	movl	$0, Terminal_OUT_pointer@GOTOFF(%ebx)
-	subl	$4, %esp
+	subl	$12, %esp
 	pushl	$0
-	pushl	$15
-	pushl	$32
 	call	fb_clear@PLT
 	addl	$16, %esp
 .L32:
@@ -1026,8 +1040,10 @@ terminal_handler:
 	movl	$0, -12(%ebp)
 	jmp	.L45
 .L48:
-	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
-	leal	-80(%eax), %edx
+	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %edx
+	movl	fb_terminal_w@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	subl	%eax, %edx
 	movl	-12(%ebp), %eax
 	addl	%eax, %edx
 	movl	Terminal_OUT_Buffer@GOT(%ebx), %eax

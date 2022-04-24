@@ -222,30 +222,372 @@ unsigned char prev_Scancode;
 unsigned char char_scancode;
 # 4 "interrupts.c" 2
 # 1 "./include/frame_buffer.h" 1
-# 12 "./include/frame_buffer.h"
-char *fb;
-unsigned char *Buffer;
-int fb_cursor;
-unsigned char FG;
-unsigned char BG;
 
-void screen_init();
 
-void fb_putPixel(int x, int y, unsigned int COLOR);
 
-void fb_set_color(unsigned char fg, unsigned char bg);
+# 1 "./include/types.h" 1
+# 21 "./include/types.h"
+typedef unsigned char u8;
+typedef unsigned short u16;
+typedef unsigned int u32;
+typedef unsigned long u64;
+typedef char i8;
+typedef short i16;
+typedef int i32;
+typedef long long int i64;
+# 5 "./include/frame_buffer.h" 2
+# 1 "./include/multiboot.h" 1
+# 72 "./include/multiboot.h"
+typedef unsigned char multiboot_uint8_t;
+typedef unsigned short multiboot_uint16_t;
+typedef unsigned int multiboot_uint32_t;
+typedef unsigned long long multiboot_uint64_t;
 
-void fb_write_cell(unsigned int i, char c, unsigned char fg, unsigned char bg);
+struct multiboot_header
+{
+
+  multiboot_uint32_t magic;
+
+
+  multiboot_uint32_t architecture;
+
+
+  multiboot_uint32_t header_length;
+
+
+  multiboot_uint32_t checksum;
+};
+
+struct multiboot_header_tag
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+};
+
+struct multiboot_header_tag_information_request
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t requests[0];
+};
+
+struct multiboot_header_tag_address
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t header_addr;
+  multiboot_uint32_t load_addr;
+  multiboot_uint32_t load_end_addr;
+  multiboot_uint32_t bss_end_addr;
+};
+
+struct multiboot_header_tag_entry_address
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t entry_addr;
+};
+
+struct multiboot_header_tag_console_flags
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t console_flags;
+};
+
+struct multiboot_header_tag_framebuffer
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t width;
+  multiboot_uint32_t height;
+  multiboot_uint32_t depth;
+};
+
+struct multiboot_header_tag_module_align
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+};
+
+struct multiboot_header_tag_relocatable
+{
+  multiboot_uint16_t type;
+  multiboot_uint16_t flags;
+  multiboot_uint32_t size;
+  multiboot_uint32_t min_addr;
+  multiboot_uint32_t max_addr;
+  multiboot_uint32_t align;
+  multiboot_uint32_t preference;
+};
+
+struct multiboot_color
+{
+  multiboot_uint8_t red;
+  multiboot_uint8_t green;
+  multiboot_uint8_t blue;
+};
+
+struct multiboot_mmap_entry
+{
+  multiboot_uint64_t addr;
+  multiboot_uint64_t len;
+
+
+
+
+
+  multiboot_uint32_t type;
+  multiboot_uint32_t zero;
+};
+typedef struct multiboot_mmap_entry multiboot_memory_map_t;
+
+struct multiboot_tag
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+};
+
+struct multiboot_tag_string
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  char string[0];
+};
+
+struct multiboot_tag_module
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t mod_start;
+  multiboot_uint32_t mod_end;
+  char cmdline[0];
+};
+
+struct multiboot_tag_basic_meminfo
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t mem_lower;
+  multiboot_uint32_t mem_upper;
+};
+
+struct multiboot_tag_bootdev
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t biosdev;
+  multiboot_uint32_t slice;
+  multiboot_uint32_t part;
+};
+
+struct multiboot_tag_mmap
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t entry_size;
+  multiboot_uint32_t entry_version;
+  struct multiboot_mmap_entry entries[0];
+};
+
+struct multiboot_vbe_info_block
+{
+  multiboot_uint8_t external_specification[512];
+};
+
+struct multiboot_vbe_mode_info_block
+{
+  multiboot_uint8_t external_specification[256];
+};
+
+struct multiboot_tag_vbe
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+
+  multiboot_uint16_t vbe_mode;
+  multiboot_uint16_t vbe_interface_seg;
+  multiboot_uint16_t vbe_interface_off;
+  multiboot_uint16_t vbe_interface_len;
+
+  struct multiboot_vbe_info_block vbe_control_info;
+  struct multiboot_vbe_mode_info_block vbe_mode_info;
+};
+
+struct multiboot_tag_framebuffer_common
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+
+  multiboot_uint64_t framebuffer_addr;
+  multiboot_uint32_t framebuffer_pitch;
+  multiboot_uint32_t framebuffer_width;
+  multiboot_uint32_t framebuffer_height;
+  multiboot_uint8_t framebuffer_bpp;
+
+
+
+  multiboot_uint8_t framebuffer_type;
+  multiboot_uint16_t reserved;
+};
+
+struct multiboot_tag_framebuffer
+{
+  struct multiboot_tag_framebuffer_common common;
+
+  union
+  {
+    struct
+    {
+      multiboot_uint16_t framebuffer_palette_num_colors;
+      struct multiboot_color framebuffer_palette[0];
+    };
+    struct
+    {
+      multiboot_uint8_t framebuffer_red_field_position;
+      multiboot_uint8_t framebuffer_red_mask_size;
+      multiboot_uint8_t framebuffer_green_field_position;
+      multiboot_uint8_t framebuffer_green_mask_size;
+      multiboot_uint8_t framebuffer_blue_field_position;
+      multiboot_uint8_t framebuffer_blue_mask_size;
+    };
+  };
+};
+
+struct multiboot_tag_elf_sections
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t num;
+  multiboot_uint32_t entsize;
+  multiboot_uint32_t shndx;
+  char sections[0];
+};
+
+struct multiboot_tag_apm
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint16_t version;
+  multiboot_uint16_t cseg;
+  multiboot_uint32_t offset;
+  multiboot_uint16_t cseg_16;
+  multiboot_uint16_t dseg;
+  multiboot_uint16_t flags;
+  multiboot_uint16_t cseg_len;
+  multiboot_uint16_t cseg_16_len;
+  multiboot_uint16_t dseg_len;
+};
+
+struct multiboot_tag_efi32
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t pointer;
+};
+
+struct multiboot_tag_efi64
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint64_t pointer;
+};
+
+struct multiboot_tag_smbios
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint8_t major;
+  multiboot_uint8_t minor;
+  multiboot_uint8_t reserved[6];
+  multiboot_uint8_t tables[0];
+};
+
+struct multiboot_tag_old_acpi
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint8_t rsdp[0];
+};
+
+struct multiboot_tag_new_acpi
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint8_t rsdp[0];
+};
+
+struct multiboot_tag_network
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint8_t dhcpack[0];
+};
+
+struct multiboot_tag_efi_mmap
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t descr_size;
+  multiboot_uint32_t descr_vers;
+  multiboot_uint8_t efi_mmap[0];
+};
+
+struct multiboot_tag_efi32_ih
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t pointer;
+};
+
+struct multiboot_tag_efi64_ih
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint64_t pointer;
+};
+
+struct multiboot_tag_load_base_addr
+{
+  multiboot_uint32_t type;
+  multiboot_uint32_t size;
+  multiboot_uint32_t load_base_addr;
+};
+# 6 "./include/frame_buffer.h" 2
+# 15 "./include/frame_buffer.h"
+u32 fb_width;
+u32 fb_height;
+u64* fb;
+int fb_terminal_w;
+int fb_terminal_h;
+
+unsigned int FG;
+unsigned int BG;
+
+void fb_setPixel(u32 x, u32 y, u32 color);
+
+void init_fb(struct multiboot_tag_framebuffer *tagfb);
+
+void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
 
 void printChar(unsigned int x, unsigned int y, char c);
 
-void fb_clear(char c, unsigned char fg, unsigned char bg);
+void fb_set_color(unsigned int fg, unsigned int bg);
+
+void fb_clear(unsigned int color);
 
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-# 42 "./include/frame_buffer.h"
-void fb_move_cursor(unsigned short pos);
+
+void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 # 5 "interrupts.c" 2
 # 1 "./include/pic.h" 1
@@ -291,11 +633,17 @@ unsigned int encodeHex(char *Buffer, int start, int end);
 char quadToHex(char quad);
 char hexToQuad(char hex);
 # 8 "./include/terminal.h" 2
-# 16 "./include/terminal.h"
-char Terminal_Buffer[80];
-char Terminal_OUT_Buffer[80*40];
 
-char Terminal_Arguments[80];
+
+
+
+
+
+
+char Terminal_Buffer[128];
+char Terminal_OUT_Buffer[128*40];
+
+char Terminal_Arguments[128];
 
 int terminal_compare(char *buffer, int start, int end, int len);
 
@@ -377,7 +725,7 @@ void SYS_CALL(struct cpu_state cpu){
    fb_write_start((char *) cpu.ebx, cpu.ecx, cpu.edx);
    break;
   case 0x04:
-   fb_move_cursor(cpu.ebx);
+
    break;
   case 0x03:
    break;
