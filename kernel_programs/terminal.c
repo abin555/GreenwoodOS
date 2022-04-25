@@ -6,7 +6,7 @@ unsigned int previousASCII_pointer = 0;
 unsigned int previousKEY_pointer = 0;
 
 #ifndef Terminal_Y
-int Terminal_Y = 24;
+int Terminal_Y = 768/8-8;
 #endif
 
 void terminal_renderer(){

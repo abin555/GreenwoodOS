@@ -575,10 +575,10 @@ char hexToQuad(char hex);
 
 
 
-char Terminal_Buffer[128];
-char Terminal_OUT_Buffer[128*40];
+char Terminal_Buffer[1024/8];
+char Terminal_OUT_Buffer[1024/8*40];
 
-char Terminal_Arguments[128];
+char Terminal_Arguments[1024/8];
 
 int terminal_compare(char *buffer, int start, int end, int len);
 
@@ -694,10 +694,11 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
 
-  fb_set_color(0xFFFFFF, 0x000000);
+
 
   while(1){
     terminal_handler();
+
   }
   return 0;
 }

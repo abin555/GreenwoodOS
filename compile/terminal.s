@@ -19,9 +19,9 @@
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.comm	Terminal_Buffer,80,32
-	.comm	Terminal_OUT_Buffer,3200,32
-	.comm	Terminal_Arguments,80,32
+	.comm	Terminal_Buffer,128,32
+	.comm	Terminal_OUT_Buffer,5120,32
+	.comm	Terminal_Arguments,128,32
 	.globl	Terminal_OUT_pointer
 	.bss
 	.align 4
@@ -53,7 +53,7 @@ previousKEY_pointer:
 	.type	Terminal_Y, @object
 	.size	Terminal_Y, 4
 Terminal_Y:
-	.long	24
+	.long	88
 	.text
 	.globl	terminal_renderer
 	.type	terminal_renderer, @function
@@ -96,7 +96,7 @@ terminal_renderer:
 	pushl	%edx
 	pushl	$1
 	pushl	%eax
-	pushl	$80
+	pushl	$128
 	movl	Terminal_Buffer@GOT(%ebx), %eax
 	pushl	%eax
 	call	fb_write_xy@PLT
@@ -359,7 +359,7 @@ terminal_interpret:
 .L26:
 	addl	$1, -16(%ebp)
 .L10:
-	cmpl	$79, -16(%ebp)
+	cmpl	$127, -16(%ebp)
 	jle	.L13
 	movl	-12(%ebp), %eax
 	leal	1(%eax), %edx
@@ -400,7 +400,7 @@ terminal_interpret:
 	movl	Terminal_Arguments@GOT(%ebx), %eax
 	movzbl	(%eax), %eax
 	movsbl	%al, %eax
-	movl	$80, %esi
+	movl	$128, %esi
 	subl	%eax, %esi
 	movl	%esi, %eax
 	subl	$12, %esp
@@ -807,7 +807,7 @@ terminal_enter:
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	pushl	%eax
-	pushl	$80
+	pushl	$128
 	movl	Terminal_OUT_Buffer@GOT(%ebx), %eax
 	pushl	%eax
 	movl	Terminal_Buffer@GOT(%ebx), %eax
@@ -821,18 +821,18 @@ terminal_enter:
 	pushl	$0
 	pushl	%edx
 	pushl	%eax
-	pushl	$80
+	pushl	$128
 	movl	Terminal_OUT_Buffer@GOT(%ebx), %eax
 	pushl	%eax
 	call	fb_write_xy@PLT
 	addl	$32, %esp
 	movl	fb_terminal_w@GOT(%ebx), %eax
 	movl	(%eax), %ecx
-	movl	$80, %eax
+	movl	$128, %eax
 	cltd
 	idivl	%ecx
 	movl	%edx, %eax
-	leal	80(%eax), %edx
+	leal	128(%eax), %edx
 	movl	Terminal_OUT_pointer@GOTOFF(%ebx), %eax
 	addl	%edx, %eax
 	movl	%eax, Terminal_OUT_pointer@GOTOFF(%ebx)
@@ -857,7 +857,7 @@ terminal_enter:
 	addl	$16, %esp
 	addl	$1, -12(%ebp)
 .L29:
-	cmpl	$79, -12(%ebp)
+	cmpl	$127, -12(%ebp)
 	jle	.L30
 	movl	Terminal_Y@GOTOFF(%ebx), %eax
 	subl	$8, %esp
@@ -928,7 +928,7 @@ terminal_handler:
 	cmpl	%eax, %edx
 	je	.L34
 	movzwl	Terminal_Buffer_Pointer@GOTOFF(%ebx), %eax
-	cmpw	$79, %ax
+	cmpw	$127, %ax
 	ja	.L34
 	call	terminal_console
 	movl	keyboard_ascii_pointer@GOT(%ebx), %eax
@@ -1021,7 +1021,7 @@ terminal_handler:
 	jmp	.L51
 .L36:
 	movzwl	Terminal_Buffer_Pointer@GOTOFF(%ebx), %eax
-	cmpw	$79, %ax
+	cmpw	$127, %ax
 	ja	.L52
 	movzwl	Terminal_Buffer_Pointer@GOTOFF(%ebx), %eax
 	addl	$1, %eax
@@ -1089,7 +1089,7 @@ terminal_handler:
 .L46:
 	addl	$1, -12(%ebp)
 .L45:
-	cmpl	$79, -12(%ebp)
+	cmpl	$127, -12(%ebp)
 	jle	.L48
 	jmp	.L37
 .L50:

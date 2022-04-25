@@ -76,11 +76,6 @@ kmain:
 	jne	.L6
 	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
-	subl	$8, %esp
-	pushl	$0
-	pushl	$16777215
-	call	fb_set_color@PLT
-	addl	$16, %esp
 .L7:
 	call	terminal_handler@PLT
 	jmp	.L7

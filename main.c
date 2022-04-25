@@ -39,10 +39,11 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
 
-  fb_set_color(0xFFFFFF, 0x000000);
+  //fb_set_color(0xFFFFFF, 0x000000);
   //char string[] = "TEST MESSAGE";
   while(1){
     terminal_handler();
+    //KYBRD_DEBUG_DISPLAY();
   }
   return 0;
 }

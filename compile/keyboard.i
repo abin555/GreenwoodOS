@@ -631,11 +631,11 @@ void keyboard_flag_handler(unsigned char scan_code){
         break;
 
         case 0x5B:
-        software_interrupt(4);
+
         break;
 
         case 0xD3:
-        software_interrupt(1);
+
         break;
     }
 }
@@ -664,7 +664,6 @@ void keyboard_handle_interrupt(){
             else{
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US[scan_code];
             }
-            printChar(1,1, keyboard_ASCIIBuffer[keyboard_ascii_pointer]);
             keyboard_ascii_pointer++;
         }
         else{

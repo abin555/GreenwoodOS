@@ -640,10 +640,10 @@ char hexToQuad(char hex);
 
 
 
-char Terminal_Buffer[128];
-char Terminal_OUT_Buffer[128*40];
+char Terminal_Buffer[1024/8];
+char Terminal_OUT_Buffer[1024/8*40];
 
-char Terminal_Arguments[128];
+char Terminal_Arguments[1024/8];
 
 int terminal_compare(char *buffer, int start, int end, int len);
 

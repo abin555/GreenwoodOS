@@ -565,10 +565,10 @@ char hexToQuad(char hex);
 
 
 
-char Terminal_Buffer[80];
-char Terminal_OUT_Buffer[80*40];
+char Terminal_Buffer[1024/8];
+char Terminal_OUT_Buffer[1024/8*40];
 
-char Terminal_Arguments[80];
+char Terminal_Arguments[1024/8];
 
 int terminal_compare(char *buffer, int start, int end, int len);
 
@@ -588,14 +588,14 @@ unsigned int previousASCII_pointer = 0;
 unsigned int previousKEY_pointer = 0;
 
 
-int Terminal_Y = 24;
+int Terminal_Y = 768/8-8;
 
 
 void terminal_renderer(){
     fb_clear(0);
     fb_move_cursor_xy(1,Terminal_Y);
     printChar(0, Terminal_Y, '>');
-    fb_write_xy(Terminal_Buffer, 80, Terminal_Buffer_Pointer, 1, Terminal_Y);
+    fb_write_xy(Terminal_Buffer, 1024/8, Terminal_Buffer_Pointer, 1, Terminal_Y);
 }
 
 void terminal_console(){
@@ -633,7 +633,7 @@ int terminal_compare(char *Buffer, int start, int end, int len){
 void terminal_interpret(){
     int found_splits = 0;
 
-    for(int i = 0; i < 80; i++){
+    for(int i = 0; i < 1024/8; i++){
         if(Terminal_Buffer[i] == ' ' || Terminal_Buffer[i] == 0){
             Terminal_Arguments[found_splits] = i;
             found_splits++;
@@ -647,7 +647,7 @@ void terminal_interpret(){
 
         printChar(79, 0, 'P');
         fb_write_cell(Terminal_OUT_pointer, '-', 0xFF0000, 0);
-        fb_write_xy(Terminal_Buffer, 80 -Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
+        fb_write_xy(Terminal_Buffer, 1024/8 -Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
         Terminal_OUT_pointer+=fb_terminal_w;
 
 
@@ -713,15 +713,15 @@ void terminal_interpret(){
 void terminal_enter(){
 
 
-    STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, 80, Terminal_OUT_pointer);
-    fb_write_xy(Terminal_OUT_Buffer, 80, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
-    Terminal_OUT_pointer += 80 + (80 % fb_terminal_w);
+    STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, 1024/8, Terminal_OUT_pointer);
+    fb_write_xy(Terminal_OUT_Buffer, 1024/8, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
+    Terminal_OUT_pointer += 1024/8 + (1024/8 % fb_terminal_w);
     Terminal_Buffer_Pointer = 0;
 
 
 
     terminal_interpret();
-    for(int i = 0; i < 80; i++){
+    for(int i = 0; i < 1024/8; i++){
         Terminal_Buffer[i] = 0;
         printChar(i+1, Terminal_Y, ' ');
     }
@@ -742,7 +742,7 @@ void terminal_handler(){
 
 
 
-    if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < 80){
+    if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < 1024/8){
 
         terminal_console();
         previousASCII_pointer = keyboard_ascii_pointer;
@@ -770,13 +770,13 @@ void terminal_handler(){
             }
             break;
             case 0xCD:
-            if(Terminal_Buffer_Pointer < 80){
+            if(Terminal_Buffer_Pointer < 1024/8){
                 Terminal_Buffer_Pointer++;
                 fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
             }
             break;
             case 0xC8:
-            for(int i = 0; i < 80; i++){
+            for(int i = 0; i < 1024/8; i++){
                 Terminal_Buffer[i] = Terminal_OUT_Buffer[Terminal_OUT_pointer-fb_terminal_w+i];
                 printChar(i+1, Terminal_Y, Terminal_Buffer[i]);
                 if(Terminal_Buffer[i] == 0){
