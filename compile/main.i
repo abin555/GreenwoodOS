@@ -475,6 +475,7 @@ void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 
 void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
 # 5 "main.c" 2
 # 1 "./include/keyboard.h" 1
 
@@ -732,6 +733,67 @@ void flyingDot(){
   }
 }
 
+
+
+
+void pong(){
+  unsigned int ascii_pointer = 0;
+  int paddley = fb_height/2;
+  int ballx = fb_width/2;
+  int bally = fb_height/2;
+  int ballvx = -10;
+  int ballvy = 10;
+  while(1){
+    fb_clearBackBuffer(0x000000);
+
+    if(1 ){
+
+      ballx+=ballvx;
+      bally+=ballvy;
+      if(ballx > (int) fb_width - 50 || ballx < 100){
+        if(ballx < 100){
+          if(bally > paddley-(150 / 2) && bally < paddley+(150 / 2)){
+            ballvx *= -1;
+          }
+          else{
+            ballx = fb_width/2;
+            bally = fb_height/2;
+            ballvx*=-1;
+            ballvx++;
+            ballvy++;
+          }
+        }
+        else{
+          ballvx *= -1;
+        }
+      }
+      if(bally > (int) fb_height - 50 || bally < 50){
+        ballvy *= -1;
+      }
+    }
+    if(keyboard_ascii_pointer != ascii_pointer){
+      ascii_pointer=keyboard_ascii_pointer;
+
+      if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 'w'){
+        if(paddley > 150){
+          paddley-=25;
+        }
+      }
+      else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 's'){
+        if(paddley < (int) fb_height - 150){
+          paddley+=25;
+        }
+      }
+    }
+    pixelScaled(ballx ,bally,10,0xFFFFFF);
+
+    for(int drawPaddle = 0; drawPaddle < 150; drawPaddle++){
+      fb_setPixel(100, paddley-(150/2)+drawPaddle,0xFFFFFF);
+    }
+    fb_copyBuffer();
+  }
+}
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
 
@@ -757,22 +819,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   load_gdt();
   interrupt_install_idt();
-
-  fb_set_color(0xFFFFFF, 0x000000);
-  char string[] = "TEST MESSAGE";
-
-  printChar(1,20,'B');
-  printChar_Scaled(5,5,'A',100);
-  pixelScaled(5,5,5,0xFFFFFF);
-
-  for(int y = 0; y<50; y++){
-    fb_write_xy(string, sizeof string, 0, y,y);
-  }
-  fb_copyBuffer();
-  return 0;
-  while(1){
-    terminal_handler();
-
-  }
+  fb_set_color(0xFFFFFF,0);
+  pong();
   return 0;
 }

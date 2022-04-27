@@ -63,22 +63,64 @@ void flyingDot(){
   }
 }
 
+#define paddleheight 150
+#define paddlex 100
+#define bounds 50
 void pong(){
-  int ascii_pointer = 0;
+  unsigned int ascii_pointer = 0;
   int paddley = fb_height/2;
   int ballx = fb_width/2;
   int bally = fb_height/2;
-  int ballvx = -1;
-  int vall vy = 1;
-  u32 physicscounter = 0;
+  int ballvx = -10;
+  int ballvy = 10;
   while(1){
-    physicscounter++;
-    if(physicscounter % 0xFF){
+    fb_clearBackBuffer(0x000000);
+    //physicscounter++;
+    if(1 /* physicscounter % 0xFF == 0 */){
+      //pixelScaled(20,20,4,0xFF00FF);
       ballx+=ballvx;
+      bally+=ballvy;
+      if(ballx > (int) fb_width - bounds || ballx < paddlex){
+        if(ballx < paddlex){
+          if(bally > paddley-(paddleheight / 2) && bally < paddley+(paddleheight / 2)){
+            ballvx *= -1;
+          }
+          else{
+            ballx = fb_width/2;
+            bally = fb_height/2;
+            ballvx*=-1;
+            ballvx++;
+            ballvy++;
+          }
+        }
+        else{
+          ballvx *= -1;
+        }
+      }
+      if(bally > (int) fb_height - bounds || bally < bounds){
+        ballvy *= -1;
+      }
     }
     if(keyboard_ascii_pointer != ascii_pointer){
       ascii_pointer=keyboard_ascii_pointer;
+      //printChar_Scaled(1,1,keyboard_ASCIIBuffer[keyboard_ascii_pointer-1],4);
+      if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 'w'){
+        if(paddley > paddleheight){
+          paddley-=25;
+        }
+      }
+      else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 's'){
+        if(paddley < (int) fb_height - paddleheight){
+          paddley+=25;
+        }
+      }
     }
+    pixelScaled(ballx ,bally,10,0xFFFFFF);
+    //pixelScaled(paddlex, paddley, 10, 0xFFFFFF);
+    for(int drawPaddle = 0; drawPaddle < paddleheight; drawPaddle++){
+      fb_setPixel(paddlex, paddley-(paddleheight/2)+drawPaddle,0xFFFFFF);
+    }
+    fb_copyBuffer();
   }
 }
 
@@ -107,7 +149,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   load_gdt();
   interrupt_install_idt();
-
-  
+  fb_set_color(0xFFFFFF,0);
+  pong();
   return 0;
 }

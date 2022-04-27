@@ -603,6 +603,7 @@ void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 
 void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
 # 5 "interrupts.c" 2
 # 1 "./include/pic.h" 1
 # 44 "./include/pic.h"

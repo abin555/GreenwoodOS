@@ -1267,28 +1267,72 @@ fb_copyBuffer:
 	.cfi_endproc
 .LFE13:
 	.size	fb_copyBuffer, .-fb_copyBuffer
+	.globl	fb_clearBackBuffer
+	.type	fb_clearBackBuffer, @function
+fb_clearBackBuffer:
+.LFB14:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$16, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.ax
+	addl	$_GLOBAL_OFFSET_TABLE_, %eax
+	movl	$0, -8(%ebp)
+	jmp	.L54
+.L55:
+	movl	fb_backBuffer@GOT(%eax), %edx
+	movl	-8(%ebp), %ecx
+	movl	8(%ebp), %ebx
+	movl	%ebx, (%edx,%ecx,4)
+	addl	$1, -8(%ebp)
+.L54:
+	movl	fb_width@GOT(%eax), %edx
+	movl	(%edx), %ecx
+	movl	fb_height@GOT(%eax), %edx
+	movl	(%edx), %edx
+	imull	%ecx, %edx
+	cmpl	%edx, -8(%ebp)
+	jb	.L55
+	nop
+	nop
+	addl	$16, %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE14:
+	.size	fb_clearBackBuffer, .-fb_clearBackBuffer
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB14:
+.LFB15:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE14:
+.LFE15:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB15:
+.LFB16:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE15:
+.LFE16:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

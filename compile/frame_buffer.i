@@ -384,6 +384,7 @@ void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 
 void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
 # 2 "frame_buffer.c" 2
 # 1 "./include/font.h" 1
 
@@ -627,5 +628,11 @@ void fb_copyBuffer(){
 
     for(u32 index = 0; index<fb_width*fb_height; index++){
         fb[index] = fb_backBuffer[index];
+    }
+}
+
+void fb_clearBackBuffer(u32 color){
+    for(u32 index = 0; index<fb_width*fb_height; index++){
+        fb_backBuffer[index] = color;
     }
 }

@@ -122,7 +122,6 @@ char convertascii(unsigned char scan_code){
 void keyboard_handle_interrupt(){
     unsigned char scan_code;
     scan_code = keyboard_enc_read_buf();    
-    //printChar(20,20, kbd_US[scan_code]);
     if(scan_code){
         if(kbd_US[scan_code] != 0){
             if(KYBRD_SHIFT){

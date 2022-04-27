@@ -537,6 +537,7 @@ void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
 
 void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
 # 3 "keyboard.c" 2
 # 1 "./include/ascii_tables.h" 1
 
@@ -669,7 +670,6 @@ char convertascii(unsigned char scan_code){
 void keyboard_handle_interrupt(){
     unsigned char scan_code;
     scan_code = keyboard_enc_read_buf();
-
     if(scan_code){
         if(kbd_US[scan_code] != 0){
             if(KYBRD_SHIFT){
