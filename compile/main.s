@@ -4,6 +4,7 @@
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
+	.comm	fb_backBuffer,8294400,32
 	.comm	fb_terminal_w,4,4
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
@@ -27,9 +28,9 @@
 	.comm	vga_width,4,4
 	.comm	vga_height,4,4
 	.comm	screen,4,4
-	.globl	kmain
-	.type	kmain, @function
-kmain:
+	.globl	flyingDot
+	.type	flyingDot, @function
+flyingDot:
 .LFB0:
 	.cfi_startproc
 	endbr32
@@ -39,47 +40,252 @@ kmain:
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
 	pushl	%ebx
-	subl	$20, %esp
+	subl	$52, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	movl	$50, -12(%ebp)
+	movl	$50, -16(%ebp)
+	movl	$3, -20(%ebp)
+	movl	$5, -24(%ebp)
+	movl	$255, -28(%ebp)
+.L25:
+	movl	$0, -32(%ebp)
+	jmp	.L2
+.L19:
+	movl	-20(%ebp), %eax
+	addl	%eax, -12(%ebp)
+	movl	-24(%ebp), %eax
+	addl	%eax, -16(%ebp)
+	movl	-16(%ebp), %edx
+	movl	-12(%ebp), %eax
+	subl	$4, %esp
+	pushl	$16777215
+	pushl	%edx
+	pushl	%eax
+	call	fb_setPixel@PLT
+	addl	$16, %esp
+	movl	fb_width@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	subl	$10, %eax
+	cmpl	%eax, -12(%ebp)
+	jge	.L3
+	cmpl	$10, -12(%ebp)
+	jg	.L4
+.L3:
+	negl	-20(%ebp)
+	cmpl	$0, -20(%ebp)
+	jns	.L5
+	subl	$1, -20(%ebp)
+.L5:
+	cmpl	$0, -20(%ebp)
+	jle	.L4
+	addl	$1, -20(%ebp)
+.L4:
+	movl	fb_height@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	subl	$10, %eax
+	cmpl	%eax, -16(%ebp)
+	jge	.L6
+	cmpl	$10, -16(%ebp)
+	jg	.L7
+.L6:
+	negl	-24(%ebp)
+	cmpl	$0, -24(%ebp)
+	jns	.L8
+	subl	$1, -24(%ebp)
+.L8:
+	cmpl	$0, -24(%ebp)
+	jle	.L7
+	addl	$1, -24(%ebp)
+.L7:
+	cmpl	$50, -20(%ebp)
+	jg	.L9
+	cmpl	$-50, -20(%ebp)
+	jge	.L10
+.L9:
+	movl	$1, -20(%ebp)
+.L10:
+	cmpl	$50, -24(%ebp)
+	jg	.L11
+	cmpl	$-50, -24(%ebp)
+	jge	.L12
+.L11:
+	movl	$1, -24(%ebp)
+.L12:
+	movl	fb_width@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	cmpl	%eax, -12(%ebp)
+	jg	.L13
+	cmpl	$0, -12(%ebp)
+	jns	.L14
+.L13:
+	movl	fb_width@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	shrl	%eax
+	movl	%eax, -12(%ebp)
+.L14:
+	movl	fb_height@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	cmpl	%eax, -16(%ebp)
+	jg	.L15
+	cmpl	$0, -16(%ebp)
+	jns	.L16
+.L15:
+	movl	fb_height@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	shrl	%eax
+	movl	%eax, -16(%ebp)
+.L16:
+	movl	$0, -36(%ebp)
+	jmp	.L17
+.L18:
+	addl	$1, -36(%ebp)
+.L17:
+	cmpl	$65534, -36(%ebp)
+	jbe	.L18
+	addl	$1, -32(%ebp)
+.L2:
+	cmpl	$254, -32(%ebp)
+	jle	.L19
+	movl	$0, -40(%ebp)
+	jmp	.L20
+.L24:
+	movl	$0, -44(%ebp)
+	jmp	.L21
+.L23:
+	movl	-28(%ebp), %eax
+	sall	$16, %eax
+	andl	$16711680, %eax
+	movl	%eax, %edx
+	movl	-28(%ebp), %eax
+	sall	$8, %eax
+	movzwl	%ax, %eax
+	orl	%edx, %eax
+	orl	-28(%ebp), %eax
+	movl	%eax, %ecx
+	movl	-44(%ebp), %edx
+	movl	-40(%ebp), %eax
+	subl	$4, %esp
+	pushl	%ecx
+	pushl	%edx
+	pushl	%eax
+	call	fb_setPixel@PLT
+	addl	$16, %esp
+	subl	$1, -28(%ebp)
+	cmpl	$0, -28(%ebp)
+	jne	.L22
+	movl	$255, -28(%ebp)
+.L22:
+	addl	$1, -44(%ebp)
+.L21:
+	cmpl	$499, -44(%ebp)
+	jle	.L23
+	addl	$1, -40(%ebp)
+.L20:
+	cmpl	$499, -40(%ebp)
+	jle	.L24
+	jmp	.L25
+	.cfi_endproc
+.LFE0:
+	.size	flyingDot, .-flyingDot
+	.globl	kmain
+	.type	kmain, @function
+kmain:
+.LFB1:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$36, %esp
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	cmpl	$920085129, 8(%ebp)
-	je	.L2
+	je	.L27
 	movl	$255, %eax
-	jmp	.L8
-.L2:
+	jmp	.L34
+.L27:
 	movl	12(%ebp), %eax
 	addl	$8, %eax
 	movl	%eax, -12(%ebp)
-	jmp	.L4
-.L6:
+	jmp	.L29
+.L31:
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
 	cmpl	$8, %eax
-	jne	.L5
+	jne	.L30
 	movl	-12(%ebp), %eax
-	movl	%eax, -16(%ebp)
+	movl	%eax, -20(%ebp)
 	subl	$12, %esp
-	pushl	-16(%ebp)
+	pushl	-20(%ebp)
 	call	init_fb@PLT
 	addl	$16, %esp
-.L5:
+.L30:
 	movl	-12(%ebp), %eax
 	movl	4(%eax), %eax
 	addl	$7, %eax
 	andl	$-8, %eax
 	addl	%eax, -12(%ebp)
-.L4:
+.L29:
 	movl	-12(%ebp), %eax
 	movl	(%eax), %eax
 	testl	%eax, %eax
-	jne	.L6
+	jne	.L31
 	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
-.L7:
-	call	terminal_handler@PLT
-	jmp	.L7
-.L8:
+	subl	$8, %esp
+	pushl	$0
+	pushl	$16777215
+	call	fb_set_color@PLT
+	addl	$16, %esp
+	movl	$1414743380, -33(%ebp)
+	movl	$1397050656, -29(%ebp)
+	movl	$1162297683, -25(%ebp)
+	movb	$0, -21(%ebp)
+	subl	$4, %esp
+	pushl	$66
+	pushl	$20
+	pushl	$1
+	call	printChar@PLT
+	addl	$16, %esp
+	pushl	$100
+	pushl	$65
+	pushl	$5
+	pushl	$5
+	call	printChar_Scaled@PLT
+	addl	$16, %esp
+	pushl	$16777215
+	pushl	$5
+	pushl	$5
+	pushl	$5
+	call	pixelScaled@PLT
+	addl	$16, %esp
+	movl	$0, -16(%ebp)
+	jmp	.L32
+.L33:
+	movl	-16(%ebp), %edx
+	movl	-16(%ebp), %eax
+	subl	$12, %esp
+	pushl	%edx
+	pushl	%eax
+	pushl	$0
+	pushl	$13
+	leal	-33(%ebp), %eax
+	pushl	%eax
+	call	fb_write_xy@PLT
+	addl	$32, %esp
+	addl	$1, -16(%ebp)
+.L32:
+	cmpl	$49, -16(%ebp)
+	jle	.L33
+	call	fb_copyBuffer@PLT
+	movl	$0, %eax
+.L34:
 	movl	-4(%ebp), %ebx
 	leave
 	.cfi_restore 5
@@ -87,19 +293,19 @@ kmain:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE1:
 	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB1:
+.LFB2:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE2:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -85,6 +85,9 @@ void SYS_CALL(struct cpu_state cpu){
 			break;
 		case SYS_YIELD:
 			break;
+		case SYS_PIXEL:
+			fb_setPixel(cpu.ebx, cpu.ecx, cpu.edx);
+			break;
 	}
 }
 

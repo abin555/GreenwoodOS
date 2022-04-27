@@ -18,6 +18,7 @@ SYS_MODE:
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
+	.comm	fb_backBuffer,8294400,32
 	.comm	fb_terminal_w,4,4
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
@@ -227,20 +228,24 @@ SYS_CALL:
 	call	fb_write_xy@PLT
 	addl	$32, %esp
 	movl	8(%ebp), %eax
-	cmpl	$4, %eax
-	je	.L16
-	cmpl	$4, %eax
-	ja	.L17
-	cmpl	$3, %eax
-	je	.L18
-	cmpl	$3, %eax
-	ja	.L17
-	cmpl	$1, %eax
-	je	.L14
-	cmpl	$2, %eax
-	je	.L15
-	jmp	.L17
-.L14:
+	cmpl	$5, %eax
+	ja	.L18
+	sall	$2, %eax
+	movl	.L13@GOTOFF(%eax,%ebx), %eax
+	addl	%ebx, %eax
+	notrack jmp	*%eax
+	.section	.rodata
+	.align 4
+	.align 4
+.L13:
+	.long	.L18@GOTOFF
+	.long	.L17@GOTOFF
+	.long	.L16@GOTOFF
+	.long	.L19@GOTOFF
+	.long	.L19@GOTOFF
+	.long	.L12@GOTOFF
+	.text
+.L17:
 	subl	$4, %esp
 	pushl	$80
 	pushl	$2
@@ -260,8 +265,8 @@ SYS_CALL:
 	pushl	%eax
 	call	fb_write_cell@PLT
 	addl	$16, %esp
-	jmp	.L12
-.L15:
+	jmp	.L11
+.L16:
 	movl	20(%ebp), %edx
 	movl	16(%ebp), %eax
 	movl	12(%ebp), %ecx
@@ -271,14 +276,22 @@ SYS_CALL:
 	pushl	%ecx
 	call	fb_write_start@PLT
 	addl	$16, %esp
-	jmp	.L12
-.L16:
-	nop
-	jmp	.L17
-.L18:
-	nop
+	jmp	.L11
 .L12:
-.L17:
+	movl	20(%ebp), %ecx
+	movl	16(%ebp), %edx
+	movl	12(%ebp), %eax
+	subl	$4, %esp
+	pushl	%ecx
+	pushl	%edx
+	pushl	%eax
+	call	fb_setPixel@PLT
+	addl	$16, %esp
+	jmp	.L11
+.L19:
+	nop
+.L11:
+.L18:
 	nop
 	leal	-8(%ebp), %esp
 	popl	%ebx
@@ -309,25 +322,25 @@ interrupt_handler:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	cmpl	$128, 36(%ebp)
-	je	.L20
+	je	.L21
 	cmpl	$128, 36(%ebp)
-	ja	.L25
+	ja	.L26
 	cmpl	$33, 36(%ebp)
-	je	.L22
-	cmpl	$34, 36(%ebp)
 	je	.L23
-	jmp	.L25
-.L22:
+	cmpl	$34, 36(%ebp)
+	je	.L24
+	jmp	.L26
+.L23:
 	call	keyboard_handle_interrupt@PLT
 	subl	$12, %esp
 	pushl	36(%ebp)
 	call	pic_acknowledge@PLT
 	addl	$16, %esp
-	jmp	.L24
-.L23:
+	jmp	.L25
+.L24:
 	call	KERNEL_INTERRUPT
-	jmp	.L24
-.L20:
+	jmp	.L25
+.L21:
 	subl	$4, %esp
 	pushl	32(%ebp)
 	pushl	28(%ebp)
@@ -338,10 +351,10 @@ interrupt_handler:
 	pushl	8(%ebp)
 	call	SYS_CALL
 	addl	$32, %esp
-	jmp	.L24
-.L25:
+	jmp	.L25
+.L26:
 	nop
-.L24:
+.L25:
 	nop
 	movl	-4(%ebp), %ebx
 	leave

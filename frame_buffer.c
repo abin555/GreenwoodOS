@@ -9,7 +9,7 @@ void fb_setPixel(u32 x, u32 y, u32 color){
     if (fb_width <= x || fb_height <= y)
         return;
         
-    fb[ fb_width * y + x] = color;
+    fb_backBuffer[ fb_width * y + x] = color;
 }
 
 void init_fb(struct multiboot_tag_framebuffer *tagfb){
@@ -25,25 +25,43 @@ void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
     u32 y = (index / fb_terminal_w)*CHAR_H;
     for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
-            fb[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+            fb_backBuffer[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
         }
     }
 }
 void printChar(unsigned int x, unsigned int y, char c){
     for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
-            fb[fb_width * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
+            fb_backBuffer[fb_width * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
         }
     }
 }
+
+void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale){
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            //fb[fb_width * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
+            pixelScaled((x+pixel+scale)*scale,(y+layer+scale)*scale,scale,((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG);
+        }
+    }
+}
+
+void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color){
+    for(int scalex = 0; scalex<scale; scalex++){
+        for(int scaley = 0; scaley<scale; scaley++){
+            fb_backBuffer[fb_width*(y+scaley)+x+scalex] = color;
+        }
+    }
+}
+
 void fb_set_color(unsigned int fg, unsigned int bg){
     FG = fg;
     BG = bg;
 }
 
 void fb_clear(unsigned int color){
-    for(int i = 0; i < fb_terminal_h*fb_terminal_w; i++){
-        fb[i] = color;
+    for(u32 i = 0; i < fb_width*fb_height; i++){
+        fb_backBuffer[i] = color;
     }
 }
 
@@ -81,4 +99,17 @@ void fb_move_cursor(unsigned int pos){
 }
 void fb_move_cursor_xy(unsigned int x, unsigned int y){
     fb_cursor = fb_terminal_w*y+x;
+}
+
+void fb_copyBuffer(){
+    //memcpy((u64 *) &fb_backBuffer, (u64 *) &fb, (u64) fb_width*fb_height);
+    for(u32 index = 0; index<fb_width*fb_height; index++){
+        fb[index] = fb_backBuffer[index];
+    }
+}
+
+void fb_clearBackBuffer(u32 color){
+    for(u32 index = 0; index<fb_width*fb_height; index++){
+        fb_backBuffer[index] = color;
+    }
 }

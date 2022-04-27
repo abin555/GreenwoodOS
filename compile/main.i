@@ -433,10 +433,19 @@ typedef long long int i64;
 # 5 "./include/frame_buffer.h" 2
 # 1 "./include/multiboot.h" 1
 # 6 "./include/frame_buffer.h" 2
-# 15 "./include/frame_buffer.h"
+# 1 "./include/memory.h" 1
+
+
+
+
+
+void memcpy(u64* source, u64* target, u64 len);
+# 7 "./include/frame_buffer.h" 2
+# 16 "./include/frame_buffer.h"
 u32 fb_width;
 u32 fb_height;
 u64* fb;
+u32 fb_backBuffer[1920*1080];
 int fb_terminal_w;
 int fb_terminal_h;
 
@@ -450,6 +459,9 @@ void init_fb(struct multiboot_tag_framebuffer *tagfb);
 void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
 
 void printChar(unsigned int x, unsigned int y, char c);
+void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale);
+
+void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color);
 
 void fb_set_color(unsigned int fg, unsigned int bg);
 
@@ -461,6 +473,8 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
+
+void fb_copyBuffer();
 # 5 "main.c" 2
 # 1 "./include/keyboard.h" 1
 
@@ -668,6 +682,56 @@ u32 vga_width;
 u32 vga_height;
 u64* screen;
 
+void flyingDot(){
+  int x = 50;
+  int y = 50;
+  int dx = 3;
+  int dy = 5;
+  int color = 0xFF;
+  while(1){
+    for(int clear = 0; clear < 0xFF; clear++){
+
+      x+=dx;
+      y+=dy;
+      fb_setPixel(x,y,0xFFFFFF);
+      if(x >= (int) fb_width-10 || x <= 10){
+        dx *= -1;
+        if(dx < 0){
+          dx--;
+        }
+        if(dx>0){
+          dx++;
+        }
+      }
+      if(y >= (int) fb_height-10 || y <= 10){
+        dy *= -1;
+        if(dy < 0){
+          dy--;
+        }
+        if(dy>0){
+          dy++;
+        }
+      }
+
+      if(dx>50||dx<-50){dx=1;}
+      if(dy>50||dy<-50){dy=1;}
+      if(x>(int)fb_width || x<0){x=fb_width/2;}
+      if(y>(int)fb_height || y<0){y=fb_height/2;}
+      for(u32 t = 0; t < 0xFFFF; t++){}
+    }
+    for(int bx = 0; bx<500; bx++){
+      for(int by = 0; by<500; by++){
+        fb_setPixel(bx, by, ((color & 0xFF) << 16) | ((color & 0xFF) << 8) | color);
+        color--;
+        if(color == 0){
+          color = 0xFF;
+        }
+
+      }
+    }
+  }
+}
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
 
@@ -694,8 +758,18 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
 
+  fb_set_color(0xFFFFFF, 0x000000);
+  char string[] = "TEST MESSAGE";
 
+  printChar(1,20,'B');
+  printChar_Scaled(5,5,'A',100);
+  pixelScaled(5,5,5,0xFFFFFF);
 
+  for(int y = 0; y<50; y++){
+    fb_write_xy(string, sizeof string, 0, y,y);
+  }
+  fb_copyBuffer();
+  return 0;
   while(1){
     terminal_handler();
 

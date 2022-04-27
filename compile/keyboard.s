@@ -31,6 +31,7 @@ prev_Scancode:
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
+	.comm	fb_backBuffer,8294400,32
 	.comm	fb_terminal_w,4,4
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4

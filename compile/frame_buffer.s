@@ -3,6 +3,7 @@
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
+	.comm	fb_backBuffer,8294400,32
 	.comm	fb_terminal_w,4,4
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
@@ -506,18 +507,15 @@ fb_setPixel:
 	movl	(%edx), %edx
 	cmpl	%edx, 12(%ebp)
 	jnb	.L5
-	movl	fb@GOT(%eax), %edx
+	movl	fb_width@GOT(%eax), %edx
 	movl	(%edx), %edx
-	movl	fb_width@GOT(%eax), %eax
-	movl	(%eax), %eax
-	imull	12(%ebp), %eax
-	movl	%eax, %ecx
-	movl	8(%ebp), %eax
-	addl	%ecx, %eax
-	sall	$2, %eax
-	addl	%eax, %edx
-	movl	16(%ebp), %eax
-	movl	%eax, (%edx)
+	movl	%edx, %ecx
+	imull	12(%ebp), %ecx
+	movl	8(%ebp), %edx
+	addl	%edx, %ecx
+	movl	fb_backBuffer@GOT(%eax), %eax
+	movl	16(%ebp), %edx
+	movl	%edx, (%eax,%ecx,4)
 	jmp	.L1
 .L5:
 	nop
@@ -591,15 +589,13 @@ fb_write_cell:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
-	pushl	%esi
 	pushl	%ebx
 	subl	$20, %esp
-	.cfi_offset 6, -12
-	.cfi_offset 3, -16
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	12(%ebp), %eax
-	movb	%al, -28(%ebp)
+	movb	%al, -24(%ebp)
 	movl	fb_terminal_w@GOT(%ebx), %eax
 	movl	(%eax), %eax
 	movl	%eax, %ecx
@@ -608,7 +604,7 @@ fb_write_cell:
 	divl	%ecx
 	movl	%edx, %eax
 	sall	$3, %eax
-	movl	%eax, -20(%ebp)
+	movl	%eax, -16(%ebp)
 	movl	fb_terminal_w@GOT(%ebx), %eax
 	movl	(%eax), %eax
 	movl	%eax, %ecx
@@ -616,22 +612,22 @@ fb_write_cell:
 	movl	$0, %edx
 	divl	%ecx
 	sall	$3, %eax
-	movl	%eax, -24(%ebp)
-	movl	$0, -12(%ebp)
+	movl	%eax, -20(%ebp)
+	movl	$0, -8(%ebp)
 	jmp	.L8
 .L13:
-	movl	$0, -16(%ebp)
+	movl	$0, -12(%ebp)
 	jmp	.L9
 .L12:
-	movsbl	-28(%ebp), %edx
+	movsbl	-24(%ebp), %edx
 	leal	FONT@GOTOFF(%ebx), %eax
 	sall	$3, %edx
 	addl	%eax, %edx
-	movl	-12(%ebp), %eax
+	movl	-8(%ebp), %eax
 	addl	%edx, %eax
 	movzbl	(%eax), %eax
 	movzbl	%al, %edx
-	movl	-16(%ebp), %eax
+	movl	-12(%ebp), %eax
 	movl	%eax, %ecx
 	sarl	%cl, %edx
 	movl	%edx, %eax
@@ -643,36 +639,31 @@ fb_write_cell:
 .L10:
 	movl	20(%ebp), %eax
 .L11:
-	movl	fb@GOT(%ebx), %edx
-	movl	(%edx), %ecx
-	movl	-12(%ebp), %esi
-	movl	-24(%ebp), %edx
-	addl	%edx, %esi
+	movl	-8(%ebp), %ecx
+	movl	-20(%ebp), %edx
+	addl	%edx, %ecx
 	movl	fb_width@GOT(%ebx), %edx
 	movl	(%edx), %edx
-	imull	%edx, %esi
-	movl	-20(%ebp), %edx
-	addl	%edx, %esi
+	imull	%edx, %ecx
 	movl	-16(%ebp), %edx
-	addl	%esi, %edx
-	sall	$2, %edx
-	addl	%ecx, %edx
-	movl	%eax, (%edx)
-	addl	$1, -16(%ebp)
-.L9:
-	cmpl	$7, -16(%ebp)
-	jle	.L12
+	addl	%edx, %ecx
+	movl	-12(%ebp), %edx
+	addl	%edx, %ecx
+	movl	fb_backBuffer@GOT(%ebx), %edx
+	movl	%eax, (%edx,%ecx,4)
 	addl	$1, -12(%ebp)
-.L8:
+.L9:
 	cmpl	$7, -12(%ebp)
+	jle	.L12
+	addl	$1, -8(%ebp)
+.L8:
+	cmpl	$7, -8(%ebp)
 	jle	.L13
 	nop
 	nop
 	addl	$20, %esp
 	popl	%ebx
 	.cfi_restore 3
-	popl	%esi
-	.cfi_restore 6
 	popl	%ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -691,30 +682,28 @@ printChar:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
-	pushl	%esi
 	pushl	%ebx
 	subl	$20, %esp
-	.cfi_offset 6, -12
-	.cfi_offset 3, -16
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	movl	16(%ebp), %edx
-	movb	%dl, -28(%ebp)
-	movl	$0, -12(%ebp)
+	movb	%dl, -24(%ebp)
+	movl	$0, -8(%ebp)
 	jmp	.L15
 .L20:
-	movl	$0, -16(%ebp)
+	movl	$0, -12(%ebp)
 	jmp	.L16
 .L19:
-	movsbl	-28(%ebp), %ecx
+	movsbl	-24(%ebp), %ecx
 	leal	FONT@GOTOFF(%eax), %edx
 	sall	$3, %ecx
 	addl	%edx, %ecx
-	movl	-12(%ebp), %edx
+	movl	-8(%ebp), %edx
 	addl	%ecx, %edx
 	movzbl	(%edx), %edx
 	movzbl	%dl, %ebx
-	movl	-16(%ebp), %edx
+	movl	-12(%ebp), %edx
 	movl	%edx, %ecx
 	sarl	%cl, %ebx
 	movl	%ebx, %edx
@@ -728,34 +717,119 @@ printChar:
 	movl	BG@GOT(%eax), %edx
 	movl	(%edx), %edx
 .L18:
-	movl	fb@GOT(%eax), %ecx
-	movl	(%ecx), %ebx
 	movl	12(%ebp), %ecx
-	leal	0(,%ecx,8), %esi
-	movl	-12(%ebp), %ecx
-	addl	%ecx, %esi
+	leal	0(,%ecx,8), %ebx
+	movl	-8(%ebp), %ecx
+	addl	%ecx, %ebx
 	movl	fb_width@GOT(%eax), %ecx
 	movl	(%ecx), %ecx
-	imull	%esi, %ecx
-	movl	8(%ebp), %esi
-	sall	$3, %esi
-	addl	%ecx, %esi
-	movl	-16(%ebp), %ecx
-	addl	%esi, %ecx
-	sall	$2, %ecx
-	addl	%ebx, %ecx
-	movl	%edx, (%ecx)
-	addl	$1, -16(%ebp)
-.L16:
-	cmpl	$7, -16(%ebp)
-	jle	.L19
+	imull	%ebx, %ecx
+	movl	8(%ebp), %ebx
+	sall	$3, %ebx
+	addl	%ecx, %ebx
+	movl	-12(%ebp), %ecx
+	addl	%ecx, %ebx
+	movl	fb_backBuffer@GOT(%eax), %ecx
+	movl	%edx, (%ecx,%ebx,4)
 	addl	$1, -12(%ebp)
-.L15:
+.L16:
 	cmpl	$7, -12(%ebp)
+	jle	.L19
+	addl	$1, -8(%ebp)
+.L15:
+	cmpl	$7, -8(%ebp)
 	jle	.L20
 	nop
 	nop
 	addl	$20, %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE3:
+	.size	printChar, .-printChar
+	.globl	printChar_Scaled
+	.type	printChar_Scaled, @function
+printChar_Scaled:
+.LFB4:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%esi
+	pushl	%ebx
+	subl	$32, %esp
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
+	call	__x86.get_pc_thunk.bx
+	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	movl	16(%ebp), %eax
+	movb	%al, -28(%ebp)
+	movl	$0, -12(%ebp)
+	jmp	.L22
+.L27:
+	movl	$0, -16(%ebp)
+	jmp	.L23
+.L26:
+	movsbl	-28(%ebp), %edx
+	leal	FONT@GOTOFF(%ebx), %eax
+	sall	$3, %edx
+	addl	%eax, %edx
+	movl	-12(%ebp), %eax
+	addl	%edx, %eax
+	movzbl	(%eax), %eax
+	movzbl	%al, %edx
+	movl	-16(%ebp), %eax
+	movl	%eax, %ecx
+	sarl	%cl, %edx
+	movl	%edx, %eax
+	andl	$1, %eax
+	testl	%eax, %eax
+	je	.L24
+	movl	FG@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	jmp	.L25
+.L24:
+	movl	BG@GOT(%ebx), %eax
+	movl	(%eax), %eax
+.L25:
+	movl	-12(%ebp), %ecx
+	movl	12(%ebp), %edx
+	addl	%edx, %ecx
+	movl	20(%ebp), %edx
+	addl	%edx, %ecx
+	movl	20(%ebp), %edx
+	imull	%edx, %ecx
+	movl	-16(%ebp), %esi
+	movl	8(%ebp), %edx
+	addl	%edx, %esi
+	movl	20(%ebp), %edx
+	addl	%edx, %esi
+	movl	20(%ebp), %edx
+	imull	%esi, %edx
+	pushl	%eax
+	pushl	20(%ebp)
+	pushl	%ecx
+	pushl	%edx
+	call	pixelScaled
+	addl	$16, %esp
+	addl	$1, -16(%ebp)
+.L23:
+	cmpl	$7, -16(%ebp)
+	jle	.L26
+	addl	$1, -12(%ebp)
+.L22:
+	cmpl	$7, -12(%ebp)
+	jle	.L27
+	nop
+	nop
+	leal	-8(%ebp), %esp
 	popl	%ebx
 	.cfi_restore 3
 	popl	%esi
@@ -765,12 +839,69 @@ printChar:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
-	.size	printChar, .-printChar
+.LFE4:
+	.size	printChar_Scaled, .-printChar_Scaled
+	.globl	pixelScaled
+	.type	pixelScaled, @function
+pixelScaled:
+.LFB5:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$16, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.ax
+	addl	$_GLOBAL_OFFSET_TABLE_, %eax
+	movl	$0, -8(%ebp)
+	jmp	.L29
+.L32:
+	movl	$0, -12(%ebp)
+	jmp	.L30
+.L31:
+	movl	-12(%ebp), %ecx
+	movl	12(%ebp), %edx
+	addl	%edx, %ecx
+	movl	fb_width@GOT(%eax), %edx
+	movl	(%edx), %edx
+	imull	%edx, %ecx
+	movl	8(%ebp), %edx
+	addl	%edx, %ecx
+	movl	-8(%ebp), %edx
+	leal	(%ecx,%edx), %ebx
+	movl	fb_backBuffer@GOT(%eax), %edx
+	movl	20(%ebp), %ecx
+	movl	%ecx, (%edx,%ebx,4)
+	addl	$1, -12(%ebp)
+.L30:
+	movl	-12(%ebp), %edx
+	cmpl	16(%ebp), %edx
+	jl	.L31
+	addl	$1, -8(%ebp)
+.L29:
+	movl	-8(%ebp), %edx
+	cmpl	16(%ebp), %edx
+	jl	.L32
+	nop
+	nop
+	addl	$16, %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE5:
+	.size	pixelScaled, .-pixelScaled
 	.globl	fb_set_color
 	.type	fb_set_color, @function
 fb_set_color:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -792,12 +923,12 @@ fb_set_color:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	fb_set_color, .-fb_set_color
 	.globl	fb_clear
 	.type	fb_clear, @function
 fb_clear:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -805,41 +936,43 @@ fb_clear:
 	.cfi_offset 5, -8
 	movl	%esp, %ebp
 	.cfi_def_cfa_register 5
+	pushl	%ebx
 	subl	$16, %esp
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
-	jmp	.L23
-.L24:
-	movl	fb@GOT(%eax), %edx
-	movl	(%edx), %edx
-	movl	-4(%ebp), %ecx
-	sall	$2, %ecx
-	addl	%edx, %ecx
-	movl	8(%ebp), %edx
-	movl	%edx, (%ecx)
-	addl	$1, -4(%ebp)
-.L23:
-	movl	fb_terminal_h@GOT(%eax), %edx
+	movl	$0, -8(%ebp)
+	jmp	.L35
+.L36:
+	movl	fb_backBuffer@GOT(%eax), %edx
+	movl	-8(%ebp), %ecx
+	movl	8(%ebp), %ebx
+	movl	%ebx, (%edx,%ecx,4)
+	addl	$1, -8(%ebp)
+.L35:
+	movl	fb_width@GOT(%eax), %edx
 	movl	(%edx), %ecx
-	movl	fb_terminal_w@GOT(%eax), %edx
+	movl	fb_height@GOT(%eax), %edx
 	movl	(%edx), %edx
 	imull	%ecx, %edx
-	cmpl	%edx, -4(%ebp)
-	jl	.L24
+	cmpl	%edx, -8(%ebp)
+	jb	.L36
 	nop
 	nop
-	leave
+	addl	$16, %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	fb_clear, .-fb_clear
 	.globl	fb_write
 	.type	fb_write, @function
 fb_write:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -857,8 +990,8 @@ fb_write:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	$0, -16(%ebp)
-	jmp	.L26
-.L27:
+	jmp	.L38
+.L39:
 	movl	BG@GOT(%ebx), %eax
 	movl	(%eax), %ecx
 	movl	FG@GOT(%ebx), %eax
@@ -879,10 +1012,10 @@ fb_write:
 	call	fb_write_cell
 	addl	$16, %esp
 	addl	$1, -16(%ebp)
-.L26:
+.L38:
 	movl	-16(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	jb	.L27
+	jb	.L39
 	movl	$0, %eax
 	leal	-12(%ebp), %esp
 	popl	%ebx
@@ -896,12 +1029,12 @@ fb_write:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	fb_write, .-fb_write
 	.globl	fb_write_start
 	.type	fb_write_start, @function
 fb_write_start:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -919,8 +1052,8 @@ fb_write_start:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	$0, -16(%ebp)
-	jmp	.L30
-.L31:
+	jmp	.L42
+.L43:
 	movl	BG@GOT(%ebx), %eax
 	movl	(%eax), %ecx
 	movl	FG@GOT(%ebx), %eax
@@ -943,10 +1076,10 @@ fb_write_start:
 	call	fb_write_cell
 	addl	$16, %esp
 	addl	$1, -16(%ebp)
-.L30:
+.L42:
 	movl	-16(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	jb	.L31
+	jb	.L43
 	movl	$0, %eax
 	leal	-12(%ebp), %esp
 	popl	%ebx
@@ -960,12 +1093,12 @@ fb_write_start:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	fb_write_start, .-fb_write_start
 	.globl	fb_write_xy
 	.type	fb_write_xy, @function
 fb_write_xy:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -983,8 +1116,8 @@ fb_write_xy:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	movl	$0, -16(%ebp)
-	jmp	.L34
-.L35:
+	jmp	.L46
+.L47:
 	movl	BG@GOT(%ebx), %eax
 	movl	(%eax), %edi
 	movl	FG@GOT(%ebx), %eax
@@ -1014,10 +1147,10 @@ fb_write_xy:
 	call	fb_write_cell
 	addl	$16, %esp
 	addl	$1, -16(%ebp)
-.L34:
+.L46:
 	movl	-16(%ebp), %eax
 	cmpl	12(%ebp), %eax
-	jl	.L35
+	jl	.L47
 	nop
 	nop
 	leal	-12(%ebp), %esp
@@ -1032,12 +1165,12 @@ fb_write_xy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.size	fb_write_xy, .-fb_write_xy
 	.globl	fb_move_cursor
 	.type	fb_move_cursor, @function
 fb_move_cursor:
-.LFB9:
+.LFB11:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -1055,12 +1188,12 @@ fb_move_cursor:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE11:
 	.size	fb_move_cursor, .-fb_move_cursor
 	.globl	fb_move_cursor_xy
 	.type	fb_move_cursor_xy, @function
 fb_move_cursor_xy:
-.LFB10:
+.LFB12:
 	.cfi_startproc
 	endbr32
 	pushl	%ebp
@@ -1083,30 +1216,79 @@ fb_move_cursor_xy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE12:
 	.size	fb_move_cursor_xy, .-fb_move_cursor_xy
+	.globl	fb_copyBuffer
+	.type	fb_copyBuffer, @function
+fb_copyBuffer:
+.LFB13:
+	.cfi_startproc
+	endbr32
+	pushl	%ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	movl	%esp, %ebp
+	.cfi_def_cfa_register 5
+	pushl	%ebx
+	subl	$16, %esp
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.ax
+	addl	$_GLOBAL_OFFSET_TABLE_, %eax
+	movl	$0, -8(%ebp)
+	jmp	.L51
+.L52:
+	movl	fb@GOT(%eax), %edx
+	movl	(%edx), %edx
+	movl	-8(%ebp), %ecx
+	sall	$2, %ecx
+	leal	(%edx,%ecx), %ebx
+	movl	fb_backBuffer@GOT(%eax), %edx
+	movl	-8(%ebp), %ecx
+	movl	(%edx,%ecx,4), %edx
+	movl	%edx, (%ebx)
+	addl	$1, -8(%ebp)
+.L51:
+	movl	fb_width@GOT(%eax), %edx
+	movl	(%edx), %ecx
+	movl	fb_height@GOT(%eax), %edx
+	movl	(%edx), %edx
+	imull	%ecx, %edx
+	cmpl	%edx, -8(%ebp)
+	jb	.L52
+	nop
+	nop
+	addl	$16, %esp
+	popl	%ebx
+	.cfi_restore 3
+	popl	%ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE13:
+	.size	fb_copyBuffer, .-fb_copyBuffer
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB11:
+.LFB14:
 	.cfi_startproc
 	movl	(%esp), %eax
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE14:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB12:
+.LFB15:
 	.cfi_startproc
 	movl	(%esp), %ebx
 	ret
 	.cfi_endproc
-.LFE12:
+.LFE15:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
