@@ -1,4 +1,5 @@
 	.file	"keyboard.c"
+	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
@@ -51,22 +52,22 @@ keyboard_ctrl_read_status:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	subl	$12, %esp
-	pushl	$100
-	movl	%eax, %ebx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	100
+	mov	ebx, eax
 	call	inb@PLT
-	addl	$16, %esp
-	movl	-4(%ebp), %ebx
+	add	esp, 16
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -81,36 +82,36 @@ keyboard_ctrl_send_cmd:
 .LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
+	push	ebx
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	8(%ebp), %eax
-	movb	%al, -12(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	BYTE PTR -12[ebp], al
 .L6:
 	call	keyboard_ctrl_read_status
-	movsbl	%al, %eax
-	andl	$2, %eax
-	testl	%eax, %eax
+	movsx	eax, al
+	and	eax, 2
+	test	eax, eax
 	je	.L8
 	jmp	.L6
 .L8:
 	nop
-	movzbl	-12(%ebp), %eax
-	movzbl	%al, %eax
-	subl	$8, %esp
-	pushl	%eax
-	pushl	$100
+	movzx	eax, BYTE PTR -12[ebp]
+	movzx	eax, al
+	sub	esp, 8
+	push	eax
+	push	100
 	call	outb@PLT
-	addl	$16, %esp
+	add	esp, 16
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -125,22 +126,22 @@ keyboard_enc_read_buf:
 .LFB2:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	subl	$12, %esp
-	pushl	$96
-	movl	%eax, %ebx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	96
+	mov	ebx, eax
 	call	inb@PLT
-	addl	$16, %esp
-	movl	-4(%ebp), %ebx
+	add	esp, 16
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -155,36 +156,36 @@ keyboard_enc_send_cmd:
 .LFB3:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
+	push	ebx
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	8(%ebp), %eax
-	movb	%al, -12(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	BYTE PTR -12[ebp], al
 .L14:
 	call	keyboard_ctrl_read_status
-	movsbl	%al, %eax
-	andl	$2, %eax
-	testl	%eax, %eax
+	movsx	eax, al
+	and	eax, 2
+	test	eax, eax
 	je	.L16
 	jmp	.L14
 .L16:
 	nop
-	movzbl	-12(%ebp), %eax
-	movzbl	%al, %eax
-	subl	$8, %esp
-	pushl	%eax
-	pushl	$96
+	movzx	eax, BYTE PTR -12[ebp]
+	movzx	eax, al
+	sub	esp, 8
+	push	eax
+	push	96
 	call	outb@PLT
-	addl	$16, %esp
+	add	esp, 16
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -199,60 +200,60 @@ keyboard_set_leds:
 .LFB4:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$40, %esp
+	sub	esp, 40
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %ecx
-	movl	12(%ebp), %edx
-	movl	16(%ebp), %eax
-	movb	%cl, -28(%ebp)
-	movb	%dl, -32(%ebp)
-	movb	%al, -36(%ebp)
-	movb	$0, -9(%ebp)
-	cmpb	$0, -36(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	mov	BYTE PTR -28[ebp], cl
+	mov	BYTE PTR -32[ebp], dl
+	mov	BYTE PTR -36[ebp], al
+	mov	BYTE PTR -9[ebp], 0
+	cmp	BYTE PTR -36[ebp], 0
 	je	.L18
-	movzbl	-9(%ebp), %eax
-	orl	$1, %eax
+	movzx	eax, BYTE PTR -9[ebp]
+	or	eax, 1
 	jmp	.L19
 .L18:
-	movzbl	-9(%ebp), %eax
-	andl	$1, %eax
+	movzx	eax, BYTE PTR -9[ebp]
+	and	eax, 1
 .L19:
-	movb	%al, -9(%ebp)
-	cmpb	$0, -28(%ebp)
+	mov	BYTE PTR -9[ebp], al
+	cmp	BYTE PTR -28[ebp], 0
 	je	.L20
-	movzbl	-28(%ebp), %eax
-	orl	$2, %eax
+	movzx	eax, BYTE PTR -28[ebp]
+	or	eax, 2
 	jmp	.L21
 .L20:
-	movzbl	-28(%ebp), %eax
-	andl	$2, %eax
+	movzx	eax, BYTE PTR -28[ebp]
+	and	eax, 2
 .L21:
-	movb	%al, -9(%ebp)
-	cmpb	$0, -32(%ebp)
+	mov	BYTE PTR -9[ebp], al
+	cmp	BYTE PTR -32[ebp], 0
 	je	.L22
-	movzbl	-28(%ebp), %eax
-	orl	$4, %eax
+	movzx	eax, BYTE PTR -28[ebp]
+	or	eax, 4
 	jmp	.L23
 .L22:
-	movzbl	-28(%ebp), %eax
-	andl	$4, %eax
+	movzx	eax, BYTE PTR -28[ebp]
+	and	eax, 4
 .L23:
-	movb	%al, -9(%ebp)
-	subl	$12, %esp
-	pushl	$-19
+	mov	BYTE PTR -9[ebp], al
+	sub	esp, 12
+	push	-19
 	call	keyboard_enc_send_cmd
-	addl	$16, %esp
-	movsbl	-9(%ebp), %eax
-	subl	$12, %esp
-	pushl	%eax
+	add	esp, 16
+	movsx	eax, BYTE PTR -9[ebp]
+	sub	esp, 12
+	push	eax
 	call	keyboard_enc_send_cmd
-	addl	$16, %esp
+	add	esp, 16
 	nop
 	leave
 	.cfi_restore 5
@@ -267,30 +268,30 @@ keyboard_self_test:
 .LFB5:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$8, %esp
+	sub	esp, 8
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	subl	$12, %esp
-	pushl	$-86
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	-86
 	call	keyboard_ctrl_send_cmd
-	addl	$16, %esp
+	add	esp, 16
 .L27:
 	call	keyboard_ctrl_read_status
-	movsbl	%al, %eax
-	andl	$1, %eax
-	testl	%eax, %eax
+	movsx	eax, al
+	and	eax, 1
+	test	eax, eax
 	jne	.L30
 	jmp	.L27
 .L30:
 	nop
 	call	keyboard_enc_read_buf
-	cmpb	$85, %al
-	sete	%al
+	cmp	al, 85
+	sete	al
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -304,23 +305,23 @@ keyboard_disable:
 .LFB6:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	subl	$12, %esp
-	pushl	$-83
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	-83
 	call	keyboard_ctrl_send_cmd
-	addl	$16, %esp
-	movb	$1, _keyboard_disable@GOTOFF(%ebx)
+	add	esp, 16
+	mov	BYTE PTR _keyboard_disable@GOTOFF[ebx], 1
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -335,23 +336,23 @@ keyboard_enable:
 .LFB7:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	subl	$12, %esp
-	pushl	$-82
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	-82
 	call	keyboard_ctrl_send_cmd
-	addl	$16, %esp
-	movb	$0, _keyboard_disable@GOTOFF(%ebx)
+	add	esp, 16
+	mov	BYTE PTR _keyboard_disable@GOTOFF[ebx], 0
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -366,29 +367,29 @@ keyboard_keyread:
 .LFB8:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$8, %esp
+	sub	esp, 8
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	subl	$12, %esp
-	pushl	$-12
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 12
+	push	-12
 	call	keyboard_enc_send_cmd
-	addl	$16, %esp
+	add	esp, 16
 .L36:
 	call	keyboard_ctrl_read_status
-	movsbl	%al, %eax
-	andl	$1, %eax
-	testl	%eax, %eax
+	movsx	eax, al
+	and	eax, 1
+	test	eax, eax
 	jne	.L39
 	jmp	.L36
 .L39:
 	nop
 	call	keyboard_enc_read_buf
-	movsbl	%al, %eax
+	movsx	eax, al
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -402,49 +403,49 @@ keyboard_flag_handler:
 .LFB9:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$24, %esp
+	sub	esp, 24
 	call	__x86.get_pc_thunk.dx
-	addl	$_GLOBAL_OFFSET_TABLE_, %edx
-	movl	8(%ebp), %eax
-	movb	%al, -12(%ebp)
-	movzbl	-12(%ebp), %eax
-	cmpl	$211, %eax
+	add	edx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	BYTE PTR -12[ebp], al
+	movzx	eax, BYTE PTR -12[ebp]
+	cmp	eax, 211
 	je	.L46
-	cmpl	$211, %eax
+	cmp	eax, 211
 	jg	.L47
-	cmpl	$170, %eax
+	cmp	eax, 170
 	je	.L43
-	cmpl	$170, %eax
+	cmp	eax, 170
 	jg	.L47
-	cmpl	$91, %eax
+	cmp	eax, 91
 	je	.L48
-	cmpl	$91, %eax
+	cmp	eax, 91
 	jg	.L47
-	cmpl	$29, %eax
+	cmp	eax, 29
 	je	.L49
-	cmpl	$42, %eax
+	cmp	eax, 42
 	jne	.L47
-	movb	$1, KYBRD_SHIFT@GOTOFF(%edx)
-	subl	$4, %esp
-	pushl	$0
-	pushl	$1
-	pushl	$0
+	mov	BYTE PTR KYBRD_SHIFT@GOTOFF[edx], 1
+	sub	esp, 4
+	push	0
+	push	1
+	push	0
 	call	keyboard_set_leds
-	addl	$16, %esp
+	add	esp, 16
 	jmp	.L42
 .L43:
-	movb	$0, KYBRD_SHIFT@GOTOFF(%edx)
-	subl	$4, %esp
-	pushl	$0
-	pushl	$0
-	pushl	$0
+	mov	BYTE PTR KYBRD_SHIFT@GOTOFF[edx], 0
+	sub	esp, 4
+	push	0
+	push	0
+	push	0
 	call	keyboard_set_leds
-	addl	$16, %esp
+	add	esp, 16
 	jmp	.L42
 .L46:
 	nop
@@ -470,35 +471,35 @@ convertascii:
 .LFB10:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$4, %esp
+	sub	esp, 4
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movb	%dl, -4(%ebp)
-	movzbl	-4(%ebp), %edx
-	movl	kbd_US@GOT(%eax), %ecx
-	movzbl	(%ecx,%edx), %edx
-	testb	%dl, %dl
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	BYTE PTR -4[ebp], dl
+	movzx	edx, BYTE PTR -4[ebp]
+	mov	ecx, DWORD PTR kbd_US@GOT[eax]
+	movzx	edx, BYTE PTR [ecx+edx]
+	test	dl, dl
 	je	.L51
-	movzbl	KYBRD_SHIFT@GOTOFF(%eax), %edx
-	testb	%dl, %dl
+	movzx	edx, BYTE PTR KYBRD_SHIFT@GOTOFF[eax]
+	test	dl, dl
 	je	.L52
-	movzbl	-4(%ebp), %edx
-	movl	kbd_US_shift@GOT(%eax), %eax
-	movzbl	(%eax,%edx), %eax
+	movzx	edx, BYTE PTR -4[ebp]
+	mov	eax, DWORD PTR kbd_US_shift@GOT[eax]
+	movzx	eax, BYTE PTR [eax+edx]
 	jmp	.L53
 .L52:
-	movzbl	-4(%ebp), %edx
-	movl	kbd_US@GOT(%eax), %eax
-	movzbl	(%eax,%edx), %eax
+	movzx	edx, BYTE PTR -4[ebp]
+	mov	eax, DWORD PTR kbd_US@GOT[eax]
+	movzx	eax, BYTE PTR [eax+edx]
 	jmp	.L53
 .L51:
-	movl	$0, %eax
+	mov	eax, 0
 .L53:
 	leave
 	.cfi_restore 5
@@ -513,74 +514,74 @@ keyboard_handle_interrupt:
 .LFB11:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
+	push	ebx
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	call	keyboard_enc_read_buf
-	movb	%al, -9(%ebp)
-	cmpb	$0, -9(%ebp)
+	mov	BYTE PTR -9[ebp], al
+	cmp	BYTE PTR -9[ebp], 0
 	je	.L55
-	movzbl	-9(%ebp), %eax
-	movl	kbd_US@GOT(%ebx), %edx
-	movzbl	(%edx,%eax), %eax
-	testb	%al, %al
+	movzx	eax, BYTE PTR -9[ebp]
+	mov	edx, DWORD PTR kbd_US@GOT[ebx]
+	movzx	eax, BYTE PTR [edx+eax]
+	test	al, al
 	je	.L56
-	movzbl	KYBRD_SHIFT@GOTOFF(%ebx), %eax
-	testb	%al, %al
+	movzx	eax, BYTE PTR KYBRD_SHIFT@GOTOFF[ebx]
+	test	al, al
 	je	.L57
-	movzbl	-9(%ebp), %edx
-	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
-	movl	kbd_US_shift@GOT(%ebx), %ecx
-	movzbl	(%ecx,%edx), %ecx
-	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
-	movb	%cl, (%edx,%eax)
+	movzx	edx, BYTE PTR -9[ebp]
+	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
+	mov	ecx, DWORD PTR kbd_US_shift@GOT[ebx]
+	movzx	ecx, BYTE PTR [ecx+edx]
+	mov	edx, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
+	mov	BYTE PTR [edx+eax], cl
 	jmp	.L58
 .L57:
-	movzbl	-9(%ebp), %edx
-	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
-	movl	kbd_US@GOT(%ebx), %ecx
-	movzbl	(%ecx,%edx), %ecx
-	movl	keyboard_ASCIIBuffer@GOT(%ebx), %edx
-	movb	%cl, (%edx,%eax)
+	movzx	edx, BYTE PTR -9[ebp]
+	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
+	mov	ecx, DWORD PTR kbd_US@GOT[ebx]
+	movzx	ecx, BYTE PTR [ecx+edx]
+	mov	edx, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
+	mov	BYTE PTR [edx+eax], cl
 .L58:
-	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
-	addl	$1, %eax
-	movl	%eax, keyboard_ascii_pointer@GOTOFF(%ebx)
+	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
+	add	eax, 1
+	mov	DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx], eax
 	jmp	.L59
 .L56:
-	movzbl	-9(%ebp), %eax
-	subl	$12, %esp
-	pushl	%eax
+	movzx	eax, BYTE PTR -9[ebp]
+	sub	esp, 12
+	push	eax
 	call	keyboard_flag_handler
-	addl	$16, %esp
+	add	esp, 16
 .L59:
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	movl	keyboard_KEYBUFFER@GOT(%ebx), %edx
-	movzbl	-9(%ebp), %ecx
-	movb	%cl, (%edx,%eax)
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	addl	$1, %eax
-	movl	%eax, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
+	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
+	mov	edx, DWORD PTR keyboard_KEYBUFFER@GOT[ebx]
+	movzx	ecx, BYTE PTR -9[ebp]
+	mov	BYTE PTR [edx+eax], cl
+	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
+	add	eax, 1
+	mov	DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx], eax
 .L55:
-	movl	keyboard_ascii_pointer@GOTOFF(%ebx), %eax
-	cmpl	$254, %eax
+	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
+	cmp	eax, 254
 	jbe	.L60
-	movl	$0, keyboard_ascii_pointer@GOTOFF(%ebx)
+	mov	DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx], 0
 .L60:
-	movl	keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx), %eax
-	cmpl	$254, %eax
+	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
+	cmp	eax, 254
 	jbe	.L62
-	movl	$0, keyboard_KEYBUFFER_POINTER@GOTOFF(%ebx)
+	mov	DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx], 0
 .L62:
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -596,7 +597,7 @@ keyboard_handle_interrupt:
 __x86.get_pc_thunk.ax:
 .LFB12:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE12:
@@ -607,7 +608,7 @@ __x86.get_pc_thunk.ax:
 __x86.get_pc_thunk.dx:
 .LFB13:
 	.cfi_startproc
-	movl	(%esp), %edx
+	mov	edx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE13:
@@ -618,7 +619,7 @@ __x86.get_pc_thunk.dx:
 __x86.get_pc_thunk.bx:
 .LFB14:
 	.cfi_startproc
-	movl	(%esp), %ebx
+	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE14:

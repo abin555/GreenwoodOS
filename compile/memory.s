@@ -1,4 +1,5 @@
 	.file	"memory.c"
+	.intel_syntax noprefix
 	.text
 	.globl	memcpy
 	.type	memcpy, @function
@@ -6,31 +7,31 @@ memcpy:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$16, %esp
+	sub	esp, 16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
 	jmp	.L2
 .L3:
-	movl	-4(%ebp), %eax
-	leal	0(,%eax,4), %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movl	-4(%ebp), %edx
-	leal	0(,%edx,4), %ecx
-	movl	12(%ebp), %edx
-	addl	%ecx, %edx
-	movl	(%eax), %eax
-	movl	%eax, (%edx)
-	addl	$1, -4(%ebp)
+	mov	eax, DWORD PTR -4[ebp]
+	lea	edx, 0[0+eax*4]
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	mov	edx, DWORD PTR -4[ebp]
+	lea	ecx, 0[0+edx*4]
+	mov	edx, DWORD PTR 12[ebp]
+	add	edx, ecx
+	mov	eax, DWORD PTR [eax]
+	mov	DWORD PTR [edx], eax
+	add	DWORD PTR -4[ebp], 1
 .L2:
-	movl	-4(%ebp), %eax
-	cmpl	16(%ebp), %eax
+	mov	eax, DWORD PTR -4[ebp]
+	cmp	eax, DWORD PTR 16[ebp]
 	jb	.L3
 	nop
 	nop
@@ -48,7 +49,7 @@ memcpy:
 __x86.get_pc_thunk.ax:
 .LFB1:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE1:

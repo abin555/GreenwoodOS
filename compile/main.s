@@ -1,4 +1,5 @@
 	.file	"main.c"
+	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
 	.comm	fb_width,4,4
@@ -34,387 +35,253 @@ flyingDot:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$52, %esp
+	push	ebx
+	sub	esp, 52
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	$50, -12(%ebp)
-	movl	$50, -16(%ebp)
-	movl	$3, -20(%ebp)
-	movl	$5, -24(%ebp)
-	movl	$255, -28(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -12[ebp], 50
+	mov	DWORD PTR -16[ebp], 50
+	mov	DWORD PTR -20[ebp], 3
+	mov	DWORD PTR -24[ebp], 5
+	mov	DWORD PTR -28[ebp], 255
 .L25:
-	movl	$0, -32(%ebp)
+	mov	DWORD PTR -32[ebp], 0
 	jmp	.L2
 .L19:
-	movl	-20(%ebp), %eax
-	addl	%eax, -12(%ebp)
-	movl	-24(%ebp), %eax
-	addl	%eax, -16(%ebp)
-	movl	-16(%ebp), %edx
-	movl	-12(%ebp), %eax
-	subl	$4, %esp
-	pushl	$16777215
-	pushl	%edx
-	pushl	%eax
+	mov	eax, DWORD PTR -20[ebp]
+	add	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR -24[ebp]
+	add	DWORD PTR -16[ebp], eax
+	mov	edx, DWORD PTR -16[ebp]
+	mov	eax, DWORD PTR -12[ebp]
+	sub	esp, 4
+	push	16777215
+	push	edx
+	push	eax
 	call	fb_setPixel@PLT
-	addl	$16, %esp
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	subl	$10, %eax
-	cmpl	%eax, -12(%ebp)
+	add	esp, 16
+	mov	eax, DWORD PTR fb_width@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 10
+	cmp	DWORD PTR -12[ebp], eax
 	jge	.L3
-	cmpl	$10, -12(%ebp)
+	cmp	DWORD PTR -12[ebp], 10
 	jg	.L4
 .L3:
-	negl	-20(%ebp)
-	cmpl	$0, -20(%ebp)
+	neg	DWORD PTR -20[ebp]
+	cmp	DWORD PTR -20[ebp], 0
 	jns	.L5
-	subl	$1, -20(%ebp)
+	sub	DWORD PTR -20[ebp], 1
 .L5:
-	cmpl	$0, -20(%ebp)
+	cmp	DWORD PTR -20[ebp], 0
 	jle	.L4
-	addl	$1, -20(%ebp)
+	add	DWORD PTR -20[ebp], 1
 .L4:
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	subl	$10, %eax
-	cmpl	%eax, -16(%ebp)
+	mov	eax, DWORD PTR fb_height@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 10
+	cmp	DWORD PTR -16[ebp], eax
 	jge	.L6
-	cmpl	$10, -16(%ebp)
+	cmp	DWORD PTR -16[ebp], 10
 	jg	.L7
 .L6:
-	negl	-24(%ebp)
-	cmpl	$0, -24(%ebp)
+	neg	DWORD PTR -24[ebp]
+	cmp	DWORD PTR -24[ebp], 0
 	jns	.L8
-	subl	$1, -24(%ebp)
+	sub	DWORD PTR -24[ebp], 1
 .L8:
-	cmpl	$0, -24(%ebp)
+	cmp	DWORD PTR -24[ebp], 0
 	jle	.L7
-	addl	$1, -24(%ebp)
+	add	DWORD PTR -24[ebp], 1
 .L7:
-	cmpl	$50, -20(%ebp)
+	cmp	DWORD PTR -20[ebp], 50
 	jg	.L9
-	cmpl	$-50, -20(%ebp)
+	cmp	DWORD PTR -20[ebp], -50
 	jge	.L10
 .L9:
-	movl	$1, -20(%ebp)
+	mov	DWORD PTR -20[ebp], 1
 .L10:
-	cmpl	$50, -24(%ebp)
+	cmp	DWORD PTR -24[ebp], 50
 	jg	.L11
-	cmpl	$-50, -24(%ebp)
+	cmp	DWORD PTR -24[ebp], -50
 	jge	.L12
 .L11:
-	movl	$1, -24(%ebp)
+	mov	DWORD PTR -24[ebp], 1
 .L12:
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	cmpl	%eax, -12(%ebp)
+	mov	eax, DWORD PTR fb_width@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	cmp	DWORD PTR -12[ebp], eax
 	jg	.L13
-	cmpl	$0, -12(%ebp)
+	cmp	DWORD PTR -12[ebp], 0
 	jns	.L14
 .L13:
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -12(%ebp)
+	mov	eax, DWORD PTR fb_width@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	shr	eax
+	mov	DWORD PTR -12[ebp], eax
 .L14:
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	cmpl	%eax, -16(%ebp)
+	mov	eax, DWORD PTR fb_height@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	cmp	DWORD PTR -16[ebp], eax
 	jg	.L15
-	cmpl	$0, -16(%ebp)
+	cmp	DWORD PTR -16[ebp], 0
 	jns	.L16
 .L15:
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -16(%ebp)
+	mov	eax, DWORD PTR fb_height@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	shr	eax
+	mov	DWORD PTR -16[ebp], eax
 .L16:
-	movl	$0, -36(%ebp)
+	mov	DWORD PTR -36[ebp], 0
 	jmp	.L17
 .L18:
-	addl	$1, -36(%ebp)
+	add	DWORD PTR -36[ebp], 1
 .L17:
-	cmpl	$65534, -36(%ebp)
+	cmp	DWORD PTR -36[ebp], 65534
 	jbe	.L18
-	addl	$1, -32(%ebp)
+	add	DWORD PTR -32[ebp], 1
 .L2:
-	cmpl	$254, -32(%ebp)
+	cmp	DWORD PTR -32[ebp], 254
 	jle	.L19
-	movl	$0, -40(%ebp)
+	mov	DWORD PTR -40[ebp], 0
 	jmp	.L20
 .L24:
-	movl	$0, -44(%ebp)
+	mov	DWORD PTR -44[ebp], 0
 	jmp	.L21
 .L23:
-	movl	-28(%ebp), %eax
-	sall	$16, %eax
-	andl	$16711680, %eax
-	movl	%eax, %edx
-	movl	-28(%ebp), %eax
-	sall	$8, %eax
-	movzwl	%ax, %eax
-	orl	%edx, %eax
-	orl	-28(%ebp), %eax
-	movl	%eax, %ecx
-	movl	-44(%ebp), %edx
-	movl	-40(%ebp), %eax
-	subl	$4, %esp
-	pushl	%ecx
-	pushl	%edx
-	pushl	%eax
+	mov	eax, DWORD PTR -28[ebp]
+	sal	eax, 16
+	and	eax, 16711680
+	mov	edx, eax
+	mov	eax, DWORD PTR -28[ebp]
+	sal	eax, 8
+	movzx	eax, ax
+	or	eax, edx
+	or	eax, DWORD PTR -28[ebp]
+	mov	ecx, eax
+	mov	edx, DWORD PTR -44[ebp]
+	mov	eax, DWORD PTR -40[ebp]
+	sub	esp, 4
+	push	ecx
+	push	edx
+	push	eax
 	call	fb_setPixel@PLT
-	addl	$16, %esp
-	subl	$1, -28(%ebp)
-	cmpl	$0, -28(%ebp)
+	add	esp, 16
+	sub	DWORD PTR -28[ebp], 1
+	cmp	DWORD PTR -28[ebp], 0
 	jne	.L22
-	movl	$255, -28(%ebp)
+	mov	DWORD PTR -28[ebp], 255
 .L22:
-	addl	$1, -44(%ebp)
+	add	DWORD PTR -44[ebp], 1
 .L21:
-	cmpl	$499, -44(%ebp)
+	cmp	DWORD PTR -44[ebp], 499
 	jle	.L23
-	addl	$1, -40(%ebp)
+	add	DWORD PTR -40[ebp], 1
 .L20:
-	cmpl	$499, -40(%ebp)
+	cmp	DWORD PTR -40[ebp], 499
 	jle	.L24
 	jmp	.L25
 	.cfi_endproc
 .LFE0:
 	.size	flyingDot, .-flyingDot
-	.globl	pong
-	.type	pong, @function
-pong:
-.LFB1:
-	.cfi_startproc
-	endbr32
-	pushl	%ebp
-	.cfi_def_cfa_offset 8
-	.cfi_offset 5, -8
-	movl	%esp, %ebp
-	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$36, %esp
-	.cfi_offset 3, -12
-	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	$0, -12(%ebp)
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -16(%ebp)
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -20(%ebp)
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -24(%ebp)
-	movl	$-10, -28(%ebp)
-	movl	$10, -32(%ebp)
-.L38:
-	subl	$12, %esp
-	pushl	$0
-	call	fb_clearBackBuffer@PLT
-	addl	$16, %esp
-	movl	-28(%ebp), %eax
-	addl	%eax, -20(%ebp)
-	movl	-32(%ebp), %eax
-	addl	%eax, -24(%ebp)
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	subl	$49, %eax
-	cmpl	%eax, -20(%ebp)
-	jge	.L27
-	cmpl	$99, -20(%ebp)
-	jg	.L28
-.L27:
-	cmpl	$99, -20(%ebp)
-	jg	.L29
-	movl	-16(%ebp), %eax
-	subl	$74, %eax
-	cmpl	%eax, -24(%ebp)
-	jl	.L30
-	movl	-16(%ebp), %eax
-	addl	$74, %eax
-	cmpl	%eax, -24(%ebp)
-	jg	.L30
-	negl	-28(%ebp)
-	jmp	.L28
-.L30:
-	movl	fb_width@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -20(%ebp)
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	shrl	%eax
-	movl	%eax, -24(%ebp)
-	negl	-28(%ebp)
-	addl	$1, -28(%ebp)
-	addl	$1, -32(%ebp)
-	jmp	.L28
-.L29:
-	negl	-28(%ebp)
-.L28:
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	subl	$49, %eax
-	cmpl	%eax, -24(%ebp)
-	jge	.L32
-	cmpl	$49, -24(%ebp)
-	jg	.L33
-.L32:
-	negl	-32(%ebp)
-.L33:
-	movl	keyboard_ascii_pointer@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	cmpl	%eax, -12(%ebp)
-	je	.L34
-	movl	keyboard_ascii_pointer@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	movl	%eax, -12(%ebp)
-	movl	keyboard_ascii_pointer@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	leal	-1(%eax), %edx
-	movl	keyboard_ASCIIBuffer@GOT(%ebx), %eax
-	movzbl	(%eax,%edx), %eax
-	cmpb	$119, %al
-	jne	.L35
-	cmpl	$150, -16(%ebp)
-	jle	.L34
-	subl	$25, -16(%ebp)
-	jmp	.L34
-.L35:
-	movl	keyboard_ascii_pointer@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	leal	-1(%eax), %edx
-	movl	keyboard_ASCIIBuffer@GOT(%ebx), %eax
-	movzbl	(%eax,%edx), %eax
-	cmpb	$115, %al
-	jne	.L34
-	movl	fb_height@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	subl	$150, %eax
-	cmpl	%eax, -16(%ebp)
-	jge	.L34
-	addl	$25, -16(%ebp)
-.L34:
-	movl	-24(%ebp), %edx
-	movl	-20(%ebp), %eax
-	pushl	$16777215
-	pushl	$10
-	pushl	%edx
-	pushl	%eax
-	call	pixelScaled@PLT
-	addl	$16, %esp
-	movl	$0, -36(%ebp)
-	jmp	.L36
-.L37:
-	movl	-16(%ebp), %eax
-	leal	-75(%eax), %edx
-	movl	-36(%ebp), %eax
-	addl	%edx, %eax
-	subl	$4, %esp
-	pushl	$16777215
-	pushl	%eax
-	pushl	$100
-	call	fb_setPixel@PLT
-	addl	$16, %esp
-	addl	$1, -36(%ebp)
-.L36:
-	cmpl	$149, -36(%ebp)
-	jle	.L37
-	call	fb_copyBuffer@PLT
-	jmp	.L38
-	.cfi_endproc
-.LFE1:
-	.size	pong, .-pong
 	.globl	kmain
 	.type	kmain, @function
 kmain:
-.LFB2:
+.LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
+	push	ebx
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	cmpl	$920085129, 8(%ebp)
-	je	.L40
-	movl	$255, %eax
-	jmp	.L41
-.L40:
-	movl	12(%ebp), %eax
-	addl	$8, %eax
-	movl	%eax, -12(%ebp)
-	jmp	.L42
-.L44:
-	movl	-12(%ebp), %eax
-	movl	(%eax), %eax
-	cmpl	$8, %eax
-	jne	.L43
-	movl	-12(%ebp), %eax
-	movl	%eax, -16(%ebp)
-	subl	$12, %esp
-	pushl	-16(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	cmp	DWORD PTR 8[ebp], 920085129
+	je	.L27
+	mov	eax, 255
+	jmp	.L33
+.L27:
+	mov	eax, DWORD PTR 12[ebp]
+	add	eax, 8
+	mov	DWORD PTR -12[ebp], eax
+	jmp	.L29
+.L31:
+	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR [eax]
+	cmp	eax, 8
+	jne	.L30
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR -16[ebp], eax
+	sub	esp, 12
+	push	DWORD PTR -16[ebp]
 	call	init_fb@PLT
-	addl	$16, %esp
-.L43:
-	movl	-12(%ebp), %eax
-	movl	4(%eax), %eax
-	addl	$7, %eax
-	andl	$-8, %eax
-	addl	%eax, -12(%ebp)
-.L42:
-	movl	-12(%ebp), %eax
-	movl	(%eax), %eax
-	testl	%eax, %eax
-	jne	.L44
+	add	esp, 16
+.L30:
+	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR 4[eax]
+	add	eax, 7
+	and	eax, -8
+	add	DWORD PTR -12[ebp], eax
+.L29:
+	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR [eax]
+	test	eax, eax
+	jne	.L31
 	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
-	subl	$8, %esp
-	pushl	$0
-	pushl	$16777215
+	sub	esp, 8
+	push	0
+	push	16777215
 	call	fb_set_color@PLT
-	addl	$16, %esp
-	call	pong
-	movl	$0, %eax
-.L41:
-	movl	-4(%ebp), %ebx
+	add	esp, 16
+	mov	DWORD PTR -21[ebp], 1953719636
+	mov	BYTE PTR -17[ebp], 0
+	sub	esp, 8
+	push	5
+	push	5
+	call	fb_move_cursor_xy@PLT
+	add	esp, 16
+	sub	esp, 4
+	push	0
+	push	4
+	lea	eax, -21[ebp]
+	push	eax
+	call	fb_write_start@PLT
+	add	esp, 16
+.L32:
+	call	terminal_handler@PLT
+	jmp	.L32
+.L33:
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE1:
 	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB2:
 	.cfi_startproc
-	movl	(%esp), %ebx
+	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE2:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -22,8 +22,8 @@ framebuffer_tag_start:
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 1920
-	DD 1080
+	DD 1024
+	DD 768
 	DD 32
 framebuffer_tag_end:
 align 8
@@ -124,7 +124,7 @@ externalProgram: dd program_A ;Used in C code to change the execution region of 
 global PROGA: 					;Global function to call and execute external program.
 PROGA:
 	jmp [externalProgram]		;Jump to program pointer
-
+SYS_STATE: DB 0 ;0 = Kernel 1 = PROG
 
 
 
@@ -221,16 +221,21 @@ program_A_end:
 section .PROGB
 program_B:
 	mov eax, 0x00000001
-	mov ebx, 0x0000004E
+	mov ebx, 0x00000100
 	mov ecx, 'T'
 	int 0x80
-	mov eax, 0x00000004
-	mov ebx, 80*8
+	mov eax, 4
+	mov ebx, 130
 	int 0x80
 	mov eax, 0x00000002
 	mov ebx, Message_PROGB
-	mov ecx, 8
+	mov ecx, 28
 	mov edx, 0
 	int 0x80
+	mov eax, 5
+	mov ebx, 600
+	mov ecx, 600
+	mov edx, 0x2EFFE2
+	int 0x80
 	ret
-Message_PROGB: DB "Your Mom"
+Message_PROGB: DB "HELLO WORLD SERIOUSLY THOUGH"

@@ -10,10 +10,13 @@ OBJECTS = \
 		kernel_programs/keyboard_test.o \
 		pic.o \
 		string.o\
-		memory.o
+		memory.o\
+		gfx.o\
+		pong.o#\
+		#DRIVERS/IDE.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -masm=intel -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
@@ -26,7 +29,7 @@ kernel.elf: $(OBJECTS)
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o GreenwoodOS.img iso
-run: os.iso
+run: os.iso transfer-compiled
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio
 
 %.o: %.c

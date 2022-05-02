@@ -1,4 +1,5 @@
 	.file	"ascii_tables.c"
+	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1

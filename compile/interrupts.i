@@ -649,6 +649,15 @@ char quadToHex(char quad);
 char hexToQuad(char hex);
 # 8 "./include/terminal.h" 2
 
+# 1 "./include/pong.h" 1
+
+
+
+
+
+
+void pong();
+# 10 "./include/terminal.h" 2
 
 
 
@@ -659,6 +668,8 @@ char Terminal_Buffer[1024/8];
 char Terminal_OUT_Buffer[1024/8*40];
 
 char Terminal_Arguments[1024/8];
+
+void terminal_memory_view();
 
 int terminal_compare(char *buffer, int start, int end, int len);
 
@@ -733,14 +744,13 @@ void SYS_CALL(struct cpu_state cpu){
  fb_write_xy(STR_edit, 9, 0, 0, 21);
  switch(cpu.eax){
   case 0x01:
-   printChar(79, 2, 'P');
    fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
    break;
   case 0x02:
    fb_write_start((char *) cpu.ebx, cpu.ecx, cpu.edx);
    break;
   case 0x04:
-
+   fb_move_cursor(cpu.ebx);
    break;
   case 0x03:
    break;

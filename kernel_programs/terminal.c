@@ -6,8 +6,12 @@ unsigned int previousASCII_pointer = 0;
 unsigned int previousKEY_pointer = 0;
 
 #ifndef Terminal_Y
-int Terminal_Y = 768/8-8;
+int Terminal_Y = 92;
 #endif
+
+void terminal_memory_view(){
+
+}
 
 void terminal_renderer(){
     fb_clear(FB_BLACK);
@@ -125,6 +129,13 @@ void terminal_interpret(){
     if(terminal_compare("set_PROG", 0, Terminal_Arguments[0], 8)){
         unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
         externalProgram = (unsigned int *) addr;
+    }
+    if(terminal_compare("clear", 0, Terminal_Arguments[0], 5)){
+        fb_clear(0);
+        Terminal_OUT_pointer = 0;
+    }
+    if(terminal_compare("pong", 0, Terminal_Arguments[0], 4)){
+        pong();
     }
 }
 

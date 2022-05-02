@@ -6,6 +6,7 @@
 #include "keyboard.h"
 #include "string.h"
 #include "ascii_tables.h"
+#include "pong.h"
 
 #define TERMINAL_Buffer_Size 1024/8
 #define TERMINAL_SPLIT ' '
@@ -16,6 +17,8 @@ char Terminal_Buffer[TERMINAL_Buffer_Size];
 char Terminal_OUT_Buffer[TERMINAL_Buffer_Size*40];
 
 char Terminal_Arguments[TERMINAL_Buffer_Size];
+
+void terminal_memory_view();
 
 int terminal_compare(char *buffer, int start, int end, int len);
 

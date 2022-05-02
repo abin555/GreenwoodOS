@@ -1,4 +1,5 @@
 	.file	"string.c"
+	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
@@ -18,37 +19,37 @@ STR_Compare:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$16, %esp
+	sub	esp, 16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
-	movl	16(%ebp), %eax
-	movl	%eax, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
+	mov	eax, DWORD PTR 16[ebp]
+	mov	DWORD PTR -8[ebp], eax
 	jmp	.L2
 .L4:
-	movl	-8(%ebp), %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movzbl	(%eax), %edx
-	movl	-8(%ebp), %ecx
-	movl	12(%ebp), %eax
-	addl	%ecx, %eax
-	movzbl	(%eax), %eax
-	cmpb	%al, %dl
+	mov	edx, DWORD PTR -8[ebp]
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	movzx	edx, BYTE PTR [eax]
+	mov	ecx, DWORD PTR -8[ebp]
+	mov	eax, DWORD PTR 12[ebp]
+	add	eax, ecx
+	movzx	eax, BYTE PTR [eax]
+	cmp	dl, al
 	jne	.L3
-	addl	$1, -4(%ebp)
+	add	DWORD PTR -4[ebp], 1
 .L3:
-	addl	$1, -8(%ebp)
+	add	DWORD PTR -8[ebp], 1
 .L2:
-	movl	-8(%ebp), %eax
-	cmpl	20(%ebp), %eax
+	mov	eax, DWORD PTR -8[ebp]
+	cmp	eax, DWORD PTR 20[ebp]
 	jl	.L4
-	movl	-4(%ebp), %eax
+	mov	eax, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -62,32 +63,32 @@ STR_INSERT:
 .LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$16, %esp
+	sub	esp, 16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
 	jmp	.L7
 .L8:
-	movl	-4(%ebp), %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movl	-4(%ebp), %ecx
-	movl	20(%ebp), %edx
-	addl	%ecx, %edx
-	movl	%edx, %ecx
-	movl	12(%ebp), %edx
-	addl	%ecx, %edx
-	movzbl	(%eax), %eax
-	movb	%al, (%edx)
-	addl	$1, -4(%ebp)
+	mov	edx, DWORD PTR -4[ebp]
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	mov	ecx, DWORD PTR -4[ebp]
+	mov	edx, DWORD PTR 20[ebp]
+	add	edx, ecx
+	mov	ecx, edx
+	mov	edx, DWORD PTR 12[ebp]
+	add	edx, ecx
+	movzx	eax, BYTE PTR [eax]
+	mov	BYTE PTR [edx], al
+	add	DWORD PTR -4[ebp], 1
 .L7:
-	movl	-4(%ebp), %eax
-	cmpl	16(%ebp), %eax
+	mov	eax, DWORD PTR -4[ebp]
+	cmp	eax, DWORD PTR 16[ebp]
 	jl	.L8
 	nop
 	nop
@@ -104,50 +105,50 @@ decodeData:
 .LFB2:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$16, %esp
+	sub	esp, 16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -4(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
 	jmp	.L10
 .L13:
-	movl	-4(%ebp), %eax
-	movl	12(%ebp), %edx
-	movl	%eax, %ecx
-	sarl	%cl, %edx
-	movl	%edx, %eax
-	andl	$1, %eax
-	testl	%eax, %eax
+	mov	eax, DWORD PTR -4[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	ecx, eax
+	sar	edx, cl
+	mov	eax, edx
+	and	eax, 1
+	test	eax, eax
 	je	.L11
-	movl	16(%ebp), %eax
-	subl	-4(%ebp), %eax
-	movl	%eax, %edx
-	movl	20(%ebp), %eax
-	addl	%edx, %eax
-	movl	%eax, %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movb	$49, (%eax)
+	mov	eax, DWORD PTR 16[ebp]
+	sub	eax, DWORD PTR -4[ebp]
+	mov	edx, eax
+	mov	eax, DWORD PTR 20[ebp]
+	add	eax, edx
+	mov	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	mov	BYTE PTR [eax], 49
 	jmp	.L12
 .L11:
-	movl	16(%ebp), %eax
-	subl	-4(%ebp), %eax
-	movl	%eax, %edx
-	movl	20(%ebp), %eax
-	addl	%edx, %eax
-	movl	%eax, %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movb	$48, (%eax)
+	mov	eax, DWORD PTR 16[ebp]
+	sub	eax, DWORD PTR -4[ebp]
+	mov	edx, eax
+	mov	eax, DWORD PTR 20[ebp]
+	add	eax, edx
+	mov	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	mov	BYTE PTR [eax], 48
 .L12:
-	addl	$1, -4(%ebp)
+	add	DWORD PTR -4[ebp], 1
 .L10:
-	movl	-4(%ebp), %eax
-	cmpl	16(%ebp), %eax
+	mov	eax, DWORD PTR -4[ebp]
+	cmp	eax, DWORD PTR 16[ebp]
 	jl	.L13
 	nop
 	nop
@@ -164,23 +165,23 @@ quadtoHex:
 .LFB3:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$4, %esp
+	sub	esp, 4
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movb	%dl, -4(%ebp)
-	movsbl	-4(%ebp), %edx
-	cmpl	$15, %edx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	BYTE PTR -4[ebp], dl
+	movsx	edx, BYTE PTR -4[ebp]
+	cmp	edx, 15
 	ja	.L15
-	sall	$2, %edx
-	movl	.L17@GOTOFF(%edx,%eax), %edx
-	addl	%edx, %eax
-	notrack jmp	*%eax
+	sal	edx, 2
+	mov	edx, DWORD PTR .L17@GOTOFF[edx+eax]
+	add	eax, edx
+	notrack jmp	eax
 	.section	.rodata
 	.align 4
 	.align 4
@@ -203,55 +204,55 @@ quadtoHex:
 	.long	.L16@GOTOFF
 	.text
 .L32:
-	movl	$48, %eax
+	mov	eax, 48
 	jmp	.L33
 .L31:
-	movl	$49, %eax
+	mov	eax, 49
 	jmp	.L33
 .L30:
-	movl	$50, %eax
+	mov	eax, 50
 	jmp	.L33
 .L29:
-	movl	$51, %eax
+	mov	eax, 51
 	jmp	.L33
 .L28:
-	movl	$52, %eax
+	mov	eax, 52
 	jmp	.L33
 .L27:
-	movl	$53, %eax
+	mov	eax, 53
 	jmp	.L33
 .L26:
-	movl	$54, %eax
+	mov	eax, 54
 	jmp	.L33
 .L25:
-	movl	$55, %eax
+	mov	eax, 55
 	jmp	.L33
 .L24:
-	movl	$56, %eax
+	mov	eax, 56
 	jmp	.L33
 .L23:
-	movl	$57, %eax
+	mov	eax, 57
 	jmp	.L33
 .L22:
-	movl	$65, %eax
+	mov	eax, 65
 	jmp	.L33
 .L21:
-	movl	$66, %eax
+	mov	eax, 66
 	jmp	.L33
 .L20:
-	movl	$67, %eax
+	mov	eax, 67
 	jmp	.L33
 .L19:
-	movl	$68, %eax
+	mov	eax, 68
 	jmp	.L33
 .L18:
-	movl	$69, %eax
+	mov	eax, 69
 	jmp	.L33
 .L16:
-	movl	$70, %eax
+	mov	eax, 70
 	jmp	.L33
 .L15:
-	movl	$120, %eax
+	mov	eax, 120
 .L33:
 	leave
 	.cfi_restore 5
@@ -266,24 +267,24 @@ hexToQuad:
 .LFB4:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	subl	$4, %esp
+	sub	esp, 4
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movb	%dl, -4(%ebp)
-	movsbl	-4(%ebp), %edx
-	subl	$48, %edx
-	cmpl	$54, %edx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	BYTE PTR -4[ebp], dl
+	movsx	edx, BYTE PTR -4[ebp]
+	sub	edx, 48
+	cmp	edx, 54
 	ja	.L35
-	sall	$2, %edx
-	movl	.L37@GOTOFF(%edx,%eax), %edx
-	addl	%edx, %eax
-	notrack jmp	*%eax
+	sal	edx, 2
+	mov	edx, DWORD PTR .L37@GOTOFF[edx+eax]
+	add	eax, edx
+	notrack jmp	eax
 	.section	.rodata
 	.align 4
 	.align 4
@@ -345,55 +346,55 @@ hexToQuad:
 	.long	.L36@GOTOFF
 	.text
 .L52:
-	movl	$0, %eax
+	mov	eax, 0
 	jmp	.L53
 .L51:
-	movl	$1, %eax
+	mov	eax, 1
 	jmp	.L53
 .L50:
-	movl	$2, %eax
+	mov	eax, 2
 	jmp	.L53
 .L49:
-	movl	$3, %eax
+	mov	eax, 3
 	jmp	.L53
 .L48:
-	movl	$4, %eax
+	mov	eax, 4
 	jmp	.L53
 .L47:
-	movl	$5, %eax
+	mov	eax, 5
 	jmp	.L53
 .L46:
-	movl	$6, %eax
+	mov	eax, 6
 	jmp	.L53
 .L45:
-	movl	$7, %eax
+	mov	eax, 7
 	jmp	.L53
 .L44:
-	movl	$8, %eax
+	mov	eax, 8
 	jmp	.L53
 .L43:
-	movl	$9, %eax
+	mov	eax, 9
 	jmp	.L53
 .L42:
-	movl	$10, %eax
+	mov	eax, 10
 	jmp	.L53
 .L41:
-	movl	$11, %eax
+	mov	eax, 11
 	jmp	.L53
 .L40:
-	movl	$12, %eax
+	mov	eax, 12
 	jmp	.L53
 .L39:
-	movl	$13, %eax
+	mov	eax, 13
 	jmp	.L53
 .L38:
-	movl	$14, %eax
+	mov	eax, 14
 	jmp	.L53
 .L36:
-	movl	$15, %eax
+	mov	eax, 15
 	jmp	.L53
 .L35:
-	movl	$0, %eax
+	mov	eax, 0
 .L53:
 	leave
 	.cfi_restore 5
@@ -408,56 +409,56 @@ decodeHex:
 .LFB5:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
 	jmp	.L55
 .L56:
-	movl	-8(%ebp), %eax
-	sall	$2, %eax
-	movl	12(%ebp), %edx
-	movl	%eax, %ecx
-	sarl	%cl, %edx
-	movl	%edx, %eax
-	movsbl	%al, %eax
-	andl	$15, %eax
-	movl	%eax, %edx
-	movl	16(%ebp), %eax
-	leal	3(%eax), %ecx
-	testl	%eax, %eax
-	cmovs	%ecx, %eax
-	sarl	$2, %eax
-	subl	-8(%ebp), %eax
-	movl	%eax, %ecx
-	movl	20(%ebp), %eax
-	addl	%ecx, %eax
-	movl	%eax, %ecx
-	movl	8(%ebp), %eax
-	leal	(%ecx,%eax), %ebx
-	pushl	%edx
+	mov	eax, DWORD PTR -8[ebp]
+	sal	eax, 2
+	mov	edx, DWORD PTR 12[ebp]
+	mov	ecx, eax
+	sar	edx, cl
+	mov	eax, edx
+	movsx	eax, al
+	and	eax, 15
+	mov	edx, eax
+	mov	eax, DWORD PTR 16[ebp]
+	lea	ecx, 3[eax]
+	test	eax, eax
+	cmovs	eax, ecx
+	sar	eax, 2
+	sub	eax, DWORD PTR -8[ebp]
+	mov	ecx, eax
+	mov	eax, DWORD PTR 20[ebp]
+	add	eax, ecx
+	mov	ecx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	lea	ebx, [ecx+eax]
+	push	edx
 	call	quadtoHex
-	addl	$4, %esp
-	movb	%al, (%ebx)
-	addl	$1, -8(%ebp)
+	add	esp, 4
+	mov	BYTE PTR [ebx], al
+	add	DWORD PTR -8[ebp], 1
 .L55:
-	movl	16(%ebp), %eax
-	leal	3(%eax), %edx
-	testl	%eax, %eax
-	cmovs	%edx, %eax
-	sarl	$2, %eax
-	cmpl	%eax, -8(%ebp)
+	mov	eax, DWORD PTR 16[ebp]
+	lea	edx, 3[eax]
+	test	eax, eax
+	cmovs	eax, edx
+	sar	eax, 2
+	cmp	DWORD PTR -8[ebp], eax
 	jl	.L56
 	nop
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -472,45 +473,45 @@ encodeHex:
 .LFB6:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
-	movl	$0, -12(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L58
 .L59:
-	movl	-8(%ebp), %eax
-	sall	$4, %eax
-	movl	%eax, %ebx
-	movl	12(%ebp), %edx
-	movl	-12(%ebp), %eax
-	addl	%edx, %eax
-	movl	%eax, %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movzbl	(%eax), %eax
-	movsbl	%al, %eax
-	pushl	%eax
+	mov	eax, DWORD PTR -8[ebp]
+	sal	eax, 4
+	mov	ebx, eax
+	mov	edx, DWORD PTR 12[ebp]
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, edx
+	mov	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	push	eax
 	call	hexToQuad
-	addl	$4, %esp
-	movsbl	%al, %eax
-	orl	%ebx, %eax
-	movl	%eax, -8(%ebp)
-	addl	$1, -12(%ebp)
+	add	esp, 4
+	movsx	eax, al
+	or	eax, ebx
+	mov	DWORD PTR -8[ebp], eax
+	add	DWORD PTR -12[ebp], 1
 .L58:
-	movl	16(%ebp), %eax
-	subl	12(%ebp), %eax
-	cmpl	%eax, -12(%ebp)
+	mov	eax, DWORD PTR 16[ebp]
+	sub	eax, DWORD PTR 12[ebp]
+	cmp	DWORD PTR -12[ebp], eax
 	jl	.L59
-	movl	-8(%ebp), %eax
-	movl	-4(%ebp), %ebx
+	mov	eax, DWORD PTR -8[ebp]
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -526,7 +527,7 @@ encodeHex:
 __x86.get_pc_thunk.ax:
 .LFB7:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE7:

@@ -1,4 +1,5 @@
 	.file	"frame_buffer.c"
+	.intel_syntax noprefix
 	.text
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
@@ -492,35 +493,38 @@ fb_setPixel:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %edx
-	cmpl	%edx, 8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	cmp	DWORD PTR 8[ebp], edx
 	jnb	.L5
-	movl	fb_height@GOT(%eax), %edx
-	movl	(%edx), %edx
-	cmpl	%edx, 12(%ebp)
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	cmp	DWORD PTR 12[ebp], edx
 	jnb	.L5
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %edx
-	movl	%edx, %ecx
-	imull	12(%ebp), %ecx
-	movl	8(%ebp), %edx
-	addl	%edx, %ecx
-	movl	fb_backBuffer@GOT(%eax), %eax
-	movl	16(%ebp), %edx
-	movl	%edx, (%eax,%ecx,4)
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	mov	eax, DWORD PTR fb_width@GOT[eax]
+	mov	eax, DWORD PTR [eax]
+	imul	eax, DWORD PTR 12[ebp]
+	mov	ecx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, ecx
+	sal	eax, 2
+	add	edx, eax
+	mov	eax, DWORD PTR 16[ebp]
+	mov	DWORD PTR [edx], eax
 	jmp	.L1
 .L5:
 	nop
 .L1:
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -533,45 +537,45 @@ init_fb:
 .LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
+	push	ebx
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movl	8(%edx), %ecx
-	movl	12(%edx), %ebx
-	movl	%ecx, %edx
-	movl	%edx, %ecx
-	movl	fb@GOT(%eax), %edx
-	movl	%ecx, (%edx)
-	movl	8(%ebp), %edx
-	movl	24(%edx), %ecx
-	movl	fb_height@GOT(%eax), %edx
-	movl	%ecx, (%edx)
-	movl	8(%ebp), %edx
-	movl	20(%edx), %ecx
-	movl	fb_width@GOT(%eax), %edx
-	movl	%ecx, (%edx)
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %edx
-	shrl	$3, %edx
-	movl	%edx, %ecx
-	movl	fb_terminal_w@GOT(%eax), %edx
-	movl	%ecx, (%edx)
-	movl	fb_height@GOT(%eax), %edx
-	movl	(%edx), %edx
-	shrl	$3, %edx
-	movl	fb_terminal_h@GOT(%eax), %eax
-	movl	%edx, (%eax)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	ecx, DWORD PTR 8[edx]
+	mov	ebx, DWORD PTR 12[edx]
+	mov	edx, ecx
+	mov	ecx, edx
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	DWORD PTR [edx], ecx
+	mov	edx, DWORD PTR 8[ebp]
+	mov	ecx, DWORD PTR 24[edx]
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	DWORD PTR [edx], ecx
+	mov	edx, DWORD PTR 8[ebp]
+	mov	ecx, DWORD PTR 20[edx]
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	DWORD PTR [edx], ecx
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	shr	edx, 3
+	mov	ecx, edx
+	mov	edx, DWORD PTR fb_terminal_w@GOT[eax]
+	mov	DWORD PTR [edx], ecx
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	shr	edx, 3
+	mov	eax, DWORD PTR fb_terminal_h@GOT[eax]
+	mov	DWORD PTR [eax], edx
 	nop
-	popl	%ebx
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -584,87 +588,94 @@ fb_write_cell:
 .LFB2:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
-	.cfi_offset 3, -12
+	push	esi
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	12(%ebp), %eax
-	movb	%al, -24(%ebp)
-	movl	fb_terminal_w@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	movl	%eax, %ecx
-	movl	8(%ebp), %eax
-	movl	$0, %edx
-	divl	%ecx
-	movl	%edx, %eax
-	sall	$3, %eax
-	movl	%eax, -16(%ebp)
-	movl	fb_terminal_w@GOT(%ebx), %eax
-	movl	(%eax), %eax
-	movl	%eax, %ecx
-	movl	8(%ebp), %eax
-	movl	$0, %edx
-	divl	%ecx
-	sall	$3, %eax
-	movl	%eax, -20(%ebp)
-	movl	$0, -8(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 12[ebp]
+	mov	BYTE PTR -28[ebp], al
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	ecx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	mov	edx, 0
+	div	ecx
+	mov	eax, edx
+	sal	eax, 3
+	mov	DWORD PTR -20[ebp], eax
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	ecx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	mov	edx, 0
+	div	ecx
+	sal	eax, 3
+	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L8
 .L13:
-	movl	$0, -12(%ebp)
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L9
 .L12:
-	movsbl	-24(%ebp), %edx
-	leal	FONT@GOTOFF(%ebx), %eax
-	sall	$3, %edx
-	addl	%eax, %edx
-	movl	-8(%ebp), %eax
-	addl	%edx, %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %edx
-	movl	-12(%ebp), %eax
-	movl	%eax, %ecx
-	sarl	%cl, %edx
-	movl	%edx, %eax
-	andl	$1, %eax
-	testl	%eax, %eax
+	movsx	edx, BYTE PTR -28[ebp]
+	lea	eax, FONT@GOTOFF[ebx]
+	sal	edx, 3
+	add	edx, eax
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, edx
+	movzx	eax, BYTE PTR [eax]
+	movzx	edx, al
+	mov	eax, DWORD PTR -16[ebp]
+	mov	ecx, eax
+	sar	edx, cl
+	mov	eax, edx
+	and	eax, 1
+	test	eax, eax
 	je	.L10
-	movl	16(%ebp), %eax
+	mov	eax, DWORD PTR 16[ebp]
 	jmp	.L11
 .L10:
-	movl	20(%ebp), %eax
+	mov	eax, DWORD PTR 20[ebp]
 .L11:
-	movl	-8(%ebp), %ecx
-	movl	-20(%ebp), %edx
-	addl	%edx, %ecx
-	movl	fb_width@GOT(%ebx), %edx
-	movl	(%edx), %edx
-	imull	%edx, %ecx
-	movl	-16(%ebp), %edx
-	addl	%edx, %ecx
-	movl	-12(%ebp), %edx
-	addl	%edx, %ecx
-	movl	fb_backBuffer@GOT(%ebx), %edx
-	movl	%eax, (%edx,%ecx,4)
-	addl	$1, -12(%ebp)
+	mov	edx, DWORD PTR fb@GOT[ebx]
+	mov	ecx, DWORD PTR [edx]
+	mov	esi, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR -24[ebp]
+	add	esi, edx
+	mov	edx, DWORD PTR fb_width@GOT[ebx]
+	mov	edx, DWORD PTR [edx]
+	imul	esi, edx
+	mov	edx, DWORD PTR -20[ebp]
+	add	esi, edx
+	mov	edx, DWORD PTR -16[ebp]
+	add	edx, esi
+	sal	edx, 2
+	add	edx, ecx
+	mov	DWORD PTR [edx], eax
+	add	DWORD PTR -16[ebp], 1
 .L9:
-	cmpl	$7, -12(%ebp)
+	cmp	DWORD PTR -16[ebp], 7
 	jle	.L12
-	addl	$1, -8(%ebp)
+	add	DWORD PTR -12[ebp], 1
 .L8:
-	cmpl	$7, -8(%ebp)
+	cmp	DWORD PTR -12[ebp], 7
 	jle	.L13
 	nop
 	nop
-	addl	$20, %esp
-	popl	%ebx
+	add	esp, 20
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	esi
+	.cfi_restore 6
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -677,74 +688,81 @@ printChar:
 .LFB3:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
-	.cfi_offset 3, -12
+	push	esi
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	16(%ebp), %edx
-	movb	%dl, -24(%ebp)
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 16[ebp]
+	mov	BYTE PTR -28[ebp], dl
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L15
 .L20:
-	movl	$0, -12(%ebp)
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L16
 .L19:
-	movsbl	-24(%ebp), %ecx
-	leal	FONT@GOTOFF(%eax), %edx
-	sall	$3, %ecx
-	addl	%edx, %ecx
-	movl	-8(%ebp), %edx
-	addl	%ecx, %edx
-	movzbl	(%edx), %edx
-	movzbl	%dl, %ebx
-	movl	-12(%ebp), %edx
-	movl	%edx, %ecx
-	sarl	%cl, %ebx
-	movl	%ebx, %edx
-	andl	$1, %edx
-	testl	%edx, %edx
+	movsx	ecx, BYTE PTR -28[ebp]
+	lea	edx, FONT@GOTOFF[eax]
+	sal	ecx, 3
+	add	ecx, edx
+	mov	edx, DWORD PTR -12[ebp]
+	add	edx, ecx
+	movzx	edx, BYTE PTR [edx]
+	movzx	ebx, dl
+	mov	edx, DWORD PTR -16[ebp]
+	mov	ecx, edx
+	sar	ebx, cl
+	mov	edx, ebx
+	and	edx, 1
+	test	edx, edx
 	je	.L17
-	movl	FG@GOT(%eax), %edx
-	movl	(%edx), %edx
+	mov	edx, DWORD PTR FG@GOT[eax]
+	mov	edx, DWORD PTR [edx]
 	jmp	.L18
 .L17:
-	movl	BG@GOT(%eax), %edx
-	movl	(%edx), %edx
+	mov	edx, DWORD PTR BG@GOT[eax]
+	mov	edx, DWORD PTR [edx]
 .L18:
-	movl	12(%ebp), %ecx
-	leal	0(,%ecx,8), %ebx
-	movl	-8(%ebp), %ecx
-	addl	%ecx, %ebx
-	movl	fb_width@GOT(%eax), %ecx
-	movl	(%ecx), %ecx
-	imull	%ebx, %ecx
-	movl	8(%ebp), %ebx
-	sall	$3, %ebx
-	addl	%ecx, %ebx
-	movl	-12(%ebp), %ecx
-	addl	%ecx, %ebx
-	movl	fb_backBuffer@GOT(%eax), %ecx
-	movl	%edx, (%ecx,%ebx,4)
-	addl	$1, -12(%ebp)
+	mov	ecx, DWORD PTR fb@GOT[eax]
+	mov	ebx, DWORD PTR [ecx]
+	mov	ecx, DWORD PTR 12[ebp]
+	lea	esi, 0[0+ecx*8]
+	mov	ecx, DWORD PTR -12[ebp]
+	add	esi, ecx
+	mov	ecx, DWORD PTR fb_width@GOT[eax]
+	mov	ecx, DWORD PTR [ecx]
+	imul	ecx, esi
+	mov	esi, DWORD PTR 8[ebp]
+	sal	esi, 3
+	add	esi, ecx
+	mov	ecx, DWORD PTR -16[ebp]
+	add	ecx, esi
+	sal	ecx, 2
+	add	ecx, ebx
+	mov	DWORD PTR [ecx], edx
+	add	DWORD PTR -16[ebp], 1
 .L16:
-	cmpl	$7, -12(%ebp)
+	cmp	DWORD PTR -16[ebp], 7
 	jle	.L19
-	addl	$1, -8(%ebp)
+	add	DWORD PTR -12[ebp], 1
 .L15:
-	cmpl	$7, -8(%ebp)
+	cmp	DWORD PTR -12[ebp], 7
 	jle	.L20
 	nop
 	nop
-	addl	$20, %esp
-	popl	%ebx
+	add	esp, 20
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	esi
+	.cfi_restore 6
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -757,84 +775,84 @@ printChar_Scaled:
 .LFB4:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%esi
-	pushl	%ebx
-	subl	$32, %esp
+	push	esi
+	push	ebx
+	sub	esp, 32
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	16(%ebp), %eax
-	movb	%al, -28(%ebp)
-	movl	$0, -12(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 16[ebp]
+	mov	BYTE PTR -28[ebp], al
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L22
 .L27:
-	movl	$0, -16(%ebp)
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L23
 .L26:
-	movsbl	-28(%ebp), %edx
-	leal	FONT@GOTOFF(%ebx), %eax
-	sall	$3, %edx
-	addl	%eax, %edx
-	movl	-12(%ebp), %eax
-	addl	%edx, %eax
-	movzbl	(%eax), %eax
-	movzbl	%al, %edx
-	movl	-16(%ebp), %eax
-	movl	%eax, %ecx
-	sarl	%cl, %edx
-	movl	%edx, %eax
-	andl	$1, %eax
-	testl	%eax, %eax
+	movsx	edx, BYTE PTR -28[ebp]
+	lea	eax, FONT@GOTOFF[ebx]
+	sal	edx, 3
+	add	edx, eax
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, edx
+	movzx	eax, BYTE PTR [eax]
+	movzx	edx, al
+	mov	eax, DWORD PTR -16[ebp]
+	mov	ecx, eax
+	sar	edx, cl
+	mov	eax, edx
+	and	eax, 1
+	test	eax, eax
 	je	.L24
-	movl	FG@GOT(%ebx), %eax
-	movl	(%eax), %eax
+	mov	eax, DWORD PTR FG@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
 	jmp	.L25
 .L24:
-	movl	BG@GOT(%ebx), %eax
-	movl	(%eax), %eax
+	mov	eax, DWORD PTR BG@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
 .L25:
-	movl	-12(%ebp), %ecx
-	movl	12(%ebp), %edx
-	addl	%edx, %ecx
-	movl	20(%ebp), %edx
-	addl	%edx, %ecx
-	movl	20(%ebp), %edx
-	imull	%edx, %ecx
-	movl	-16(%ebp), %esi
-	movl	8(%ebp), %edx
-	addl	%edx, %esi
-	movl	20(%ebp), %edx
-	addl	%edx, %esi
-	movl	20(%ebp), %edx
-	imull	%esi, %edx
-	pushl	%eax
-	pushl	20(%ebp)
-	pushl	%ecx
-	pushl	%edx
+	mov	ecx, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	add	ecx, edx
+	mov	edx, DWORD PTR 20[ebp]
+	add	ecx, edx
+	mov	edx, DWORD PTR 20[ebp]
+	imul	ecx, edx
+	mov	esi, DWORD PTR -16[ebp]
+	mov	edx, DWORD PTR 8[ebp]
+	add	esi, edx
+	mov	edx, DWORD PTR 20[ebp]
+	add	esi, edx
+	mov	edx, DWORD PTR 20[ebp]
+	imul	edx, esi
+	push	eax
+	push	DWORD PTR 20[ebp]
+	push	ecx
+	push	edx
 	call	pixelScaled
-	addl	$16, %esp
-	addl	$1, -16(%ebp)
+	add	esp, 16
+	add	DWORD PTR -16[ebp], 1
 .L23:
-	cmpl	$7, -16(%ebp)
+	cmp	DWORD PTR -16[ebp], 7
 	jle	.L26
-	addl	$1, -12(%ebp)
+	add	DWORD PTR -12[ebp], 1
 .L22:
-	cmpl	$7, -12(%ebp)
+	cmp	DWORD PTR -12[ebp], 7
 	jle	.L27
 	nop
 	nop
-	leal	-8(%ebp), %esp
-	popl	%ebx
+	lea	esp, -8[ebp]
+	pop	ebx
 	.cfi_restore 3
-	popl	%esi
+	pop	esi
 	.cfi_restore 6
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -847,51 +865,54 @@ pixelScaled:
 .LFB5:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
 	jmp	.L29
 .L32:
-	movl	$0, -12(%ebp)
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L30
 .L31:
-	movl	-12(%ebp), %ecx
-	movl	12(%ebp), %edx
-	addl	%edx, %ecx
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %edx
-	imull	%edx, %ecx
-	movl	8(%ebp), %edx
-	addl	%edx, %ecx
-	movl	-8(%ebp), %edx
-	leal	(%ecx,%edx), %ebx
-	movl	fb_backBuffer@GOT(%eax), %edx
-	movl	20(%ebp), %ecx
-	movl	%ecx, (%edx,%ebx,4)
-	addl	$1, -12(%ebp)
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	ecx, DWORD PTR [edx]
+	mov	ebx, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	add	ebx, edx
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	imul	ebx, edx
+	mov	edx, DWORD PTR 8[ebp]
+	add	ebx, edx
+	mov	edx, DWORD PTR -8[ebp]
+	add	edx, ebx
+	sal	edx, 2
+	add	ecx, edx
+	mov	edx, DWORD PTR 20[ebp]
+	mov	DWORD PTR [ecx], edx
+	add	DWORD PTR -12[ebp], 1
 .L30:
-	movl	-12(%ebp), %edx
-	cmpl	16(%ebp), %edx
+	mov	edx, DWORD PTR -12[ebp]
+	cmp	edx, DWORD PTR 16[ebp]
 	jl	.L31
-	addl	$1, -8(%ebp)
+	add	DWORD PTR -8[ebp], 1
 .L29:
-	movl	-8(%ebp), %edx
-	cmpl	16(%ebp), %edx
+	mov	edx, DWORD PTR -8[ebp]
+	cmp	edx, DWORD PTR 16[ebp]
 	jl	.L32
 	nop
 	nop
-	addl	$16, %esp
-	popl	%ebx
+	add	esp, 16
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -904,21 +925,21 @@ fb_set_color:
 .LFB6:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	FG@GOT(%eax), %edx
-	movl	8(%ebp), %ecx
-	movl	%ecx, (%edx)
-	movl	BG@GOT(%eax), %eax
-	movl	12(%ebp), %edx
-	movl	%edx, (%eax)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR FG@GOT[eax]
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	DWORD PTR [edx], ecx
+	mov	eax, DWORD PTR BG@GOT[eax]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	DWORD PTR [eax], edx
 	nop
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -931,38 +952,36 @@ fb_clear:
 .LFB7:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
-	.cfi_offset 3, -12
+	sub	esp, 16
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
 	jmp	.L35
 .L36:
-	movl	fb_backBuffer@GOT(%eax), %edx
-	movl	-8(%ebp), %ecx
-	movl	8(%ebp), %ebx
-	movl	%ebx, (%edx,%ecx,4)
-	addl	$1, -8(%ebp)
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	mov	ecx, DWORD PTR -4[ebp]
+	sal	ecx, 2
+	add	ecx, edx
+	mov	edx, DWORD PTR 8[ebp]
+	mov	DWORD PTR [ecx], edx
+	add	DWORD PTR -4[ebp], 1
 .L35:
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %ecx
-	movl	fb_height@GOT(%eax), %edx
-	movl	(%edx), %edx
-	imull	%ecx, %edx
-	cmpl	%edx, -8(%ebp)
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	ecx, DWORD PTR [edx]
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	imul	edx, ecx
+	cmp	DWORD PTR -4[ebp], edx
 	jb	.L36
 	nop
 	nop
-	addl	$16, %esp
-	popl	%ebx
-	.cfi_restore 3
-	popl	%ebp
+	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -975,56 +994,56 @@ fb_write:
 .LFB8:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%edi
-	pushl	%esi
-	pushl	%ebx
-	subl	$16, %esp
+	push	edi
+	push	esi
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 7, -12
 	.cfi_offset 6, -16
 	.cfi_offset 3, -20
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	$0, -16(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L38
 .L39:
-	movl	BG@GOT(%ebx), %eax
-	movl	(%eax), %ecx
-	movl	FG@GOT(%ebx), %eax
-	movl	(%eax), %edx
-	movl	8(%ebp), %esi
-	movl	-16(%ebp), %eax
-	addl	%esi, %eax
-	movzbl	(%eax), %eax
-	movsbl	%al, %eax
-	movl	fb_cursor@GOTOFF(%ebx), %esi
-	movl	%esi, %edi
-	movl	-16(%ebp), %esi
-	addl	%edi, %esi
-	pushl	%ecx
-	pushl	%edx
-	pushl	%eax
-	pushl	%esi
+	mov	eax, DWORD PTR BG@GOT[ebx]
+	mov	ecx, DWORD PTR [eax]
+	mov	eax, DWORD PTR FG@GOT[ebx]
+	mov	edx, DWORD PTR [eax]
+	mov	esi, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR -16[ebp]
+	add	eax, esi
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	mov	esi, DWORD PTR fb_cursor@GOTOFF[ebx]
+	mov	edi, esi
+	mov	esi, DWORD PTR -16[ebp]
+	add	esi, edi
+	push	ecx
+	push	edx
+	push	eax
+	push	esi
 	call	fb_write_cell
-	addl	$16, %esp
-	addl	$1, -16(%ebp)
+	add	esp, 16
+	add	DWORD PTR -16[ebp], 1
 .L38:
-	movl	-16(%ebp), %eax
-	cmpl	12(%ebp), %eax
+	mov	eax, DWORD PTR -16[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
 	jb	.L39
-	movl	$0, %eax
-	leal	-12(%ebp), %esp
-	popl	%ebx
+	mov	eax, 0
+	lea	esp, -12[ebp]
+	pop	ebx
 	.cfi_restore 3
-	popl	%esi
+	pop	esi
 	.cfi_restore 6
-	popl	%edi
+	pop	edi
 	.cfi_restore 7
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1037,58 +1056,58 @@ fb_write_start:
 .LFB9:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%edi
-	pushl	%esi
-	pushl	%ebx
-	subl	$16, %esp
+	push	edi
+	push	esi
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 7, -12
 	.cfi_offset 6, -16
 	.cfi_offset 3, -20
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	$0, -16(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L42
 .L43:
-	movl	BG@GOT(%ebx), %eax
-	movl	(%eax), %ecx
-	movl	FG@GOT(%ebx), %eax
-	movl	(%eax), %edx
-	movl	-16(%ebp), %esi
-	movl	16(%ebp), %eax
-	addl	%eax, %esi
-	movl	8(%ebp), %eax
-	addl	%esi, %eax
-	movzbl	(%eax), %eax
-	movsbl	%al, %eax
-	movl	fb_cursor@GOTOFF(%ebx), %esi
-	movl	%esi, %edi
-	movl	-16(%ebp), %esi
-	addl	%edi, %esi
-	pushl	%ecx
-	pushl	%edx
-	pushl	%eax
-	pushl	%esi
+	mov	eax, DWORD PTR BG@GOT[ebx]
+	mov	ecx, DWORD PTR [eax]
+	mov	eax, DWORD PTR FG@GOT[ebx]
+	mov	edx, DWORD PTR [eax]
+	mov	esi, DWORD PTR -16[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	add	esi, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, esi
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	mov	esi, DWORD PTR fb_cursor@GOTOFF[ebx]
+	mov	edi, esi
+	mov	esi, DWORD PTR -16[ebp]
+	add	esi, edi
+	push	ecx
+	push	edx
+	push	eax
+	push	esi
 	call	fb_write_cell
-	addl	$16, %esp
-	addl	$1, -16(%ebp)
+	add	esp, 16
+	add	DWORD PTR -16[ebp], 1
 .L42:
-	movl	-16(%ebp), %eax
-	cmpl	12(%ebp), %eax
+	mov	eax, DWORD PTR -16[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
 	jb	.L43
-	movl	$0, %eax
-	leal	-12(%ebp), %esp
-	popl	%ebx
+	mov	eax, 0
+	lea	esp, -12[ebp]
+	pop	ebx
 	.cfi_restore 3
-	popl	%esi
+	pop	esi
 	.cfi_restore 6
-	popl	%edi
+	pop	edi
 	.cfi_restore 7
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1101,66 +1120,66 @@ fb_write_xy:
 .LFB10:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%edi
-	pushl	%esi
-	pushl	%ebx
-	subl	$16, %esp
+	push	edi
+	push	esi
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 7, -12
 	.cfi_offset 6, -16
 	.cfi_offset 3, -20
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	$0, -16(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L46
 .L47:
-	movl	BG@GOT(%ebx), %eax
-	movl	(%eax), %edi
-	movl	FG@GOT(%ebx), %eax
-	movl	(%eax), %esi
-	movl	-16(%ebp), %edx
-	movl	16(%ebp), %eax
-	addl	%edx, %eax
-	movl	%eax, %edx
-	movl	8(%ebp), %eax
-	addl	%edx, %eax
-	movzbl	(%eax), %eax
-	movsbl	%al, %ecx
-	movl	24(%ebp), %edx
-	movl	%edx, %eax
-	sall	$2, %eax
-	addl	%edx, %eax
-	sall	$4, %eax
-	movl	%eax, %edx
-	movl	20(%ebp), %eax
-	addl	%eax, %edx
-	movl	-16(%ebp), %eax
-	addl	%edx, %eax
-	pushl	%edi
-	pushl	%esi
-	pushl	%ecx
-	pushl	%eax
+	mov	eax, DWORD PTR BG@GOT[ebx]
+	mov	edi, DWORD PTR [eax]
+	mov	eax, DWORD PTR FG@GOT[ebx]
+	mov	esi, DWORD PTR [eax]
+	mov	edx, DWORD PTR -16[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	add	eax, edx
+	mov	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, edx
+	movzx	eax, BYTE PTR [eax]
+	movsx	ecx, al
+	mov	edx, DWORD PTR 24[ebp]
+	mov	eax, edx
+	sal	eax, 2
+	add	eax, edx
+	sal	eax, 4
+	mov	edx, eax
+	mov	eax, DWORD PTR 20[ebp]
+	add	edx, eax
+	mov	eax, DWORD PTR -16[ebp]
+	add	eax, edx
+	push	edi
+	push	esi
+	push	ecx
+	push	eax
 	call	fb_write_cell
-	addl	$16, %esp
-	addl	$1, -16(%ebp)
+	add	esp, 16
+	add	DWORD PTR -16[ebp], 1
 .L46:
-	movl	-16(%ebp), %eax
-	cmpl	12(%ebp), %eax
+	mov	eax, DWORD PTR -16[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
 	jl	.L47
 	nop
 	nop
-	leal	-12(%ebp), %esp
-	popl	%ebx
+	lea	esp, -12[ebp]
+	pop	ebx
 	.cfi_restore 3
-	popl	%esi
+	pop	esi
 	.cfi_restore 6
-	popl	%edi
+	pop	edi
 	.cfi_restore 7
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1173,17 +1192,17 @@ fb_move_cursor:
 .LFB11:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movl	%edx, fb_cursor@GOTOFF(%eax)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	DWORD PTR fb_cursor@GOTOFF[eax], edx
 	nop
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1196,22 +1215,22 @@ fb_move_cursor_xy:
 .LFB12:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	fb_terminal_w@GOT(%eax), %edx
-	movl	(%edx), %edx
-	movl	%edx, %ecx
-	imull	12(%ebp), %ecx
-	movl	8(%ebp), %edx
-	addl	%ecx, %edx
-	movl	%edx, fb_cursor@GOTOFF(%eax)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR fb_terminal_w@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	mov	ecx, edx
+	imul	ecx, DWORD PTR 12[ebp]
+	mov	edx, DWORD PTR 8[ebp]
+	add	edx, ecx
+	mov	DWORD PTR fb_cursor@GOTOFF[eax], edx
 	nop
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1224,43 +1243,43 @@ fb_copyBuffer:
 .LFB13:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
 	jmp	.L51
 .L52:
-	movl	fb@GOT(%eax), %edx
-	movl	(%edx), %edx
-	movl	-8(%ebp), %ecx
-	sall	$2, %ecx
-	leal	(%edx,%ecx), %ebx
-	movl	fb_backBuffer@GOT(%eax), %edx
-	movl	-8(%ebp), %ecx
-	movl	(%edx,%ecx,4), %edx
-	movl	%edx, (%ebx)
-	addl	$1, -8(%ebp)
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	mov	ecx, DWORD PTR -8[ebp]
+	sal	ecx, 2
+	lea	ebx, [edx+ecx]
+	mov	edx, DWORD PTR fb_backBuffer@GOT[eax]
+	mov	ecx, DWORD PTR -8[ebp]
+	mov	edx, DWORD PTR [edx+ecx*4]
+	mov	DWORD PTR [ebx], edx
+	add	DWORD PTR -8[ebp], 1
 .L51:
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %ecx
-	movl	fb_height@GOT(%eax), %edx
-	movl	(%edx), %edx
-	imull	%ecx, %edx
-	cmpl	%edx, -8(%ebp)
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	ecx, DWORD PTR [edx]
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	imul	edx, ecx
+	cmp	DWORD PTR -8[ebp], edx
 	jb	.L52
 	nop
 	nop
-	addl	$16, %esp
-	popl	%ebx
+	add	esp, 16
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1273,38 +1292,38 @@ fb_clearBackBuffer:
 .LFB14:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$16, %esp
+	push	ebx
+	sub	esp, 16
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	$0, -8(%ebp)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
 	jmp	.L54
 .L55:
-	movl	fb_backBuffer@GOT(%eax), %edx
-	movl	-8(%ebp), %ecx
-	movl	8(%ebp), %ebx
-	movl	%ebx, (%edx,%ecx,4)
-	addl	$1, -8(%ebp)
+	mov	edx, DWORD PTR fb_backBuffer@GOT[eax]
+	mov	ecx, DWORD PTR -8[ebp]
+	mov	ebx, DWORD PTR 8[ebp]
+	mov	DWORD PTR [edx+ecx*4], ebx
+	add	DWORD PTR -8[ebp], 1
 .L54:
-	movl	fb_width@GOT(%eax), %edx
-	movl	(%edx), %ecx
-	movl	fb_height@GOT(%eax), %edx
-	movl	(%edx), %edx
-	imull	%ecx, %edx
-	cmpl	%edx, -8(%ebp)
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	ecx, DWORD PTR [edx]
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	imul	edx, ecx
+	cmp	DWORD PTR -8[ebp], edx
 	jb	.L55
 	nop
 	nop
-	addl	$16, %esp
-	popl	%ebx
+	add	esp, 16
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -1318,7 +1337,7 @@ fb_clearBackBuffer:
 __x86.get_pc_thunk.ax:
 .LFB15:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE15:
@@ -1329,7 +1348,7 @@ __x86.get_pc_thunk.ax:
 __x86.get_pc_thunk.bx:
 .LFB16:
 	.cfi_startproc
-	movl	(%esp), %ebx
+	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE16:

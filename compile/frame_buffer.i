@@ -532,7 +532,7 @@ void fb_setPixel(u32 x, u32 y, u32 color){
     if (fb_width <= x || fb_height <= y)
         return;
 
-    fb_backBuffer[ fb_width * y + x] = color;
+    fb[ fb_width * y + x] = color;
 }
 
 void init_fb(struct multiboot_tag_framebuffer *tagfb){
@@ -548,14 +548,14 @@ void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
     u32 y = (index / fb_terminal_w)*8;
     for(int layer = 0; layer < 8; layer++){
         for(int pixel = 0; pixel < 8; pixel++){
-            fb_backBuffer[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+            fb[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
         }
     }
 }
 void printChar(unsigned int x, unsigned int y, char c){
     for(int layer = 0; layer < 8; layer++){
         for(int pixel = 0; pixel < 8; pixel++){
-            fb_backBuffer[fb_width * ((y*8)+layer) + (x*8)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
+            fb[fb_width * ((y*8)+layer) + (x*8)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
         }
     }
 }
@@ -572,7 +572,7 @@ void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale){
 void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color){
     for(int scalex = 0; scalex<scale; scalex++){
         for(int scaley = 0; scaley<scale; scaley++){
-            fb_backBuffer[fb_width*(y+scaley)+x+scalex] = color;
+            fb[fb_width*(y+scaley)+x+scalex] = color;
         }
     }
 }
@@ -584,7 +584,7 @@ void fb_set_color(unsigned int fg, unsigned int bg){
 
 void fb_clear(unsigned int color){
     for(u32 i = 0; i < fb_width*fb_height; i++){
-        fb_backBuffer[i] = color;
+        fb[i] = color;
     }
 }
 

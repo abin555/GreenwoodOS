@@ -584,6 +584,15 @@ char quadToHex(char quad);
 char hexToQuad(char hex);
 # 8 "./include/terminal.h" 2
 
+# 1 "./include/pong.h" 1
+
+
+
+
+
+
+void pong();
+# 10 "./include/terminal.h" 2
 
 
 
@@ -594,6 +603,8 @@ char Terminal_Buffer[1024/8];
 char Terminal_OUT_Buffer[1024/8*40];
 
 char Terminal_Arguments[1024/8];
+
+void terminal_memory_view();
 
 int terminal_compare(char *buffer, int start, int end, int len);
 
@@ -676,6 +687,20 @@ char decode[500];
 
 void KYBRD_DEBUG_DISPLAY();
 # 9 "main.c" 2
+# 1 "./include/gfx.h" 1
+
+
+
+
+
+
+void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
+void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
+void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
+# 10 "main.c" 2
+# 1 "./include/pong.h" 1
+# 11 "main.c" 2
+
 
 extern void load_gdt();
 
@@ -733,67 +758,6 @@ void flyingDot(){
   }
 }
 
-
-
-
-void pong(){
-  unsigned int ascii_pointer = 0;
-  int paddley = fb_height/2;
-  int ballx = fb_width/2;
-  int bally = fb_height/2;
-  int ballvx = -10;
-  int ballvy = 10;
-  while(1){
-    fb_clearBackBuffer(0x000000);
-
-    if(1 ){
-
-      ballx+=ballvx;
-      bally+=ballvy;
-      if(ballx > (int) fb_width - 50 || ballx < 100){
-        if(ballx < 100){
-          if(bally > paddley-(150 / 2) && bally < paddley+(150 / 2)){
-            ballvx *= -1;
-          }
-          else{
-            ballx = fb_width/2;
-            bally = fb_height/2;
-            ballvx*=-1;
-            ballvx++;
-            ballvy++;
-          }
-        }
-        else{
-          ballvx *= -1;
-        }
-      }
-      if(bally > (int) fb_height - 50 || bally < 50){
-        ballvy *= -1;
-      }
-    }
-    if(keyboard_ascii_pointer != ascii_pointer){
-      ascii_pointer=keyboard_ascii_pointer;
-
-      if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 'w'){
-        if(paddley > 150){
-          paddley-=25;
-        }
-      }
-      else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 's'){
-        if(paddley < (int) fb_height - 150){
-          paddley+=25;
-        }
-      }
-    }
-    pixelScaled(ballx ,bally,10,0xFFFFFF);
-
-    for(int drawPaddle = 0; drawPaddle < 150; drawPaddle++){
-      fb_setPixel(100, paddley-(150/2)+drawPaddle,0xFFFFFF);
-    }
-    fb_copyBuffer();
-  }
-}
-
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
 
@@ -820,6 +784,12 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
-  pong();
+
+  char teststr[] = "Test";
+  fb_move_cursor_xy(5,5);
+  fb_write_start(teststr, 4, 0);
+  while(1){
+    terminal_handler();
+  }
   return 0;
 }

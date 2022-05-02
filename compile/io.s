@@ -1,4 +1,5 @@
 	.file	"io.c"
+	.intel_syntax noprefix
 	.text
 	.globl	INT_Software_Value
 	.data
@@ -14,28 +15,28 @@ software_interrupt:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$20, %esp
+	push	ebx
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %edx
-	movb	%dl, -12(%ebp)
-	movl	INT_Software_Value@GOTOFF(%eax), %edx
-	movzbl	-12(%ebp), %ecx
-	movb	%cl, (%edx)
-	movl	%eax, %ebx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	mov	BYTE PTR -12[ebp], dl
+	mov	edx, DWORD PTR INT_Software_Value@GOTOFF[eax]
+	movzx	ecx, BYTE PTR -12[ebp]
+	mov	BYTE PTR [edx], cl
+	mov	ebx, eax
 	call	software_int@PLT
 	nop
-	addl	$20, %esp
-	popl	%ebx
+	add	esp, 20
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -48,18 +49,18 @@ WriteMem:
 .LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %eax
-	movl	12(%ebp), %edx
-	movl	%edx, (%eax)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	DWORD PTR [eax], edx
 	nop
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -72,16 +73,16 @@ ReadMem:
 .LFB2:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	8(%ebp), %eax
-	movl	(%eax), %eax
-	popl	%ebp
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR [eax]
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -95,7 +96,7 @@ ReadMem:
 __x86.get_pc_thunk.ax:
 .LFB3:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE3:

@@ -1,4 +1,5 @@
 	.file	"interrupts.c"
+	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
 	.globl	SYS_MODE
@@ -39,39 +40,39 @@ interrupts_init_descriptor:
 .LFB0:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
+	push	ebx
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	12(%ebp), %edx
-	shrl	$16, %edx
-	movl	%edx, %ebx
-	movl	idt_descriptors@GOT(%eax), %edx
-	movl	8(%ebp), %ecx
-	movw	%bx, 6(%edx,%ecx,8)
-	movl	12(%ebp), %edx
-	movl	%edx, %ebx
-	movl	idt_descriptors@GOT(%eax), %edx
-	movl	8(%ebp), %ecx
-	movw	%bx, (%edx,%ecx,8)
-	movl	idt_descriptors@GOT(%eax), %edx
-	movl	8(%ebp), %ecx
-	movw	$8, 2(%edx,%ecx,8)
-	movl	idt_descriptors@GOT(%eax), %edx
-	movl	8(%ebp), %ecx
-	movb	$0, 4(%edx,%ecx,8)
-	movl	idt_descriptors@GOT(%eax), %eax
-	movl	8(%ebp), %edx
-	movb	$-114, 5(%eax,%edx,8)
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 12[ebp]
+	shr	edx, 16
+	mov	ebx, edx
+	mov	edx, DWORD PTR idt_descriptors@GOT[eax]
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	WORD PTR 6[edx+ecx*8], bx
+	mov	edx, DWORD PTR 12[ebp]
+	mov	ebx, edx
+	mov	edx, DWORD PTR idt_descriptors@GOT[eax]
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	WORD PTR [edx+ecx*8], bx
+	mov	edx, DWORD PTR idt_descriptors@GOT[eax]
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	WORD PTR 2[edx+ecx*8], 8
+	mov	edx, DWORD PTR idt_descriptors@GOT[eax]
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	BYTE PTR 4[edx+ecx*8], 0
+	mov	eax, DWORD PTR idt_descriptors@GOT[eax]
+	mov	edx, DWORD PTR 8[ebp]
+	mov	BYTE PTR 5[eax+edx*8], -114
 	nop
-	popl	%ebx
+	pop	ebx
 	.cfi_restore 3
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -84,49 +85,49 @@ interrupt_install_idt:
 .LFB1:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	movl	int_handler_33@GOT(%ebx), %eax
-	pushl	%eax
-	pushl	$33
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR int_handler_33@GOT[ebx]
+	push	eax
+	push	33
 	call	interrupts_init_descriptor
-	addl	$8, %esp
-	movl	int_handler_34@GOT(%ebx), %eax
-	pushl	%eax
-	pushl	$34
+	add	esp, 8
+	mov	eax, DWORD PTR int_handler_34@GOT[ebx]
+	push	eax
+	push	34
 	call	interrupts_init_descriptor
-	addl	$8, %esp
-	movl	int_handler_128@GOT(%ebx), %eax
-	pushl	%eax
-	pushl	$128
+	add	esp, 8
+	mov	eax, DWORD PTR int_handler_128@GOT[ebx]
+	push	eax
+	push	128
 	call	interrupts_init_descriptor
-	addl	$8, %esp
-	movl	idt_descriptors@GOT(%ebx), %eax
-	movl	%eax, %edx
-	movl	idt@GOT(%ebx), %eax
-	movl	%edx, 2(%eax)
-	movl	idt@GOT(%ebx), %eax
-	movw	$2048, (%eax)
-	movl	idt@GOT(%ebx), %eax
-	subl	$12, %esp
-	pushl	%eax
+	add	esp, 8
+	mov	eax, DWORD PTR idt_descriptors@GOT[ebx]
+	mov	edx, eax
+	mov	eax, DWORD PTR idt@GOT[ebx]
+	mov	DWORD PTR 2[eax], edx
+	mov	eax, DWORD PTR idt@GOT[ebx]
+	mov	WORD PTR [eax], 2048
+	mov	eax, DWORD PTR idt@GOT[ebx]
+	sub	esp, 12
+	push	eax
 	call	load_idt@PLT
-	addl	$16, %esp
-	subl	$8, %esp
-	pushl	$40
-	pushl	$32
+	add	esp, 16
+	sub	esp, 8
+	push	40
+	push	32
 	call	pic_remap@PLT
-	addl	$16, %esp
+	add	esp, 16
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -141,46 +142,46 @@ KERNEL_INTERRUPT:
 .LFB2:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	call	__x86.get_pc_thunk.ax
-	addl	$_GLOBAL_OFFSET_TABLE_, %eax
-	movl	INT_Software_Value@GOT(%eax), %edx
-	movl	(%edx), %edx
-	movzbl	(%edx), %edx
-	movzbl	%dl, %edx
-	cmpl	$4, %edx
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR INT_Software_Value@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	movzx	edx, BYTE PTR [edx]
+	movzx	edx, dl
+	cmp	edx, 4
 	je	.L4
-	cmpl	$4, %edx
+	cmp	edx, 4
 	jg	.L9
-	cmpl	$3, %edx
+	cmp	edx, 3
 	je	.L6
-	cmpl	$3, %edx
+	cmp	edx, 3
 	jg	.L9
-	cmpl	$1, %edx
+	cmp	edx, 1
 	je	.L7
-	cmpl	$2, %edx
+	cmp	edx, 2
 	je	.L8
 	jmp	.L9
 .L7:
-	movb	$1, SYS_MODE@GOTOFF(%eax)
+	mov	BYTE PTR SYS_MODE@GOTOFF[eax], 1
 	jmp	.L5
 .L8:
-	movb	$2, SYS_MODE@GOTOFF(%eax)
+	mov	BYTE PTR SYS_MODE@GOTOFF[eax], 2
 	jmp	.L5
 .L6:
-	movb	$3, SYS_MODE@GOTOFF(%eax)
+	mov	BYTE PTR SYS_MODE@GOTOFF[eax], 3
 	jmp	.L5
 .L4:
-	movb	$4, SYS_MODE@GOTOFF(%eax)
+	mov	BYTE PTR SYS_MODE@GOTOFF[eax], 4
 	nop
 .L5:
 .L9:
 	nop
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -193,47 +194,47 @@ SYS_CALL:
 .LFB3:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%esi
-	pushl	%ebx
+	push	esi
+	push	ebx
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	subl	$4, %esp
-	pushl	$83
-	pushl	$1
-	pushl	$79
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	sub	esp, 4
+	push	83
+	push	1
+	push	79
 	call	printChar@PLT
-	addl	$16, %esp
-	movl	8(%ebp), %eax
-	pushl	$0
-	pushl	$32
-	pushl	%eax
-	movl	STR_edit@GOT(%ebx), %eax
-	pushl	%eax
+	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
 	call	decodeHex@PLT
-	addl	$16, %esp
-	subl	$12, %esp
-	pushl	$21
-	pushl	$0
-	pushl	$0
-	pushl	$9
-	movl	STR_edit@GOT(%ebx), %eax
-	pushl	%eax
+	add	esp, 16
+	sub	esp, 12
+	push	21
+	push	0
+	push	0
+	push	9
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
 	call	fb_write_xy@PLT
-	addl	$32, %esp
-	movl	8(%ebp), %eax
-	cmpl	$5, %eax
+	add	esp, 32
+	mov	eax, DWORD PTR 8[ebp]
+	cmp	eax, 5
 	ja	.L18
-	sall	$2, %eax
-	movl	.L13@GOTOFF(%eax,%ebx), %eax
-	addl	%ebx, %eax
-	notrack jmp	*%eax
+	sal	eax, 2
+	mov	eax, DWORD PTR .L13@GOTOFF[eax+ebx]
+	add	eax, ebx
+	notrack jmp	eax
 	.section	.rodata
 	.align 4
 	.align 4
@@ -242,63 +243,64 @@ SYS_CALL:
 	.long	.L17@GOTOFF
 	.long	.L16@GOTOFF
 	.long	.L19@GOTOFF
-	.long	.L19@GOTOFF
+	.long	.L14@GOTOFF
 	.long	.L12@GOTOFF
 	.text
 .L17:
-	subl	$4, %esp
-	pushl	$80
-	pushl	$2
-	pushl	$79
-	call	printChar@PLT
-	addl	$16, %esp
-	movl	BG@GOT(%ebx), %eax
-	movl	(%eax), %esi
-	movl	FG@GOT(%ebx), %eax
-	movl	(%eax), %ecx
-	movl	16(%ebp), %eax
-	movsbl	%al, %edx
-	movl	12(%ebp), %eax
-	pushl	%esi
-	pushl	%ecx
-	pushl	%edx
-	pushl	%eax
+	mov	eax, DWORD PTR BG@GOT[ebx]
+	mov	esi, DWORD PTR [eax]
+	mov	eax, DWORD PTR FG@GOT[ebx]
+	mov	ecx, DWORD PTR [eax]
+	mov	eax, DWORD PTR 16[ebp]
+	movsx	edx, al
+	mov	eax, DWORD PTR 12[ebp]
+	push	esi
+	push	ecx
+	push	edx
+	push	eax
 	call	fb_write_cell@PLT
-	addl	$16, %esp
+	add	esp, 16
 	jmp	.L11
 .L16:
-	movl	20(%ebp), %edx
-	movl	16(%ebp), %eax
-	movl	12(%ebp), %ecx
-	subl	$4, %esp
-	pushl	%edx
-	pushl	%eax
-	pushl	%ecx
+	mov	edx, DWORD PTR 20[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	mov	ecx, DWORD PTR 12[ebp]
+	sub	esp, 4
+	push	edx
+	push	eax
+	push	ecx
 	call	fb_write_start@PLT
-	addl	$16, %esp
+	add	esp, 16
+	jmp	.L11
+.L14:
+	mov	eax, DWORD PTR 12[ebp]
+	sub	esp, 12
+	push	eax
+	call	fb_move_cursor@PLT
+	add	esp, 16
 	jmp	.L11
 .L12:
-	movl	20(%ebp), %ecx
-	movl	16(%ebp), %edx
-	movl	12(%ebp), %eax
-	subl	$4, %esp
-	pushl	%ecx
-	pushl	%edx
-	pushl	%eax
+	mov	ecx, DWORD PTR 20[ebp]
+	mov	edx, DWORD PTR 16[ebp]
+	mov	eax, DWORD PTR 12[ebp]
+	sub	esp, 4
+	push	ecx
+	push	edx
+	push	eax
 	call	fb_setPixel@PLT
-	addl	$16, %esp
+	add	esp, 16
 	jmp	.L11
 .L19:
 	nop
 .L11:
 .L18:
 	nop
-	leal	-8(%ebp), %esp
-	popl	%ebx
+	lea	esp, -8[ebp]
+	pop	ebx
 	.cfi_restore 3
-	popl	%esi
+	pop	esi
 	.cfi_restore 6
-	popl	%ebp
+	pop	ebp
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
@@ -311,52 +313,52 @@ interrupt_handler:
 .LFB4:
 	.cfi_startproc
 	endbr32
-	pushl	%ebp
+	push	ebp
 	.cfi_def_cfa_offset 8
 	.cfi_offset 5, -8
-	movl	%esp, %ebp
+	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	pushl	%ebx
-	subl	$4, %esp
+	push	ebx
+	sub	esp, 4
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
-	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
-	cmpl	$128, 36(%ebp)
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	cmp	DWORD PTR 36[ebp], 128
 	je	.L21
-	cmpl	$128, 36(%ebp)
+	cmp	DWORD PTR 36[ebp], 128
 	ja	.L26
-	cmpl	$33, 36(%ebp)
+	cmp	DWORD PTR 36[ebp], 33
 	je	.L23
-	cmpl	$34, 36(%ebp)
+	cmp	DWORD PTR 36[ebp], 34
 	je	.L24
 	jmp	.L26
 .L23:
 	call	keyboard_handle_interrupt@PLT
-	subl	$12, %esp
-	pushl	36(%ebp)
+	sub	esp, 12
+	push	DWORD PTR 36[ebp]
 	call	pic_acknowledge@PLT
-	addl	$16, %esp
+	add	esp, 16
 	jmp	.L25
 .L24:
 	call	KERNEL_INTERRUPT
 	jmp	.L25
 .L21:
-	subl	$4, %esp
-	pushl	32(%ebp)
-	pushl	28(%ebp)
-	pushl	24(%ebp)
-	pushl	20(%ebp)
-	pushl	16(%ebp)
-	pushl	12(%ebp)
-	pushl	8(%ebp)
+	sub	esp, 4
+	push	DWORD PTR 32[ebp]
+	push	DWORD PTR 28[ebp]
+	push	DWORD PTR 24[ebp]
+	push	DWORD PTR 20[ebp]
+	push	DWORD PTR 16[ebp]
+	push	DWORD PTR 12[ebp]
+	push	DWORD PTR 8[ebp]
 	call	SYS_CALL
-	addl	$32, %esp
+	add	esp, 32
 	jmp	.L25
 .L26:
 	nop
 .L25:
 	nop
-	movl	-4(%ebp), %ebx
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_restore 3
@@ -372,7 +374,7 @@ interrupt_handler:
 __x86.get_pc_thunk.ax:
 .LFB5:
 	.cfi_startproc
-	movl	(%esp), %eax
+	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE5:
@@ -383,7 +385,7 @@ __x86.get_pc_thunk.ax:
 __x86.get_pc_thunk.bx:
 .LFB6:
 	.cfi_startproc
-	movl	(%esp), %ebx
+	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
 .LFE6:
