@@ -556,11 +556,18 @@ unsigned char char_scancode;
 # 1 "./include/system_calls.h" 1
 # 7 "./include/grapher.h" 2
 
+
+
+
+
+
 struct DATA_Settings{
     int left_bound;
-    int right_bount;
+    int right_bound;
     int top_bound;
     int bottom_bound;
+    int xscale;
+    int yscale;
 } settings_data;
 
 struct formula{
@@ -571,6 +578,9 @@ struct formula{
 int previousAscii_Pointer;
 int previousKey_Pointer;
 
+int axis_center_x;
+int axis_center_y;
+
 void draw_settings_pane();
 void draw_axis();
 void draw_graph();
@@ -579,12 +589,48 @@ void grapher_entry();
 # 2 "grapher.c" 2
 
 void draw_regions(){
-    gfx_vline(0,fb_height/2, fb_width-250, 0xFFFFFF);
-    gfx_hline(fb_width-250, fb_width,fb_height/2, 0xFFFFFF);
+    gfx_vline(0,fb_height-fb_height/4, fb_width-fb_width/5, 0xFFFFFF);
+    gfx_hline(0, fb_width,fb_height-fb_height/4, 0xFFFFFF);
+}
+
+void draw_axis(){
+    fb_setPixel(axis_center_x, axis_center_y, 0xFFFFFF);
+    gfx_hline(
+        axis_center_x-(fb_width/3),
+        axis_center_x+(fb_width/3),
+        axis_center_y,
+        0xFFFFFF);
+    gfx_vline(
+        axis_center_y-(fb_height/3),
+        axis_center_y+(fb_height/3),
+        axis_center_x,
+        0xFFFFFF
+    );
+
+}
+
+void draw_graph(){
+    for(int x = settings_data.left_bound; x <= settings_data.right_bound; x++){
+        fb_setPixel(
+            axis_center_x+settings_data.xscale*x,
+            settings_data.yscale*((x+10)*x-2)+axis_center_y,
+            0xFF00FF
+        );
+    }
 }
 
 void grapher_entry(){
+    fb_clear(0);
+    axis_center_x = (fb_width-fb_width/5)/2;
+    axis_center_y = (fb_height-fb_height/4)/2;
+    settings_data.xscale = 1;
+    settings_data.yscale = 1;
+    settings_data.left_bound = -(int)(fb_width/3);
+    settings_data.right_bound = (int)(fb_width/3);
+
+    draw_regions();
+    draw_axis();
+    draw_graph();
     while(1){
-        draw_regions();
     }
 }

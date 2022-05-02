@@ -673,14 +673,14 @@ void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
 void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
 void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
 # 5 "./include/grapher.h" 2
-
-
-
+# 13 "./include/grapher.h"
 struct DATA_Settings{
     int left_bound;
-    int right_bount;
+    int right_bound;
     int top_bound;
     int bottom_bound;
+    int xscale;
+    int yscale;
 } settings_data;
 
 struct formula{
@@ -690,6 +690,9 @@ struct formula{
 
 int previousAscii_Pointer;
 int previousKey_Pointer;
+
+int axis_center_x;
+int axis_center_y;
 
 void draw_settings_pane();
 void draw_axis();
