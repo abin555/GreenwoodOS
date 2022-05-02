@@ -593,6 +593,46 @@ char hexToQuad(char hex);
 
 void pong();
 # 10 "./include/terminal.h" 2
+# 1 "./include/grapher.h" 1
+
+
+
+# 1 "./include/gfx.h" 1
+
+
+
+
+
+
+void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
+void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
+void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
+# 5 "./include/grapher.h" 2
+
+# 1 "./include/system_calls.h" 1
+# 7 "./include/grapher.h" 2
+
+struct DATA_Settings{
+    int left_bound;
+    int right_bount;
+    int top_bound;
+    int bottom_bound;
+} settings_data;
+
+struct formula{
+    int type;
+    char expression[80];
+} formulas[4];
+
+int previousAscii_Pointer;
+int previousKey_Pointer;
+
+void draw_settings_pane();
+void draw_axis();
+void draw_graph();
+void draw_regions();
+void grapher_entry();
+# 11 "./include/terminal.h" 2
 
 
 
@@ -622,8 +662,7 @@ void terminal_handler();
 
 
 unsigned char SYS_MODE;
-# 1 "./include/system_calls.h" 1
-# 6 "./include/interrupts.h" 2
+
 
 struct IDT
 {
@@ -688,15 +727,6 @@ char decode[500];
 void KYBRD_DEBUG_DISPLAY();
 # 9 "main.c" 2
 # 1 "./include/gfx.h" 1
-
-
-
-
-
-
-void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
-void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
-void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
 # 10 "main.c" 2
 # 1 "./include/pong.h" 1
 # 11 "main.c" 2
@@ -784,10 +814,6 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
-
-  char teststr[] = "Test";
-  fb_move_cursor_xy(5,5);
-  fb_write_start(teststr, 4, 0);
   while(1){
     terminal_handler();
   }

@@ -82,17 +82,101 @@ gfx_line:
 	.cfi_endproc
 .LFE0:
 	.size	gfx_line, .-gfx_line
+	.globl	gfx_hline
+	.type	gfx_hline, @function
+gfx_hline:
+.LFB1:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	DWORD PTR -12[ebp], eax
+	jmp	.L5
+.L6:
+	sub	esp, 4
+	push	DWORD PTR 20[ebp]
+	push	DWORD PTR 16[ebp]
+	push	DWORD PTR -12[ebp]
+	call	fb_setPixel@PLT
+	add	esp, 16
+	add	DWORD PTR -12[ebp], 1
+.L5:
+	mov	eax, DWORD PTR -12[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
+	jb	.L6
+	nop
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE1:
+	.size	gfx_hline, .-gfx_hline
+	.globl	gfx_vline
+	.type	gfx_vline, @function
+gfx_vline:
+.LFB2:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	DWORD PTR -12[ebp], eax
+	jmp	.L8
+.L9:
+	sub	esp, 4
+	push	DWORD PTR 20[ebp]
+	push	DWORD PTR -12[ebp]
+	push	DWORD PTR 16[ebp]
+	call	fb_setPixel@PLT
+	add	esp, 16
+	add	DWORD PTR -12[ebp], 1
+.L8:
+	mov	eax, DWORD PTR -12[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
+	jb	.L9
+	nop
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE2:
+	.size	gfx_vline, .-gfx_vline
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

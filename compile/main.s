@@ -21,6 +21,10 @@
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
+	.comm	settings_data,16,4
+	.comm	formulas,336,32
+	.comm	previousAscii_Pointer,4,4
+	.comm	previousKey_Pointer,4,4
 	.comm	Terminal_Buffer,128,32
 	.comm	Terminal_OUT_Buffer,5120,32
 	.comm	Terminal_Arguments,128,32
@@ -243,20 +247,6 @@ kmain:
 	push	0
 	push	16777215
 	call	fb_set_color@PLT
-	add	esp, 16
-	mov	DWORD PTR -21[ebp], 1953719636
-	mov	BYTE PTR -17[ebp], 0
-	sub	esp, 8
-	push	5
-	push	5
-	call	fb_move_cursor_xy@PLT
-	add	esp, 16
-	sub	esp, 4
-	push	0
-	push	4
-	lea	eax, -21[ebp]
-	push	eax
-	call	fb_write_start@PLT
 	add	esp, 16
 .L32:
 	call	terminal_handler@PLT

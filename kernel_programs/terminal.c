@@ -137,6 +137,9 @@ void terminal_interpret(){
     if(terminal_compare("pong", 0, Terminal_Arguments[0], 4)){
         pong();
     }
+    if(terminal_compare("grapher", 0, Terminal_Arguments[0], 7)){
+        grapher_entry();
+    }
 }
 
 void terminal_enter(){    

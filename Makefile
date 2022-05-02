@@ -12,8 +12,8 @@ OBJECTS = \
 		string.o\
 		memory.o\
 		gfx.o\
-		pong.o#\
-		#DRIVERS/IDE.o
+		pong.o\
+		grapher.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -masm=intel -c

@@ -403,3 +403,17 @@ void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color){
         fb_setPixel(x,x*yperx+y1,color);
     }
 }
+
+
+void gfx_hline(u32 x1, u32 x2, u32 y, u32 color){
+    for(u32 x = x1; x<x2; x++){
+        fb_setPixel(x, y, color);
+    }
+}
+
+
+void gfx_vline(u32 y1, u32 y2, u32 x, u32 color){
+    for(u32 y = y1; y<y2; y++){
+        fb_setPixel(x,y,color);
+    }
+}

@@ -7,6 +7,7 @@
 #include "string.h"
 #include "ascii_tables.h"
 #include "pong.h"
+#include "grapher.h"
 
 #define TERMINAL_Buffer_Size 1024/8
 #define TERMINAL_SPLIT ' '
