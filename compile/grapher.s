@@ -101,7 +101,7 @@ draw_axis:
 	push	edi
 	push	esi
 	push	ebx
-	sub	esp, 12
+	sub	esp, 28
 	.cfi_offset 7, -12
 	.cfi_offset 6, -16
 	.cfi_offset 3, -20
@@ -174,6 +174,48 @@ draw_axis:
 	push	eax
 	call	gfx_vline@PLT
 	add	esp, 16
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	DWORD PTR -28[ebp], eax
+	jmp	.L3
+.L4:
+	mov	eax, DWORD PTR fb_width@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR 4[eax]
+	mov	ecx, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	ecx
+	mov	edx, eax
+	mov	eax, DWORD PTR -28[ebp]
+	imul	edx, eax
+	mov	eax, DWORD PTR axis_center_x@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	edx, eax
+	mov	eax, DWORD PTR axis_center_y@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, 10
+	mov	ecx, eax
+	mov	eax, DWORD PTR axis_center_y@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 10
+	push	16777215
+	push	edx
+	push	ecx
+	push	eax
+	call	gfx_vline@PLT
+	add	esp, 16
+	add	DWORD PTR -28[ebp], 1
+.L3:
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR 4[eax]
+	cmp	DWORD PTR -28[ebp], eax
+	jle	.L4
+	nop
 	nop
 	lea	esp, -12[ebp]
 	pop	ebx
@@ -208,8 +250,8 @@ draw_graph:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR -12[ebp], eax
-	jmp	.L4
-.L5:
+	jmp	.L6
+.L7:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 20[eax]
 	mov	edx, DWORD PTR -12[ebp]
@@ -235,11 +277,11 @@ draw_graph:
 	call	fb_setPixel@PLT
 	add	esp, 16
 	add	DWORD PTR -12[ebp], 1
-.L4:
+.L6:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 4[eax]
 	cmp	DWORD PTR -12[ebp], eax
-	jle	.L5
+	jle	.L7
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
@@ -300,30 +342,15 @@ grapher_entry:
 	mov	DWORD PTR 16[eax], 1
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	DWORD PTR 20[eax], 1
-	mov	eax, DWORD PTR fb_width@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, -1431655765
-	mul	edx
-	mov	eax, edx
-	shr	eax
-	neg	eax
-	mov	edx, eax
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
-	mov	DWORD PTR [eax], edx
-	mov	eax, DWORD PTR fb_width@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, -1431655765
-	mul	edx
-	mov	eax, edx
-	shr	eax
-	mov	edx, eax
+	mov	DWORD PTR [eax], -10
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
-	mov	DWORD PTR 4[eax], edx
+	mov	DWORD PTR 4[eax], 10
 	call	draw_regions
 	call	draw_axis
 	call	draw_graph
-.L7:
-	jmp	.L7
+.L9:
+	jmp	.L9
 	.cfi_endproc
 .LFE3:
 	.size	grapher_entry, .-grapher_entry

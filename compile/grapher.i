@@ -606,7 +606,14 @@ void draw_axis(){
         axis_center_x,
         0xFFFFFF
     );
-
+    for(int x = settings_data.left_bound; x <= settings_data.right_bound; x++){
+        gfx_vline(
+            axis_center_y-10,
+            axis_center_y+10,
+            axis_center_x+(x*(fb_width/3/settings_data.right_bound)),
+            0xFFFFFF
+        );
+    }
 }
 
 void draw_graph(){
@@ -625,8 +632,8 @@ void grapher_entry(){
     axis_center_y = (fb_height-fb_height/4)/2;
     settings_data.xscale = 1;
     settings_data.yscale = 1;
-    settings_data.left_bound = -(int)(fb_width/3);
-    settings_data.right_bound = (int)(fb_width/3);
+    settings_data.left_bound = -10;
+    settings_data.right_bound = 10;
 
     draw_regions();
     draw_axis();
