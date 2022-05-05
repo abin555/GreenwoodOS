@@ -580,6 +580,7 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
 
 unsigned int encodeHex(char *Buffer, int start, int end);
 
@@ -614,12 +615,7 @@ void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
 
 # 1 "./include/system_calls.h" 1
 # 7 "./include/grapher.h" 2
-
-
-
-
-
-
+# 16 "./include/grapher.h"
 struct DATA_Settings{
     int left_bound;
     int right_bound;
@@ -631,8 +627,15 @@ struct DATA_Settings{
     double step;
 } settings_data;
 
+struct interface_struct{
+    unsigned int last_ASCII_P;
+    unsigned int select_region;
+
+} grapher_interface;
+
 struct formula{
     int type;
+    unsigned int ex_pointer;
     char expression[80];
 } formulas[4];
 
@@ -648,6 +651,8 @@ void draw_graph();
 void clear_region();
 void draw_regions();
 void grapher_entry();
+void grapher_key_handler(char key);
+void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 # 11 "./include/terminal.h" 2
@@ -657,10 +662,10 @@ float sqrt(float x);
 
 
 
-char Terminal_Buffer[1024/8];
-char Terminal_OUT_Buffer[1024/8*40];
+char Terminal_Buffer[1920/8];
+char Terminal_OUT_Buffer[1920/8*40];
 
-char Terminal_Arguments[1024/8];
+char Terminal_Arguments[1920/8];
 
 void terminal_memory_view();
 

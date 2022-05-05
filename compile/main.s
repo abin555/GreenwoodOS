@@ -23,14 +23,15 @@
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
 	.comm	settings_data,36,32
-	.comm	formulas,336,32
+	.comm	grapher_interface,8,4
+	.comm	formulas,352,32
 	.comm	previousAscii_Pointer,4,4
 	.comm	previousKey_Pointer,4,4
 	.comm	axis_center_x,4,4
 	.comm	axis_center_y,4,4
-	.comm	Terminal_Buffer,128,32
-	.comm	Terminal_OUT_Buffer,5120,32
-	.comm	Terminal_Arguments,128,32
+	.comm	Terminal_Buffer,240,32
+	.comm	Terminal_OUT_Buffer,9600,32
+	.comm	Terminal_Arguments,240,32
 	.comm	SYS_MODE,1,1
 	.comm	decode,500,32
 	.comm	vga_width,4,4

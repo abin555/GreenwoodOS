@@ -558,12 +558,7 @@ unsigned char char_scancode;
 # 6 "./include/grapher.h" 2
 # 1 "./include/system_calls.h" 1
 # 7 "./include/grapher.h" 2
-
-
-
-
-
-
+# 16 "./include/grapher.h"
 struct DATA_Settings{
     int left_bound;
     int right_bound;
@@ -575,8 +570,15 @@ struct DATA_Settings{
     double step;
 } settings_data;
 
+struct interface_struct{
+    unsigned int last_ASCII_P;
+    unsigned int select_region;
+
+} grapher_interface;
+
 struct formula{
     int type;
+    unsigned int ex_pointer;
     char expression[80];
 } formulas[4];
 
@@ -592,6 +594,8 @@ void draw_graph();
 void clear_region();
 void draw_regions();
 void grapher_entry();
+void grapher_key_handler(char key);
+void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 # 2 "grapher.c" 2
@@ -666,6 +670,22 @@ void draw_graph(){
 
 void clear_region(){
 
+    for(unsigned int y = 0;
+        y < (unsigned int) 2*axis_center_y;
+        y++){
+        for(unsigned int x = 0;
+            x < (unsigned int) 2*axis_center_x;
+            x++){
+            fb_setPixel(x,y,0);
+        }
+    }
+    draw_axis();
+}
+
+void grapher_key_handler(char key){
+    if(key == 'c'){
+        clear_region();
+    }
 }
 
 void grapher_entry(){
@@ -684,9 +704,15 @@ void grapher_entry(){
     draw_regions();
     draw_axis();
     draw_graph();
+    grapher_draw_formulas();
     while(1){
-        if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
-            return;
+        if(keyboard_ascii_pointer != grapher_interface.last_ASCII_P){
+            if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
+                keyboard_ascii_pointer=0;
+                return;
+            }
+            grapher_key_handler(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1]);
+            grapher_interface.last_ASCII_P = keyboard_ascii_pointer;
         }
     }
 }
@@ -698,4 +724,20 @@ float sqrt(float x){
     x = *(float*)&i;
     x = x*(1.5f - xhalf*x*x);
     return x;
+}
+
+void grapher_draw_formulas(){
+    for(unsigned int y = fb_height-fb_height/4;
+        y < fb_height;
+        y++){
+        for(unsigned int x = 0; x < fb_width; x++){
+            fb_setPixel(x,y,0);
+        }
+    }
+    for(int formula = 0; formula < 4; formula++){
+        for(int index = 0; index < 80; index++){
+            printChar_Scaled(index, formula+fb_height-fb_height/4 +8, formulas[formula].expression[index], 2);
+        }
+    }
+
 }

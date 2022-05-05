@@ -12,9 +12,11 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 void decodeData(char *Buffer, int in, int len, int start);
 
 void decodeHex(char *Buffer, int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
 
 unsigned int encodeHex(char *Buffer, int start, int end);
 
 char quadToHex(char quad);
 char hexToQuad(char hex);
+void strcpy(char *source, char *destination, int source);
 #endif

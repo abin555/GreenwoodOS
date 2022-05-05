@@ -70,6 +70,22 @@ void draw_graph(){
 
 void clear_region(){
     
+    for(unsigned int y = 0; 
+        y < (unsigned int) 2*axis_center_y;
+        y++){
+        for(unsigned int x = 0; 
+            x < (unsigned int) 2*axis_center_x; 
+            x++){
+            fb_setPixel(x,y,0);
+        }
+    }
+    draw_axis();
+}
+
+void grapher_key_handler(char key){
+    if(key == 'c'){
+        clear_region();
+    }
 }
 
 void grapher_entry(){
@@ -84,13 +100,19 @@ void grapher_entry(){
     settings_data.bottom_bound = -10;
     settings_data.settings |= 0b00000000;
     settings_data.step = 0.0001;
-
+    //formulas[0].expression = "x^2+2x+1";
     draw_regions();
     draw_axis();
     draw_graph();
+    grapher_draw_formulas();
     while(1){
-        if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
-            return;
+        if(keyboard_ascii_pointer != grapher_interface.last_ASCII_P){
+            if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
+                keyboard_ascii_pointer=0;
+                return;
+            }
+            grapher_key_handler(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1]);
+            grapher_interface.last_ASCII_P = keyboard_ascii_pointer;
         }
     }
 }
@@ -102,4 +124,20 @@ float sqrt(float x){
     x = *(float*)&i;              // convert new bits into float
     x = x*(1.5f - xhalf*x*x);     // One round of Newton's method
     return x;
+}
+
+void grapher_draw_formulas(){
+    for(unsigned int y = fb_height-fb_height/Proportion_Bottom;
+        y < fb_height;
+        y++){
+        for(unsigned int x = 0; x < fb_width; x++){
+            fb_setPixel(x,y,0);
+        }
+    }
+    for(int formula = 0; formula < MAX_FORMULAS; formula++){
+        for(int index = 0; index < MAX_FORMULA_LEN; index++){
+            printChar_Scaled(index, formula+fb_height-fb_height/Proportion_Bottom+8, formulas[formula].expression[index], 2);
+        }
+    }
+
 }

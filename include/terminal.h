@@ -9,7 +9,7 @@
 #include "pong.h"
 #include "grapher.h"
 
-#define TERMINAL_Buffer_Size 1024/8
+#define TERMINAL_Buffer_Size 1920/8
 #define TERMINAL_SPLIT ' '
 
 //#define Terminal_Y 20

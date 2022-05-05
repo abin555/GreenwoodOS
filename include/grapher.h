@@ -10,6 +10,9 @@
 
 #define Axis_Proportion 3
 
+#define MAX_FORMULAS 4
+#define MAX_FORMULA_LEN 80
+
 struct DATA_Settings{
     int left_bound;
     int right_bound;
@@ -21,10 +24,17 @@ struct DATA_Settings{
     double step;
 } settings_data;
 
+struct interface_struct{
+    unsigned int last_ASCII_P;
+    unsigned int select_region;
+
+} grapher_interface;
+
 struct formula{
     int type;
-    char expression[80];
-} formulas[4];
+    unsigned int ex_pointer;
+    char expression[MAX_FORMULA_LEN];
+} formulas[MAX_FORMULAS];
 
 int previousAscii_Pointer;
 int previousKey_Pointer;
@@ -38,6 +48,8 @@ void draw_graph();
 void clear_region();
 void draw_regions();
 void grapher_entry();
+void grapher_key_handler(char key);
+void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 
