@@ -570,6 +570,8 @@ struct DATA_Settings{
     int bottom_bound;
     int xscale;
     int yscale;
+    char settings;
+    double step;
 } settings_data;
 
 struct formula{
@@ -588,7 +590,8 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
-void plot_point(int x, int y);
+void plot_point(float x, float y);
+float sqrt(float x);
 # 2 "grapher.c" 2
 
 void draw_regions(){
@@ -627,18 +630,29 @@ void draw_axis(){
     }
 }
 
-void plot_point(int x, int y){
-    pixelScaled(
-        axis_center_x+(x*(fb_width/3/settings_data.right_bound)),
-        axis_center_y+(y*(fb_height/3/settings_data.top_bound)),
-        3,
-        0xFF00FF
-    );
+void plot_point(float x, float y){
+    if(settings_data.settings & 0b00000001){
+        pixelScaled(
+            axis_center_x+(x*(fb_width/3/settings_data.right_bound)),
+            axis_center_y+((-1 * y)*(fb_height/3/settings_data.top_bound)),
+            3,
+            0xFF00FF
+        );
+    }
+    else{
+        fb_setPixel(
+            axis_center_x+(x*(fb_width/3/settings_data.right_bound)),
+            axis_center_y+((-1 * y)*(fb_height/3/settings_data.top_bound)),
+            0xFF00FF
+        );
+    }
 }
 
 void draw_graph(){
-    for(int x = settings_data.left_bound; x <= settings_data.right_bound; x++){
-        int y = (x-2)*(x-2)+2;
+    for(float x = settings_data.left_bound; x <= settings_data.right_bound; x += settings_data.step){
+        float y = 0.5*x*x-4*x;
+
+
         if(y > settings_data.bottom_bound && y < settings_data.top_bound){
             plot_point(x, y);
         }
@@ -655,7 +669,8 @@ void grapher_entry(){
     settings_data.right_bound = 10;
     settings_data.top_bound = 10;
     settings_data.bottom_bound = -10;
-
+    settings_data.settings |= 0b00000000;
+    settings_data.step = 0.0001;
 
     draw_regions();
     draw_axis();
@@ -665,4 +680,13 @@ void grapher_entry(){
             return;
         }
     }
+}
+
+float sqrt(float x){
+    float xhalf = 0.5f * x;
+    int i = *(int*)&x;
+    i = 0x5f3759df - (i >> 1);
+    x = *(float*)&i;
+    x = x*(1.5f - xhalf*x*x);
+    return x;
 }

@@ -19,7 +19,7 @@
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
 	.comm	char_scancode,1,1
-	.comm	settings_data,24,4
+	.comm	settings_data,36,32
 	.comm	formulas,336,32
 	.comm	previousAscii_Pointer,4,4
 	.comm	previousKey_Pointer,4,4
@@ -286,10 +286,23 @@ plot_point:
 	.cfi_def_cfa_register 5
 	push	esi
 	push	ebx
+	sub	esp, 16
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.cx
 	add	ecx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR settings_data@GOT[ecx]
+	movzx	eax, BYTE PTR 24[eax]
+	movsx	eax, al
+	and	eax, 1
+	test	eax, eax
+	je	.L8
+	mov	eax, DWORD PTR axis_center_y@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	DWORD PTR -24[ebp], eax
+	fild	DWORD PTR -24[ebp]
+	fld	DWORD PTR 12[ebp]
+	fchs
 	mov	eax, DWORD PTR fb_height@GOT[ecx]
 	mov	eax, DWORD PTR [eax]
 	mov	edx, -1431655765
@@ -301,12 +314,23 @@ plot_point:
 	mov	eax, edx
 	mov	edx, 0
 	div	ebx
-	mov	edx, eax
-	mov	eax, DWORD PTR 12[ebp]
-	imul	edx, eax
-	mov	eax, DWORD PTR axis_center_y@GOT[ecx]
+	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -20[ebp], 0
+	fild	QWORD PTR -24[ebp]
+	fmulp	st(1), st
+	faddp	st(1), st
+	fnstcw	WORD PTR -10[ebp]
+	movzx	eax, WORD PTR -10[ebp]
+	or	ah, 12
+	mov	WORD PTR -12[ebp], ax
+	fldcw	WORD PTR -12[ebp]
+	fistp	QWORD PTR -24[ebp]
+	fldcw	WORD PTR -10[ebp]
+	mov	ebx, DWORD PTR -24[ebp]
+	mov	eax, DWORD PTR axis_center_x@GOT[ecx]
 	mov	eax, DWORD PTR [eax]
-	lea	ebx, [edx+eax]
+	mov	DWORD PTR -24[ebp], eax
+	fild	DWORD PTR -24[ebp]
 	mov	eax, DWORD PTR fb_width@GOT[ecx]
 	mov	eax, DWORD PTR [eax]
 	mov	edx, -1431655765
@@ -318,12 +342,15 @@ plot_point:
 	mov	eax, edx
 	mov	edx, 0
 	div	esi
-	mov	edx, eax
-	mov	eax, DWORD PTR 8[ebp]
-	imul	edx, eax
-	mov	eax, DWORD PTR axis_center_x@GOT[ecx]
-	mov	eax, DWORD PTR [eax]
-	add	eax, edx
+	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -20[ebp], 0
+	fild	QWORD PTR -24[ebp]
+	fmul	DWORD PTR 8[ebp]
+	faddp	st(1), st
+	fldcw	WORD PTR -12[ebp]
+	fistp	QWORD PTR -24[ebp]
+	fldcw	WORD PTR -10[ebp]
+	mov	eax, DWORD PTR -24[ebp]
 	push	16711935
 	push	3
 	push	ebx
@@ -331,6 +358,70 @@ plot_point:
 	mov	ebx, ecx
 	call	pixelScaled@PLT
 	add	esp, 16
+	jmp	.L10
+.L8:
+	mov	eax, DWORD PTR axis_center_y@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	DWORD PTR -24[ebp], eax
+	fild	DWORD PTR -24[ebp]
+	fld	DWORD PTR 12[ebp]
+	fchs
+	mov	eax, DWORD PTR fb_height@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ecx]
+	mov	eax, DWORD PTR 8[eax]
+	mov	ebx, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	ebx
+	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -20[ebp], 0
+	fild	QWORD PTR -24[ebp]
+	fmulp	st(1), st
+	faddp	st(1), st
+	fnstcw	WORD PTR -10[ebp]
+	movzx	eax, WORD PTR -10[ebp]
+	or	ah, 12
+	mov	WORD PTR -12[ebp], ax
+	fldcw	WORD PTR -12[ebp]
+	fistp	QWORD PTR -24[ebp]
+	fldcw	WORD PTR -10[ebp]
+	mov	ebx, DWORD PTR -24[ebp]
+	mov	eax, DWORD PTR axis_center_x@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	DWORD PTR -24[ebp], eax
+	fild	DWORD PTR -24[ebp]
+	mov	eax, DWORD PTR fb_width@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ecx]
+	mov	eax, DWORD PTR 4[eax]
+	mov	esi, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	esi
+	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -20[ebp], 0
+	fild	QWORD PTR -24[ebp]
+	fmul	DWORD PTR 8[ebp]
+	faddp	st(1), st
+	fldcw	WORD PTR -12[ebp]
+	fistp	QWORD PTR -24[ebp]
+	fldcw	WORD PTR -10[ebp]
+	mov	eax, DWORD PTR -24[ebp]
+	sub	esp, 4
+	push	16711935
+	push	ebx
+	push	eax
+	mov	ebx, ecx
+	call	fb_setPixel@PLT
+	add	esp, 16
+.L10:
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx
@@ -356,42 +447,65 @@ draw_graph:
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	push	ebx
-	sub	esp, 20
+	sub	esp, 36
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	mov	DWORD PTR -12[ebp], eax
-	jmp	.L9
-.L11:
-	mov	eax, DWORD PTR -12[ebp]
-	lea	edx, -2[eax]
-	mov	eax, DWORD PTR -12[ebp]
-	sub	eax, 2
-	imul	eax, edx
-	add	eax, 2
-	mov	DWORD PTR -16[ebp], eax
+	mov	DWORD PTR -28[ebp], eax
+	fild	DWORD PTR -28[ebp]
+	fstp	DWORD PTR -12[ebp]
+	jmp	.L12
+.L16:
+	fld	DWORD PTR -12[ebp]
+	fld	QWORD PTR .LC0@GOTOFF[ebx]
+	fmulp	st(1), st
+	fld	DWORD PTR -12[ebp]
+	fmulp	st(1), st
+	fld	DWORD PTR -12[ebp]
+	fld	DWORD PTR .LC1@GOTOFF[ebx]
+	fmulp	st(1), st
+	fsubp	st(1), st
+	fstp	DWORD PTR -16[ebp]
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 12[eax]
-	cmp	DWORD PTR -16[ebp], eax
-	jle	.L10
+	mov	DWORD PTR -28[ebp], eax
+	fild	DWORD PTR -28[ebp]
+	fld	DWORD PTR -16[ebp]
+	fcomip	st, st(1)
+	fstp	st(0)
+	jbe	.L13
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 8[eax]
-	cmp	DWORD PTR -16[ebp], eax
-	jge	.L10
+	mov	DWORD PTR -28[ebp], eax
+	fild	DWORD PTR -28[ebp]
+	fld	DWORD PTR -16[ebp]
+	fxch	st(1)
+	fcomip	st, st(1)
+	fstp	st(0)
+	jbe	.L13
 	sub	esp, 8
 	push	DWORD PTR -16[ebp]
 	push	DWORD PTR -12[ebp]
 	call	plot_point
 	add	esp, 16
-.L10:
-	add	DWORD PTR -12[ebp], 1
-.L9:
+.L13:
+	fld	DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	fld	QWORD PTR 28[eax]
+	faddp	st(1), st
+	fstp	DWORD PTR -12[ebp]
+.L12:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 4[eax]
-	cmp	DWORD PTR -12[ebp], eax
-	jle	.L11
+	mov	DWORD PTR -28[ebp], eax
+	fild	DWORD PTR -28[ebp]
+	fld	DWORD PTR -12[ebp]
+	fxch	st(1)
+	fcomip	st, st(1)
+	fstp	st(0)
+	jnb	.L16
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
@@ -460,19 +574,26 @@ grapher_entry:
 	mov	DWORD PTR 8[eax], 10
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	DWORD PTR 12[eax], -10
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	movzx	edx, BYTE PTR 24[eax]
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	BYTE PTR 24[eax], dl
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	fld	QWORD PTR .LC2@GOTOFF[ebx]
+	fstp	QWORD PTR 28[eax]
 	call	draw_regions
 	call	draw_axis
 	call	draw_graph
-.L15:
+.L22:
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	lea	edx, -1[eax]
 	mov	eax, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
 	movzx	eax, BYTE PTR [eax+edx]
 	cmp	al, 47
-	je	.L17
-	jmp	.L15
-.L17:
+	je	.L24
+	jmp	.L22
+.L24:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave
@@ -483,28 +604,104 @@ grapher_entry:
 	.cfi_endproc
 .LFE4:
 	.size	grapher_entry, .-grapher_entry
+	.globl	sqrt
+	.type	sqrt, @function
+sqrt:
+.LFB5:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 16
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	fld	DWORD PTR 8[ebp]
+	fld	DWORD PTR .LC3@GOTOFF[eax]
+	fmulp	st(1), st
+	fstp	DWORD PTR -4[ebp]
+	lea	edx, 8[ebp]
+	mov	edx, DWORD PTR [edx]
+	mov	DWORD PTR -8[ebp], edx
+	mov	edx, DWORD PTR -8[ebp]
+	sar	edx
+	mov	ecx, 1597463007
+	sub	ecx, edx
+	mov	edx, ecx
+	mov	DWORD PTR -8[ebp], edx
+	lea	edx, -8[ebp]
+	fld	DWORD PTR [edx]
+	fstp	DWORD PTR 8[ebp]
+	fld	DWORD PTR 8[ebp]
+	fmul	DWORD PTR -4[ebp]
+	fld	DWORD PTR 8[ebp]
+	fmulp	st(1), st
+	fld	DWORD PTR .LC4@GOTOFF[eax]
+	fsubrp	st(1), st
+	fld	DWORD PTR 8[ebp]
+	fmulp	st(1), st
+	fstp	DWORD PTR 8[ebp]
+	fld	DWORD PTR 8[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE5:
+	.size	sqrt, .-sqrt
+	.section	.rodata
+	.align 8
+.LC0:
+	.long	0
+	.long	1071644672
+	.align 4
+.LC1:
+	.long	1082130432
+	.align 8
+.LC2:
+	.long	3944497965
+	.long	1058682594
+	.align 4
+.LC3:
+	.long	1056964608
+	.align 4
+.LC4:
+	.long	1069547520
+	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
+	.globl	__x86.get_pc_thunk.ax
+	.hidden	__x86.get_pc_thunk.ax
+	.type	__x86.get_pc_thunk.ax, @function
+__x86.get_pc_thunk.ax:
+.LFB6:
+	.cfi_startproc
+	mov	eax, DWORD PTR [esp]
+	ret
+	.cfi_endproc
+.LFE6:
 	.section	.text.__x86.get_pc_thunk.cx,"axG",@progbits,__x86.get_pc_thunk.cx,comdat
 	.globl	__x86.get_pc_thunk.cx
 	.hidden	__x86.get_pc_thunk.cx
 	.type	__x86.get_pc_thunk.cx, @function
 __x86.get_pc_thunk.cx:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	mov	ecx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

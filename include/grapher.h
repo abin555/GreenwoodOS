@@ -17,6 +17,8 @@ struct DATA_Settings{
     int bottom_bound;
     int xscale;
     int yscale;
+    char settings;
+    double step;
 } settings_data;
 
 struct formula{
@@ -35,6 +37,7 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
-void plot_point(int x, int y);
+void plot_point(float x, float y);
+float sqrt(float x);
 
 #endif

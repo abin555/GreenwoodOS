@@ -28,7 +28,7 @@ SYS_MODE:
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.comm	settings_data,24,4
+	.comm	settings_data,36,32
 	.comm	formulas,336,32
 	.comm	previousAscii_Pointer,4,4
 	.comm	previousKey_Pointer,4,4
