@@ -10,6 +10,7 @@ SYS_MODE:
 	.byte	1
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
 	.comm	keyboard_KEYBUFFER,255,32
 	.comm	keyboard_ASCIIBuffer,255,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
@@ -209,97 +210,83 @@ SYS_CALL:
 	push	ebx
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
-	call	__x86.get_pc_thunk.bx
-	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	sub	esp, 4
-	push	83
-	push	1
-	push	79
-	call	printChar@PLT
-	add	esp, 16
-	mov	eax, DWORD PTR 8[ebp]
-	push	0
-	push	32
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	sub	esp, 12
-	push	21
-	push	0
-	push	0
-	push	9
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
-	mov	eax, DWORD PTR 8[ebp]
-	cmp	eax, 5
-	ja	.L18
-	sal	eax, 2
-	mov	eax, DWORD PTR .L13@GOTOFF[eax+ebx]
-	add	eax, ebx
-	notrack jmp	eax
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR 8[ebp]
+	cmp	edx, 6
+	ja	.L19
+	sal	edx, 2
+	mov	edx, DWORD PTR .L13@GOTOFF[edx+eax]
+	add	edx, eax
+	notrack jmp	edx
 	.section	.rodata
 	.align 4
 	.align 4
 .L13:
+	.long	.L19@GOTOFF
 	.long	.L18@GOTOFF
 	.long	.L17@GOTOFF
-	.long	.L16@GOTOFF
-	.long	.L19@GOTOFF
+	.long	.L20@GOTOFF
+	.long	.L15@GOTOFF
 	.long	.L14@GOTOFF
 	.long	.L12@GOTOFF
 	.text
-.L17:
-	mov	eax, DWORD PTR BG@GOT[ebx]
-	mov	esi, DWORD PTR [eax]
-	mov	eax, DWORD PTR FG@GOT[ebx]
-	mov	ecx, DWORD PTR [eax]
-	mov	eax, DWORD PTR 16[ebp]
-	movsx	edx, al
-	mov	eax, DWORD PTR 12[ebp]
+.L18:
+	mov	edx, DWORD PTR BG@GOT[eax]
+	mov	esi, DWORD PTR [edx]
+	mov	edx, DWORD PTR FG@GOT[eax]
+	mov	ebx, DWORD PTR [edx]
+	mov	edx, DWORD PTR 16[ebp]
+	movsx	ecx, dl
+	mov	edx, DWORD PTR 12[ebp]
 	push	esi
+	push	ebx
 	push	ecx
 	push	edx
-	push	eax
+	mov	ebx, eax
 	call	fb_write_cell@PLT
 	add	esp, 16
 	jmp	.L11
-.L16:
-	mov	edx, DWORD PTR 20[ebp]
-	mov	eax, DWORD PTR 16[ebp]
-	mov	ecx, DWORD PTR 12[ebp]
+.L17:
+	mov	ecx, DWORD PTR 20[ebp]
+	mov	edx, DWORD PTR 16[ebp]
+	mov	ebx, DWORD PTR 12[ebp]
 	sub	esp, 4
-	push	edx
-	push	eax
 	push	ecx
+	push	edx
+	push	ebx
+	mov	ebx, eax
 	call	fb_write_start@PLT
 	add	esp, 16
 	jmp	.L11
-.L14:
-	mov	eax, DWORD PTR 12[ebp]
+.L15:
+	mov	edx, DWORD PTR 12[ebp]
 	sub	esp, 12
-	push	eax
+	push	edx
+	mov	ebx, eax
 	call	fb_move_cursor@PLT
 	add	esp, 16
 	jmp	.L11
-.L12:
-	mov	ecx, DWORD PTR 20[ebp]
-	mov	edx, DWORD PTR 16[ebp]
-	mov	eax, DWORD PTR 12[ebp]
+.L14:
+	mov	ebx, DWORD PTR 20[ebp]
+	mov	ecx, DWORD PTR 16[ebp]
+	mov	edx, DWORD PTR 12[ebp]
 	sub	esp, 4
+	push	ebx
 	push	ecx
 	push	edx
-	push	eax
+	mov	ebx, eax
 	call	fb_setPixel@PLT
 	add	esp, 16
 	jmp	.L11
-.L19:
+.L12:
+	mov	ebx, eax
+	call	restore_kernel@PLT
+	jmp	.L11
+.L20:
 	nop
 .L11:
-.L18:
+.L19:
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx
@@ -327,29 +314,29 @@ interrupt_handler:
 	push	ebx
 	sub	esp, 4
 	.cfi_offset 3, -12
-	call	__x86.get_pc_thunk.bx
-	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	cmp	DWORD PTR 36[ebp], 128
-	je	.L21
-	cmp	DWORD PTR 36[ebp], 128
-	ja	.L26
-	cmp	DWORD PTR 36[ebp], 33
-	je	.L23
-	cmp	DWORD PTR 36[ebp], 34
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	cmp	DWORD PTR 40[ebp], 128
+	je	.L22
+	cmp	DWORD PTR 40[ebp], 128
+	ja	.L27
+	cmp	DWORD PTR 40[ebp], 33
 	je	.L24
-	jmp	.L26
-.L23:
-	call	keyboard_handle_interrupt@PLT
-	sub	esp, 12
-	push	DWORD PTR 36[ebp]
-	call	pic_acknowledge@PLT
-	add	esp, 16
-	jmp	.L25
+	cmp	DWORD PTR 40[ebp], 34
+	je	.L25
+	jmp	.L27
 .L24:
+	sub	esp, 12
+	push	DWORD PTR 40[ebp]
+	mov	ebx, eax
+	call	keyboard_handle_interrupt@PLT
+	add	esp, 16
+	jmp	.L26
+.L25:
 	call	KERNEL_INTERRUPT
-	jmp	.L25
-.L21:
-	sub	esp, 4
+	jmp	.L26
+.L22:
+	push	DWORD PTR 36[ebp]
 	push	DWORD PTR 32[ebp]
 	push	DWORD PTR 28[ebp]
 	push	DWORD PTR 24[ebp]
@@ -359,10 +346,10 @@ interrupt_handler:
 	push	DWORD PTR 8[ebp]
 	call	SYS_CALL
 	add	esp, 32
-	jmp	.L25
-.L26:
+	jmp	.L26
+.L27:
 	nop
-.L25:
+.L26:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave

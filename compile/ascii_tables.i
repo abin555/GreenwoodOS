@@ -92,6 +92,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -126,6 +127,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -145,7 +147,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 

@@ -31,6 +31,7 @@ struct cpu_state {
 	unsigned int ebp; 
 	unsigned int esi; 
 	unsigned int edi; 
+	unsigned int esp;
 } __attribute__((packed));
 
 struct stack_state {

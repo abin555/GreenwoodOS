@@ -31,6 +31,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 bool KYBRD_CAPS_LOCK;
 bool KYBRD_SHIFT;
+bool KYBRD_CTRL;
 
 uint8_t keyboard_ctrl_read_status ();
 
@@ -50,7 +51,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 

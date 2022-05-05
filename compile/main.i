@@ -85,6 +85,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -513,6 +514,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -532,7 +534,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -642,6 +644,7 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
+void plot_point(int x, int y);
 # 11 "./include/terminal.h" 2
 
 
@@ -666,6 +669,8 @@ void terminal_enter();
 void terminal_renderer();
 void terminal_console();
 void terminal_handler();
+
+void terminal_init();
 # 7 "main.c" 2
 # 1 "./include/interrupts.h" 1
 
@@ -701,6 +706,7 @@ struct cpu_state {
  unsigned int ebp;
  unsigned int esi;
  unsigned int edi;
+ unsigned int esp;
 } __attribute__((packed));
 
 struct stack_state {
@@ -798,6 +804,12 @@ void flyingDot(){
   }
 }
 
+void kmain_loop(){
+  while(1){
+    terminal_handler();
+  }
+}
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
 
@@ -824,8 +836,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
-  while(1){
-    terminal_handler();
-  }
+  restore_kernel_addr = (u32 *) &kmain_loop;
+  terminal_init();
+  kmain_loop();
   return 0;
 }

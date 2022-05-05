@@ -69,9 +69,6 @@ void KERNEL_INTERRUPT(){
 	}
 }
 void SYS_CALL(struct cpu_state cpu){
-	printChar(79, 1, 'S');
-	decodeHex(STR_edit, cpu.eax, 32, 0);
-	fb_write_xy(STR_edit, 9, 0, 0, 21);
 	switch(cpu.eax){
 		case SYS_PRINT_CHAR:
 			fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
@@ -87,6 +84,9 @@ void SYS_CALL(struct cpu_state cpu){
 		case SYS_PIXEL:
 			fb_setPixel(cpu.ebx, cpu.ecx, cpu.edx);
 			break;
+		case SYS_BREAK:
+			restore_kernel();
+			break;
 	}
 }
 
@@ -97,8 +97,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 
 	switch (interrupt){
 		case INTERRUPTS_KEYBOARD:
-            keyboard_handle_interrupt();
-			pic_acknowledge(interrupt);
+            keyboard_handle_interrupt(interrupt);
 			break;
 		case INTERRUPTS_KERNEL:
 			KERNEL_INTERRUPT();

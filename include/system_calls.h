@@ -6,5 +6,5 @@
 #define SYS_YIELD 0x03
 #define SYS_SET_CURSOR 0x04
 #define SYS_PIXEL 0x05
-
+#define SYS_BREAK 0x06
 #endif

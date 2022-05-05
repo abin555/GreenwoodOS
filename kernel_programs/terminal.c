@@ -222,3 +222,7 @@ void terminal_handler(){
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
     }
 }
+
+void terminal_init(){
+    Terminal_Y = fb_height/8 - 8;
+}

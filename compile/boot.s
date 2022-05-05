@@ -3,6 +3,7 @@ global loader
 ;External C functions
 extern kmain	;Main Kernal Function
 extern interrupt_handler ; Interrupt Handler External
+extern kmain_loop
 
 ;%define FORMER_SYS
 ;;Section to define GRUB system boot headers
@@ -22,8 +23,8 @@ framebuffer_tag_start:
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 1024
-	DD 768
+	DD 1920
+	DD 1080
 	DD 32
 framebuffer_tag_end:
 align 8
@@ -149,6 +150,7 @@ int_handler_%1:
 
 common_interrupt_handler:
 	;save registers
+	push esp
 	push edi
 	push esi
 	push ebp
@@ -168,6 +170,7 @@ common_interrupt_handler:
 	pop ebp
 	pop esi
 	pop edi
+	pop esp
 
 	;restore stack pointer
 	add esp, 8
@@ -196,9 +199,11 @@ software_int:
 	INT 34
 
 global restore_kernel
+global restore_kernel_addr
 restore_kernel:
-	jmp loader
-
+	;jmp [restore_kernel_addr]
+	ret
+restore_kernel_addr: dd 0x00100000
 
 ;EXTERNAL TEST PROGRAMS
 
@@ -209,7 +214,7 @@ program_A:
 	mov ecx, 'A'
 	jmp program_A_loop
 program_A_loop:
-	cmp ecx, 'z'+1
+	cmp ecx, 'z'+100
 	je program_A_end
 	int 0x80
 	add ebx, 1

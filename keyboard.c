@@ -1,6 +1,7 @@
 #include "keyboard.h"
 #include "frame_buffer.h"
 #include "ascii_tables.h"
+#include "string.h"
 
 unsigned char prev_Scancode = 0;
 unsigned int keyboard_KEYBUFFER_POINTER = 0;
@@ -91,11 +92,6 @@ void keyboard_flag_handler(unsigned char scan_code){
         KYBRD_SHIFT = false;
         keyboard_set_leds(false,false,false);
         break;
-        
-        case 0x1D:
-        //software_int();
-        //software_interrupt(1);
-        break;
 
         case 0x5B:
         //software_interrupt(4);
@@ -103,6 +99,15 @@ void keyboard_flag_handler(unsigned char scan_code){
 
         case 0xD3:
         //software_interrupt(1);
+        break;
+        case 0x1D:
+        KYBRD_CTRL = true;
+        break;
+        case 0x9D:
+        KYBRD_CTRL = false;
+        break;
+        case 0x2E:
+        restore_kernel();
         break;
     }
 }
@@ -119,17 +124,22 @@ char convertascii(unsigned char scan_code){
     return 0;
 }
 
-void keyboard_handle_interrupt(){
+void keyboard_handle_interrupt(unsigned int interrupt){
     unsigned char scan_code;
-    scan_code = keyboard_enc_read_buf();    
+    scan_code = keyboard_enc_read_buf();
+    pic_acknowledge(interrupt);    
     if(scan_code){
-        if(kbd_US[scan_code] != 0){
+        decodeHex(STR_edit, scan_code, 8, 0);
+        fb_write_xy(STR_edit, 3, 0, 0, 0);
+        if(kbd_US[scan_code] != 0 && !KYBRD_CTRL){
             if(KYBRD_SHIFT){
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US_shift[scan_code];
+                
             }
             else{
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US[scan_code];
             }
+
             keyboard_ascii_pointer++;
         }
         else{

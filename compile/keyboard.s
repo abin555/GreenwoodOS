@@ -9,6 +9,7 @@
 	.size	KYBRD_SHIFT, 1
 KYBRD_SHIFT:
 	.zero	1
+	.comm	KYBRD_CTRL,1,1
 	.comm	keyboard_KEYBUFFER,255,32
 	.comm	keyboard_ASCIIBuffer,255,32
 	.globl	keyboard_KEYBUFFER_POINTER
@@ -39,6 +40,7 @@ prev_Scancode:
 	.comm	BG,4,4
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
 	.globl	_keyboard_disable
 	.data
 	.type	_keyboard_disable, @object
@@ -408,28 +410,38 @@ keyboard_flag_handler:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	sub	esp, 24
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.dx
 	add	edx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	eax, DWORD PTR 8[ebp]
 	mov	BYTE PTR -12[ebp], al
 	movzx	eax, BYTE PTR -12[ebp]
 	cmp	eax, 211
-	je	.L46
+	je	.L48
 	cmp	eax, 211
-	jg	.L47
+	jg	.L49
 	cmp	eax, 170
 	je	.L43
 	cmp	eax, 170
-	jg	.L47
+	jg	.L49
+	cmp	eax, 157
+	je	.L44
+	cmp	eax, 157
+	jg	.L49
 	cmp	eax, 91
-	je	.L48
+	je	.L50
 	cmp	eax, 91
-	jg	.L47
+	jg	.L49
+	cmp	eax, 46
+	je	.L46
+	cmp	eax, 46
+	jg	.L49
 	cmp	eax, 29
-	je	.L49
+	je	.L47
 	cmp	eax, 42
-	jne	.L47
+	jne	.L49
 	mov	BYTE PTR KYBRD_SHIFT@GOTOFF[edx], 1
 	sub	esp, 4
 	push	0
@@ -447,19 +459,30 @@ keyboard_flag_handler:
 	call	keyboard_set_leds
 	add	esp, 16
 	jmp	.L42
+.L47:
+	mov	eax, DWORD PTR KYBRD_CTRL@GOT[edx]
+	mov	BYTE PTR [eax], 1
+	jmp	.L42
+.L44:
+	mov	eax, DWORD PTR KYBRD_CTRL@GOT[edx]
+	mov	BYTE PTR [eax], 0
+	jmp	.L42
 .L46:
-	nop
-	jmp	.L47
+	mov	ebx, edx
+	call	restore_kernel@PLT
+	jmp	.L42
 .L48:
 	nop
-	jmp	.L47
-.L49:
+	jmp	.L49
+.L50:
 	nop
 .L42:
-.L47:
+.L49:
 	nop
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
@@ -485,22 +508,22 @@ convertascii:
 	mov	ecx, DWORD PTR kbd_US@GOT[eax]
 	movzx	edx, BYTE PTR [ecx+edx]
 	test	dl, dl
-	je	.L51
+	je	.L52
 	movzx	edx, BYTE PTR KYBRD_SHIFT@GOTOFF[eax]
 	test	dl, dl
-	je	.L52
+	je	.L53
 	movzx	edx, BYTE PTR -4[ebp]
 	mov	eax, DWORD PTR kbd_US_shift@GOT[eax]
 	movzx	eax, BYTE PTR [eax+edx]
-	jmp	.L53
-.L52:
+	jmp	.L54
+.L53:
 	movzx	edx, BYTE PTR -4[ebp]
 	mov	eax, DWORD PTR kbd_US@GOT[eax]
 	movzx	eax, BYTE PTR [eax+edx]
-	jmp	.L53
-.L51:
+	jmp	.L54
+.L52:
 	mov	eax, 0
-.L53:
+.L54:
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -526,42 +549,68 @@ keyboard_handle_interrupt:
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	call	keyboard_enc_read_buf
 	mov	BYTE PTR -9[ebp], al
+	sub	esp, 12
+	push	DWORD PTR 8[ebp]
+	call	pic_acknowledge@PLT
+	add	esp, 16
 	cmp	BYTE PTR -9[ebp], 0
-	je	.L55
+	je	.L56
+	movzx	eax, BYTE PTR -9[ebp]
+	push	0
+	push	8
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	0
+	push	0
+	push	0
+	push	3
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	movzx	eax, BYTE PTR -9[ebp]
 	mov	edx, DWORD PTR kbd_US@GOT[ebx]
 	movzx	eax, BYTE PTR [edx+eax]
 	test	al, al
-	je	.L56
-	movzx	eax, BYTE PTR KYBRD_SHIFT@GOTOFF[ebx]
+	je	.L57
+	mov	eax, DWORD PTR KYBRD_CTRL@GOT[ebx]
+	movzx	eax, BYTE PTR [eax]
+	xor	eax, 1
 	test	al, al
 	je	.L57
+	movzx	eax, BYTE PTR KYBRD_SHIFT@GOTOFF[ebx]
+	test	al, al
+	je	.L58
 	movzx	edx, BYTE PTR -9[ebp]
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
 	mov	ecx, DWORD PTR kbd_US_shift@GOT[ebx]
 	movzx	ecx, BYTE PTR [ecx+edx]
 	mov	edx, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
 	mov	BYTE PTR [edx+eax], cl
-	jmp	.L58
-.L57:
+	jmp	.L59
+.L58:
 	movzx	edx, BYTE PTR -9[ebp]
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
 	mov	ecx, DWORD PTR kbd_US@GOT[ebx]
 	movzx	ecx, BYTE PTR [ecx+edx]
 	mov	edx, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
 	mov	BYTE PTR [edx+eax], cl
-.L58:
+.L59:
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
 	add	eax, 1
 	mov	DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx], eax
-	jmp	.L59
-.L56:
+	jmp	.L60
+.L57:
 	movzx	eax, BYTE PTR -9[ebp]
 	sub	esp, 12
 	push	eax
 	call	keyboard_flag_handler
 	add	esp, 16
-.L59:
+.L60:
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
 	mov	edx, DWORD PTR keyboard_KEYBUFFER@GOT[ebx]
 	movzx	ecx, BYTE PTR -9[ebp]
@@ -569,17 +618,17 @@ keyboard_handle_interrupt:
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
 	add	eax, 1
 	mov	DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx], eax
-.L55:
+.L56:
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx]
 	cmp	eax, 254
-	jbe	.L60
+	jbe	.L61
 	mov	DWORD PTR keyboard_ascii_pointer@GOTOFF[ebx], 0
-.L60:
+.L61:
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx]
 	cmp	eax, 254
-	jbe	.L62
+	jbe	.L63
 	mov	DWORD PTR keyboard_KEYBUFFER_POINTER@GOTOFF[ebx], 0
-.L62:
+.L63:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave

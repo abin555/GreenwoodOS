@@ -35,5 +35,6 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
+void plot_point(int x, int y);
 
 #endif

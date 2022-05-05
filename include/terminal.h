@@ -31,4 +31,6 @@ void terminal_enter();
 void terminal_renderer();
 void terminal_console();
 void terminal_handler();
+
+void terminal_init();
 #endif

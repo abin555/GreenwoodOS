@@ -12,6 +12,7 @@
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
 	.comm	keyboard_KEYBUFFER,255,32
 	.comm	keyboard_ASCIIBuffer,255,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
@@ -21,10 +22,12 @@
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
-	.comm	settings_data,16,4
+	.comm	settings_data,24,4
 	.comm	formulas,336,32
 	.comm	previousAscii_Pointer,4,4
 	.comm	previousKey_Pointer,4,4
+	.comm	axis_center_x,4,4
+	.comm	axis_center_y,4,4
 	.comm	Terminal_Buffer,128,32
 	.comm	Terminal_OUT_Buffer,5120,32
 	.comm	Terminal_Arguments,128,32
@@ -1194,28 +1197,54 @@ terminal_handler:
 	.cfi_endproc
 .LFE7:
 	.size	terminal_handler, .-terminal_handler
+	.globl	terminal_init
+	.type	terminal_init, @function
+terminal_init:
+.LFB8:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	shr	edx, 3
+	sub	edx, 8
+	mov	DWORD PTR Terminal_Y@GOTOFF[eax], edx
+	nop
+	pop	ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE8:
+	.size	terminal_init, .-terminal_init
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB8:
+.LFB9:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE9:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB9:
+.LFB10:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE10:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

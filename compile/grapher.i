@@ -487,6 +487,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -521,6 +522,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -540,7 +542,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -586,6 +588,7 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
+void plot_point(int x, int y);
 # 2 "grapher.c" 2
 
 void draw_regions(){
@@ -614,15 +617,31 @@ void draw_axis(){
             0xFFFFFF
         );
     }
+    for(int y = settings_data.bottom_bound; y <= settings_data.top_bound; y++){
+        gfx_hline(
+            axis_center_x-10,
+            axis_center_x+10,
+            axis_center_y+(y*(fb_height/3/settings_data.top_bound)),
+            0xFFFFFF
+        );
+    }
+}
+
+void plot_point(int x, int y){
+    pixelScaled(
+        axis_center_x+(x*(fb_width/3/settings_data.right_bound)),
+        axis_center_y+(y*(fb_height/3/settings_data.top_bound)),
+        3,
+        0xFF00FF
+    );
 }
 
 void draw_graph(){
     for(int x = settings_data.left_bound; x <= settings_data.right_bound; x++){
-        fb_setPixel(
-            axis_center_x+settings_data.xscale*x,
-            settings_data.yscale*((x+10)*x-2)+axis_center_y,
-            0xFF00FF
-        );
+        int y = (x-2)*(x-2)+2;
+        if(y > settings_data.bottom_bound && y < settings_data.top_bound){
+            plot_point(x, y);
+        }
     }
 }
 
@@ -634,10 +653,16 @@ void grapher_entry(){
     settings_data.yscale = 1;
     settings_data.left_bound = -10;
     settings_data.right_bound = 10;
+    settings_data.top_bound = 10;
+    settings_data.bottom_bound = -10;
+
 
     draw_regions();
     draw_axis();
     draw_graph();
     while(1){
+        if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
+            return;
+        }
     }
 }

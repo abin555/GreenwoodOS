@@ -85,6 +85,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -124,6 +125,7 @@ struct cpu_state {
  unsigned int ebp;
  unsigned int esi;
  unsigned int edi;
+ unsigned int esp;
 } __attribute__((packed));
 
 struct stack_state {
@@ -189,6 +191,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -208,7 +211,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -699,6 +702,7 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
+void plot_point(int x, int y);
 # 11 "./include/terminal.h" 2
 
 
@@ -723,6 +727,8 @@ void terminal_enter();
 void terminal_renderer();
 void terminal_console();
 void terminal_handler();
+
+void terminal_init();
 # 7 "interrupts.c" 2
 
 
@@ -781,9 +787,6 @@ void KERNEL_INTERRUPT(){
  }
 }
 void SYS_CALL(struct cpu_state cpu){
- printChar(79, 1, 'S');
- decodeHex(STR_edit, cpu.eax, 32, 0);
- fb_write_xy(STR_edit, 9, 0, 0, 21);
  switch(cpu.eax){
   case 0x01:
    fb_write_cell(cpu.ebx, cpu.ecx, FG, BG);
@@ -799,6 +802,9 @@ void SYS_CALL(struct cpu_state cpu){
   case 0x05:
    fb_setPixel(cpu.ebx, cpu.ecx, cpu.edx);
    break;
+  case 0x06:
+   restore_kernel();
+   break;
  }
 }
 
@@ -809,8 +815,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 
  switch (interrupt){
   case 33:
-            keyboard_handle_interrupt();
-   pic_acknowledge(interrupt);
+            keyboard_handle_interrupt(interrupt);
    break;
   case 34:
    KERNEL_INTERRUPT();

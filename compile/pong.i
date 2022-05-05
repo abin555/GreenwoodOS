@@ -92,6 +92,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -126,6 +127,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -145,7 +147,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -552,6 +554,7 @@ void pong();
 
 void pong(){
   unsigned int ascii_pointer = 0;
+  unsigned int key_pointer = 0;
   int paddley = fb_height/2;
   int ballx = fb_width/2;
   int bally = fb_height/2;
@@ -560,6 +563,8 @@ void pong(){
   char score = 0;
   u16 physicscounter = 0;
   int physdelay = 0xFFF;
+
+  int paddlev = 0;
   fb_clear(0);
   while(1){
 
@@ -598,31 +603,50 @@ void pong(){
       }
     }
 
+    if(physicscounter % (physdelay/2) == 0){
+      if(paddlev < 0){
+        if(paddley > 100){
+          paddley+=paddlev;
+        }
+      }
+      else if(paddlev > 0){
+        if(paddley < (int) fb_height - 100){
+          paddley+=paddlev;
+        }
+      }
+      if(paddlev){
+        for(int drawPaddle = 0; drawPaddle < (int) fb_height; drawPaddle++){
+          fb_setPixel(50, drawPaddle,0);
+        }
+      }
+    }
+
+    if(keyboard_KEYBUFFER_POINTER != key_pointer){
+      key_pointer = keyboard_KEYBUFFER_POINTER;
+
+      if(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1] == 0x11){
+        paddlev = -1;
+      }
+      else if(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1] == 0x91 || keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1] == 0x9F){
+        paddlev = 0;
+      }
+      else if(keyboard_KEYBUFFER[keyboard_KEYBUFFER_POINTER-1] == 0x1F){
+        paddlev = 1;
+      }
+    }
 
     if(keyboard_ascii_pointer != ascii_pointer){
       ascii_pointer=keyboard_ascii_pointer;
-
-      if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 'w'){
-        if(paddley > 100){
-          paddley-=25;
+      if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '['){
+        if(physdelay > 20){
+          physdelay = physdelay >> 1;
         }
-      }
-      else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == 's'){
-        if(paddley < (int) fb_height - 100){
-          paddley+=25;
-        }
-      }
-      else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '['){
-        physdelay = physdelay >> 1;
       }
       else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == ']'){
         physdelay = (physdelay << 1) | 1;
       }
       else if(keyboard_ASCIIBuffer[keyboard_ascii_pointer-1] == '/'){
         return;
-      }
-      for(int drawPaddle = 0; drawPaddle < (int) fb_height; drawPaddle++){
-        fb_setPixel(50, drawPaddle,0);
       }
     }
     pixelScaled(ballx ,bally,10,0xFFFFFF);

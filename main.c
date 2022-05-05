@@ -66,6 +66,12 @@ void flyingDot(){
   }
 }
 
+void kmain_loop(){
+  while(1){
+    terminal_handler();
+  }
+}
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
   //unsigned size;
@@ -92,8 +98,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   load_gdt();
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
-  while(1){
-    terminal_handler();
-  }
+  restore_kernel_addr = (u32 *) &kmain_loop;
+  terminal_init();
+  kmain_loop();
   return 0;
 }

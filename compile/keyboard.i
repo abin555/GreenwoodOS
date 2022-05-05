@@ -89,6 +89,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -123,6 +124,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -142,7 +144,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -549,6 +551,28 @@ void fb_clearBackBuffer(u32 color);
 char kbd_US[256];
 char kbd_US_shift[256];
 # 4 "keyboard.c" 2
+# 1 "./include/string.h" 1
+
+
+
+# 1 "./include/ascii_tables.h" 1
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+# 5 "keyboard.c" 2
 
 unsigned char prev_Scancode = 0;
 unsigned int keyboard_KEYBUFFER_POINTER = 0;
@@ -640,17 +664,21 @@ void keyboard_flag_handler(unsigned char scan_code){
         keyboard_set_leds(0,0,0);
         break;
 
-        case 0x1D:
-
-
-        break;
-
         case 0x5B:
 
         break;
 
         case 0xD3:
 
+        break;
+        case 0x1D:
+        KYBRD_CTRL = 1;
+        break;
+        case 0x9D:
+        KYBRD_CTRL = 0;
+        break;
+        case 0x2E:
+        restore_kernel();
         break;
     }
 }
@@ -667,17 +695,22 @@ char convertascii(unsigned char scan_code){
     return 0;
 }
 
-void keyboard_handle_interrupt(){
+void keyboard_handle_interrupt(unsigned int interrupt){
     unsigned char scan_code;
     scan_code = keyboard_enc_read_buf();
+    pic_acknowledge(interrupt);
     if(scan_code){
-        if(kbd_US[scan_code] != 0){
+        decodeHex(STR_edit, scan_code, 8, 0);
+        fb_write_xy(STR_edit, 3, 0, 0, 0);
+        if(kbd_US[scan_code] != 0 && !KYBRD_CTRL){
             if(KYBRD_SHIFT){
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US_shift[scan_code];
+
             }
             else{
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US[scan_code];
             }
+
             keyboard_ascii_pointer++;
         }
         else{

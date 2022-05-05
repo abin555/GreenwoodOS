@@ -473,6 +473,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
 extern unsigned int *externalProgram;
@@ -512,6 +513,7 @@ enum KYBRD_CTRL_STATS_MASK {
 
 _Bool KYBRD_CAPS_LOCK;
 _Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
 
 char keyboard_ctrl_read_status ();
 
@@ -531,7 +533,7 @@ void keyboard_enable();
 int keyboard_keyread();
 
 void keyboard_flag_handler(unsigned char scan_code);
-void keyboard_handle_interrupt();
+void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
@@ -602,11 +604,18 @@ void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
 # 1 "./include/system_calls.h" 1
 # 7 "./include/grapher.h" 2
 
+
+
+
+
+
 struct DATA_Settings{
     int left_bound;
-    int right_bount;
+    int right_bound;
     int top_bound;
     int bottom_bound;
+    int xscale;
+    int yscale;
 } settings_data;
 
 struct formula{
@@ -617,10 +626,15 @@ struct formula{
 int previousAscii_Pointer;
 int previousKey_Pointer;
 
+int axis_center_x;
+int axis_center_y;
+
 void draw_settings_pane();
 void draw_axis();
 void draw_graph();
+void draw_regions();
 void grapher_entry();
+void plot_point(int x, int y);
 # 11 "./include/terminal.h" 2
 
 
@@ -645,6 +659,8 @@ void terminal_enter();
 void terminal_renderer();
 void terminal_console();
 void terminal_handler();
+
+void terminal_init();
 # 2 "kernel_programs/terminal.c" 2
 
 int Terminal_OUT_pointer = 0;
@@ -868,4 +884,8 @@ void terminal_handler(){
         }
         previousKEY_pointer = keyboard_KEYBUFFER_POINTER;
     }
+}
+
+void terminal_init(){
+    Terminal_Y = fb_height/8 - 8;
 }

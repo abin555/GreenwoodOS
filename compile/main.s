@@ -12,6 +12,7 @@
 	.comm	BG,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
 	.comm	keyboard_KEYBUFFER,255,32
 	.comm	keyboard_ASCIIBuffer,255,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
@@ -196,10 +197,32 @@ flyingDot:
 	.cfi_endproc
 .LFE0:
 	.size	flyingDot, .-flyingDot
+	.globl	kmain_loop
+	.type	kmain_loop, @function
+kmain_loop:
+.LFB1:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 4
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+.L27:
+	call	terminal_handler@PLT
+	jmp	.L27
+	.cfi_endproc
+.LFE1:
+	.size	kmain_loop, .-kmain_loop
 	.globl	kmain
 	.type	kmain, @function
 kmain:
-.LFB1:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -213,36 +236,36 @@ kmain:
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	cmp	DWORD PTR 8[ebp], 920085129
-	je	.L27
+	je	.L29
 	mov	eax, 255
-	jmp	.L33
-.L27:
+	jmp	.L30
+.L29:
 	mov	eax, DWORD PTR 12[ebp]
 	add	eax, 8
 	mov	DWORD PTR -12[ebp], eax
-	jmp	.L29
-.L31:
+	jmp	.L31
+.L33:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR [eax]
 	cmp	eax, 8
-	jne	.L30
+	jne	.L32
 	mov	eax, DWORD PTR -12[ebp]
 	mov	DWORD PTR -16[ebp], eax
 	sub	esp, 12
 	push	DWORD PTR -16[ebp]
 	call	init_fb@PLT
 	add	esp, 16
-.L30:
+.L32:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR 4[eax]
 	add	eax, 7
 	and	eax, -8
 	add	DWORD PTR -12[ebp], eax
-.L29:
+.L31:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR [eax]
 	test	eax, eax
-	jne	.L31
+	jne	.L33
 	call	load_gdt@PLT
 	call	interrupt_install_idt@PLT
 	sub	esp, 8
@@ -250,10 +273,13 @@ kmain:
 	push	16777215
 	call	fb_set_color@PLT
 	add	esp, 16
-.L32:
-	call	terminal_handler@PLT
-	jmp	.L32
-.L33:
+	mov	eax, DWORD PTR restore_kernel_addr@GOT[ebx]
+	lea	edx, kmain_loop@GOTOFF[ebx]
+	mov	DWORD PTR [eax], edx
+	call	terminal_init@PLT
+	call	kmain_loop
+	mov	eax, 0
+.L30:
 	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
@@ -261,19 +287,19 @@ kmain:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE2:
 	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB2:
+.LFB3:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

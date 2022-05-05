@@ -1138,31 +1138,29 @@ fb_write_xy:
 	jmp	.L46
 .L47:
 	mov	eax, DWORD PTR BG@GOT[ebx]
-	mov	edi, DWORD PTR [eax]
+	mov	ecx, DWORD PTR [eax]
 	mov	eax, DWORD PTR FG@GOT[ebx]
-	mov	esi, DWORD PTR [eax]
-	mov	edx, DWORD PTR -16[ebp]
+	mov	edx, DWORD PTR [eax]
+	mov	esi, DWORD PTR -16[ebp]
 	mov	eax, DWORD PTR 16[ebp]
-	add	eax, edx
-	mov	edx, eax
+	add	eax, esi
+	mov	esi, eax
 	mov	eax, DWORD PTR 8[ebp]
-	add	eax, edx
+	add	eax, esi
 	movzx	eax, BYTE PTR [eax]
-	movsx	ecx, al
-	mov	edx, DWORD PTR 24[ebp]
-	mov	eax, edx
-	sal	eax, 2
-	add	eax, edx
-	sal	eax, 4
-	mov	edx, eax
-	mov	eax, DWORD PTR 20[ebp]
-	add	edx, eax
-	mov	eax, DWORD PTR -16[ebp]
-	add	eax, edx
-	push	edi
-	push	esi
+	movsx	eax, al
+	mov	esi, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	esi, DWORD PTR [esi]
+	mov	edi, esi
+	imul	edi, DWORD PTR 24[ebp]
+	mov	esi, DWORD PTR 20[ebp]
+	add	edi, esi
+	mov	esi, DWORD PTR -16[ebp]
+	add	esi, edi
 	push	ecx
+	push	edx
 	push	eax
+	push	esi
 	call	fb_write_cell
 	add	esp, 16
 	add	DWORD PTR -16[ebp], 1

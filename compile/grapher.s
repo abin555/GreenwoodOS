@@ -12,6 +12,7 @@
 	.comm	INT_Software_Value,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
 	.comm	keyboard_KEYBUFFER,255,32
 	.comm	keyboard_ASCIIBuffer,255,32
 	.comm	keyboard_KEYBUFFER_POINTER,4,4
@@ -215,6 +216,47 @@ draw_axis:
 	mov	eax, DWORD PTR 4[eax]
 	cmp	DWORD PTR -28[ebp], eax
 	jle	.L4
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR 12[eax]
+	mov	DWORD PTR -32[ebp], eax
+	jmp	.L5
+.L6:
+	mov	eax, DWORD PTR fb_height@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR 8[eax]
+	mov	ecx, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	ecx
+	mov	edx, eax
+	mov	eax, DWORD PTR -32[ebp]
+	imul	edx, eax
+	mov	eax, DWORD PTR axis_center_y@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	edx, eax
+	mov	eax, DWORD PTR axis_center_x@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, 10
+	mov	ecx, eax
+	mov	eax, DWORD PTR axis_center_x@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 10
+	push	16777215
+	push	edx
+	push	ecx
+	push	eax
+	call	gfx_hline@PLT
+	add	esp, 16
+	add	DWORD PTR -32[ebp], 1
+.L5:
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	eax, DWORD PTR 8[eax]
+	cmp	DWORD PTR -32[ebp], eax
+	jle	.L6
 	nop
 	nop
 	lea	esp, -12[ebp]
@@ -231,10 +273,81 @@ draw_axis:
 	.cfi_endproc
 .LFE1:
 	.size	draw_axis, .-draw_axis
+	.globl	plot_point
+	.type	plot_point, @function
+plot_point:
+.LFB2:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	esi
+	push	ebx
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
+	call	__x86.get_pc_thunk.cx
+	add	ecx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR fb_height@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ecx]
+	mov	eax, DWORD PTR 8[eax]
+	mov	ebx, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	ebx
+	mov	edx, eax
+	mov	eax, DWORD PTR 12[ebp]
+	imul	edx, eax
+	mov	eax, DWORD PTR axis_center_y@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	lea	ebx, [edx+eax]
+	mov	eax, DWORD PTR fb_width@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, -1431655765
+	mul	edx
+	shr	edx
+	mov	eax, DWORD PTR settings_data@GOT[ecx]
+	mov	eax, DWORD PTR 4[eax]
+	mov	esi, eax
+	mov	eax, edx
+	mov	edx, 0
+	div	esi
+	mov	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	imul	edx, eax
+	mov	eax, DWORD PTR axis_center_x@GOT[ecx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, edx
+	push	16711935
+	push	3
+	push	ebx
+	push	eax
+	mov	ebx, ecx
+	call	pixelScaled@PLT
+	add	esp, 16
+	nop
+	lea	esp, -8[ebp]
+	pop	ebx
+	.cfi_restore 3
+	pop	esi
+	.cfi_restore 6
+	pop	ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE2:
+	.size	plot_point, .-plot_point
 	.globl	draw_graph
 	.type	draw_graph, @function
 draw_graph:
-.LFB2:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -250,38 +363,35 @@ draw_graph:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR -12[ebp], eax
-	jmp	.L6
-.L7:
+	jmp	.L9
+.L11:
+	mov	eax, DWORD PTR -12[ebp]
+	lea	edx, -2[eax]
+	mov	eax, DWORD PTR -12[ebp]
+	sub	eax, 2
+	imul	eax, edx
+	add	eax, 2
+	mov	DWORD PTR -16[ebp], eax
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
-	mov	eax, DWORD PTR 20[eax]
-	mov	edx, DWORD PTR -12[ebp]
-	add	edx, 10
-	imul	edx, DWORD PTR -12[ebp]
-	sub	edx, 2
-	imul	edx, eax
-	mov	eax, DWORD PTR axis_center_y@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	add	eax, edx
-	mov	ecx, eax
+	mov	eax, DWORD PTR 12[eax]
+	cmp	DWORD PTR -16[ebp], eax
+	jle	.L10
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
-	mov	eax, DWORD PTR 16[eax]
-	imul	eax, DWORD PTR -12[ebp]
-	mov	edx, eax
-	mov	eax, DWORD PTR axis_center_x@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	add	eax, edx
-	sub	esp, 4
-	push	16711935
-	push	ecx
-	push	eax
-	call	fb_setPixel@PLT
+	mov	eax, DWORD PTR 8[eax]
+	cmp	DWORD PTR -16[ebp], eax
+	jge	.L10
+	sub	esp, 8
+	push	DWORD PTR -16[ebp]
+	push	DWORD PTR -12[ebp]
+	call	plot_point
 	add	esp, 16
+.L10:
 	add	DWORD PTR -12[ebp], 1
-.L6:
+.L9:
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	eax, DWORD PTR 4[eax]
 	cmp	DWORD PTR -12[ebp], eax
-	jle	.L7
+	jle	.L11
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
@@ -291,12 +401,12 @@ draw_graph:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE3:
 	.size	draw_graph, .-draw_graph
 	.globl	grapher_entry
 	.type	grapher_entry, @function
 grapher_entry:
-.LFB3:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -346,25 +456,55 @@ grapher_entry:
 	mov	DWORD PTR [eax], -10
 	mov	eax, DWORD PTR settings_data@GOT[ebx]
 	mov	DWORD PTR 4[eax], 10
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	DWORD PTR 8[eax], 10
+	mov	eax, DWORD PTR settings_data@GOT[ebx]
+	mov	DWORD PTR 12[eax], -10
 	call	draw_regions
 	call	draw_axis
 	call	draw_graph
-.L9:
-	jmp	.L9
+.L15:
+	mov	eax, DWORD PTR keyboard_ascii_pointer@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	lea	edx, -1[eax]
+	mov	eax, DWORD PTR keyboard_ASCIIBuffer@GOT[ebx]
+	movzx	eax, BYTE PTR [eax+edx]
+	cmp	al, 47
+	je	.L17
+	jmp	.L15
+.L17:
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
 	.cfi_endproc
-.LFE3:
+.LFE4:
 	.size	grapher_entry, .-grapher_entry
+	.section	.text.__x86.get_pc_thunk.cx,"axG",@progbits,__x86.get_pc_thunk.cx,comdat
+	.globl	__x86.get_pc_thunk.cx
+	.hidden	__x86.get_pc_thunk.cx
+	.type	__x86.get_pc_thunk.cx, @function
+__x86.get_pc_thunk.cx:
+.LFB5:
+	.cfi_startproc
+	mov	ecx, DWORD PTR [esp]
+	ret
+	.cfi_endproc
+.LFE5:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
