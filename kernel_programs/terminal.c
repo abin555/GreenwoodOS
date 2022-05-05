@@ -140,6 +140,9 @@ void terminal_interpret(){
     if(terminal_compare("grapher", 0, Terminal_Arguments[0], 7)){
         grapher_entry();
     }
+    if(terminal_compare("reboot", 0, Terminal_Arguments[0], 6)){
+        kreboot();
+    }
 }
 
 void terminal_enter(){    

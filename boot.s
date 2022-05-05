@@ -69,7 +69,9 @@ inb:
 	in al, dx			;Recieve input and put into al register as 8 bit value (C lang Char)
 	ret					;Return to caller
 
-
+global kreboot
+kreboot:
+	jmp 0xFFFF:0
 
 ;GLOBAL DESCRIPTOR TABLE SETUP
 global load_gdt

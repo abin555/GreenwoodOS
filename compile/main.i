@@ -85,6 +85,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern void kreboot();
 extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
@@ -644,6 +645,7 @@ int axis_center_y;
 void draw_settings_pane();
 void draw_axis();
 void draw_graph();
+void clear_region();
 void draw_regions();
 void grapher_entry();
 void plot_point(float x, float y);

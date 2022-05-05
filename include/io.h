@@ -19,6 +19,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern void kreboot();
 extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 

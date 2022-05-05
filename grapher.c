@@ -8,8 +8,8 @@ void draw_regions(){
 void draw_axis(){
     fb_setPixel(axis_center_x, axis_center_y, 0xFFFFFF);
     gfx_hline(
-        axis_center_x-(fb_width/Axis_Proportion), //Left X
-        axis_center_x+(fb_width/Axis_Proportion), //Right X
+        axis_center_x-(fb_height/Axis_Proportion), //Left X
+        axis_center_x+(fb_height/Axis_Proportion), //Right X
         axis_center_y, //Y
         0xFFFFFF);//Color
     gfx_vline(
@@ -22,7 +22,7 @@ void draw_axis(){
         gfx_vline(
             axis_center_y-10,
             axis_center_y+10,
-            axis_center_x+(x*(fb_width/Axis_Proportion/settings_data.right_bound)),
+            axis_center_x+(x*(fb_height/Axis_Proportion/settings_data.right_bound)),
             0xFFFFFF
         );
     }
@@ -39,7 +39,7 @@ void draw_axis(){
 void plot_point(float x, float y){
     if(settings_data.settings & 0b00000001){
         pixelScaled(
-            axis_center_x+(x*(fb_width/Axis_Proportion/settings_data.right_bound)),
+            axis_center_x+(x*(fb_height/Axis_Proportion/settings_data.right_bound)),
             axis_center_y+((-1 * y)*(fb_height/Axis_Proportion/settings_data.top_bound)),
             3,
             0xFF00FF
@@ -47,7 +47,7 @@ void plot_point(float x, float y){
     }
     else{
         fb_setPixel(
-            axis_center_x+(x*(fb_width/Axis_Proportion/settings_data.right_bound)),
+            axis_center_x+(x*(fb_height/Axis_Proportion/settings_data.right_bound)),
             axis_center_y+((-1 * y)*(fb_height/Axis_Proportion/settings_data.top_bound)),
             0xFF00FF
         );
@@ -56,13 +56,20 @@ void plot_point(float x, float y){
 
 void draw_graph(){
     for(float x = settings_data.left_bound; x <= settings_data.right_bound; x += settings_data.step){
-        float y = 0.5*x*x-4*x;
+        //float y = x*x*(0.5 * x);
         //float y = 1/sqrt(-1*x*x+2);
+        float y;
+
+        y = x+((-1*x*x*x)/6)+((x*x*x*x*x)/120);
 
         if(y > settings_data.bottom_bound && y < settings_data.top_bound){
             plot_point(x, y);
         }
     }
+}
+
+void clear_region(){
+    
 }
 
 void grapher_entry(){

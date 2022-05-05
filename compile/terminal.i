@@ -473,6 +473,7 @@ unsigned char *INT_Software_Value;
 void software_interrupt(unsigned char interrupt);
 
 extern void restore_kernel();
+extern void kreboot();
 extern uint32_t * restore_kernel_addr;
 extern void PROGA();
 
@@ -616,6 +617,8 @@ struct DATA_Settings{
     int bottom_bound;
     int xscale;
     int yscale;
+    char settings;
+    double step;
 } settings_data;
 
 struct formula{
@@ -634,7 +637,8 @@ void draw_axis();
 void draw_graph();
 void draw_regions();
 void grapher_entry();
-void plot_point(int x, int y);
+void plot_point(float x, float y);
+float sqrt(float x);
 # 11 "./include/terminal.h" 2
 
 
@@ -802,6 +806,9 @@ void terminal_interpret(){
     }
     if(terminal_compare("grapher", 0, Terminal_Arguments[0], 7)){
         grapher_entry();
+    }
+    if(terminal_compare("reboot", 0, Terminal_Arguments[0], 6)){
+        kreboot();
     }
 }
 
