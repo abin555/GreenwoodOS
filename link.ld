@@ -20,6 +20,8 @@ SECTIONS {
 		*(COMMON)
 		*(.bss)
 	}
+	kernel_end = .;
+	
 	. = 0x01000000;
 	.PROGA ALIGN (0x2000):
 	{

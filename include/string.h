@@ -18,5 +18,5 @@ unsigned int encodeHex(char *Buffer, int start, int end);
 
 char quadToHex(char quad);
 char hexToQuad(char hex);
-void strcpy(char *source, char *destination, int source);
+void strcpy(char *source, char *destination, unsigned int len);
 #endif

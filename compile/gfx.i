@@ -351,8 +351,80 @@ struct multiboot_tag_load_base_addr
 
 
 
+# 1 "./include/gcc_stdint.h" 1
+# 34 "./include/gcc_stdint.h"
+typedef signed char int8_t;
+
+
+typedef short int int16_t;
+
+
+typedef int int32_t;
+
+
+typedef long long int int64_t;
+
+
+typedef unsigned char uint8_t;
+
+
+typedef short unsigned int uint16_t;
+
+
+typedef unsigned int uint32_t;
+
+
+typedef long long unsigned int uint64_t;
+
+
+
+
+typedef signed char int_least8_t;
+typedef short int int_least16_t;
+typedef int int_least32_t;
+typedef long long int int_least64_t;
+typedef unsigned char uint_least8_t;
+typedef short unsigned int uint_least16_t;
+typedef unsigned int uint_least32_t;
+typedef long long unsigned int uint_least64_t;
+
+
+
+typedef signed char int_fast8_t;
+typedef int int_fast16_t;
+typedef int int_fast32_t;
+typedef long long int int_fast64_t;
+typedef unsigned char uint_fast8_t;
+typedef unsigned int uint_fast16_t;
+typedef unsigned int uint_fast32_t;
+typedef long long unsigned int uint_fast64_t;
+
+
+
+
+typedef int intptr_t;
+
+
+typedef unsigned int uintptr_t;
+
+
+
+
+typedef long long int intmax_t;
+typedef long long unsigned int uintmax_t;
+# 6 "./include/memory.h" 2
+
+
+typedef struct {
+    uint8_t status;
+    uint8_t size;
+} alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
+void* memset(void * place, int val, unsigned int size);
+
+char* malloc(unsigned int size);
+void mem_init(uint32_t kernelEnd);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;

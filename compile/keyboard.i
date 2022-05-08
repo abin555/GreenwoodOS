@@ -504,7 +504,18 @@ struct multiboot_tag_load_base_addr
 
 
 
+
+
+typedef struct {
+    char status;
+    char size;
+} alloc_t;
+
 void memcpy(u64* source, u64* target, u64 len);
+void* memset(void * place, int val, unsigned int size);
+
+void* malloc(unsigned int size);
+void mem_init(unsigned int kernelEnd);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;
@@ -574,6 +585,7 @@ unsigned int encodeHex(char *Buffer, int start, int end);
 
 char quadToHex(char quad);
 char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
 # 5 "keyboard.c" 2
 
 unsigned char prev_Scancode = 0;

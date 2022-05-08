@@ -186,6 +186,7 @@ unsigned int encodeHex(char *Buffer, int start, int end);
 
 char quadToHex(char quad);
 char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
 # 2 "string.c" 2
 
 int STR_Compare(char *elem1, char *elem2, int start, int end){
@@ -343,4 +344,10 @@ unsigned int encodeHex(char *Buffer, int start, int end){
   }
 
   return workInt;
+}
+
+void strcpy(char *source, char *destination, unsigned int len){
+  for(unsigned int i = 0; i < len; i++){
+    source[i] = destination[i];
+  }
 }

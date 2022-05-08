@@ -156,3 +156,9 @@ unsigned int encodeHex(char *Buffer, int start, int end){
   
   return workInt;
 }
+
+void strcpy(char *source, char *destination, unsigned int len){
+  for(unsigned int i = 0; i < len; i++){
+    source[i] = destination[i];
+  }
+}

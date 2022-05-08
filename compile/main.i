@@ -441,7 +441,18 @@ typedef long long int i64;
 
 
 
+
+
+typedef struct {
+    uint8_t status;
+    uint8_t size;
+} alloc_t;
+
 void memcpy(u64* source, u64* target, u64 len);
+void* memset(void * place, int val, unsigned int size);
+
+void* malloc(unsigned int size);
+void mem_init(uint32_t kernelEnd);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;
@@ -586,6 +597,7 @@ unsigned int encodeHex(char *Buffer, int start, int end);
 
 char quadToHex(char quad);
 char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
 # 8 "./include/terminal.h" 2
 
 # 1 "./include/pong.h" 1

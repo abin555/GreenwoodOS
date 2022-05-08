@@ -521,17 +521,56 @@ encodeHex:
 	.cfi_endproc
 .LFE6:
 	.size	encodeHex, .-encodeHex
+	.globl	strcpy
+	.type	strcpy, @function
+strcpy:
+.LFB7:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 16
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -4[ebp], 0
+	jmp	.L62
+.L63:
+	mov	edx, DWORD PTR 12[ebp]
+	mov	eax, DWORD PTR -4[ebp]
+	add	eax, edx
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR -4[ebp]
+	add	edx, ecx
+	movzx	eax, BYTE PTR [eax]
+	mov	BYTE PTR [edx], al
+	add	DWORD PTR -4[ebp], 1
+.L62:
+	mov	eax, DWORD PTR -4[ebp]
+	cmp	eax, DWORD PTR 16[ebp]
+	jb	.L63
+	nop
+	nop
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE7:
+	.size	strcpy, .-strcpy
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB7:
+.LFB8:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE8:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

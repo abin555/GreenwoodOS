@@ -350,64 +350,6 @@ struct multiboot_tag_load_base_addr
 
 
 
-
-void memcpy(u64* source, u64* target, u64 len);
-# 7 "./include/frame_buffer.h" 2
-# 16 "./include/frame_buffer.h"
-u32 fb_width;
-u32 fb_height;
-u64* fb;
-u32 fb_backBuffer[1920*1080];
-int fb_terminal_w;
-int fb_terminal_h;
-
-unsigned int FG;
-unsigned int BG;
-
-void fb_setPixel(u32 x, u32 y, u32 color);
-
-void init_fb(struct multiboot_tag_framebuffer *tagfb);
-
-void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
-
-void printChar(unsigned int x, unsigned int y, char c);
-void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale);
-
-void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color);
-
-void fb_set_color(unsigned int fg, unsigned int bg);
-
-void fb_clear(unsigned int color);
-
-int fb_write(char *buf, unsigned int len);
-int fb_write_start(char *buf, unsigned int len, unsigned int start);
-void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-
-void fb_move_cursor(unsigned int pos);
-void fb_move_cursor_xy(unsigned int x, unsigned int y);
-
-void fb_copyBuffer();
-void fb_clearBackBuffer(u32 color);
-# 4 "./include/grapher.h" 2
-# 1 "./include/gfx.h" 1
-
-
-
-
-
-
-void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
-void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
-void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
-# 5 "./include/grapher.h" 2
-# 1 "./include/keyboard.h" 1
-
-
-
-# 1 "./include/io.h" 1
-
-
-
 # 1 "./include/gcc_stdint.h" 1
 # 34 "./include/gcc_stdint.h"
 typedef signed char int8_t;
@@ -469,7 +411,76 @@ typedef unsigned int uintptr_t;
 
 typedef long long int intmax_t;
 typedef long long unsigned int uintmax_t;
-# 5 "./include/io.h" 2
+# 6 "./include/memory.h" 2
+
+
+typedef struct {
+    uint8_t status;
+    uint8_t size;
+} alloc_t;
+
+void memcpy(u64* source, u64* target, u64 len);
+void* memset(void * place, int val, unsigned int size);
+
+char* malloc(unsigned int size);
+void mem_init(uint32_t kernelEnd);
+# 7 "./include/frame_buffer.h" 2
+# 16 "./include/frame_buffer.h"
+u32 fb_width;
+u32 fb_height;
+u64* fb;
+u32 fb_backBuffer[1920*1080];
+int fb_terminal_w;
+int fb_terminal_h;
+
+unsigned int FG;
+unsigned int BG;
+
+void fb_setPixel(u32 x, u32 y, u32 color);
+
+void init_fb(struct multiboot_tag_framebuffer *tagfb);
+
+void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
+
+void printChar(unsigned int x, unsigned int y, char c);
+void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale);
+
+void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color);
+
+void fb_set_color(unsigned int fg, unsigned int bg);
+
+void fb_clear(unsigned int color);
+
+int fb_write(char *buf, unsigned int len);
+int fb_write_start(char *buf, unsigned int len, unsigned int start);
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+
+void fb_move_cursor(unsigned int pos);
+void fb_move_cursor_xy(unsigned int x, unsigned int y);
+
+void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
+# 4 "./include/grapher.h" 2
+# 1 "./include/gfx.h" 1
+
+
+
+
+
+
+void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
+void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
+void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
+# 5 "./include/grapher.h" 2
+# 1 "./include/keyboard.h" 1
+
+
+
+# 1 "./include/io.h" 1
+
+
+
+
 
 extern void outb(unsigned short port, unsigned char data);
 
