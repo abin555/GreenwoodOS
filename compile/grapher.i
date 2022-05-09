@@ -416,6 +416,8 @@ typedef long long unsigned int uintmax_t;
 # 7 "./include/memory.h" 2
 
 uint32_t memory_used;
+uint32_t heap_begin;
+uint32_t heap_end;
 
 typedef struct{
     uint32_t size;

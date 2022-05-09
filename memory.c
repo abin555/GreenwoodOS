@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 0x00400000 //Heap is 4 MB in size
+#define HEAP_SIZE 50 //Heap is 4 MB in size
 
 uint32_t last_alloc = 0;
 uint32_t heap_end = 0;
@@ -66,7 +66,6 @@ char* malloc(unsigned int size){
         fb_write_xy(error, sizeof(error), 0, 0, 0);
         return 0;
     }
-
     alloc_t *alloc = (alloc_t *)last_alloc;
 	alloc->status = 1;
 	alloc->size = size;

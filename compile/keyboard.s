@@ -31,6 +31,8 @@ prev_Scancode:
 	.zero	1
 	.comm	char_scancode,1,1
 	.comm	memory_used,4,4
+	.comm	heap_begin,4,4
+	.comm	heap_end,4,4
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
@@ -556,23 +558,6 @@ keyboard_handle_interrupt:
 	add	esp, 16
 	cmp	BYTE PTR -9[ebp], 0
 	je	.L56
-	movzx	eax, BYTE PTR -9[ebp]
-	push	0
-	push	8
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	sub	esp, 12
-	push	0
-	push	0
-	push	0
-	push	3
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
 	movzx	eax, BYTE PTR -9[ebp]
 	mov	edx, DWORD PTR kbd_US@GOT[ebx]
 	movzx	eax, BYTE PTR [edx+eax]

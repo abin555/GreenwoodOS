@@ -3,6 +3,8 @@
 	.text
 	.comm	INT_Software_Value,4,4
 	.comm	memory_used,4,4
+	.comm	heap_begin,4,4
+	.comm	heap_end,4,4
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
@@ -221,6 +223,12 @@ kmain_loop:
 	.cfi_endproc
 .LFE1:
 	.size	kmain_loop, .-kmain_loop
+	.section	.rodata
+.LC0:
+	.string	"TEST"
+.LC1:
+	.string	"OOGA BOOGA"
+	.text
 	.globl	kmain
 	.type	kmain, @function
 kmain:
@@ -252,9 +260,9 @@ kmain:
 	cmp	eax, 8
 	jne	.L32
 	mov	eax, DWORD PTR -12[ebp]
-	mov	DWORD PTR -16[ebp], eax
+	mov	DWORD PTR -24[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -16[ebp]
+	push	DWORD PTR -24[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L32:
@@ -285,6 +293,54 @@ kmain:
 	push	eax
 	call	mem_init@PLT
 	add	esp, 16
+	sub	esp, 12
+	push	25
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -16[ebp], eax
+	sub	esp, 12
+	push	25
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -20[ebp], eax
+	lea	eax, .LC0@GOTOFF[ebx]
+	mov	DWORD PTR -16[ebp], eax
+	lea	eax, .LC1@GOTOFF[ebx]
+	mov	DWORD PTR -20[ebp], eax
+	sub	esp, 12
+	push	2
+	push	0
+	push	0
+	push	25
+	push	DWORD PTR -16[ebp]
+	call	fb_write_xy@PLT
+	add	esp, 32
+	sub	esp, 12
+	push	3
+	push	0
+	push	0
+	push	25
+	push	DWORD PTR -20[ebp]
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR memory_used@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	0
+	push	0
+	push	1
+	push	16
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	call	kmain_loop
 	mov	eax, 0
 .L30:

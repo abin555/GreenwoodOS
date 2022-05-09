@@ -16,11 +16,11 @@
 	.size	memory_used, 4
 memory_used:
 	.zero	4
-	.globl	last_alloc
+	.globl	heap_begin
 	.align 4
-	.type	last_alloc, @object
-	.size	last_alloc, 4
-last_alloc:
+	.type	heap_begin, @object
+	.size	heap_begin, 4
+heap_begin:
 	.zero	4
 	.globl	heap_end
 	.align 4
@@ -28,11 +28,11 @@ last_alloc:
 	.size	heap_end, 4
 heap_end:
 	.zero	4
-	.globl	heap_begin
+	.globl	last_alloc
 	.align 4
-	.type	heap_begin, @object
-	.size	heap_begin, 4
-heap_begin:
+	.type	last_alloc, @object
+	.size	last_alloc, 4
+last_alloc:
 	.zero	4
 	.text
 	.globl	memcpy
@@ -132,10 +132,10 @@ mem_init:
 	mov	edx, DWORD PTR last_alloc@GOTOFF[eax]
 	mov	DWORD PTR heap_begin@GOTOFF[eax], edx
 	mov	edx, DWORD PTR heap_begin@GOTOFF[eax]
-	add	edx, 4194304
+	add	edx, 50
 	mov	DWORD PTR heap_end@GOTOFF[eax], edx
 	mov	eax, DWORD PTR heap_begin@GOTOFF[eax]
-	push	4194304
+	push	50
 	push	0
 	push	eax
 	call	memset

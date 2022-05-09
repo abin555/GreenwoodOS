@@ -449,6 +449,8 @@ void fb_clearBackBuffer(u32 color);
 # 7 "./include/memory.h" 2
 
 uint32_t memory_used;
+uint32_t heap_begin;
+uint32_t heap_end;
 
 typedef struct{
     uint32_t size;
@@ -488,8 +490,8 @@ void* memset(void * place, int val, unsigned int size){
 void mem_init(uint32_t kernelEnd){
     last_alloc = kernelEnd + 0x1000;
     heap_begin = last_alloc;
-    heap_end = heap_begin + 0x00400000;
-    memset((char *) heap_begin, 0, 0x00400000);
+    heap_end = heap_begin + 50;
+    memset((char *) heap_begin, 0, 50);
 }
 
 char* malloc(unsigned int size){
@@ -530,7 +532,6 @@ char* malloc(unsigned int size){
         fb_write_xy(error, sizeof(error), 0, 0, 0);
         return 0;
     }
-
     alloc_t *alloc = (alloc_t *)last_alloc;
  alloc->status = 1;
  alloc->size = size;

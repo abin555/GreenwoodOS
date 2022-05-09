@@ -105,6 +105,15 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   terminal_init();
 
   mem_init(kernel_end);
+  char* msg = malloc(25);
+  char* msg2 = malloc(25);
+  msg = "TEST";
+  msg2 = "OOGA BOOGA";
+  fb_write_xy(msg, 25, 0, 0, 2);
+  fb_write_xy(msg2, 25, 0, 0, 3);
+  decodeHex(STR_edit, memory_used, 32, 0);
+  fb_write_xy(STR_edit, 16, 1, 0,0);
+
   kmain_loop();
   return 0;
 }

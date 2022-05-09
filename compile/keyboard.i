@@ -508,6 +508,8 @@ struct multiboot_tag_load_base_addr
 # 7 "./include/memory.h" 2
 
 unsigned int memory_used;
+unsigned int heap_begin;
+unsigned int heap_end;
 
 typedef struct{
     unsigned int size;
@@ -719,8 +721,6 @@ void keyboard_handle_interrupt(unsigned int interrupt){
     scan_code = keyboard_enc_read_buf();
     pic_acknowledge(interrupt);
     if(scan_code){
-        decodeHex(STR_edit, scan_code, 8, 0);
-        fb_write_xy(STR_edit, 3, 0, 0, 0);
         if(kbd_US[scan_code] != 0 && !KYBRD_CTRL){
             if(KYBRD_SHIFT){
                 keyboard_ASCIIBuffer[keyboard_ascii_pointer] = kbd_US_shift[scan_code];

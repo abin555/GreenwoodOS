@@ -575,6 +575,8 @@ struct multiboot_tag_load_base_addr
 # 7 "./include/memory.h" 2
 
 unsigned int memory_used;
+unsigned int heap_begin;
+unsigned int heap_end;
 
 typedef struct{
     unsigned int size;
