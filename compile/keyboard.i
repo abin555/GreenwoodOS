@@ -504,18 +504,23 @@ struct multiboot_tag_load_base_addr
 
 
 
+# 1 "./include/frame_buffer.h" 1
+# 7 "./include/memory.h" 2
 
+unsigned int memory_used;
 
-typedef struct {
+typedef struct{
+    unsigned int size;
     char status;
-    char size;
 } alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-void* malloc(unsigned int size);
+char* malloc(unsigned int size);
+void free(void *mem);
 void mem_init(unsigned int kernelEnd);
+unsigned int mgetSize(void *mem);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;
@@ -578,7 +583,7 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);
 
-void decodeHex(char *Buffer, int in, int len, int start);
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
 void decodeInt(char *Buffer, int in, int len, int start);
 
 unsigned int encodeHex(char *Buffer, int start, int end);

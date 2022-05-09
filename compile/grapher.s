@@ -1,6 +1,7 @@
 	.file	"grapher.c"
 	.intel_syntax noprefix
 	.text
+	.comm	memory_used,4,4
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4

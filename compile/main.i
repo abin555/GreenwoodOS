@@ -441,18 +441,23 @@ typedef long long int i64;
 
 
 
+# 1 "./include/frame_buffer.h" 1
+# 7 "./include/memory.h" 2
 
+uint32_t memory_used;
 
-typedef struct {
+typedef struct{
+    uint32_t size;
     uint8_t status;
-    uint8_t size;
 } alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-void* malloc(unsigned int size);
+char* malloc(unsigned int size);
+void free(void *mem);
 void mem_init(uint32_t kernelEnd);
+unsigned int mgetSize(void *mem);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;
@@ -563,8 +568,7 @@ unsigned char char_scancode;
 
 
 
-# 1 "./include/frame_buffer.h" 1
-# 5 "./include/terminal.h" 2
+
 
 # 1 "./include/keyboard.h" 1
 # 7 "./include/terminal.h" 2
@@ -590,7 +594,7 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);
 
-void decodeHex(char *Buffer, int in, int len, int start);
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
 void decodeInt(char *Buffer, int in, int len, int start);
 
 unsigned int encodeHex(char *Buffer, int start, int end);
@@ -768,6 +772,8 @@ void KYBRD_DEBUG_DISPLAY();
 # 10 "main.c" 2
 # 1 "./include/pong.h" 1
 # 11 "main.c" 2
+# 1 "./include/memory.h" 1
+# 12 "main.c" 2
 
 
 extern void load_gdt();
@@ -832,6 +838,8 @@ void kmain_loop(){
   }
 }
 
+extern unsigned int kernel_end;
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
 
@@ -860,6 +868,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
   terminal_init();
+
+  mem_init(kernel_end);
   kmain_loop();
   return 0;
 }

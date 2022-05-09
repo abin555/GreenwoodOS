@@ -412,18 +412,23 @@ typedef unsigned int uintptr_t;
 typedef long long int intmax_t;
 typedef long long unsigned int uintmax_t;
 # 6 "./include/memory.h" 2
+# 1 "./include/frame_buffer.h" 1
+# 7 "./include/memory.h" 2
 
+uint32_t memory_used;
 
-typedef struct {
+typedef struct{
+    uint32_t size;
     uint8_t status;
-    uint8_t size;
 } alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
 char* malloc(unsigned int size);
+void free(void *mem);
 void mem_init(uint32_t kernelEnd);
+unsigned int mgetSize(void *mem);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;

@@ -8,6 +8,7 @@
 #include "keyboard_test.h"
 #include "gfx.h"
 #include "pong.h"
+#include "memory.h"
 //#include "IDE.h"
 
 extern void load_gdt();
@@ -72,6 +73,8 @@ void kmain_loop(){
   }
 }
 
+extern unsigned int kernel_end;
+
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
   //unsigned size;
@@ -100,6 +103,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
   terminal_init();
+
+  mem_init(kernel_end);
   kmain_loop();
   return 0;
 }

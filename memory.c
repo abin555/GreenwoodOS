@@ -25,7 +25,7 @@ void mem_init(uint32_t kernelEnd){
     last_alloc = kernelEnd + 0x1000;
     heap_begin = last_alloc;
     heap_end = heap_begin + HEAP_SIZE;
-    memset((char *) heap_begin, 0, heap_end - heap_begin);
+    memset((char *) heap_begin, 0, HEAP_SIZE);
 }
 
 char* malloc(unsigned int size){
@@ -60,5 +60,32 @@ char* malloc(unsigned int size){
     }
 
     nalloc:;
-    return 0;//TODO CONTINUE WORK
+
+    if(last_alloc+size+sizeof(alloc_t) >= heap_end){
+        char error[] = "Out of HEAP memory";
+        fb_write_xy(error, sizeof(error), 0, 0, 0);
+        return 0;
+    }
+
+    alloc_t *alloc = (alloc_t *)last_alloc;
+	alloc->status = 1;
+	alloc->size = size;
+
+	last_alloc += size;
+	last_alloc += sizeof(alloc_t);
+	last_alloc += 4;
+	memory_used += size + 4 + sizeof(alloc_t);
+	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+	return (char *)((uint32_t)alloc + sizeof(alloc_t));
+}
+
+void free(void *mem){
+    alloc_t *alloc = (mem - sizeof(alloc_t));
+    memory_used -= alloc->size + sizeof(alloc_t);
+    alloc->status = 0;
+}
+
+unsigned int mgetSize(void *mem){
+    alloc_t *alloc = mem - sizeof(alloc_t);
+    return alloc->size;
 }

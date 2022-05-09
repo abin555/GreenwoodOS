@@ -3,16 +3,20 @@
 
 #include "types.h"
 #include "gcc_stdint.h"
+#include "frame_buffer.h"
 
+uint32_t memory_used;
 
-typedef struct {
-    uint8_t status;
-    uint8_t size;
+typedef struct{
+    uint32_t size;
+    uint8_t status;//
 } alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
 char* malloc(unsigned int size);
+void free(void *mem);
 void mem_init(uint32_t kernelEnd);
+unsigned int mgetSize(void *mem);
 #endif

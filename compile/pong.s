@@ -11,6 +11,7 @@
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
 	.comm	char_scancode,1,1
+	.comm	memory_used,4,4
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4

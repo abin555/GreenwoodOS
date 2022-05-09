@@ -179,7 +179,7 @@ void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
 
 void decodeData(char *Buffer, int in, int len, int start);
 
-void decodeHex(char *Buffer, int in, int len, int start);
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
 void decodeInt(char *Buffer, int in, int len, int start);
 
 unsigned int encodeHex(char *Buffer, int start, int end);
@@ -330,7 +330,7 @@ char hexToQuad(char hex){
   return 0;
 }
 
-void decodeHex(char *Buffer, int in, int len, int start){
+void decodeHex(char *Buffer, unsigned int in, int len, int start){
   for(int i = 0; i < len/4; i++){
     Buffer[start+(len/4 - i)] = quadtoHex((in >> 4*i) & 0x0F);
   }

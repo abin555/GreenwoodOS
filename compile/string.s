@@ -427,7 +427,7 @@ decodeHex:
 	sal	eax, 2
 	mov	edx, DWORD PTR 12[ebp]
 	mov	ecx, eax
-	sar	edx, cl
+	shr	edx, cl
 	mov	eax, edx
 	movsx	eax, al
 	and	eax, 15

@@ -2,6 +2,7 @@
 	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
+	.comm	memory_used,4,4
 	.comm	fb_width,4,4
 	.comm	fb_height,4,4
 	.comm	fb,4,4
@@ -278,6 +279,12 @@ kmain:
 	lea	edx, kmain_loop@GOTOFF[ebx]
 	mov	DWORD PTR [eax], edx
 	call	terminal_init@PLT
+	mov	eax, DWORD PTR kernel_end@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	esp, 12
+	push	eax
+	call	mem_init@PLT
+	add	esp, 16
 	call	kmain_loop
 	mov	eax, 0
 .L30:
