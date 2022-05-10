@@ -66,8 +66,6 @@ void terminal_interpret(){
     
 
     if(terminal_compare("print", 0, Terminal_Arguments[0], 5)){
-        
-        printChar(79, 0, 'P');
         fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
         fb_write_xy(Terminal_Buffer, TERMINAL_Buffer_Size-Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
         Terminal_OUT_pointer+=fb_terminal_w;
@@ -150,7 +148,7 @@ void terminal_enter(){
 
     STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, TERMINAL_Buffer_Size, Terminal_OUT_pointer);
     fb_write_xy(Terminal_OUT_Buffer, TERMINAL_Buffer_Size, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
-    Terminal_OUT_pointer += TERMINAL_Buffer_Size + (TERMINAL_Buffer_Size % fb_terminal_w);
+    Terminal_OUT_pointer += fb_terminal_w;
     Terminal_Buffer_Pointer = 0;
 
 

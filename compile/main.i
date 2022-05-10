@@ -872,14 +872,22 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   terminal_init();
 
   mem_init(kernel_end);
-  char* msg = malloc(25);
-  char* msg2 = malloc(25);
-  msg = "TEST";
-  msg2 = "OOGA BOOGA";
-  fb_write_xy(msg, 25, 0, 0, 2);
-  fb_write_xy(msg2, 25, 0, 0, 3);
-  decodeHex(STR_edit, memory_used, 32, 0);
-  fb_write_xy(STR_edit, 16, 1, 0,0);
+
+  char* msg = malloc(10);
+  msg = "0123456789";
+  char* msg2 = malloc(20);
+  msg2 = "TEST0123450123456789";
+  free(msg);
+
+  fb_write_xy(msg, 10, 0, 0,1);
+  fb_write_xy(msg2, 20, 0, 0, 2);
+
+  char* msg3 = malloc(10);
+  msg3 = "9876543210";
+  fb_write_xy(msg, 10, 0, 0, 3);
+  fb_write_xy(msg3, 10, 0, 0, 4);
+
+
 
   kmain_loop();
   return 0;

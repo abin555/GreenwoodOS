@@ -488,23 +488,23 @@ void* memset(void * place, int val, unsigned int size){
 }
 
 void mem_init(uint32_t kernelEnd){
-    last_alloc = kernelEnd + 0x1000;
+    last_alloc = kernelEnd;
     heap_begin = last_alloc;
-    heap_end = heap_begin + 50;
-    memset((char *) heap_begin, 0, 50);
+    heap_end = heap_begin + 0x4000;
+    memset((char *) heap_begin, 0, 0x4000);
 }
 
 char* malloc(unsigned int size){
     if(!size) return 0;
 
-    uint8_t *mem = (uint8_t *)heap_begin;
+    uint32_t *mem = (uint32_t *) heap_begin;
 
-    while((uint32_t) mem < last_alloc){
+    while((uint32_t) mem < heap_end){
         alloc_t *a = (alloc_t *) mem;
 
-        if(!a->size)
-            goto nalloc;
-
+        if(!a->size && !a->status){
+            goto notallocated;
+        }
         if(a->status){
             mem += a->size;
             mem += sizeof(alloc_t);
@@ -512,45 +512,55 @@ char* malloc(unsigned int size){
             continue;
         }
 
+
+
+
+
         if(a->size >= size){
             a->status = 1;
-
             memset(mem + sizeof(alloc_t), 0, size);
-            memory_used += size + sizeof(alloc_t);
-            return (char *)(mem + sizeof(alloc_t));
+            memory_used += size + 4 + sizeof(alloc_t);
+            last_alloc = (uint32_t) mem;
         }
 
-        mem += a->size;
-        mem += sizeof(alloc_t);
-        mem += 4;
     }
-
-    nalloc:;
+    notallocated:;
 
     if(last_alloc+size+sizeof(alloc_t) >= heap_end){
         char error[] = "Out of HEAP memory";
         fb_write_xy(error, sizeof(error), 0, 0, 0);
         return 0;
     }
-    alloc_t *alloc = (alloc_t *)last_alloc;
- alloc->status = 1;
- alloc->size = size;
 
- last_alloc += size;
- last_alloc += sizeof(alloc_t);
- last_alloc += 4;
- memory_used += size + 4 + sizeof(alloc_t);
+    alloc_t *lalloc = (alloc_t *) last_alloc;
+    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0) + 4;
+    alloc->status = 1;
+    alloc->size = size;
+
+
+    last_alloc += size;
+    last_alloc += sizeof(alloc_t);
+    last_alloc += 4;
+
+    memory_used += size + 4 + sizeof(alloc_t);
+
+
  memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+
  return (char *)((uint32_t)alloc + sizeof(alloc_t));
 }
 
 void free(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t));
+    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
     memory_used -= alloc->size + sizeof(alloc_t);
+
+
+
+
     alloc->status = 0;
 }
 
 unsigned int mgetSize(void *mem){
-    alloc_t *alloc = mem - sizeof(alloc_t);
+    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
     return alloc->size;
 }

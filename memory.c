@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 50 //Heap is 4 MB in size
+#define HEAP_SIZE 0x4000 //Heap is 4 MB in size
 
 uint32_t last_alloc = 0;
 uint32_t heap_end = 0;
@@ -22,7 +22,7 @@ void* memset(void * place, int val, unsigned int size){
 }
 
 void mem_init(uint32_t kernelEnd){
-    last_alloc = kernelEnd + 0x1000;
+    last_alloc = kernelEnd;
     heap_begin = last_alloc;
     heap_end = heap_begin + HEAP_SIZE;
     memset((char *) heap_begin, 0, HEAP_SIZE);
@@ -30,61 +30,71 @@ void mem_init(uint32_t kernelEnd){
 
 char* malloc(unsigned int size){
     if(!size) return 0;
+    
+    uint32_t *mem = (uint32_t *) heap_begin;
 
-    uint8_t *mem = (uint8_t *)heap_begin;
-
-    while((uint32_t) mem < last_alloc){
+    while((uint32_t) mem < heap_end){
         alloc_t *a = (alloc_t *) mem;
 
-        if(!a->size)
-            goto nalloc;
-        
-        if(a->status){
-            mem += a->size;
-            mem += sizeof(alloc_t);
-            mem += 4;
-            continue;
+        if(!a->size && !a->status){//If there is not an allocation at this location, goto the not allocated label
+            goto notallocated;
         }
-
-        if(a->size >= size){
-            a->status = 1;
-
-            memset(mem + sizeof(alloc_t), 0, size);
-            memory_used += size + sizeof(alloc_t);
-            return (char *)(mem + sizeof(alloc_t));
+        if(a->status){//If status is defined, the allocation segment is in use.
+            mem += a->size;//move up to the size of the segment
+            mem += sizeof(alloc_t);//add the size of the info table
+            mem += 4;//add four?
+            continue; //move on to next try
         }
+        /*
+        In order to get to this point, there need to be an existing allocation region defined at *mem
+        However, it cannot have the status flag enabled.
+        Based on this, when a region is set and the region is not used, the region is reallocated.
+        */
+        if(a->size >= size){//Check if the available allocation region contains 
+            a->status = 1;//mark region as in use.
+            memset(mem + sizeof(alloc_t), 0, size); //clear requested & available region.
+            memory_used += size + 4 + sizeof(alloc_t); //Increase counter of used memory
+            last_alloc = (uint32_t) mem;
+        } 
 
-        mem += a->size;
-        mem += sizeof(alloc_t);
-        mem += 4;
     }
+    notallocated:;//Label for unallocated memory
 
-    nalloc:;
-
-    if(last_alloc+size+sizeof(alloc_t) >= heap_end){
+    if(last_alloc+size+sizeof(alloc_t) >= heap_end){//Check if the location of the last allocated block plus the size requested would be past the heap end
         char error[] = "Out of HEAP memory";
         fb_write_xy(error, sizeof(error), 0, 0, 0);
         return 0;
     }
-    alloc_t *alloc = (alloc_t *)last_alloc;
-	alloc->status = 1;
-	alloc->size = size;
 
-	last_alloc += size;
-	last_alloc += sizeof(alloc_t);
-	last_alloc += 4;
-	memory_used += size + 4 + sizeof(alloc_t);
+    alloc_t *lalloc = (alloc_t *) last_alloc;//get data from last allocation
+    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0) + 4;//create new allocation pointer based on last alloc
+    alloc->status = 1;//Set alloc to be used
+    alloc->size = size;//set size of allocation
+
+    //increase the location of the last alloc
+    last_alloc += size;
+    last_alloc += sizeof(alloc_t);
+    last_alloc += 4;
+    //increase memory labeled as used
+    memory_used += size + 4 + sizeof(alloc_t);
+
+    //set memory in block
 	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+    //return pointer
 	return (char *)((uint32_t)alloc + sizeof(alloc_t));
 }
 
 void free(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t));
+    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
     memory_used -= alloc->size + sizeof(alloc_t);
+
+
+
+    //memset(mem, 0, alloc->size + sizeof(alloc_t));
     alloc->status = 0;
 }
 
 unsigned int mgetSize(void *mem){
-    alloc_t *alloc = mem - sizeof(alloc_t);
+    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
     return alloc->size;
 }

@@ -225,9 +225,11 @@ kmain_loop:
 	.size	kmain_loop, .-kmain_loop
 	.section	.rodata
 .LC0:
-	.string	"TEST"
+	.string	"0123456789"
 .LC1:
-	.string	"OOGA BOOGA"
+	.string	"TEST0123450123456789"
+.LC2:
+	.string	"9876543210"
 	.text
 	.globl	kmain
 	.type	kmain, @function
@@ -241,7 +243,7 @@ kmain:
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	push	ebx
-	sub	esp, 20
+	sub	esp, 36
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
@@ -260,9 +262,9 @@ kmain:
 	cmp	eax, 8
 	jne	.L32
 	mov	eax, DWORD PTR -12[ebp]
-	mov	DWORD PTR -24[ebp], eax
+	mov	DWORD PTR -28[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -24[ebp]
+	push	DWORD PTR -28[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L32:
@@ -294,51 +296,60 @@ kmain:
 	call	mem_init@PLT
 	add	esp, 16
 	sub	esp, 12
-	push	25
+	push	10
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -16[ebp], eax
+	lea	eax, .LC0@GOTOFF[ebx]
+	mov	DWORD PTR -16[ebp], eax
 	sub	esp, 12
-	push	25
+	push	20
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -20[ebp], eax
-	lea	eax, .LC0@GOTOFF[ebx]
-	mov	DWORD PTR -16[ebp], eax
 	lea	eax, .LC1@GOTOFF[ebx]
 	mov	DWORD PTR -20[ebp], eax
 	sub	esp, 12
-	push	2
+	push	DWORD PTR -16[ebp]
+	call	free@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	1
 	push	0
 	push	0
-	push	25
+	push	10
 	push	DWORD PTR -16[ebp]
 	call	fb_write_xy@PLT
 	add	esp, 32
 	sub	esp, 12
-	push	3
+	push	2
 	push	0
 	push	0
-	push	25
+	push	20
 	push	DWORD PTR -20[ebp]
 	call	fb_write_xy@PLT
 	add	esp, 32
-	mov	eax, DWORD PTR memory_used@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	push	0
-	push	32
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
 	sub	esp, 12
+	push	10
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -24[ebp], eax
+	lea	eax, .LC2@GOTOFF[ebx]
+	mov	DWORD PTR -24[ebp], eax
+	sub	esp, 12
+	push	3
 	push	0
 	push	0
-	push	1
-	push	16
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
+	push	10
+	push	DWORD PTR -16[ebp]
+	call	fb_write_xy@PLT
+	add	esp, 32
+	sub	esp, 12
+	push	4
+	push	0
+	push	0
+	push	10
+	push	DWORD PTR -24[ebp]
 	call	fb_write_xy@PLT
 	add	esp, 32
 	call	kmain_loop
