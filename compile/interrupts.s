@@ -38,9 +38,9 @@ SYS_MODE:
 	.comm	previousKey_Pointer,4,4
 	.comm	axis_center_x,4,4
 	.comm	axis_center_y,4,4
-	.comm	Terminal_Buffer,240,32
-	.comm	Terminal_OUT_Buffer,9600,32
-	.comm	Terminal_Arguments,240,32
+	.comm	Terminal_Buffer,75,32
+	.comm	Terminal_OUT_Buffer,3000,32
+	.comm	Terminal_Arguments,75,32
 	.comm	idt_descriptors,2048,32
 	.comm	idt,6,4
 	.comm	BUFFER_COUNT,4,4

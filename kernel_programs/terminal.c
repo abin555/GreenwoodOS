@@ -141,6 +141,35 @@ void terminal_interpret(){
     if(terminal_compare("reboot", 0, Terminal_Arguments[0], 6)){
         kreboot();
     }
+    if(terminal_compare("malloc", 0, Terminal_Arguments[0], 6)){
+        uint32_t size = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        void* addr = malloc(size);
+        decodeHex(STR_edit, (uint32_t) addr, 32, 0);
+
+        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+
+        decodeHex(STR_edit, memory_used, 32, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+10, 0);
+
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
+    if(terminal_compare("msize", 0, Terminal_Arguments[0], 5)){
+        uint32_t addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        decodeHex(STR_edit, mgetSize((void *)addr), 32, 0);
+        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
+    if(terminal_compare("free", 0, Terminal_Arguments[0], 4)){
+        uint32_t addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        free((void *) addr);
+        
+        decodeHex(STR_edit, memory_used, 32, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
 }
 
 void terminal_enter(){    

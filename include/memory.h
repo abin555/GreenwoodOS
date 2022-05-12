@@ -17,7 +17,7 @@ typedef struct{
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-char* malloc(unsigned int size);
+void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);

@@ -32,9 +32,9 @@
 	.comm	previousKey_Pointer,4,4
 	.comm	axis_center_x,4,4
 	.comm	axis_center_y,4,4
-	.comm	Terminal_Buffer,240,32
-	.comm	Terminal_OUT_Buffer,9600,32
-	.comm	Terminal_Arguments,240,32
+	.comm	Terminal_Buffer,75,32
+	.comm	Terminal_OUT_Buffer,3000,32
+	.comm	Terminal_Arguments,75,32
 	.comm	SYS_MODE,1,1
 	.comm	decode,500,32
 	.comm	vga_width,4,4
@@ -223,14 +223,6 @@ kmain_loop:
 	.cfi_endproc
 .LFE1:
 	.size	kmain_loop, .-kmain_loop
-	.section	.rodata
-.LC0:
-	.string	"0123456789"
-.LC1:
-	.string	"TEST0123450123456789"
-.LC2:
-	.string	"9876543210"
-	.text
 	.globl	kmain
 	.type	kmain, @function
 kmain:
@@ -243,7 +235,7 @@ kmain:
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
 	push	ebx
-	sub	esp, 36
+	sub	esp, 20
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
@@ -262,9 +254,9 @@ kmain:
 	cmp	eax, 8
 	jne	.L32
 	mov	eax, DWORD PTR -12[ebp]
-	mov	DWORD PTR -28[ebp], eax
+	mov	DWORD PTR -16[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -28[ebp]
+	push	DWORD PTR -16[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L32:
@@ -289,69 +281,10 @@ kmain:
 	lea	edx, kmain_loop@GOTOFF[ebx]
 	mov	DWORD PTR [eax], edx
 	call	terminal_init@PLT
-	mov	eax, DWORD PTR kernel_end@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
 	sub	esp, 12
-	push	eax
+	push	268435456
 	call	mem_init@PLT
 	add	esp, 16
-	sub	esp, 12
-	push	10
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -16[ebp], eax
-	lea	eax, .LC0@GOTOFF[ebx]
-	mov	DWORD PTR -16[ebp], eax
-	sub	esp, 12
-	push	20
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -20[ebp], eax
-	lea	eax, .LC1@GOTOFF[ebx]
-	mov	DWORD PTR -20[ebp], eax
-	sub	esp, 12
-	push	DWORD PTR -16[ebp]
-	call	free@PLT
-	add	esp, 16
-	sub	esp, 12
-	push	1
-	push	0
-	push	0
-	push	10
-	push	DWORD PTR -16[ebp]
-	call	fb_write_xy@PLT
-	add	esp, 32
-	sub	esp, 12
-	push	2
-	push	0
-	push	0
-	push	20
-	push	DWORD PTR -20[ebp]
-	call	fb_write_xy@PLT
-	add	esp, 32
-	sub	esp, 12
-	push	10
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -24[ebp], eax
-	lea	eax, .LC2@GOTOFF[ebx]
-	mov	DWORD PTR -24[ebp], eax
-	sub	esp, 12
-	push	3
-	push	0
-	push	0
-	push	10
-	push	DWORD PTR -16[ebp]
-	call	fb_write_xy@PLT
-	add	esp, 32
-	sub	esp, 12
-	push	4
-	push	0
-	push	0
-	push	10
-	push	DWORD PTR -24[ebp]
-	call	fb_write_xy@PLT
-	add	esp, 32
 	call	kmain_loop
 	mov	eax, 0
 .L30:

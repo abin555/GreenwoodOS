@@ -93,7 +93,7 @@ void SYS_CALL(struct cpu_state cpu){
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
 {
 	//unsigned char scan_code;
-	//unsigned char ascii;
+	//unsigned char ascii;;
 
 	switch (interrupt){
 		case INTERRUPTS_KEYBOARD:

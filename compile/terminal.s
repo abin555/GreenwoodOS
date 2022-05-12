@@ -32,9 +32,9 @@
 	.comm	previousKey_Pointer,4,4
 	.comm	axis_center_x,4,4
 	.comm	axis_center_y,4,4
-	.comm	Terminal_Buffer,240,32
-	.comm	Terminal_OUT_Buffer,9600,32
-	.comm	Terminal_Arguments,240,32
+	.comm	Terminal_Buffer,75,32
+	.comm	Terminal_OUT_Buffer,3000,32
+	.comm	Terminal_Arguments,75,32
 	.globl	Terminal_OUT_pointer
 	.bss
 	.align 4
@@ -130,7 +130,7 @@ terminal_renderer:
 	push	edx
 	push	1
 	push	eax
-	push	240
+	push	75
 	mov	eax, DWORD PTR Terminal_Buffer@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
@@ -355,6 +355,12 @@ terminal_compare:
 	.string	"grapher"
 .LC12:
 	.string	"reboot"
+.LC13:
+	.string	"malloc"
+.LC14:
+	.string	"msize"
+.LC15:
+	.string	"free"
 	.text
 	.globl	terminal_interpret
 	.type	terminal_interpret, @function
@@ -369,7 +375,7 @@ terminal_interpret:
 	.cfi_def_cfa_register 5
 	push	esi
 	push	ebx
-	sub	esp, 32
+	sub	esp, 48
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
@@ -389,7 +395,7 @@ terminal_interpret:
 	add	eax, edx
 	movzx	eax, BYTE PTR [eax]
 	test	al, al
-	jne	.L31
+	jne	.L34
 .L12:
 	mov	eax, DWORD PTR -16[ebp]
 	mov	ecx, eax
@@ -398,10 +404,10 @@ terminal_interpret:
 	add	eax, edx
 	mov	BYTE PTR [eax], cl
 	add	DWORD PTR -12[ebp], 1
-.L31:
+.L34:
 	add	DWORD PTR -16[ebp], 1
 .L11:
-	cmp	DWORD PTR -16[ebp], 239
+	cmp	DWORD PTR -16[ebp], 74
 	jle	.L14
 	mov	eax, DWORD PTR -12[ebp]
 	lea	edx, 1[eax]
@@ -436,7 +442,7 @@ terminal_interpret:
 	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
 	movzx	eax, BYTE PTR [eax]
 	movsx	eax, al
-	mov	esi, 240
+	mov	esi, 75
 	sub	esi, eax
 	mov	eax, esi
 	sub	esp, 12
@@ -866,9 +872,214 @@ terminal_interpret:
 	call	terminal_compare
 	add	esp, 16
 	test	eax, eax
-	je	.L32
+	je	.L30
 	call	kreboot@PLT
+.L30:
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	push	6
+	push	eax
+	push	0
+	lea	eax, .LC13@GOTOFF[ebx]
+	push	eax
+	call	terminal_compare
+	add	esp, 16
+	test	eax, eax
+	je	.L31
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR 1[eax]
+	movsx	eax, al
+	mov	edx, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	edx, BYTE PTR [edx]
+	movsx	edx, dl
+	add	edx, 1
+	sub	esp, 4
+	push	eax
+	push	edx
+	mov	eax, DWORD PTR Terminal_Buffer@GOT[ebx]
+	push	eax
+	call	encodeHex@PLT
+	add	esp, 16
+	mov	DWORD PTR -44[ebp], eax
+	sub	esp, 12
+	push	DWORD PTR -44[ebp]
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -48[ebp], eax
+	mov	eax, DWORD PTR -48[ebp]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	push	0
+	push	16711680
+	push	45
+	push	eax
+	call	fb_write_cell@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	add	eax, 1
+	sub	esp, 12
+	push	0
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR memory_used@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	add	eax, 10
+	sub	esp, 12
+	push	0
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	edx, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, edx
+	mov	DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx], eax
+.L31:
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	push	5
+	push	eax
+	push	0
+	lea	eax, .LC14@GOTOFF[ebx]
+	push	eax
+	call	terminal_compare
+	add	esp, 16
+	test	eax, eax
+	je	.L32
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR 1[eax]
+	movsx	eax, al
+	mov	edx, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	edx, BYTE PTR [edx]
+	movsx	edx, dl
+	add	edx, 1
+	sub	esp, 4
+	push	eax
+	push	edx
+	mov	eax, DWORD PTR Terminal_Buffer@GOT[ebx]
+	push	eax
+	call	encodeHex@PLT
+	add	esp, 16
+	mov	DWORD PTR -52[ebp], eax
+	mov	eax, DWORD PTR -52[ebp]
+	sub	esp, 12
+	push	eax
+	call	mgetSize@PLT
+	add	esp, 16
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	push	0
+	push	16711680
+	push	45
+	push	eax
+	call	fb_write_cell@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	add	eax, 1
+	sub	esp, 12
+	push	0
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	edx, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, edx
+	mov	DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx], eax
 .L32:
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	push	4
+	push	eax
+	push	0
+	lea	eax, .LC15@GOTOFF[ebx]
+	push	eax
+	call	terminal_compare
+	add	esp, 16
+	test	eax, eax
+	je	.L35
+	mov	eax, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	eax, BYTE PTR 1[eax]
+	movsx	eax, al
+	mov	edx, DWORD PTR Terminal_Arguments@GOT[ebx]
+	movzx	edx, BYTE PTR [edx]
+	movsx	edx, dl
+	add	edx, 1
+	sub	esp, 4
+	push	eax
+	push	edx
+	mov	eax, DWORD PTR Terminal_Buffer@GOT[ebx]
+	push	eax
+	call	encodeHex@PLT
+	add	esp, 16
+	mov	DWORD PTR -56[ebp], eax
+	mov	eax, DWORD PTR -56[ebp]
+	sub	esp, 12
+	push	eax
+	call	free@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR memory_used@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	add	eax, 1
+	sub	esp, 12
+	push	0
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	edx, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	add	eax, edx
+	mov	DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx], eax
+.L35:
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx
@@ -900,7 +1111,7 @@ terminal_enter:
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
 	push	eax
-	push	240
+	push	75
 	mov	eax, DWORD PTR Terminal_OUT_Buffer@GOT[ebx]
 	push	eax
 	mov	eax, DWORD PTR Terminal_Buffer@GOT[ebx]
@@ -914,7 +1125,7 @@ terminal_enter:
 	push	0
 	push	edx
 	push	eax
-	push	240
+	push	75
 	mov	eax, DWORD PTR Terminal_OUT_Buffer@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
@@ -927,8 +1138,8 @@ terminal_enter:
 	mov	WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx], 0
 	call	terminal_interpret
 	mov	DWORD PTR -12[ebp], 0
-	jmp	.L34
-.L35:
+	jmp	.L37
+.L38:
 	mov	edx, DWORD PTR Terminal_Buffer@GOT[ebx]
 	mov	eax, DWORD PTR -12[ebp]
 	add	eax, edx
@@ -944,9 +1155,9 @@ terminal_enter:
 	call	printChar@PLT
 	add	esp, 16
 	add	DWORD PTR -12[ebp], 1
-.L34:
-	cmp	DWORD PTR -12[ebp], 239
-	jle	.L35
+.L37:
+	cmp	DWORD PTR -12[ebp], 74
+	jle	.L38
 	mov	eax, DWORD PTR Terminal_Y@GOTOFF[ebx]
 	sub	esp, 8
 	push	eax
@@ -977,13 +1188,13 @@ terminal_enter:
 	imul	edx, eax
 	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
 	cmp	edx, eax
-	jge	.L37
+	jge	.L40
 	mov	DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx], 0
 	sub	esp, 12
 	push	0
 	call	fb_clear@PLT
 	add	esp, 16
-.L37:
+.L40:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave
@@ -1014,21 +1225,21 @@ terminal_handler:
 	mov	edx, DWORD PTR [eax]
 	mov	eax, DWORD PTR previousASCII_pointer@GOTOFF[ebx]
 	cmp	edx, eax
-	je	.L39
+	je	.L42
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
-	cmp	ax, 239
-	ja	.L39
+	cmp	ax, 74
+	ja	.L42
 	call	terminal_console
 	mov	eax, DWORD PTR keyboard_ascii_pointer@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR previousASCII_pointer@GOTOFF[ebx], eax
-	jmp	.L54
-.L39:
+	jmp	.L57
+.L42:
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOT[ebx]
 	mov	edx, DWORD PTR [eax]
 	mov	eax, DWORD PTR previousKEY_pointer@GOTOFF[ebx]
 	cmp	edx, eax
-	je	.L54
+	je	.L57
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	lea	edx, -1[eax]
@@ -1036,26 +1247,26 @@ terminal_handler:
 	movzx	eax, BYTE PTR [eax+edx]
 	movzx	eax, al
 	cmp	eax, 205
-	je	.L41
-	cmp	eax, 205
-	jg	.L42
-	cmp	eax, 203
-	je	.L43
-	cmp	eax, 203
-	jg	.L42
-	cmp	eax, 200
 	je	.L44
-	cmp	eax, 200
-	jg	.L42
-	cmp	eax, 14
-	je	.L45
-	cmp	eax, 156
+	cmp	eax, 205
+	jg	.L45
+	cmp	eax, 203
 	je	.L46
-	jmp	.L42
-.L45:
+	cmp	eax, 203
+	jg	.L45
+	cmp	eax, 200
+	je	.L47
+	cmp	eax, 200
+	jg	.L45
+	cmp	eax, 14
+	je	.L48
+	cmp	eax, 156
+	je	.L49
+	jmp	.L45
+.L48:
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	test	ax, ax
-	je	.L55
+	je	.L58
 	mov	eax, DWORD PTR Terminal_Y@GOTOFF[ebx]
 	mov	edx, eax
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
@@ -1082,18 +1293,18 @@ terminal_handler:
 	add	esp, 16
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	test	ax, ax
-	je	.L55
+	je	.L58
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	sub	eax, 1
 	mov	WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx], ax
-	jmp	.L55
-.L46:
+	jmp	.L58
+.L49:
 	call	terminal_enter
-	jmp	.L42
-.L43:
+	jmp	.L45
+.L46:
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	test	ax, ax
-	je	.L56
+	je	.L59
 	mov	eax, DWORD PTR Terminal_Y@GOTOFF[ebx]
 	mov	edx, eax
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
@@ -1106,11 +1317,11 @@ terminal_handler:
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	sub	eax, 1
 	mov	WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx], ax
-	jmp	.L56
-.L41:
+	jmp	.L59
+.L44:
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
-	cmp	ax, 239
-	ja	.L57
+	cmp	ax, 74
+	ja	.L60
 	movzx	eax, WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx]
 	add	eax, 1
 	mov	WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx], ax
@@ -1123,11 +1334,11 @@ terminal_handler:
 	push	eax
 	call	fb_move_cursor_xy@PLT
 	add	esp, 16
-	jmp	.L57
-.L44:
+	jmp	.L60
+.L47:
 	mov	DWORD PTR -12[ebp], 0
-	jmp	.L50
-.L53:
+	jmp	.L53
+.L56:
 	mov	edx, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
 	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
@@ -1160,7 +1371,7 @@ terminal_handler:
 	add	eax, edx
 	movzx	eax, BYTE PTR [eax]
 	test	al, al
-	jne	.L51
+	jne	.L54
 	mov	eax, DWORD PTR Terminal_Y@GOTOFF[ebx]
 	mov	edx, eax
 	mov	eax, DWORD PTR -12[ebp]
@@ -1173,26 +1384,26 @@ terminal_handler:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	WORD PTR Terminal_Buffer_Pointer@GOTOFF[ebx], ax
 	nop
-	jmp	.L42
-.L51:
+	jmp	.L45
+.L54:
 	add	DWORD PTR -12[ebp], 1
-.L50:
-	cmp	DWORD PTR -12[ebp], 239
-	jle	.L53
-	jmp	.L42
-.L55:
+.L53:
+	cmp	DWORD PTR -12[ebp], 74
+	jle	.L56
+	jmp	.L45
+.L58:
 	nop
-	jmp	.L42
-.L56:
+	jmp	.L45
+.L59:
 	nop
-	jmp	.L42
-.L57:
+	jmp	.L45
+.L60:
 	nop
-.L42:
+.L45:
 	mov	eax, DWORD PTR keyboard_KEYBUFFER_POINTER@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR previousKEY_pointer@GOTOFF[ebx], eax
-.L54:
+.L57:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave

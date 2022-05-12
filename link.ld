@@ -32,4 +32,5 @@ SECTIONS {
 	{
 		*(.PROGB)
 	}
+	heap_start = 0x10000000;
 }	

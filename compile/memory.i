@@ -460,7 +460,7 @@ typedef struct{
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-char* malloc(unsigned int size);
+void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);
@@ -494,7 +494,9 @@ void mem_init(uint32_t kernelEnd){
     memset((char *) heap_begin, 0, 0x4000);
 }
 
-char* malloc(unsigned int size){
+
+
+void* malloc(unsigned int size){
     if(!size) return 0;
 
     uint32_t *mem = (uint32_t *) heap_begin;
@@ -508,7 +510,7 @@ char* malloc(unsigned int size){
         if(a->status){
             mem += a->size;
             mem += sizeof(alloc_t);
-            mem += 4;
+
             continue;
         }
 
@@ -519,7 +521,7 @@ char* malloc(unsigned int size){
         if(a->size >= size){
             a->status = 1;
             memset(mem + sizeof(alloc_t), 0, size);
-            memory_used += size + 4 + sizeof(alloc_t);
+            memory_used += size + sizeof(alloc_t);
             last_alloc = (uint32_t) mem;
         }
 
@@ -533,16 +535,16 @@ char* malloc(unsigned int size){
     }
 
     alloc_t *lalloc = (alloc_t *) last_alloc;
-    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0) + 4;
+    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0);
     alloc->status = 1;
     alloc->size = size;
 
 
     last_alloc += size;
     last_alloc += sizeof(alloc_t);
-    last_alloc += 4;
 
-    memory_used += size + 4 + sizeof(alloc_t);
+
+    memory_used += size + sizeof(alloc_t);
 
 
  memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
@@ -551,16 +553,14 @@ char* malloc(unsigned int size){
 }
 
 void free(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
+    alloc_t *alloc = (mem - sizeof(alloc_t));
     memory_used -= alloc->size + sizeof(alloc_t);
-
-
 
 
     alloc->status = 0;
 }
 
 unsigned int mgetSize(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
+    alloc_t *alloc = (alloc_t *) (mem - sizeof(alloc_t));
     return alloc->size;
 }

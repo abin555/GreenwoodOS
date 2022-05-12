@@ -104,21 +104,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   restore_kernel_addr = (u32 *) &kmain_loop;
   terminal_init();
 
-  mem_init(kernel_end);
-
-  char* msg = malloc(10);
-  msg = "0123456789";
-  char* msg2 = malloc(20);
-  msg2 = "TEST0123450123456789";
-  free(msg);
-  
-  fb_write_xy(msg, 10, 0, 0,1);
-  fb_write_xy(msg2, 20, 0, 0, 2);
-  
-  char* msg3 = malloc(10);
-  msg3 = "9876543210";
-  fb_write_xy(msg, 10, 0, 0, 3);
-  fb_write_xy(msg3, 10, 0, 0, 4);
+  mem_init(0x10000000);
 
   //fb_write_xy(msg, heap_end - heap_begin, 0, 0, 6);
 

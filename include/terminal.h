@@ -8,8 +8,10 @@
 #include "ascii_tables.h"
 #include "pong.h"
 #include "grapher.h"
+#include "memory.h"
+#include "gcc_stdint.h"
 
-#define TERMINAL_Buffer_Size 1920/8
+#define TERMINAL_Buffer_Size 75
 #define TERMINAL_SPLIT ' '
 
 //#define Terminal_Y 20

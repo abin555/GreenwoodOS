@@ -192,7 +192,6 @@ malloc:
 	sal	eax, 2
 	add	DWORD PTR -12[ebp], eax
 	add	DWORD PTR -12[ebp], 32
-	add	DWORD PTR -12[ebp], 16
 	jmp	.L12
 .L15:
 	mov	eax, DWORD PTR -16[ebp]
@@ -211,7 +210,7 @@ malloc:
 	mov	edx, DWORD PTR memory_used@GOTOFF[ebx]
 	mov	eax, DWORD PTR 8[ebp]
 	add	eax, edx
-	add	eax, 12
+	add	eax, 8
 	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
 	mov	eax, DWORD PTR -12[ebp]
 	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
@@ -265,7 +264,6 @@ malloc:
 .L19:
 	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
 	add	eax, edx
-	add	eax, 32
 	mov	DWORD PTR -24[ebp], eax
 	mov	eax, DWORD PTR -24[ebp]
 	mov	BYTE PTR 4[eax], 1
@@ -279,13 +277,10 @@ malloc:
 	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
 	add	eax, 8
 	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
-	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
-	add	eax, 4
-	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
 	mov	edx, DWORD PTR memory_used@GOTOFF[ebx]
 	mov	eax, DWORD PTR 8[ebp]
 	add	eax, edx
-	add	eax, 12
+	add	eax, 8
 	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
 	mov	eax, DWORD PTR -24[ebp]
 	add	eax, 8
@@ -322,7 +317,7 @@ free:
 	call	__x86.get_pc_thunk.ax
 	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	edx, DWORD PTR 8[ebp]
-	sub	edx, 12
+	sub	edx, 8
 	mov	DWORD PTR -4[ebp], edx
 	mov	ecx, DWORD PTR memory_used@GOTOFF[eax]
 	mov	edx, DWORD PTR -4[ebp]
@@ -356,7 +351,7 @@ mgetSize:
 	call	__x86.get_pc_thunk.ax
 	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	eax, DWORD PTR 8[ebp]
-	sub	eax, 12
+	sub	eax, 8
 	mov	DWORD PTR -4[ebp], eax
 	mov	eax, DWORD PTR -4[ebp]
 	mov	eax, DWORD PTR [eax]

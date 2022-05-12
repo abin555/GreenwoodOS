@@ -28,7 +28,9 @@ void mem_init(uint32_t kernelEnd){
     memset((char *) heap_begin, 0, HEAP_SIZE);
 }
 
-char* malloc(unsigned int size){
+
+
+void* malloc(unsigned int size){
     if(!size) return 0;
     
     uint32_t *mem = (uint32_t *) heap_begin;
@@ -42,18 +44,18 @@ char* malloc(unsigned int size){
         if(a->status){//If status is defined, the allocation segment is in use.
             mem += a->size;//move up to the size of the segment
             mem += sizeof(alloc_t);//add the size of the info table
-            mem += 4;//add four?
+            //mem += 4;//add four?
             continue; //move on to next try
         }
-        /*
-        In order to get to this point, there need to be an existing allocation region defined at *mem
-        However, it cannot have the status flag enabled.
-        Based on this, when a region is set and the region is not used, the region is reallocated.
-        */
+        
+        //In order to get to this point, there need to be an existing allocation region defined at *mem
+        //However, it cannot have the status flag enabled.
+        //Based on this, when a region is set and the region is not used, the region is reallocated.
+        
         if(a->size >= size){//Check if the available allocation region contains 
-            a->status = 1;//mark region as in use.
+            a->status = 1;//mark region as in use.;
             memset(mem + sizeof(alloc_t), 0, size); //clear requested & available region.
-            memory_used += size + 4 + sizeof(alloc_t); //Increase counter of used memory
+            memory_used += size + sizeof(alloc_t); //Increase counter of used memory
             last_alloc = (uint32_t) mem;
         } 
 
@@ -67,16 +69,16 @@ char* malloc(unsigned int size){
     }
 
     alloc_t *lalloc = (alloc_t *) last_alloc;//get data from last allocation
-    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0) + 4;//create new allocation pointer based on last alloc
+    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0);//create new allocation pointer based on last alloc
     alloc->status = 1;//Set alloc to be used
     alloc->size = size;//set size of allocation
 
     //increase the location of the last alloc
     last_alloc += size;
     last_alloc += sizeof(alloc_t);
-    last_alloc += 4;
+    //last_alloc += 4;
     //increase memory labeled as used
-    memory_used += size + 4 + sizeof(alloc_t);
+    memory_used += size + sizeof(alloc_t);
 
     //set memory in block
 	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
@@ -85,16 +87,14 @@ char* malloc(unsigned int size){
 }
 
 void free(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
+    alloc_t *alloc = (mem - sizeof(alloc_t));
     memory_used -= alloc->size + sizeof(alloc_t);
-
-
 
     //memset(mem, 0, alloc->size + sizeof(alloc_t));
     alloc->status = 0;
 }
 
 unsigned int mgetSize(void *mem){
-    alloc_t *alloc = (mem - sizeof(alloc_t) - 4);
+    alloc_t *alloc = (alloc_t *) (mem - sizeof(alloc_t));
     return alloc->size;
 }

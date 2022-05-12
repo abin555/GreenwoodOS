@@ -456,7 +456,7 @@ typedef struct{
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-char* malloc(unsigned int size);
+void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);
@@ -674,16 +674,11 @@ void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 # 11 "./include/terminal.h" 2
+# 19 "./include/terminal.h"
+char Terminal_Buffer[75];
+char Terminal_OUT_Buffer[75*40];
 
-
-
-
-
-
-char Terminal_Buffer[1920/8];
-char Terminal_OUT_Buffer[1920/8*40];
-
-char Terminal_Arguments[1920/8];
+char Terminal_Arguments[75];
 
 void terminal_memory_view();
 
@@ -871,21 +866,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   restore_kernel_addr = (u32 *) &kmain_loop;
   terminal_init();
 
-  mem_init(kernel_end);
-
-  char* msg = malloc(10);
-  msg = "0123456789";
-  char* msg2 = malloc(20);
-  msg2 = "TEST0123450123456789";
-  free(msg);
-
-  fb_write_xy(msg, 10, 0, 0,1);
-  fb_write_xy(msg2, 20, 0, 0, 2);
-
-  char* msg3 = malloc(10);
-  msg3 = "9876543210";
-  fb_write_xy(msg, 10, 0, 0, 3);
-  fb_write_xy(msg3, 10, 0, 0, 4);
+  mem_init(0x10000000);
 
 
 

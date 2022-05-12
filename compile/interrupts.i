@@ -586,7 +586,7 @@ typedef struct{
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-char* malloc(unsigned int size);
+void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(unsigned int kernelEnd);
 unsigned int mgetSize(void *mem);
@@ -737,16 +737,11 @@ void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 # 11 "./include/terminal.h" 2
+# 19 "./include/terminal.h"
+char Terminal_Buffer[75];
+char Terminal_OUT_Buffer[75*40];
 
-
-
-
-
-
-char Terminal_Buffer[1920/8];
-char Terminal_OUT_Buffer[1920/8*40];
-
-char Terminal_Arguments[1920/8];
+char Terminal_Arguments[75];
 
 void terminal_memory_view();
 

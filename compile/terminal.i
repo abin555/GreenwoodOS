@@ -428,7 +428,7 @@ typedef struct{
 void memcpy(u64* source, u64* target, u64 len);
 void* memset(void * place, int val, unsigned int size);
 
-char* malloc(unsigned int size);
+void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);
@@ -665,16 +665,11 @@ void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
 # 11 "./include/terminal.h" 2
+# 19 "./include/terminal.h"
+char Terminal_Buffer[75];
+char Terminal_OUT_Buffer[75*40];
 
-
-
-
-
-
-char Terminal_Buffer[1920/8];
-char Terminal_OUT_Buffer[1920/8*40];
-
-char Terminal_Arguments[1920/8];
+char Terminal_Arguments[75];
 
 void terminal_memory_view();
 
@@ -709,7 +704,7 @@ void terminal_renderer(){
     fb_clear(0);
     fb_move_cursor_xy(1,Terminal_Y);
     printChar(0, Terminal_Y, '>');
-    fb_write_xy(Terminal_Buffer, 1920/8, Terminal_Buffer_Pointer, 1, Terminal_Y);
+    fb_write_xy(Terminal_Buffer, 75, Terminal_Buffer_Pointer, 1, Terminal_Y);
 }
 
 void terminal_console(){
@@ -747,7 +742,7 @@ int terminal_compare(char *Buffer, int start, int end, int len){
 void terminal_interpret(){
     int found_splits = 0;
 
-    for(int i = 0; i < 1920/8; i++){
+    for(int i = 0; i < 75; i++){
         if(Terminal_Buffer[i] == ' ' || Terminal_Buffer[i] == 0){
             Terminal_Arguments[found_splits] = i;
             found_splits++;
@@ -759,7 +754,7 @@ void terminal_interpret(){
 
     if(terminal_compare("print", 0, Terminal_Arguments[0], 5)){
         fb_write_cell(Terminal_OUT_pointer, '-', 0xFF0000, 0);
-        fb_write_xy(Terminal_Buffer, 1920/8 -Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
+        fb_write_xy(Terminal_Buffer, 75 -Terminal_Arguments[0], Terminal_Arguments[0]+1, Terminal_OUT_pointer+1, 0);
         Terminal_OUT_pointer+=fb_terminal_w;
 
 
@@ -833,20 +828,49 @@ void terminal_interpret(){
     if(terminal_compare("reboot", 0, Terminal_Arguments[0], 6)){
         kreboot();
     }
+    if(terminal_compare("malloc", 0, Terminal_Arguments[0], 6)){
+        unsigned int size = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        void* addr = malloc(size);
+        decodeHex(STR_edit, (unsigned int) addr, 32, 0);
+
+        fb_write_cell(Terminal_OUT_pointer, '-', 0xFF0000, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+
+        decodeHex(STR_edit, memory_used, 32, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+10, 0);
+
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
+    if(terminal_compare("msize", 0, Terminal_Arguments[0], 5)){
+        unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        decodeHex(STR_edit, mgetSize((void *)addr), 32, 0);
+        fb_write_cell(Terminal_OUT_pointer, '-', 0xFF0000, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
+    if(terminal_compare("free", 0, Terminal_Arguments[0], 4)){
+        unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        free((void *) addr);
+
+        decodeHex(STR_edit, memory_used, 32, 0);
+        fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+        Terminal_OUT_pointer+=fb_terminal_w;
+    }
 }
 
 void terminal_enter(){
 
 
-    STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, 1920/8, Terminal_OUT_pointer);
-    fb_write_xy(Terminal_OUT_Buffer, 1920/8, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
+    STR_INSERT(Terminal_Buffer, Terminal_OUT_Buffer, 75, Terminal_OUT_pointer);
+    fb_write_xy(Terminal_OUT_Buffer, 75, Terminal_OUT_pointer, Terminal_OUT_pointer, 0);
     Terminal_OUT_pointer += fb_terminal_w;
     Terminal_Buffer_Pointer = 0;
 
 
 
     terminal_interpret();
-    for(int i = 0; i < 1920/8; i++){
+    for(int i = 0; i < 75; i++){
         Terminal_Buffer[i] = 0;
         printChar(i+1, Terminal_Y, ' ');
     }
@@ -867,7 +891,7 @@ void terminal_handler(){
 
 
 
-    if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < 1920/8){
+    if(keyboard_ascii_pointer != previousASCII_pointer && Terminal_Buffer_Pointer < 75){
 
         terminal_console();
         previousASCII_pointer = keyboard_ascii_pointer;
@@ -895,13 +919,13 @@ void terminal_handler(){
             }
             break;
             case 0xCD:
-            if(Terminal_Buffer_Pointer < 1920/8){
+            if(Terminal_Buffer_Pointer < 75){
                 Terminal_Buffer_Pointer++;
                 fb_move_cursor_xy(Terminal_Buffer_Pointer, Terminal_Y);
             }
             break;
             case 0xC8:
-            for(int i = 0; i < 1920/8; i++){
+            for(int i = 0; i < 75; i++){
                 Terminal_Buffer[i] = Terminal_OUT_Buffer[Terminal_OUT_pointer-fb_terminal_w+i];
                 printChar(i+1, Terminal_Y, Terminal_Buffer[i]);
                 if(Terminal_Buffer[i] == 0){
