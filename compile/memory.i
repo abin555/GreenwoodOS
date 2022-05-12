@@ -465,8 +465,10 @@ void fb_clearBackBuffer(u32 color);
 
 
 extern void outb(unsigned short port, unsigned char data);
-
 extern unsigned char inb(unsigned short pos);
+
+extern void outportl(uint16_t port, uint32_t value);
+extern uint32_t inportl(uint16_t port);
 
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
@@ -617,8 +619,8 @@ void* memset(void * place, int val, unsigned int size){
 void mem_init(unsigned int kernelEnd){
     last_alloc = kernelEnd;
     heap_begin = last_alloc;
-    heap_end = heap_begin + 0x10000;
-    memset((char *) heap_begin, 0, 0x10000);
+    heap_end = heap_begin + 0xFFFFF;
+    memset((char *) heap_begin, 0, 0xFFFFF);
 }
 
 

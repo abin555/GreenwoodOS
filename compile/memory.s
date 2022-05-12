@@ -144,10 +144,10 @@ mem_init:
 	mov	edx, DWORD PTR last_alloc@GOTOFF[eax]
 	mov	DWORD PTR heap_begin@GOTOFF[eax], edx
 	mov	edx, DWORD PTR heap_begin@GOTOFF[eax]
-	add	edx, 65536
+	add	edx, 1048575
 	mov	DWORD PTR heap_end@GOTOFF[eax], edx
 	mov	eax, DWORD PTR heap_begin@GOTOFF[eax]
-	push	65536
+	push	1048575
 	push	0
 	push	eax
 	call	memset

@@ -70,8 +70,10 @@ typedef long long unsigned int uintmax_t;
 # 5 "./include/io.h" 2
 
 extern void outb(unsigned short port, unsigned char data);
-
 extern unsigned char inb(unsigned short pos);
+
+extern void outportl(uint16_t port, uint32_t value);
+extern uint32_t inportl(uint16_t port);
 
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
@@ -767,6 +769,40 @@ void KYBRD_DEBUG_DISPLAY();
 # 11 "main.c" 2
 # 1 "./include/memory.h" 1
 # 12 "main.c" 2
+# 1 "./include/PCI.h" 1
+# 10 "./include/PCI.h"
+struct __pci_driver;
+
+typedef struct {
+ unsigned int vendor;
+ unsigned int device;
+ unsigned int func;
+ struct __pci_driver *driver;
+} pci_device;
+
+typedef struct {
+ unsigned int vendor;
+ unsigned int device;
+ unsigned int func;
+} pci_device_id;
+
+typedef struct __pci_driver {
+ pci_device_id *table;
+ char *name;
+ char (*init_one)(pci_device *);
+ char (*init_driver)(void);
+ char (*exit_driver)(void);
+} pci_driver;
+
+void add_pci_device();
+
+unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
+unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
+
+void pci_init();
+void pci_probe();
+# 13 "main.c" 2
 
 
 extern void load_gdt();
@@ -860,10 +896,11 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
-  terminal_init();
 
   mem_init(0x10000000);
+  pci_init();
 
+  terminal_init();
 
 
   kmain_loop();

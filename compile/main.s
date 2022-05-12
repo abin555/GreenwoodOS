@@ -280,11 +280,12 @@ kmain:
 	mov	eax, DWORD PTR restore_kernel_addr@GOT[ebx]
 	lea	edx, kmain_loop@GOTOFF[ebx]
 	mov	DWORD PTR [eax], edx
-	call	terminal_init@PLT
 	sub	esp, 12
 	push	268435456
 	call	mem_init@PLT
 	add	esp, 16
+	call	pci_init@PLT
+	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0
 .L30:

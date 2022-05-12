@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 0x10000 //Heap is 4 MB in size
+#define HEAP_SIZE 0xFFFFF //Heap is 4 MB in size
 
 uint32_t last_alloc = 0;
 uint32_t heap_end = 0;

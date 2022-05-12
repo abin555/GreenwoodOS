@@ -81,8 +81,10 @@ typedef long long unsigned int uintmax_t;
 # 5 "./include/io.h" 2
 
 extern void outb(unsigned short port, unsigned char data);
-
 extern unsigned char inb(unsigned short pos);
+
+extern void outportl(uint16_t port, uint32_t value);
+extern uint32_t inportl(uint16_t port);
 
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);

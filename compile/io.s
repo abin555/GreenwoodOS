@@ -89,17 +89,80 @@ ReadMem:
 	.cfi_endproc
 .LFE2:
 	.size	ReadMem, .-ReadMem
+	.globl	outportl
+	.type	outportl, @function
+outportl:
+.LFB3:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 4
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	WORD PTR -4[ebp], ax
+	movzx	edx, WORD PTR -4[ebp]
+	mov	eax, DWORD PTR 12[ebp]
+#APP
+# 19 "io.c" 1
+	out dx, eax
+# 0 "" 2
+#NO_APP
+	nop
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE3:
+	.size	outportl, .-outportl
+	.globl	inportl
+	.type	inportl, @function
+inportl:
+.LFB4:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 20
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	mov	WORD PTR -20[ebp], ax
+	movzx	eax, WORD PTR -20[ebp]
+	mov	edx, eax
+#APP
+# 24 "io.c" 1
+	in eax, dx
+# 0 "" 2
+#NO_APP
+	mov	DWORD PTR -4[ebp], eax
+	mov	eax, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE4:
+	.size	inportl, .-inportl
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

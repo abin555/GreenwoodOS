@@ -9,6 +9,7 @@
 #include "gfx.h"
 #include "pong.h"
 #include "memory.h"
+#include "PCI.h"
 //#include "IDE.h"
 
 extern void load_gdt();
@@ -102,10 +103,11 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   interrupt_install_idt();
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
-  terminal_init();
 
   mem_init(0x10000000);
+  pci_init();
 
+  terminal_init();
   //fb_write_xy(msg, heap_end - heap_begin, 0, 0, 6);
 
   kmain_loop();
