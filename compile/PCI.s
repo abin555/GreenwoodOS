@@ -367,9 +367,9 @@ pci_probe:
 	mov	eax, DWORD PTR -12[ebp]
 	sub	esp, 12
 	push	eax
-	push	8
-	push	-1
-	push	4
+	push	7
+	push	0
+	push	5
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
@@ -395,9 +395,9 @@ pci_probe:
 	mov	eax, DWORD PTR -12[ebp]
 	sub	esp, 12
 	push	eax
-	push	22
-	push	-1
-	push	4
+	push	20
+	push	0
+	push	5
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT

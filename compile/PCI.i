@@ -693,10 +693,10 @@ void pci_probe()
 
                     fb_write_xy("vendor:", 7, 0, 0, DebugLine);
                     decodeHex(STR_edit, vendor, 16, 0);
-                    fb_write_xy(STR_edit, 4, -1, 8, DebugLine);
+                    fb_write_xy(STR_edit, 5, 0, 7, DebugLine);
                     fb_write_xy(" device: ", 10, 0, 12, DebugLine);
                     decodeHex(STR_edit, device, 16, 0);
-                    fb_write_xy(STR_edit, 4, -1, 22, DebugLine);
+                    fb_write_xy(STR_edit, 5, 0, 20, DebugLine);
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
