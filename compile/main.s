@@ -2,17 +2,6 @@
 	.intel_syntax noprefix
 	.text
 	.comm	INT_Software_Value,4,4
-	.comm	memory_used,4,4
-	.comm	heap_begin,4,4
-	.comm	heap_end,4,4
-	.comm	fb_width,4,4
-	.comm	fb_height,4,4
-	.comm	fb,4,4
-	.comm	fb_backBuffer,8294400,32
-	.comm	fb_terminal_w,4,4
-	.comm	fb_terminal_h,4,4
-	.comm	FG,4,4
-	.comm	BG,4,4
 	.comm	KYBRD_CAPS_LOCK,1,1
 	.comm	KYBRD_SHIFT,1,1
 	.comm	KYBRD_CTRL,1,1
@@ -25,6 +14,17 @@
 	.comm	kbd_US,256,32
 	.comm	kbd_US_shift,256,32
 	.comm	STR_edit,128,32
+	.comm	memory_used,4,4
+	.comm	heap_begin,4,4
+	.comm	heap_end,4,4
+	.comm	fb_width,4,4
+	.comm	fb_height,4,4
+	.comm	fb,4,4
+	.comm	fb_backBuffer,8294400,32
+	.comm	fb_terminal_w,4,4
+	.comm	fb_terminal_h,4,4
+	.comm	FG,4,4
+	.comm	BG,4,4
 	.comm	settings_data,36,32
 	.comm	grapher_interface,8,4
 	.comm	formulas,352,32

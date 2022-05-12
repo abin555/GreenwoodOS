@@ -573,6 +573,38 @@ struct multiboot_tag_load_base_addr
 
 # 1 "./include/frame_buffer.h" 1
 # 7 "./include/memory.h" 2
+# 1 "./include/string.h" 1
+
+
+
+# 1 "./include/ascii_tables.h" 1
+
+
+# 1 "./include/keyboard.h" 1
+# 4 "./include/ascii_tables.h" 2
+
+
+char kbd_US[256];
+char kbd_US_shift[256];
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
+# 8 "./include/memory.h" 2
 
 unsigned int memory_used;
 unsigned int heap_begin;
@@ -633,45 +665,7 @@ void pic_acknowledge(unsigned int interrupt);
 void pic_remap(int offset1, int offset2);
 # 6 "interrupts.c" 2
 # 1 "./include/terminal.h" 1
-
-
-
-
-
-# 1 "./include/keyboard.h" 1
-# 7 "./include/terminal.h" 2
-# 1 "./include/string.h" 1
-
-
-
-# 1 "./include/ascii_tables.h" 1
-
-
-
-
-
-char kbd_US[256];
-char kbd_US_shift[256];
-# 5 "./include/string.h" 2
-
-char STR_edit[128];
-
-int STR_Compare(char *elem1, char *elem2, int start, int end);
-
-void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
-
-void decodeData(char *Buffer, int in, int len, int start);
-
-void decodeHex(char *Buffer, unsigned int in, int len, int start);
-void decodeInt(char *Buffer, int in, int len, int start);
-
-unsigned int encodeHex(char *Buffer, int start, int end);
-
-char quadToHex(char quad);
-char hexToQuad(char hex);
-void strcpy(char *source, char *destination, unsigned int len);
-# 8 "./include/terminal.h" 2
-
+# 9 "./include/terminal.h"
 # 1 "./include/pong.h" 1
 
 

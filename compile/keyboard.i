@@ -506,6 +506,38 @@ struct multiboot_tag_load_base_addr
 
 # 1 "./include/frame_buffer.h" 1
 # 7 "./include/memory.h" 2
+# 1 "./include/string.h" 1
+
+
+
+# 1 "./include/ascii_tables.h" 1
+
+
+# 1 "./include/keyboard.h" 1
+# 4 "./include/ascii_tables.h" 2
+
+
+char kbd_US[256];
+char kbd_US_shift[256];
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
+# 8 "./include/memory.h" 2
 
 unsigned int memory_used;
 unsigned int heap_begin;
@@ -561,38 +593,8 @@ void fb_copyBuffer();
 void fb_clearBackBuffer(u32 color);
 # 3 "keyboard.c" 2
 # 1 "./include/ascii_tables.h" 1
-
-
-# 1 "./include/keyboard.h" 1
-# 4 "./include/ascii_tables.h" 2
-
-
-char kbd_US[256];
-char kbd_US_shift[256];
 # 4 "keyboard.c" 2
 # 1 "./include/string.h" 1
-
-
-
-# 1 "./include/ascii_tables.h" 1
-# 5 "./include/string.h" 2
-
-char STR_edit[128];
-
-int STR_Compare(char *elem1, char *elem2, int start, int end);
-
-void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
-
-void decodeData(char *Buffer, int in, int len, int start);
-
-void decodeHex(char *Buffer, unsigned int in, int len, int start);
-void decodeInt(char *Buffer, int in, int len, int start);
-
-unsigned int encodeHex(char *Buffer, int start, int end);
-
-char quadToHex(char quad);
-char hexToQuad(char hex);
-void strcpy(char *source, char *destination, unsigned int len);
 # 5 "keyboard.c" 2
 
 unsigned char prev_Scancode = 0;

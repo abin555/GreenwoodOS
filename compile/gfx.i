@@ -415,14 +415,139 @@ typedef long long unsigned int uintmax_t;
 # 6 "./include/memory.h" 2
 # 1 "./include/frame_buffer.h" 1
 # 7 "./include/memory.h" 2
+# 1 "./include/string.h" 1
 
-uint32_t memory_used;
-uint32_t heap_begin;
-uint32_t heap_end;
+
+
+# 1 "./include/ascii_tables.h" 1
+
+
+# 1 "./include/keyboard.h" 1
+
+
+
+# 1 "./include/io.h" 1
+
+
+
+
+
+extern void outb(unsigned short port, unsigned char data);
+
+extern unsigned char inb(unsigned short pos);
+
+void WriteMem(uint32_t Address, uint32_t Value);
+uint32_t ReadMem(uint32_t Address);
+
+extern void loadGDT(unsigned short GDT);
+
+void pic_acknowledge(unsigned int interrupt);
+
+extern void software_int();
+unsigned char *INT_Software_Value;
+void software_interrupt(unsigned char interrupt);
+
+extern void restore_kernel();
+extern void kreboot();
+extern uint32_t * restore_kernel_addr;
+extern void PROGA();
+
+extern unsigned int *externalProgram;
+# 5 "./include/keyboard.h" 2
+# 1 "./include/stdint.h" 1
+# 6 "./include/keyboard.h" 2
+
+
+
+
+enum KEYBOARD_ENCODER_IO{
+    KEYBOARD_ENC_INPUT_BUF = 0x60,
+    KEYBOARD_ENC_CMD_REG = 0x60
+};
+
+enum KEYBOARD_CTRL_IO{
+    KEYBOARD_CTRL_STATS_REG = 0x64,
+    KEYBOARD_CTRL_CMD_REG = 0x64
+};
+
+enum KYBRD_CTRL_STATS_MASK {
+
+ KYBRD_CTRL_STATS_MASK_OUT_BUF = 1,
+ KYBRD_CTRL_STATS_MASK_IN_BUF = 2,
+ KYBRD_CTRL_STATS_MASK_SYSTEM = 4,
+ KYBRD_CTRL_STATS_MASK_CMD_DATA = 8,
+ KYBRD_CTRL_STATS_MASK_LOCKED = 0x10,
+ KYBRD_CTRL_STATS_MASK_AUX_BUF = 0x20,
+ KYBRD_CTRL_STATS_MASK_TIMEOUT = 0x40,
+ KYBRD_CTRL_STATS_MASK_PARITY = 0x80
+};
+
+_Bool KYBRD_CAPS_LOCK;
+_Bool KYBRD_SHIFT;
+_Bool KYBRD_CTRL;
+
+char keyboard_ctrl_read_status ();
+
+void keyboard_ctrl_send_cmd(char cmd);
+
+char keyboard_enc_read_buf();
+
+void keyboard_enc_send_cmd(char cmd);
+
+void keyboard_set_leds(_Bool num, _Bool caps, _Bool scroll);
+
+_Bool keyboard_self_test();
+
+void keyboard_disable();
+void keyboard_enable();
+
+int keyboard_keyread();
+
+void keyboard_flag_handler(unsigned char scan_code);
+void keyboard_handle_interrupt(unsigned int interrupt);
+
+char convertascii(unsigned char scan_code);
+
+unsigned char keyboard_KEYBUFFER[0xFF];
+char keyboard_ASCIIBuffer[0xFF];
+
+unsigned int keyboard_KEYBUFFER_POINTER;
+unsigned int keyboard_ascii_pointer;
+
+unsigned char prev_Scancode;
+unsigned char char_scancode;
+# 4 "./include/ascii_tables.h" 2
+
+
+char kbd_US[256];
+char kbd_US_shift[256];
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
+# 8 "./include/memory.h" 2
+
+unsigned int memory_used;
+unsigned int heap_begin;
+unsigned int heap_end;
 
 typedef struct{
-    uint32_t size;
-    uint8_t status;
+    unsigned int size;
+    char status;
 } alloc_t;
 
 void memcpy(u64* source, u64* target, u64 len);
@@ -430,7 +555,7 @@ void* memset(void * place, int val, unsigned int size);
 
 void* malloc(unsigned int size);
 void free(void *mem);
-void mem_init(uint32_t kernelEnd);
+void mem_init(unsigned int kernelEnd);
 unsigned int mgetSize(void *mem);
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"

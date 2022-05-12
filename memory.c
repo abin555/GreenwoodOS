@@ -55,8 +55,10 @@ void* malloc(unsigned int size){
         if(a->size >= size){//Check if the available allocation region contains 
             a->status = 1;//mark region as in use.;
             memset(mem + sizeof(alloc_t), 0, size); //clear requested & available region.
-            memory_used += size + sizeof(alloc_t); //Increase counter of used memory
-            last_alloc = (uint32_t) mem;
+            memory_used += size; //Increase counter of used memory
+
+            return (void *)((uint32_t) mem + sizeof(alloc_t));
+            //last_alloc = (uint32_t) mem;
         } 
 
     }
@@ -81,17 +83,26 @@ void* malloc(unsigned int size){
     memory_used += size + sizeof(alloc_t);
 
     //set memory in block
-	memset((char *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+
+    decodeHex(STR_edit, last_alloc, 32, 0);
+    fb_write_xy(STR_edit, 8, 1, fb_terminal_w - 9, 0);
+
+
     //return pointer
-	return (char *)((uint32_t)alloc + sizeof(alloc_t));
+	return (void *)((uint32_t)alloc + sizeof(alloc_t));
 }
 
 void free(void *mem){
     alloc_t *alloc = (mem - sizeof(alloc_t));
-    memory_used -= alloc->size + sizeof(alloc_t);
-
+    memory_used -= alloc->size;
+    decodeHex(STR_edit, alloc->size, 32, 0);
+    fb_write_xy(STR_edit, 8, 1, 20, 1);
     //memset(mem, 0, alloc->size + sizeof(alloc_t));
     alloc->status = 0;
+    if((uint32_t) mem == last_alloc){
+        last_alloc -= (uint32_t) mem + sizeof(alloc_t);
+    }
 }
 
 unsigned int mgetSize(void *mem){

@@ -1,6 +1,19 @@
 	.file	"frame_buffer.c"
 	.intel_syntax noprefix
 	.text
+	.comm	INT_Software_Value,4,4
+	.comm	KYBRD_CAPS_LOCK,1,1
+	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
+	.comm	keyboard_KEYBUFFER,255,32
+	.comm	keyboard_ASCIIBuffer,255,32
+	.comm	keyboard_KEYBUFFER_POINTER,4,4
+	.comm	keyboard_ascii_pointer,4,4
+	.comm	prev_Scancode,1,1
+	.comm	char_scancode,1,1
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
 	.comm	memory_used,4,4
 	.comm	heap_begin,4,4
 	.comm	heap_end,4,4

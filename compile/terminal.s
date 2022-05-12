@@ -1054,6 +1054,13 @@ terminal_interpret:
 	push	eax
 	call	free@PLT
 	add	esp, 16
+	mov	eax, DWORD PTR Terminal_OUT_pointer@GOTOFF[ebx]
+	push	0
+	push	16711680
+	push	45
+	push	eax
+	call	fb_write_cell@PLT
+	add	esp, 16
 	mov	eax, DWORD PTR memory_used@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	push	0

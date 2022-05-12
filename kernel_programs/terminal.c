@@ -166,8 +166,11 @@ void terminal_interpret(){
         uint32_t addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
         free((void *) addr);
         
+        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
+
         decodeHex(STR_edit, memory_used, 32, 0);
         fb_write_xy(STR_edit, 8, 1, Terminal_OUT_pointer+1, 0);
+        
         Terminal_OUT_pointer+=fb_terminal_w;
     }
 }

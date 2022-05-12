@@ -9,6 +9,19 @@
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
 	.comm	BG,4,4
+	.comm	INT_Software_Value,4,4
+	.comm	KYBRD_CAPS_LOCK,1,1
+	.comm	KYBRD_SHIFT,1,1
+	.comm	KYBRD_CTRL,1,1
+	.comm	keyboard_KEYBUFFER,255,32
+	.comm	keyboard_ASCIIBuffer,255,32
+	.comm	keyboard_KEYBUFFER_POINTER,4,4
+	.comm	keyboard_ascii_pointer,4,4
+	.comm	prev_Scancode,1,1
+	.comm	char_scancode,1,1
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
 	.globl	memory_used
 	.bss
 	.align 4
@@ -210,10 +223,10 @@ malloc:
 	mov	edx, DWORD PTR memory_used@GOTOFF[ebx]
 	mov	eax, DWORD PTR 8[ebp]
 	add	eax, edx
-	add	eax, 8
 	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
 	mov	eax, DWORD PTR -12[ebp]
-	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
+	add	eax, 8
+	jmp	.L11
 .L12:
 	mov	edx, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR heap_end@GOTOFF[ebx]
@@ -290,6 +303,26 @@ malloc:
 	push	eax
 	call	memset
 	add	esp, 16
+	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 9
+	sub	esp, 12
+	push	0
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	mov	eax, DWORD PTR -24[ebp]
 	add	eax, 8
 .L11:
@@ -313,24 +346,56 @@ free:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	sub	esp, 16
-	call	__x86.get_pc_thunk.ax
-	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	edx, DWORD PTR 8[ebp]
-	sub	edx, 8
-	mov	DWORD PTR -4[ebp], edx
-	mov	ecx, DWORD PTR memory_used@GOTOFF[eax]
-	mov	edx, DWORD PTR -4[ebp]
-	mov	edx, DWORD PTR [edx]
-	sub	ecx, edx
-	mov	edx, ecx
-	sub	edx, 8
-	mov	DWORD PTR memory_used@GOTOFF[eax], edx
-	mov	eax, DWORD PTR -4[ebp]
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR 8[ebp]
+	sub	eax, 8
+	mov	DWORD PTR -12[ebp], eax
+	mov	edx, DWORD PTR memory_used@GOTOFF[ebx]
+	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR [eax]
+	sub	edx, eax
+	mov	eax, edx
+	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR [eax]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	1
+	push	20
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR -12[ebp]
 	mov	BYTE PTR 4[eax], 0
+	mov	edx, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
+	cmp	edx, eax
+	jne	.L23
+	mov	edx, DWORD PTR last_alloc@GOTOFF[ebx]
+	mov	eax, DWORD PTR 8[ebp]
+	sub	edx, eax
+	mov	eax, edx
+	sub	eax, 8
+	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
+.L23:
 	nop
+	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc

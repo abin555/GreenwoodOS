@@ -30,6 +30,9 @@ keyboard_ascii_pointer:
 prev_Scancode:
 	.zero	1
 	.comm	char_scancode,1,1
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
 	.comm	memory_used,4,4
 	.comm	heap_begin,4,4
 	.comm	heap_end,4,4
@@ -41,9 +44,6 @@ prev_Scancode:
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
 	.comm	BG,4,4
-	.comm	kbd_US,256,32
-	.comm	kbd_US_shift,256,32
-	.comm	STR_edit,128,32
 	.globl	_keyboard_disable
 	.data
 	.type	_keyboard_disable, @object

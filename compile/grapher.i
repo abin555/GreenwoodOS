@@ -414,71 +414,13 @@ typedef long long unsigned int uintmax_t;
 # 6 "./include/memory.h" 2
 # 1 "./include/frame_buffer.h" 1
 # 7 "./include/memory.h" 2
-
-uint32_t memory_used;
-uint32_t heap_begin;
-uint32_t heap_end;
-
-typedef struct{
-    uint32_t size;
-    uint8_t status;
-} alloc_t;
-
-void memcpy(u64* source, u64* target, u64 len);
-void* memset(void * place, int val, unsigned int size);
-
-void* malloc(unsigned int size);
-void free(void *mem);
-void mem_init(uint32_t kernelEnd);
-unsigned int mgetSize(void *mem);
-# 7 "./include/frame_buffer.h" 2
-# 16 "./include/frame_buffer.h"
-u32 fb_width;
-u32 fb_height;
-u64* fb;
-u32 fb_backBuffer[1920*1080];
-int fb_terminal_w;
-int fb_terminal_h;
-
-unsigned int FG;
-unsigned int BG;
-
-void fb_setPixel(u32 x, u32 y, u32 color);
-
-void init_fb(struct multiboot_tag_framebuffer *tagfb);
-
-void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
-
-void printChar(unsigned int x, unsigned int y, char c);
-void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale);
-
-void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color);
-
-void fb_set_color(unsigned int fg, unsigned int bg);
-
-void fb_clear(unsigned int color);
-
-int fb_write(char *buf, unsigned int len);
-int fb_write_start(char *buf, unsigned int len, unsigned int start);
-void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
-
-void fb_move_cursor(unsigned int pos);
-void fb_move_cursor_xy(unsigned int x, unsigned int y);
-
-void fb_copyBuffer();
-void fb_clearBackBuffer(u32 color);
-# 4 "./include/grapher.h" 2
-# 1 "./include/gfx.h" 1
+# 1 "./include/string.h" 1
 
 
 
+# 1 "./include/ascii_tables.h" 1
 
 
-
-void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
-void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
-void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
-# 5 "./include/grapher.h" 2
 # 1 "./include/keyboard.h" 1
 
 
@@ -573,7 +515,96 @@ unsigned int keyboard_ascii_pointer;
 
 unsigned char prev_Scancode;
 unsigned char char_scancode;
-# 6 "./include/grapher.h" 2
+# 4 "./include/ascii_tables.h" 2
+
+
+char kbd_US[256];
+char kbd_US_shift[256];
+# 5 "./include/string.h" 2
+
+char STR_edit[128];
+
+int STR_Compare(char *elem1, char *elem2, int start, int end);
+
+void STR_INSERT(char *in_str, char *out_str, int len, int write_index);
+
+void decodeData(char *Buffer, int in, int len, int start);
+
+void decodeHex(char *Buffer, unsigned int in, int len, int start);
+void decodeInt(char *Buffer, int in, int len, int start);
+
+unsigned int encodeHex(char *Buffer, int start, int end);
+
+char quadToHex(char quad);
+char hexToQuad(char hex);
+void strcpy(char *source, char *destination, unsigned int len);
+# 8 "./include/memory.h" 2
+
+unsigned int memory_used;
+unsigned int heap_begin;
+unsigned int heap_end;
+
+typedef struct{
+    unsigned int size;
+    char status;
+} alloc_t;
+
+void memcpy(u64* source, u64* target, u64 len);
+void* memset(void * place, int val, unsigned int size);
+
+void* malloc(unsigned int size);
+void free(void *mem);
+void mem_init(unsigned int kernelEnd);
+unsigned int mgetSize(void *mem);
+# 7 "./include/frame_buffer.h" 2
+# 16 "./include/frame_buffer.h"
+u32 fb_width;
+u32 fb_height;
+u64* fb;
+u32 fb_backBuffer[1920*1080];
+int fb_terminal_w;
+int fb_terminal_h;
+
+unsigned int FG;
+unsigned int BG;
+
+void fb_setPixel(u32 x, u32 y, u32 color);
+
+void init_fb(struct multiboot_tag_framebuffer *tagfb);
+
+void fb_write_cell(u32 index, char c, u32 fb, u32 bg);
+
+void printChar(unsigned int x, unsigned int y, char c);
+void printChar_Scaled(unsigned int x, unsigned int y, char c, int scale);
+
+void pixelScaled(unsigned int x, unsigned int y, int scale, u32 color);
+
+void fb_set_color(unsigned int fg, unsigned int bg);
+
+void fb_clear(unsigned int color);
+
+int fb_write(char *buf, unsigned int len);
+int fb_write_start(char *buf, unsigned int len, unsigned int start);
+void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+
+void fb_move_cursor(unsigned int pos);
+void fb_move_cursor_xy(unsigned int x, unsigned int y);
+
+void fb_copyBuffer();
+void fb_clearBackBuffer(u32 color);
+# 4 "./include/grapher.h" 2
+# 1 "./include/gfx.h" 1
+
+
+
+
+
+
+void gfx_line(u32 x1, u32 y1, u32 x2, u32 y2, u32 color);
+void gfx_hline(u32 x1, u32 x2, u32 y, u32 color);
+void gfx_vline(u32 y1, u32 y2, u32 x, u32 color);
+# 5 "./include/grapher.h" 2
+
 # 1 "./include/system_calls.h" 1
 # 7 "./include/grapher.h" 2
 # 16 "./include/grapher.h"

@@ -17,6 +17,9 @@ SYS_MODE:
 	.comm	keyboard_ascii_pointer,4,4
 	.comm	prev_Scancode,1,1
 	.comm	char_scancode,1,1
+	.comm	kbd_US,256,32
+	.comm	kbd_US_shift,256,32
+	.comm	STR_edit,128,32
 	.comm	memory_used,4,4
 	.comm	heap_begin,4,4
 	.comm	heap_end,4,4
@@ -28,9 +31,6 @@ SYS_MODE:
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
 	.comm	BG,4,4
-	.comm	kbd_US,256,32
-	.comm	kbd_US_shift,256,32
-	.comm	STR_edit,128,32
 	.comm	settings_data,36,32
 	.comm	grapher_interface,8,4
 	.comm	formulas,352,32
