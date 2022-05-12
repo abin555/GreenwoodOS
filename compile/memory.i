@@ -589,6 +589,8 @@ void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(unsigned int kernelEnd);
 unsigned int mgetSize(void *mem);
+
+void printHeap();
 # 2 "memory.c" 2
 
 
@@ -615,8 +617,8 @@ void* memset(void * place, int val, unsigned int size){
 void mem_init(unsigned int kernelEnd){
     last_alloc = kernelEnd;
     heap_begin = last_alloc;
-    heap_end = heap_begin + 0x4000;
-    memset((char *) heap_begin, 0, 0x4000);
+    heap_end = heap_begin + 0x10000;
+    memset((char *) heap_begin, 0, 0x10000);
 }
 
 
@@ -624,7 +626,7 @@ void mem_init(unsigned int kernelEnd){
 void* malloc(unsigned int size){
     if(!size) return 0;
 
-    unsigned int *mem = (unsigned int *) heap_begin;
+    unsigned int mem = (unsigned int) heap_begin;
 
     while((unsigned int) mem < heap_end){
         alloc_t *a = (alloc_t *) mem;
@@ -643,15 +645,16 @@ void* malloc(unsigned int size){
 
 
 
-        if(a->size >= size){
+        if(a->size == size){
             a->status = 1;
-            memset(mem + sizeof(alloc_t), 0, size);
+            memset((unsigned int *) mem + sizeof(alloc_t), 0, size);
             memory_used += size;
-
+            printHeap();
             return (void *)((unsigned int) mem + sizeof(alloc_t));
 
         }
-
+        mem += a->size + sizeof(alloc_t);
+        continue;
     }
     notallocated:;
 
@@ -676,10 +679,7 @@ void* malloc(unsigned int size){
 
  memset((void *)((unsigned int)alloc + sizeof(alloc_t)), 0, size);
 
-    decodeHex(STR_edit, last_alloc, 32, 0);
-    fb_write_xy(STR_edit, 8, 1, fb_terminal_w - 9, 0);
-
-
+    printHeap();
 
  return (void *)((unsigned int)alloc + sizeof(alloc_t));
 }
@@ -687,16 +687,43 @@ void* malloc(unsigned int size){
 void free(void *mem){
     alloc_t *alloc = (mem - sizeof(alloc_t));
     memory_used -= alloc->size;
-    decodeHex(STR_edit, alloc->size, 32, 0);
-    fb_write_xy(STR_edit, 8, 1, 20, 1);
 
     alloc->status = 0;
     if((unsigned int) mem == last_alloc){
         last_alloc -= (unsigned int) mem + sizeof(alloc_t);
     }
+    printHeap();
 }
 
 unsigned int mgetSize(void *mem){
     alloc_t *alloc = (alloc_t *) (mem - sizeof(alloc_t));
     return alloc->size;
+}
+
+void printHeap(){
+    char workspace[] = "_____MEM | _Address | ____Size | __Status";
+    fb_set_color(0x03fc1c, 0);
+    fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 0);
+    fb_set_color(0xFFFFFF, 0);
+    strcpy("_________________________________________", workspace, sizeof(workspace));
+    fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 1);
+    strcpy("                                         ", workspace, sizeof(workspace));
+
+    decodeHex(STR_edit, last_alloc, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, fb_terminal_w - sizeof(workspace) - 10, 0);
+
+    unsigned int mem = (unsigned int ) heap_begin;
+
+    unsigned int layer = 2;
+    while(mem < last_alloc){
+        alloc_t *a = (alloc_t *) mem;
+        decodeHex(workspace, mem, 32, -1);
+        decodeHex(workspace, mem + sizeof(alloc_t), 32, 10);
+        decodeHex(workspace, a->size, 32, 21);
+        decodeHex(workspace, a->status, 32, 32);
+        fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), layer);
+        layer++;
+        mem = mem + a->size + sizeof(alloc_t);
+
+    }
 }

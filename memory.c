@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 0x4000 //Heap is 4 MB in size
+#define HEAP_SIZE 0x10000 //Heap is 4 MB in size
 
 uint32_t last_alloc = 0;
 uint32_t heap_end = 0;
@@ -33,7 +33,7 @@ void mem_init(uint32_t kernelEnd){
 void* malloc(unsigned int size){
     if(!size) return 0;
     
-    uint32_t *mem = (uint32_t *) heap_begin;
+    uint32_t mem = (uint32_t) heap_begin;
 
     while((uint32_t) mem < heap_end){
         alloc_t *a = (alloc_t *) mem;
@@ -52,15 +52,16 @@ void* malloc(unsigned int size){
         //However, it cannot have the status flag enabled.
         //Based on this, when a region is set and the region is not used, the region is reallocated.
         
-        if(a->size >= size){//Check if the available allocation region contains 
+        if(a->size == size){//Check if the available allocation region contains 
             a->status = 1;//mark region as in use.;
-            memset(mem + sizeof(alloc_t), 0, size); //clear requested & available region.
+            memset((uint32_t *) mem + sizeof(alloc_t), 0, size); //clear requested & available region.
             memory_used += size; //Increase counter of used memory
-
+            printHeap();
             return (void *)((uint32_t) mem + sizeof(alloc_t));
             //last_alloc = (uint32_t) mem;
         } 
-
+        mem += a->size + sizeof(alloc_t);
+        continue;
     }
     notallocated:;//Label for unallocated memory
 
@@ -85,10 +86,7 @@ void* malloc(unsigned int size){
     //set memory in block
 	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
 
-    decodeHex(STR_edit, last_alloc, 32, 0);
-    fb_write_xy(STR_edit, 8, 1, fb_terminal_w - 9, 0);
-
-
+    printHeap();
     //return pointer
 	return (void *)((uint32_t)alloc + sizeof(alloc_t));
 }
@@ -96,16 +94,43 @@ void* malloc(unsigned int size){
 void free(void *mem){
     alloc_t *alloc = (mem - sizeof(alloc_t));
     memory_used -= alloc->size;
-    decodeHex(STR_edit, alloc->size, 32, 0);
-    fb_write_xy(STR_edit, 8, 1, 20, 1);
     //memset(mem, 0, alloc->size + sizeof(alloc_t));
     alloc->status = 0;
     if((uint32_t) mem == last_alloc){
         last_alloc -= (uint32_t) mem + sizeof(alloc_t);
     }
+    printHeap();
 }
 
 unsigned int mgetSize(void *mem){
     alloc_t *alloc = (alloc_t *) (mem - sizeof(alloc_t));
     return alloc->size;
+}
+
+void printHeap(){
+    char workspace[] = "_____MEM | _Address | ____Size | __Status";
+    fb_set_color(0x03fc1c, 0);
+    fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 0);
+    fb_set_color(0xFFFFFF, 0);
+    strcpy("_________________________________________", workspace, sizeof(workspace));
+    fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 1);
+    strcpy("                                         ", workspace, sizeof(workspace));
+
+    decodeHex(STR_edit, last_alloc, 32, 0);
+    fb_write_xy(STR_edit, 9, 0, fb_terminal_w - sizeof(workspace) - 10, 0);
+
+    uint32_t mem = (uint32_t ) heap_begin;
+    //uint32_t nextaddr = (uint32_t) mem;
+    uint32_t layer = 2;
+    while(mem < last_alloc){
+        alloc_t *a = (alloc_t *) mem;
+        decodeHex(workspace, mem, 32, -1);
+        decodeHex(workspace, mem + sizeof(alloc_t), 32, 10);
+        decodeHex(workspace, a->size, 32, 21);
+        decodeHex(workspace, a->status, 32, 32);
+        fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), layer);
+        layer++;
+        mem = mem +  a->size + sizeof(alloc_t);
+
+    }
 }

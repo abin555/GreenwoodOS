@@ -556,6 +556,8 @@ void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(unsigned int kernelEnd);
 unsigned int mgetSize(void *mem);
+
+void printHeap();
 # 7 "./include/frame_buffer.h" 2
 # 16 "./include/frame_buffer.h"
 u32 fb_width;

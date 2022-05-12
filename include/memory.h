@@ -22,4 +22,6 @@ void* malloc(unsigned int size);
 void free(void *mem);
 void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);
+
+void printHeap();
 #endif

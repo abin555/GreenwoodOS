@@ -144,10 +144,10 @@ mem_init:
 	mov	edx, DWORD PTR last_alloc@GOTOFF[eax]
 	mov	DWORD PTR heap_begin@GOTOFF[eax], edx
 	mov	edx, DWORD PTR heap_begin@GOTOFF[eax]
-	add	edx, 16384
+	add	edx, 65536
 	mov	DWORD PTR heap_end@GOTOFF[eax], edx
 	mov	eax, DWORD PTR heap_begin@GOTOFF[eax]
-	push	16384
+	push	65536
 	push	0
 	push	eax
 	call	memset
@@ -184,7 +184,7 @@ malloc:
 	mov	eax, DWORD PTR heap_begin@GOTOFF[ebx]
 	mov	DWORD PTR -12[ebp], eax
 	jmp	.L12
-.L16:
+.L17:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	DWORD PTR -16[ebp], eax
 	mov	eax, DWORD PTR -16[ebp]
@@ -194,7 +194,7 @@ malloc:
 	mov	eax, DWORD PTR -16[ebp]
 	movzx	eax, BYTE PTR 4[eax]
 	test	al, al
-	je	.L20
+	je	.L21
 .L13:
 	mov	eax, DWORD PTR -16[ebp]
 	movzx	eax, BYTE PTR 4[eax]
@@ -202,15 +202,14 @@ malloc:
 	je	.L15
 	mov	eax, DWORD PTR -16[ebp]
 	mov	eax, DWORD PTR [eax]
-	sal	eax, 2
 	add	DWORD PTR -12[ebp], eax
-	add	DWORD PTR -12[ebp], 32
+	add	DWORD PTR -12[ebp], 8
 	jmp	.L12
 .L15:
 	mov	eax, DWORD PTR -16[ebp]
 	mov	eax, DWORD PTR [eax]
 	cmp	DWORD PTR 8[ebp], eax
-	ja	.L12
+	jne	.L16
 	mov	eax, DWORD PTR -16[ebp]
 	mov	BYTE PTR 4[eax], 1
 	mov	eax, DWORD PTR -12[ebp]
@@ -224,16 +223,24 @@ malloc:
 	mov	eax, DWORD PTR 8[ebp]
 	add	eax, edx
 	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
+	call	printHeap
 	mov	eax, DWORD PTR -12[ebp]
 	add	eax, 8
 	jmp	.L11
+.L16:
+	mov	eax, DWORD PTR -16[ebp]
+	mov	edx, DWORD PTR [eax]
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, edx
+	add	eax, 8
+	mov	DWORD PTR -12[ebp], eax
+	nop
 .L12:
-	mov	edx, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR heap_end@GOTOFF[ebx]
-	cmp	edx, eax
-	jb	.L16
+	cmp	DWORD PTR -12[ebp], eax
+	jb	.L17
 	jmp	.L14
-.L20:
+.L21:
 	nop
 .L14:
 	mov	edx, DWORD PTR last_alloc@GOTOFF[ebx]
@@ -242,7 +249,7 @@ malloc:
 	lea	edx, 8[eax]
 	mov	eax, DWORD PTR heap_end@GOTOFF[ebx]
 	cmp	edx, eax
-	jb	.L17
+	jb	.L18
 	mov	DWORD PTR -43[ebp], 544503119
 	mov	DWORD PTR -39[ebp], 1210082927
 	mov	DWORD PTR -35[ebp], 542130501
@@ -260,21 +267,21 @@ malloc:
 	add	esp, 32
 	mov	eax, 0
 	jmp	.L11
-.L17:
+.L18:
 	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
 	mov	DWORD PTR -20[ebp], eax
 	mov	eax, DWORD PTR -20[ebp]
 	movzx	eax, BYTE PTR 4[eax]
 	test	al, al
-	je	.L18
+	je	.L19
 	mov	eax, DWORD PTR -20[ebp]
 	mov	eax, DWORD PTR [eax]
 	add	eax, 8
 	lea	edx, 0[0+eax*8]
-	jmp	.L19
-.L18:
-	mov	edx, 0
+	jmp	.L20
 .L19:
+	mov	edx, 0
+.L20:
 	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
 	add	eax, edx
 	mov	DWORD PTR -24[ebp], eax
@@ -303,26 +310,7 @@ malloc:
 	push	eax
 	call	memset
 	add	esp, 16
-	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
-	push	0
-	push	32
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, 9
-	sub	esp, 12
-	push	0
-	push	eax
-	push	1
-	push	8
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
+	call	printHeap
 	mov	eax, DWORD PTR -24[ebp]
 	add	eax, 8
 .L11:
@@ -346,56 +334,35 @@ free:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	push	ebx
-	sub	esp, 20
-	.cfi_offset 3, -12
-	call	__x86.get_pc_thunk.bx
-	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	eax, DWORD PTR 8[ebp]
-	sub	eax, 8
-	mov	DWORD PTR -12[ebp], eax
-	mov	edx, DWORD PTR memory_used@GOTOFF[ebx]
-	mov	eax, DWORD PTR -12[ebp]
-	mov	eax, DWORD PTR [eax]
-	sub	edx, eax
-	mov	eax, edx
-	mov	DWORD PTR memory_used@GOTOFF[ebx], eax
-	mov	eax, DWORD PTR -12[ebp]
-	mov	eax, DWORD PTR [eax]
-	push	0
-	push	32
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	sub	esp, 12
-	push	1
-	push	20
-	push	1
-	push	8
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
-	mov	eax, DWORD PTR -12[ebp]
-	mov	BYTE PTR 4[eax], 0
+	sub	esp, 24
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	edx, DWORD PTR 8[ebp]
-	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
-	cmp	edx, eax
+	sub	edx, 8
+	mov	DWORD PTR -12[ebp], edx
+	mov	ecx, DWORD PTR memory_used@GOTOFF[eax]
+	mov	edx, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR [edx]
+	sub	ecx, edx
+	mov	edx, ecx
+	mov	DWORD PTR memory_used@GOTOFF[eax], edx
+	mov	edx, DWORD PTR -12[ebp]
+	mov	BYTE PTR 4[edx], 0
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR last_alloc@GOTOFF[eax]
+	cmp	ecx, edx
 	jne	.L23
-	mov	edx, DWORD PTR last_alloc@GOTOFF[ebx]
-	mov	eax, DWORD PTR 8[ebp]
-	sub	edx, eax
-	mov	eax, edx
-	sub	eax, 8
-	mov	DWORD PTR last_alloc@GOTOFF[ebx], eax
+	mov	ecx, DWORD PTR last_alloc@GOTOFF[eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sub	ecx, edx
+	mov	edx, ecx
+	sub	edx, 8
+	mov	DWORD PTR last_alloc@GOTOFF[eax], edx
 .L23:
+	call	printHeap
 	nop
-	mov	ebx, DWORD PTR -4[ebp]
 	leave
 	.cfi_restore 5
-	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
@@ -427,28 +394,209 @@ mgetSize:
 	.cfi_endproc
 .LFE5:
 	.size	mgetSize, .-mgetSize
+	.section	.rodata
+	.align 4
+.LC0:
+	.string	"_________________________________________"
+	.align 4
+.LC1:
+	.string	"                                         "
+	.text
+	.globl	printHeap
+	.type	printHeap, @function
+printHeap:
+.LFB6:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 68
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -62[ebp], 1600085855
+	mov	DWORD PTR -58[ebp], 1296387423
+	mov	DWORD PTR -54[ebp], 1595964448
+	mov	DWORD PTR -50[ebp], 1919181889
+	mov	DWORD PTR -46[ebp], 544437093
+	mov	DWORD PTR -42[ebp], 1600069756
+	mov	DWORD PTR -38[ebp], 1767071583
+	mov	DWORD PTR -34[ebp], 2082497914
+	mov	DWORD PTR -30[ebp], 1398759200
+	mov	DWORD PTR -26[ebp], 1970561396
+	mov	WORD PTR -22[ebp], 115
+	sub	esp, 8
+	push	0
+	push	261148
+	call	fb_set_color@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 42
+	sub	esp, 12
+	push	0
+	push	eax
+	push	0
+	push	42
+	lea	eax, -62[ebp]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	sub	esp, 8
+	push	0
+	push	16777215
+	call	fb_set_color@PLT
+	add	esp, 16
+	sub	esp, 4
+	push	42
+	lea	eax, -62[ebp]
+	push	eax
+	lea	eax, .LC0@GOTOFF[ebx]
+	push	eax
+	call	strcpy@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 42
+	sub	esp, 12
+	push	1
+	push	eax
+	push	0
+	push	42
+	lea	eax, -62[ebp]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	sub	esp, 4
+	push	42
+	lea	eax, -62[ebp]
+	push	eax
+	lea	eax, .LC1@GOTOFF[ebx]
+	push	eax
+	call	strcpy@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 52
+	sub	esp, 12
+	push	0
+	push	eax
+	push	0
+	push	9
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR heap_begin@GOTOFF[ebx]
+	mov	DWORD PTR -12[ebp], eax
+	mov	DWORD PTR -16[ebp], 2
+	jmp	.L27
+.L28:
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR -20[ebp], eax
+	push	-1
+	push	32
+	push	DWORD PTR -12[ebp]
+	lea	eax, -62[ebp]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, 8
+	push	10
+	push	32
+	push	eax
+	lea	eax, -62[ebp]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR -20[ebp]
+	mov	eax, DWORD PTR [eax]
+	push	21
+	push	32
+	push	eax
+	lea	eax, -62[ebp]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR -20[ebp]
+	movzx	eax, BYTE PTR 4[eax]
+	movsx	eax, al
+	push	32
+	push	32
+	push	eax
+	lea	eax, -62[ebp]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 42
+	sub	esp, 12
+	push	DWORD PTR -16[ebp]
+	push	eax
+	push	0
+	push	42
+	lea	eax, -62[ebp]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	add	DWORD PTR -16[ebp], 1
+	mov	eax, DWORD PTR -20[ebp]
+	mov	edx, DWORD PTR [eax]
+	mov	eax, DWORD PTR -12[ebp]
+	add	eax, edx
+	add	eax, 8
+	mov	DWORD PTR -12[ebp], eax
+.L27:
+	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
+	cmp	DWORD PTR -12[ebp], eax
+	jb	.L28
+	nop
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE6:
+	.size	printHeap, .-printHeap
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB6:
+.LFB7:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE7:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB7:
+.LFB8:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE8:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

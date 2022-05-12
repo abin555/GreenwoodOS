@@ -538,10 +538,10 @@ strcpy:
 	mov	DWORD PTR -4[ebp], 0
 	jmp	.L62
 .L63:
-	mov	edx, DWORD PTR 12[ebp]
+	mov	edx, DWORD PTR 8[ebp]
 	mov	eax, DWORD PTR -4[ebp]
 	add	eax, edx
-	mov	ecx, DWORD PTR 8[ebp]
+	mov	ecx, DWORD PTR 12[ebp]
 	mov	edx, DWORD PTR -4[ebp]
 	add	edx, ecx
 	movzx	eax, BYTE PTR [eax]
