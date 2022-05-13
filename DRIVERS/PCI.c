@@ -57,6 +57,10 @@ uint16_t getDeviceClass(uint16_t bus, uint16_t device, uint16_t function){
     uint16_t r0 = pci_read_word(bus, device, function, 10);
     return r0;
 }
+uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
+    uint8_t r0 = pci_read_word(bus, device, function, 14) >> 4;
+    return r0;
+}
 
 void pci_probe()
 {
@@ -84,11 +88,18 @@ void pci_probe()
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
+                    pci_device_id *pdev_id = (pci_device_id *)malloc(sizeof(pci_device_id));
+                    pdev_id->bus = bus;
+                    pdev_id->slot = slot;
+                    pdev_id->func = function;
+
+
                     pdev->vendor = vendor;
                     pdev->device = device;
                     pdev->func = function;
                     pdev->class = class;
                     pdev->driver = 0;
+                    pdev->device_id = pdev_id;
                     add_pci_device(pdev);
             }
         }

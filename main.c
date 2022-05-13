@@ -106,6 +106,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   mem_init(0x10000000);
   pci_init();
+  activate_Drivers();
 
   terminal_init();
   //fb_write_xy(msg, heap_end - heap_begin, 0, 0, 6);

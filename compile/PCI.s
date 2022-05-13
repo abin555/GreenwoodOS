@@ -33,17 +33,17 @@
 	.size	pci_devices, 4
 pci_devices:
 	.zero	4
-	.globl	devs
-	.align 4
-	.type	devs, @object
-	.size	devs, 4
-devs:
-	.zero	4
 	.globl	pci_drivers
 	.align 4
 	.type	pci_drivers, @object
 	.size	pci_drivers, 4
 pci_drivers:
+	.zero	4
+	.globl	devs
+	.align 4
+	.type	devs, @object
+	.size	devs, 4
+devs:
 	.zero	4
 	.globl	drivs
 	.align 4
@@ -367,6 +367,45 @@ getDeviceClass:
 	.cfi_endproc
 .LFE4:
 	.size	getDeviceClass, .-getDeviceClass
+	.globl	getDeviceProgIF
+	.type	getDeviceProgIF, @function
+getDeviceProgIF:
+.LFB5:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 40
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	mov	WORD PTR -28[ebp], cx
+	mov	WORD PTR -32[ebp], dx
+	mov	WORD PTR -36[ebp], ax
+	movzx	ecx, WORD PTR -36[ebp]
+	movzx	edx, WORD PTR -32[ebp]
+	movzx	eax, WORD PTR -28[ebp]
+	push	14
+	push	ecx
+	push	edx
+	push	eax
+	call	pci_read_word
+	add	esp, 16
+	shr	ax, 4
+	mov	BYTE PTR -9[ebp], al
+	movzx	eax, BYTE PTR -9[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE5:
+	.size	getDeviceProgIF, .-getDeviceProgIF
 	.section	.rodata
 .LC0:
 	.string	"vendor:"
@@ -378,7 +417,7 @@ getDeviceClass:
 	.globl	pci_probe
 	.type	pci_probe, @function
 pci_probe:
-.LFB5:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -393,14 +432,14 @@ pci_probe:
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	DWORD PTR -12[ebp], 0
 	mov	DWORD PTR -16[ebp], 0
-	jmp	.L13
-.L20:
-	mov	DWORD PTR -20[ebp], 0
-	jmp	.L14
-.L19:
-	mov	DWORD PTR -24[ebp], 0
 	jmp	.L15
-.L18:
+.L22:
+	mov	DWORD PTR -20[ebp], 0
+	jmp	.L16
+.L21:
+	mov	DWORD PTR -24[ebp], 0
+	jmp	.L17
+.L20:
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -415,7 +454,7 @@ pci_probe:
 	add	esp, 16
 	mov	WORD PTR -26[ebp], ax
 	cmp	WORD PTR -26[ebp], -1
-	je	.L21
+	je	.L23
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -528,10 +567,24 @@ pci_probe:
 	add	esp, 32
 	add	DWORD PTR -12[ebp], 1
 	sub	esp, 12
-	push	20
+	push	24
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -36[ebp], eax
+	sub	esp, 12
+	push	12
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -40[ebp], eax
+	mov	eax, DWORD PTR -40[ebp]
+	mov	edx, DWORD PTR -16[ebp]
+	mov	DWORD PTR [eax], edx
+	mov	eax, DWORD PTR -40[ebp]
+	mov	edx, DWORD PTR -20[ebp]
+	mov	DWORD PTR 4[eax], edx
+	mov	eax, DWORD PTR -40[ebp]
+	mov	edx, DWORD PTR -24[ebp]
+	mov	DWORD PTR 8[eax], edx
 	movzx	edx, WORD PTR -26[ebp]
 	mov	eax, DWORD PTR -36[ebp]
 	mov	DWORD PTR [eax], edx
@@ -546,26 +599,29 @@ pci_probe:
 	mov	WORD PTR 12[eax], dx
 	mov	eax, DWORD PTR -36[ebp]
 	mov	DWORD PTR 16[eax], 0
+	mov	eax, DWORD PTR -36[ebp]
+	mov	edx, DWORD PTR -40[ebp]
+	mov	DWORD PTR 20[eax], edx
 	sub	esp, 12
 	push	DWORD PTR -36[ebp]
 	call	add_pci_device
 	add	esp, 16
-	jmp	.L17
-.L21:
+	jmp	.L19
+.L23:
 	nop
-.L17:
+.L19:
 	add	DWORD PTR -24[ebp], 1
-.L15:
+.L17:
 	cmp	DWORD PTR -24[ebp], 7
-	jbe	.L18
-	add	DWORD PTR -20[ebp], 1
-.L14:
-	cmp	DWORD PTR -20[ebp], 31
-	jbe	.L19
-	add	DWORD PTR -16[ebp], 1
-.L13:
-	cmp	DWORD PTR -16[ebp], 255
 	jbe	.L20
+	add	DWORD PTR -20[ebp], 1
+.L16:
+	cmp	DWORD PTR -20[ebp], 31
+	jbe	.L21
+	add	DWORD PTR -16[ebp], 1
+.L15:
+	cmp	DWORD PTR -16[ebp], 255
+	jbe	.L22
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
@@ -575,12 +631,12 @@ pci_probe:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE6:
 	.size	pci_probe, .-pci_probe
 	.globl	pci_init
 	.type	pci_init, @function
 pci_init:
-.LFB6:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -597,7 +653,7 @@ pci_init:
 	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
 	mov	DWORD PTR devs@GOTOFF[ebx], eax
 	sub	esp, 12
-	push	640
+	push	768
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR pci_devices@GOTOFF[ebx], eax
@@ -615,30 +671,30 @@ pci_init:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE7:
 	.size	pci_init, .-pci_init
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB7:
+.LFB8:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE8:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB8:
+.LFB9:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE9:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

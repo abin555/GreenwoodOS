@@ -610,15 +610,25 @@ void printHeap();
 
 
 
+
+# 1 "./include/PCI.h" 1
+# 6 "./include/usb.h" 2
+
 char usb_driverName[27];
 
 
 void usb_init_driver();
 void usb_exit_driver();
 # 5 "./include/drivers.h" 2
+
+
+void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
+
+
 struct __pci_driver;
+struct __pci_device_id;
 
 typedef struct {
  unsigned int vendor;
@@ -626,13 +636,13 @@ typedef struct {
  unsigned int func;
  unsigned short class;
  struct __pci_driver *driver;
+ struct __pci_device_id *device_id;
 } pci_device;
 
-typedef struct {
- unsigned int vendor;
- unsigned int device;
+typedef struct __pci_device_id{
+ unsigned int bus;
+ unsigned int slot;
  unsigned int func;
- unsigned short class;
 } pci_device_id;
 
 typedef struct __pci_driver {
@@ -642,6 +652,11 @@ typedef struct __pci_driver {
  void (*init_driver)(void);
  void (*exit_driver)(void);
 } pci_driver;
+
+pci_device **pci_devices;
+pci_driver **pci_drivers;
+unsigned int devs;
+unsigned int drivs;
 
 void add_pci_device();
 
@@ -711,6 +726,10 @@ unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigne
     unsigned short r0 = pci_read_word(bus, device, function, 10);
     return r0;
 }
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function){
+    char r0 = pci_read_word(bus, device, function, 14) >> 4;
+    return r0;
+}
 
 void pci_probe()
 {
@@ -738,11 +757,18 @@ void pci_probe()
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
+                    pci_device_id *pdev_id = (pci_device_id *)malloc(sizeof(pci_device_id));
+                    pdev_id->bus = bus;
+                    pdev_id->slot = slot;
+                    pdev_id->func = function;
+
+
                     pdev->vendor = vendor;
                     pdev->device = device;
                     pdev->func = function;
                     pdev->class = class;
                     pdev->driver = 0;
+                    pdev->device_id = pdev_id;
                     add_pci_device(pdev);
             }
         }

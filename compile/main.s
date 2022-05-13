@@ -38,6 +38,10 @@
 	.comm	SYS_MODE,1,1
 	.comm	decode,500,32
 	.comm	usb_driverName,27,4
+	.comm	pci_devices,4,4
+	.comm	pci_drivers,4,4
+	.comm	devs,4,4
+	.comm	drivs,4,4
 	.comm	vga_width,4,4
 	.comm	vga_height,4,4
 	.comm	screen,4,4
@@ -286,6 +290,7 @@ kmain:
 	call	mem_init@PLT
 	add	esp, 16
 	call	pci_init@PLT
+	call	activate_Drivers@PLT
 	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0
