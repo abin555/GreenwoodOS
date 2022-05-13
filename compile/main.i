@@ -770,13 +770,32 @@ void KYBRD_DEBUG_DISPLAY();
 # 1 "./include/memory.h" 1
 # 12 "main.c" 2
 # 1 "./include/PCI.h" 1
-# 10 "./include/PCI.h"
+# 9 "./include/PCI.h"
+# 1 "./include/drivers.h" 1
+
+
+
+# 1 "./include/usb.h" 1
+
+
+
+char usb_driverName[27];
+
+
+void usb_init_driver();
+void usb_exit_driver();
+# 5 "./include/drivers.h" 2
+
+void activate_Drivers();
+# 10 "./include/PCI.h" 2
+
 struct __pci_driver;
 
 typedef struct {
  unsigned int vendor;
  unsigned int device;
  unsigned int func;
+ unsigned short class;
  struct __pci_driver *driver;
 } pci_device;
 
@@ -784,14 +803,15 @@ typedef struct {
  unsigned int vendor;
  unsigned int device;
  unsigned int func;
+ unsigned short class;
 } pci_device_id;
 
 typedef struct __pci_driver {
  pci_device_id *table;
  char *name;
- char (*init_one)(pci_device *);
- char (*init_driver)(void);
- char (*exit_driver)(void);
+ pci_device *init_one;
+ void (*init_driver)(void);
+ void (*exit_driver)(void);
 } pci_driver;
 
 void add_pci_device();
@@ -799,6 +819,7 @@ void add_pci_device();
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
+unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();

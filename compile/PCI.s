@@ -25,6 +25,7 @@
 	.comm	memory_used,4,4
 	.comm	heap_begin,4,4
 	.comm	heap_end,4,4
+	.comm	usb_driverName,27,4
 	.globl	pci_devices
 	.bss
 	.align 4
@@ -62,20 +63,64 @@ add_pci_device:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	call	__x86.get_pc_thunk.ax
-	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	edx, DWORD PTR pci_devices@GOTOFF[eax]
-	mov	ecx, DWORD PTR devs@GOTOFF[eax]
-	sal	ecx, 2
-	add	ecx, edx
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.bx
+	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	eax, DWORD PTR pci_devices@GOTOFF[ebx]
+	mov	edx, DWORD PTR devs@GOTOFF[ebx]
+	sal	edx, 2
+	add	edx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	mov	DWORD PTR [edx], eax
+	mov	eax, DWORD PTR 8[ebp]
+	movzx	eax, WORD PTR 12[eax]
+	movzx	eax, ax
+	cmp	eax, 3075
+	jne	.L2
+	sub	esp, 4
+	push	85
+	push	0
+	push	0
+	call	printChar@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	20
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR usb_driverName@GOT[ebx]
+	mov	DWORD PTR 4[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR 8[ebp]
-	mov	DWORD PTR [ecx], edx
-	mov	edx, DWORD PTR devs@GOTOFF[eax]
-	add	edx, 1
-	mov	DWORD PTR devs@GOTOFF[eax], edx
+	mov	DWORD PTR 8[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR usb_init_driver@GOT[ebx]
+	mov	DWORD PTR 12[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR usb_exit_driver@GOT[ebx]
+	mov	DWORD PTR 16[eax], edx
+	mov	eax, DWORD PTR pci_drivers@GOTOFF[ebx]
+	mov	edx, DWORD PTR drivs@GOTOFF[ebx]
+	sal	edx, 2
+	add	edx, eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR [edx], eax
+	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
+	add	eax, 1
+	mov	DWORD PTR drivs@GOTOFF[ebx], eax
 	nop
-	pop	ebp
+.L2:
+	mov	eax, DWORD PTR devs@GOTOFF[ebx]
+	add	eax, 1
+	mov	DWORD PTR devs@GOTOFF[ebx], eax
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
@@ -237,9 +282,8 @@ getVendorID:
 	push	eax
 	call	pci_read_word
 	add	esp, 16
-	movzx	eax, ax
-	mov	DWORD PTR -12[ebp], eax
-	mov	eax, DWORD PTR -12[ebp]
+	mov	WORD PTR -10[ebp], ax
+	movzx	eax, WORD PTR -10[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -276,9 +320,8 @@ getDeviceID:
 	push	eax
 	call	pci_read_word
 	add	esp, 16
-	movzx	eax, ax
-	mov	DWORD PTR -12[ebp], eax
-	mov	eax, DWORD PTR -12[ebp]
+	mov	WORD PTR -10[ebp], ax
+	movzx	eax, WORD PTR -10[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -286,16 +329,56 @@ getDeviceID:
 	.cfi_endproc
 .LFE3:
 	.size	getDeviceID, .-getDeviceID
+	.globl	getDeviceClass
+	.type	getDeviceClass, @function
+getDeviceClass:
+.LFB4:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	sub	esp, 40
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	ecx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 12[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	mov	WORD PTR -28[ebp], cx
+	mov	WORD PTR -32[ebp], dx
+	mov	WORD PTR -36[ebp], ax
+	movzx	ecx, WORD PTR -36[ebp]
+	movzx	edx, WORD PTR -32[ebp]
+	movzx	eax, WORD PTR -28[ebp]
+	push	10
+	push	ecx
+	push	edx
+	push	eax
+	call	pci_read_word
+	add	esp, 16
+	mov	WORD PTR -10[ebp], ax
+	movzx	eax, WORD PTR -10[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE4:
+	.size	getDeviceClass, .-getDeviceClass
 	.section	.rodata
 .LC0:
 	.string	"vendor:"
 .LC1:
 	.string	" device: "
+.LC2:
+	.string	" class: "
 	.text
 	.globl	pci_probe
 	.type	pci_probe, @function
 pci_probe:
-.LFB4:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -310,14 +393,14 @@ pci_probe:
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	DWORD PTR -12[ebp], 0
 	mov	DWORD PTR -16[ebp], 0
-	jmp	.L10
-.L17:
+	jmp	.L13
+.L20:
 	mov	DWORD PTR -20[ebp], 0
-	jmp	.L11
-.L16:
+	jmp	.L14
+.L19:
 	mov	DWORD PTR -24[ebp], 0
-	jmp	.L12
-.L15:
+	jmp	.L15
+.L18:
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -332,7 +415,7 @@ pci_probe:
 	add	esp, 16
 	mov	WORD PTR -26[ebp], ax
 	cmp	WORD PTR -26[ebp], -1
-	je	.L18
+	je	.L21
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -346,6 +429,19 @@ pci_probe:
 	call	getDeviceID
 	add	esp, 16
 	mov	WORD PTR -28[ebp], ax
+	mov	eax, DWORD PTR -24[ebp]
+	movzx	ecx, ax
+	mov	eax, DWORD PTR -20[ebp]
+	movzx	edx, ax
+	mov	eax, DWORD PTR -16[ebp]
+	movzx	eax, ax
+	sub	esp, 4
+	push	ecx
+	push	edx
+	push	eax
+	call	getDeviceClass
+	add	esp, 16
+	mov	WORD PTR -30[ebp], ax
 	mov	eax, DWORD PTR -12[ebp]
 	sub	esp, 12
 	push	eax
@@ -402,43 +498,74 @@ pci_probe:
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
+	mov	eax, DWORD PTR -12[ebp]
+	sub	esp, 12
+	push	eax
+	push	25
+	push	0
+	push	9
+	lea	eax, .LC2@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	movzx	eax, WORD PTR -30[ebp]
+	push	0
+	push	16
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR -12[ebp]
+	sub	esp, 12
+	push	eax
+	push	32
+	push	0
+	push	5
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	add	DWORD PTR -12[ebp], 1
 	sub	esp, 12
-	push	16
+	push	20
 	call	malloc@PLT
 	add	esp, 16
-	mov	DWORD PTR -32[ebp], eax
+	mov	DWORD PTR -36[ebp], eax
 	movzx	edx, WORD PTR -26[ebp]
-	mov	eax, DWORD PTR -32[ebp]
+	mov	eax, DWORD PTR -36[ebp]
 	mov	DWORD PTR [eax], edx
 	movzx	edx, WORD PTR -28[ebp]
-	mov	eax, DWORD PTR -32[ebp]
+	mov	eax, DWORD PTR -36[ebp]
 	mov	DWORD PTR 4[eax], edx
-	mov	eax, DWORD PTR -32[ebp]
+	mov	eax, DWORD PTR -36[ebp]
 	mov	edx, DWORD PTR -24[ebp]
 	mov	DWORD PTR 8[eax], edx
-	mov	eax, DWORD PTR -32[ebp]
-	mov	DWORD PTR 12[eax], 0
+	mov	eax, DWORD PTR -36[ebp]
+	movzx	edx, WORD PTR -30[ebp]
+	mov	WORD PTR 12[eax], dx
+	mov	eax, DWORD PTR -36[ebp]
+	mov	DWORD PTR 16[eax], 0
 	sub	esp, 12
-	push	DWORD PTR -32[ebp]
+	push	DWORD PTR -36[ebp]
 	call	add_pci_device
 	add	esp, 16
-	jmp	.L14
-.L18:
+	jmp	.L17
+.L21:
 	nop
-.L14:
+.L17:
 	add	DWORD PTR -24[ebp], 1
-.L12:
+.L15:
 	cmp	DWORD PTR -24[ebp], 7
-	jbe	.L15
+	jbe	.L18
 	add	DWORD PTR -20[ebp], 1
-.L11:
+.L14:
 	cmp	DWORD PTR -20[ebp], 31
-	jbe	.L16
+	jbe	.L19
 	add	DWORD PTR -16[ebp], 1
-.L10:
+.L13:
 	cmp	DWORD PTR -16[ebp], 255
-	jbe	.L17
+	jbe	.L20
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
@@ -448,12 +575,12 @@ pci_probe:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE5:
 	.size	pci_probe, .-pci_probe
 	.globl	pci_init
 	.type	pci_init, @function
 pci_init:
-.LFB5:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -470,7 +597,7 @@ pci_init:
 	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
 	mov	DWORD PTR devs@GOTOFF[ebx], eax
 	sub	esp, 12
-	push	512
+	push	640
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR pci_devices@GOTOFF[ebx], eax
@@ -488,30 +615,30 @@ pci_init:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE6:
 	.size	pci_init, .-pci_init
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB6:
+.LFB7:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE7:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB7:
+.LFB8:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE8:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -479,26 +479,6 @@ printHeap:
 	push	eax
 	call	strcpy@PLT
 	add	esp, 16
-	mov	eax, DWORD PTR last_alloc@GOTOFF[ebx]
-	push	0
-	push	32
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, 52
-	sub	esp, 12
-	push	0
-	push	eax
-	push	0
-	push	9
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
 	mov	eax, DWORD PTR heap_begin@GOTOFF[ebx]
 	mov	DWORD PTR -12[ebp], eax
 	mov	DWORD PTR -16[ebp], 2

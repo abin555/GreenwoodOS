@@ -37,6 +37,7 @@
 	.comm	Terminal_Arguments,75,32
 	.comm	SYS_MODE,1,1
 	.comm	decode,500,32
+	.comm	usb_driverName,27,4
 	.comm	vga_width,4,4
 	.comm	vga_height,4,4
 	.comm	screen,4,4

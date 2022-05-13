@@ -10,6 +10,19 @@ uint32_t drivs = 0;
 void add_pci_device(pci_device *pdev)
 {
 	pci_devices[devs] = pdev;
+    switch(pdev->class){
+        case 0x0C03:;//Universal Serial Bus Controller
+            printChar(0,0,'U');
+            pci_driver *pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->name = usb_driverName;
+            pdrive->init_one = pdev;
+            pdrive->init_driver = usb_init_driver;
+            pdrive->exit_driver = usb_exit_driver;
+
+            pci_drivers[drivs] = pdrive;
+            drivs++;
+        break;
+    }
 	devs ++;
 	return;
 }
@@ -30,16 +43,20 @@ uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offs
 
 uint16_t getVendorID(uint16_t bus, uint16_t device, uint16_t function)
 {
-        uint32_t r0 = pci_read_word(bus,device,function,0);
-        return r0;
+    uint16_t r0 = pci_read_word(bus,device,function,0);
+    return r0;
 }
 
 uint16_t getDeviceID(uint16_t bus, uint16_t device, uint16_t function)
 {
-        uint32_t r0 = pci_read_word(bus,device,function,2);
-        return r0;
+    uint16_t r0 = pci_read_word(bus,device,function,2);
+    return r0;
 }
 
+uint16_t getDeviceClass(uint16_t bus, uint16_t device, uint16_t function){
+    uint16_t r0 = pci_read_word(bus, device, function, 10);
+    return r0;
+}
 
 void pci_probe()
 {
@@ -53,7 +70,7 @@ void pci_probe()
                     uint16_t vendor = getVendorID(bus, slot, function);
                     if(vendor == 0xffff) continue;
                     uint16_t device = getDeviceID(bus, slot, function);
-                    //mprint("vendor: 0x%x device: 0x%x\n", vendor, device);
+                    uint16_t class = getDeviceClass(bus, slot, function);
 
                     fb_write_xy("vendor:", 7, 0, 0, DebugLine);
                     decodeHex(STR_edit, vendor, 16, 0);
@@ -61,12 +78,16 @@ void pci_probe()
                     fb_write_xy(" device: ", 10, 0, 12, DebugLine);
                     decodeHex(STR_edit, device, 16, 0);
                     fb_write_xy(STR_edit, 5, 0, 20, DebugLine);
+                    fb_write_xy(" class: ", 9, 0, 25, DebugLine);
+                    decodeHex(STR_edit, class, 16, 0);
+                    fb_write_xy(STR_edit, 5, 0, 32, DebugLine);
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
                     pdev->vendor = vendor;
                     pdev->device = device;
                     pdev->func = function;
+                    pdev->class = class;
                     pdev->driver = 0;
                     add_pci_device(pdev);
             }

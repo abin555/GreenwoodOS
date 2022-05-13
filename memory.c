@@ -116,9 +116,6 @@ void printHeap(){
     fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 1);
     strcpy("                                         ", workspace, sizeof(workspace));
 
-    decodeHex(STR_edit, last_alloc, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, fb_terminal_w - sizeof(workspace) - 10, 0);
-
     uint32_t mem = (uint32_t ) heap_begin;
     //uint32_t nextaddr = (uint32_t) mem;
     uint32_t layer = 2;

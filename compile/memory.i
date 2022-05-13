@@ -711,9 +711,6 @@ void printHeap(){
     fb_write_xy(workspace, sizeof(workspace), 0, fb_terminal_w-sizeof(workspace), 1);
     strcpy("                                         ", workspace, sizeof(workspace));
 
-    decodeHex(STR_edit, last_alloc, 32, 0);
-    fb_write_xy(STR_edit, 9, 0, fb_terminal_w - sizeof(workspace) - 10, 0);
-
     unsigned int mem = (unsigned int ) heap_begin;
 
     unsigned int layer = 2;
