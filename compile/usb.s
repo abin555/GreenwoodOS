@@ -48,9 +48,10 @@ usb_init_driver:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
+	push	esi
 	push	ebx
-	sub	esp, 4
-	.cfi_offset 3, -12
+	.cfi_offset 6, -12
+	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	sub	esp, 4
@@ -68,13 +69,34 @@ usb_init_driver:
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 20[eax]
 	mov	eax, DWORD PTR 8[eax]
 	movzx	ecx, ax
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 20[eax]
 	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	esi, DWORD PTR 8[ebp]
+	sal	esi, 2
+	add	eax, esi
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 20[eax]
 	mov	eax, DWORD PTR [eax]
 	movzx	eax, ax
 	sub	esp, 4
@@ -101,10 +123,13 @@ usb_init_driver:
 	call	fb_write_xy@PLT
 	add	esp, 32
 	nop
-	mov	ebx, DWORD PTR -4[ebp]
-	leave
-	.cfi_restore 5
+	lea	esp, -8[ebp]
+	pop	ebx
 	.cfi_restore 3
+	pop	esi
+	.cfi_restore 6
+	pop	ebp
+	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc

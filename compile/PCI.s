@@ -86,7 +86,7 @@ add_pci_device:
 	call	printChar@PLT
 	add	esp, 16
 	sub	esp, 12
-	push	20
+	push	24
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -12[ebp], eax
@@ -96,12 +96,16 @@ add_pci_device:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR 8[ebp]
 	mov	DWORD PTR 8[eax], edx
+	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
+	mov	edx, eax
 	mov	eax, DWORD PTR -12[ebp]
-	mov	edx, DWORD PTR usb_init_driver@GOT[ebx]
 	mov	DWORD PTR 12[eax], edx
 	mov	eax, DWORD PTR -12[ebp]
-	mov	edx, DWORD PTR usb_exit_driver@GOT[ebx]
+	mov	edx, DWORD PTR usb_init_driver@GOT[ebx]
 	mov	DWORD PTR 16[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR usb_exit_driver@GOT[ebx]
+	mov	DWORD PTR 20[eax], edx
 	mov	eax, DWORD PTR pci_drivers@GOTOFF[ebx]
 	mov	edx, DWORD PTR drivs@GOTOFF[ebx]
 	sal	edx, 2
@@ -658,7 +662,7 @@ pci_init:
 	add	esp, 16
 	mov	DWORD PTR pci_devices@GOTOFF[ebx], eax
 	sub	esp, 12
-	push	640
+	push	768
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR pci_drivers@GOTOFF[ebx], eax

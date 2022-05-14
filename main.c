@@ -10,6 +10,8 @@
 #include "pong.h"
 #include "memory.h"
 #include "PCI.h"
+#include "usb.h"
+#include "drivers.h"
 //#include "IDE.h"
 
 extern void load_gdt();

@@ -771,10 +771,6 @@ void KYBRD_DEBUG_DISPLAY();
 # 12 "main.c" 2
 # 1 "./include/PCI.h" 1
 # 9 "./include/PCI.h"
-# 1 "./include/drivers.h" 1
-
-
-
 # 1 "./include/usb.h" 1
 
 
@@ -786,24 +782,19 @@ void KYBRD_DEBUG_DISPLAY();
 char usb_driverName[27];
 
 
-void usb_init_driver();
+void usb_init_driver(int driverID);
 void usb_exit_driver();
-# 5 "./include/drivers.h" 2
-
-
-void activate_Drivers();
 # 10 "./include/PCI.h" 2
-
-
 
 struct __pci_driver;
 struct __pci_device_id;
+struct __pci_device;
 
-typedef struct {
+typedef struct __pci_device{
  unsigned int vendor;
  unsigned int device;
  unsigned int func;
- unsigned short class;
+ unsigned short Class;
  struct __pci_driver *driver;
  struct __pci_device_id *device_id;
 } pci_device;
@@ -818,7 +809,8 @@ typedef struct __pci_driver {
  pci_device_id *table;
  char *name;
  pci_device *init_one;
- void (*init_driver)(void);
+ int driverID;
+ void (*init_driver)(int);
  void (*exit_driver)(void);
 } pci_driver;
 
@@ -838,6 +830,17 @@ char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short f
 void pci_init();
 void pci_probe();
 # 13 "main.c" 2
+# 1 "./include/usb.h" 1
+# 14 "main.c" 2
+# 1 "./include/drivers.h" 1
+
+
+
+
+
+
+void activate_Drivers();
+# 15 "main.c" 2
 
 
 extern void load_gdt();

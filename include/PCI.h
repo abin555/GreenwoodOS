@@ -6,18 +6,17 @@
 #include "memory.h"
 #include "string.h"
 #include "frame_buffer.h"
-#include "drivers.h"
-
-
+#include "usb.h"
 
 struct __pci_driver;
 struct __pci_device_id;
+struct __pci_device;
 
-typedef struct {
+typedef struct __pci_device{
 	uint32_t vendor;
 	uint32_t device;
 	uint32_t func;
-	uint16_t class;
+	uint16_t Class;
 	struct __pci_driver *driver;
 	struct __pci_device_id *device_id;
 } pci_device;
@@ -32,7 +31,8 @@ typedef struct __pci_driver {
 	pci_device_id *table;
 	char *name;
 	pci_device *init_one;
-	void (*init_driver)(void);
+	int driverID;
+	void (*init_driver)(int);
 	void (*exit_driver)(void);
 } pci_driver;
 

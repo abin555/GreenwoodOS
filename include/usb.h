@@ -7,7 +7,7 @@
 char usb_driverName[27];
 
 
-void usb_init_driver();
+void usb_init_driver(int driverID);
 void usb_exit_driver();
 
 #endif

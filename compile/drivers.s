@@ -55,8 +55,18 @@ activate_Drivers:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 12[eax]
+	mov	eax, DWORD PTR 16[eax]
+	mov	edx, DWORD PTR pci_drivers@GOT[ebx]
+	mov	edx, DWORD PTR [edx]
+	movzx	ecx, WORD PTR -10[ebp]
+	sal	ecx, 2
+	add	edx, ecx
+	mov	edx, DWORD PTR [edx]
+	mov	edx, DWORD PTR 12[edx]
+	sub	esp, 12
+	push	edx
 	call	eax
+	add	esp, 16
 	movzx	eax, WORD PTR -10[ebp]
 	add	eax, 1
 	mov	WORD PTR -10[ebp], ax
@@ -68,11 +78,10 @@ activate_Drivers:
 	jb	.L3
 	nop
 	nop
-	add	esp, 20
-	pop	ebx
-	.cfi_restore 3
-	pop	ebp
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc

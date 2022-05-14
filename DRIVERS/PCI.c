@@ -10,12 +10,13 @@ uint32_t drivs = 0;
 void add_pci_device(pci_device *pdev)
 {
 	pci_devices[devs] = pdev;
-    switch(pdev->class){
+    switch(pdev->Class){
         case 0x0C03:;//Universal Serial Bus Controller
             printChar(0,0,'U');
             pci_driver *pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pdrive->name = usb_driverName;
             pdrive->init_one = pdev;
+            pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
 
@@ -74,7 +75,7 @@ void pci_probe()
                     uint16_t vendor = getVendorID(bus, slot, function);
                     if(vendor == 0xffff) continue;
                     uint16_t device = getDeviceID(bus, slot, function);
-                    uint16_t class = getDeviceClass(bus, slot, function);
+                    uint16_t Class = getDeviceClass(bus, slot, function);
 
                     fb_write_xy("vendor:", 7, 0, 0, DebugLine);
                     decodeHex(STR_edit, vendor, 16, 0);
@@ -83,7 +84,7 @@ void pci_probe()
                     decodeHex(STR_edit, device, 16, 0);
                     fb_write_xy(STR_edit, 5, 0, 20, DebugLine);
                     fb_write_xy(" class: ", 9, 0, 25, DebugLine);
-                    decodeHex(STR_edit, class, 16, 0);
+                    decodeHex(STR_edit, Class, 16, 0);
                     fb_write_xy(STR_edit, 5, 0, 32, DebugLine);
                     DebugLine++;
 
@@ -97,7 +98,7 @@ void pci_probe()
                     pdev->vendor = vendor;
                     pdev->device = device;
                     pdev->func = function;
-                    pdev->class = class;
+                    pdev->Class = Class;
                     pdev->driver = 0;
                     pdev->device_id = pdev_id;
                     add_pci_device(pdev);
