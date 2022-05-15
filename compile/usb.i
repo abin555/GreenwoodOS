@@ -600,7 +600,26 @@ void fb_clearBackBuffer(u32 color);
 # 5 "./include/usb.h" 2
 # 1 "./include/PCI.h" 1
 # 9 "./include/PCI.h"
+# 1 "./include/drivers.h" 1
+
+
+
 # 1 "./include/usb.h" 1
+# 5 "./include/drivers.h" 2
+# 1 "./include/IDE.h" 1
+
+
+
+# 1 "./include/PCI.h" 1
+# 5 "./include/IDE.h" 2
+# 84 "./include/IDE.h"
+char ide_driverName[22];
+void ide_driver_install(int driverID);
+# 6 "./include/drivers.h" 2
+
+
+
+void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
 struct __pci_driver;
@@ -642,7 +661,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();
@@ -658,17 +677,19 @@ void usb_exit_driver();
 char usb_driverName[] = "Universal Serial Bus Driver";
 
 void usb_init_driver(int driverID){
-    printChar(20,20,'S');
-    fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 8, 8);
+    fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 40, driverID);
     decodeHex(STR_edit,
+
     getDeviceClass(
         pci_drivers[driverID]->init_one->device_id->bus,
         pci_drivers[driverID]->init_one->device_id->slot,
         pci_drivers[driverID]->init_one->device_id->func
     ),
+
+
     16,
     0);
-    fb_write_xy(STR_edit, 4, -1, 8,9);
+    fb_write_xy(STR_edit, 4, 1, 40+sizeof(usb_driverName)+1,driverID);
 }
 void usb_exit_driver(){
 

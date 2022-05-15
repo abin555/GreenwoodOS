@@ -2,7 +2,9 @@
 #define DRIVERS_H
 
 #include "usb.h"
+#include "IDE.h"
 #include "PCI.h"
+
 
 void activate_Drivers();
 

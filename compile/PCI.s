@@ -26,6 +26,7 @@
 	.comm	heap_begin,4,4
 	.comm	heap_end,4,4
 	.comm	usb_driverName,27,4
+	.comm	ide_driverName,22,4
 	.globl	pci_devices
 	.bss
 	.align 4
@@ -77,14 +78,10 @@ add_pci_device:
 	mov	eax, DWORD PTR 8[ebp]
 	movzx	eax, WORD PTR 12[eax]
 	movzx	eax, ax
+	cmp	eax, 257
+	je	.L2
 	cmp	eax, 3075
-	jne	.L2
-	sub	esp, 4
-	push	85
-	push	0
-	push	0
-	call	printChar@PLT
-	add	esp, 16
+	jne	.L3
 	sub	esp, 12
 	push	24
 	call	malloc@PLT
@@ -115,8 +112,37 @@ add_pci_device:
 	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
 	add	eax, 1
 	mov	DWORD PTR drivs@GOTOFF[ebx], eax
-	nop
+	jmp	.L3
 .L2:
+	sub	esp, 12
+	push	24
+	call	malloc@PLT
+	add	esp, 16
+	mov	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR ide_driverName@GOT[ebx]
+	mov	DWORD PTR 4[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR 8[ebp]
+	mov	DWORD PTR 8[eax], edx
+	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
+	mov	edx, eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR 12[eax], edx
+	mov	eax, DWORD PTR -12[ebp]
+	mov	edx, DWORD PTR ide_driver_install@GOT[ebx]
+	mov	DWORD PTR 16[eax], edx
+	mov	eax, DWORD PTR pci_drivers@GOTOFF[ebx]
+	mov	edx, DWORD PTR drivs@GOTOFF[ebx]
+	sal	edx, 2
+	add	edx, eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR [edx], eax
+	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
+	add	eax, 1
+	mov	DWORD PTR drivs@GOTOFF[ebx], eax
+	nop
+.L3:
 	mov	eax, DWORD PTR devs@GOTOFF[ebx]
 	add	eax, 1
 	mov	DWORD PTR devs@GOTOFF[ebx], eax
@@ -394,15 +420,14 @@ getDeviceProgIF:
 	movzx	ecx, WORD PTR -36[ebp]
 	movzx	edx, WORD PTR -32[ebp]
 	movzx	eax, WORD PTR -28[ebp]
-	push	14
+	push	12
 	push	ecx
 	push	edx
 	push	eax
 	call	pci_read_word
 	add	esp, 16
-	shr	ax, 4
-	mov	BYTE PTR -9[ebp], al
-	movzx	eax, BYTE PTR -9[ebp]
+	mov	WORD PTR -10[ebp], ax
+	movzx	eax, WORD PTR -10[ebp]
 	leave
 	.cfi_restore 5
 	.cfi_def_cfa 4, 4
@@ -436,14 +461,14 @@ pci_probe:
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	mov	DWORD PTR -12[ebp], 0
 	mov	DWORD PTR -16[ebp], 0
-	jmp	.L15
-.L22:
-	mov	DWORD PTR -20[ebp], 0
 	jmp	.L16
-.L21:
-	mov	DWORD PTR -24[ebp], 0
+.L23:
+	mov	DWORD PTR -20[ebp], 0
 	jmp	.L17
-.L20:
+.L22:
+	mov	DWORD PTR -24[ebp], 0
+	jmp	.L18
+.L21:
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -458,7 +483,7 @@ pci_probe:
 	add	esp, 16
 	mov	WORD PTR -26[ebp], ax
 	cmp	WORD PTR -26[ebp], -1
-	je	.L23
+	je	.L24
 	mov	eax, DWORD PTR -24[ebp]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR -20[ebp]
@@ -610,22 +635,22 @@ pci_probe:
 	push	DWORD PTR -36[ebp]
 	call	add_pci_device
 	add	esp, 16
-	jmp	.L19
-.L23:
+	jmp	.L20
+.L24:
 	nop
-.L19:
+.L20:
 	add	DWORD PTR -24[ebp], 1
-.L17:
+.L18:
 	cmp	DWORD PTR -24[ebp], 7
-	jbe	.L20
-	add	DWORD PTR -20[ebp], 1
-.L16:
-	cmp	DWORD PTR -20[ebp], 31
 	jbe	.L21
-	add	DWORD PTR -16[ebp], 1
-.L15:
-	cmp	DWORD PTR -16[ebp], 255
+	add	DWORD PTR -20[ebp], 1
+.L17:
+	cmp	DWORD PTR -20[ebp], 31
 	jbe	.L22
+	add	DWORD PTR -16[ebp], 1
+.L16:
+	cmp	DWORD PTR -16[ebp], 255
+	jbe	.L23
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]

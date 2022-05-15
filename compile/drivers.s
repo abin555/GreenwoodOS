@@ -30,6 +30,7 @@
 	.comm	devs,4,4
 	.comm	drivs,4,4
 	.comm	usb_driverName,27,4
+	.comm	ide_driverName,22,4
 	.globl	activate_Drivers
 	.type	activate_Drivers, @function
 activate_Drivers:

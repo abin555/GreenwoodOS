@@ -602,6 +602,10 @@ void printHeap();
 # 7 "./include/PCI.h" 2
 
 
+# 1 "./include/drivers.h" 1
+
+
+
 # 1 "./include/usb.h" 1
 
 
@@ -615,10 +619,17 @@ char usb_driverName[27];
 
 void usb_init_driver(int driverID);
 void usb_exit_driver();
+# 5 "./include/drivers.h" 2
+# 1 "./include/IDE.h" 1
+# 84 "./include/IDE.h"
+char ide_driverName[22];
+void ide_driver_install(int driverID);
+# 6 "./include/drivers.h" 2
+
+
+
+void activate_Drivers();
 # 10 "./include/PCI.h" 2
-
-
-
 
 struct __pci_driver;
 struct __pci_device_id;
@@ -659,7 +670,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();
@@ -675,15 +686,26 @@ unsigned int drivs = 0;
 void add_pci_device(pci_device *pdev)
 {
  pci_devices[devs] = pdev;
+    pci_driver *pdrive;
     switch(pdev->Class){
         case 0x0C03:;
-            printChar(0,0,'U');
-            pci_driver *pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+
+            pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pdrive->name = usb_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
+
+            pci_drivers[drivs] = pdrive;
+            drivs++;
+        break;
+        case 0x0101:;
+            pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->name = ide_driverName;
+            pdrive->init_one = pdev;
+            pdrive->driverID = drivs;
+            pdrive->init_driver = ide_driver_install;
 
             pci_drivers[drivs] = pdrive;
             drivs++;
@@ -723,8 +745,8 @@ unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigne
     unsigned short r0 = pci_read_word(bus, device, function, 10);
     return r0;
 }
-char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function){
-    char r0 = pci_read_word(bus, device, function, 14) >> 4;
+unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function){
+    unsigned short r0 = pci_read_word(bus, device, function, 0x2+0xA);
     return r0;
 }
 

@@ -38,6 +38,7 @@
 	.comm	SYS_MODE,1,1
 	.comm	decode,500,32
 	.comm	usb_driverName,27,4
+	.comm	ide_driverName,22,4
 	.comm	pci_devices,4,4
 	.comm	pci_drivers,4,4
 	.comm	devs,4,4

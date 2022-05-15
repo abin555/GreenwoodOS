@@ -25,6 +25,7 @@
 	.comm	fb_terminal_h,4,4
 	.comm	FG,4,4
 	.comm	BG,4,4
+	.comm	ide_driverName,22,4
 	.comm	pci_devices,4,4
 	.comm	pci_drivers,4,4
 	.comm	devs,4,4
@@ -54,15 +55,10 @@ usb_init_driver:
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	sub	esp, 4
-	push	83
-	push	20
-	push	20
-	call	printChar@PLT
-	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
 	sub	esp, 12
-	push	8
-	push	8
+	push	eax
+	push	40
 	push	0
 	push	27
 	lea	eax, usb_driverName@GOTOFF[ebx]
@@ -113,10 +109,11 @@ usb_init_driver:
 	push	eax
 	call	decodeHex@PLT
 	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
 	sub	esp, 12
-	push	9
-	push	8
-	push	-1
+	push	eax
+	push	68
+	push	1
 	push	4
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax

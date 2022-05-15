@@ -1,6 +1,7 @@
 #ifndef IDE_H
 #define IDE_H
 #include "io.h"
+#include "PCI.h"
 
 //STATUS FLAGS
 #define ATA_SR_BSY     0x80    // Busy
@@ -79,45 +80,8 @@
 #define ATA_REG_ALTSTATUS  0x0C
 #define ATA_REG_DEVADDRESS 0x0D
 
-struct IDEChannelRegisters {
-   unsigned short base;  // I/O Base.
-   unsigned short ctrl;  // Control Base
-   unsigned short bmide; // Bus Master IDE
-   unsigned char  nIEN;  // nIEN (No Interrupt);
-} channels[2];
 
-
-
-unsigned char ide_buf[2048] = {0};
-static volatile unsigned char ide_irq_invoked = 0;
-//static unsigned char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-
-struct ide_device {
-   unsigned char  Reserved;    // 0 (Empty) or 1 (This Drive really exists).
-   unsigned char  Channel;     // 0 (Primary Channel) or 1 (Secondary Channel).
-   unsigned char  Drive;       // 0 (Master Drive) or 1 (Slave Drive).
-   unsigned short Type;        // 0: ATA, 1:ATAPI.
-   unsigned short Signature;   // Drive Signature
-   unsigned short Capabilities;// Features.
-   unsigned int   CommandSets; // Command Sets Supported.
-   unsigned int   Size;        // Size in Sectors.
-   unsigned char  Model[41];   // Model in string.
-} ide_devices[4];
-
-unsigned char ide_read(unsigned char channel, unsigned char reg);
-void ide_write(unsigned char channel, unsigned char reg, unsigned char data);
-void ide_read_buffer(unsigned char channel, unsigned char reg, unsigned int buffer, unsigned int quads);
-unsigned char ide_polling(unsigned char channel, unsigned int advanced_check);
-//unsigned char ide_print_error(unsigned int drive, unsigned char err);
-
-
-void ide_initialize(
-    unsigned int BAR0, 
-    unsigned int BAR1, 
-    unsigned int BAR2, 
-    unsigned int BAR3,
-    unsigned int BAR4);
-
-
+char ide_driverName[22];
+void ide_driver_install(int driverID);
 
 #endif

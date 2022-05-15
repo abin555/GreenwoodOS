@@ -1,1 +1,1 @@
-qemu-system-x86_64.exe -boot d -cdrom GreenwoodOS.iso"
+qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio -drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img -usb -device usb-ehci

@@ -16,7 +16,8 @@ OBJECTS = \
 		grapher.o\
 		DRIVERS/PCI.o\
 		DRIVERS/usb.o\
-		drivers.o
+		drivers.o\
+		DRIVERS/IDE.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -masm=intel -c
