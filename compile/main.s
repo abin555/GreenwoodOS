@@ -373,6 +373,24 @@ kmain:
 	mov	eax, DWORD PTR [eax]
 	cmp	DWORD PTR -32[ebp], eax
 	jb	.L37
+	mov	eax, DWORD PTR restore_kernel_addr@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	sub	esp, 12
+	push	20
+	push	20
+	push	1
+	push	32
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	call	activate_Drivers@PLT
 	call	terminal_init@PLT
 	call	kmain_loop

@@ -106,7 +106,7 @@ void terminal_interpret(){
         PROGA();
     }
     if(terminal_compare("wipe", 0, Terminal_Arguments[0], 4)){
-        for(int i = 0; i < 50; i++){
+        for(int i = 0; i < 1000; i++){
             WriteMem((int)externalProgram+4*i, 0x00000000);
         }
     }

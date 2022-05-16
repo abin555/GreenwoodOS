@@ -958,6 +958,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
       fb_write_xy(STR_edit, 16/4, 1, dev*5, (devs+1)+offset);
     }
   }
+  decodeHex(STR_edit, (unsigned int) restore_kernel_addr, 32, 0);
+  fb_write_xy(STR_edit, 32, 1, 20, 20);
 
   activate_Drivers();
 
