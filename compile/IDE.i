@@ -687,10 +687,10 @@ void ide_driver_install(int driverID){
    fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 40, driverID);
    decodeHex(STR_edit,
 
-   getDeviceClass(
-      pci_drivers[driverID]->init_one->device_id->bus,
-      pci_drivers[driverID]->init_one->device_id->slot,
-      pci_drivers[driverID]->init_one->device_id->func
+   getDeviceProgIF(
+      pci_drivers[driverID]->table->bus,
+      pci_drivers[driverID]->table->slot,
+      pci_drivers[driverID]->table->func
    ),
 
 

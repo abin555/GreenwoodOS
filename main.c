@@ -108,6 +108,20 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   mem_init(0x10000000);
   pci_init();
+
+  for(unsigned int dev = 0; dev < devs; dev++){
+    for(int offset = 0; offset < 75; offset++){
+      uint32_t data = pci_read_word(
+        pci_devices[dev]->device_id->bus,
+        pci_devices[dev]->device_id->slot,
+        pci_devices[dev]->device_id->func,
+        offset
+      );
+      decodeHex(STR_edit, data, 16, 0);
+      fb_write_xy(STR_edit, 16/4, 1, dev*5, (devs+1)+offset);
+    }
+  }
+
   activate_Drivers();
 
   terminal_init();

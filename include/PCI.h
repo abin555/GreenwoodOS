@@ -47,7 +47,7 @@ uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offs
 uint16_t getVendorID(uint16_t bus, uint16_t device, uint16_t function);
 uint16_t getDeviceID(uint16_t bus, uint16_t device, uint16_t function);
 uint16_t getDeviceClass(uint16_t bus, uint16_t device, uint16_t function);
-uint16_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function);
+uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function);
 
 void pci_init();
 void pci_probe();

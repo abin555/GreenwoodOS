@@ -1200,10 +1200,65 @@ fb_write_xy:
 	.cfi_endproc
 .LFE10:
 	.size	fb_write_xy, .-fb_write_xy
+	.globl	fb_write_xy_scaled
+	.type	fb_write_xy_scaled, @function
+fb_write_xy_scaled:
+.LFB11:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 20
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -12[ebp], 0
+	jmp	.L49
+.L50:
+	mov	edx, DWORD PTR 28[ebp]
+	mov	ecx, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR 16[ebp]
+	add	eax, ecx
+	mov	ecx, eax
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, ecx
+	movzx	eax, BYTE PTR [eax]
+	movsx	eax, al
+	mov	ecx, DWORD PTR -12[ebp]
+	imul	ecx, DWORD PTR 28[ebp]
+	lea	ebx, 0[0+ecx*4]
+	mov	ecx, DWORD PTR 20[ebp]
+	add	ecx, ebx
+	push	edx
+	push	eax
+	push	DWORD PTR 24[ebp]
+	push	ecx
+	call	printChar_Scaled
+	add	esp, 16
+	add	DWORD PTR -12[ebp], 1
+.L49:
+	mov	eax, DWORD PTR -12[ebp]
+	cmp	eax, DWORD PTR 12[ebp]
+	jl	.L50
+	nop
+	nop
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
+	.cfi_restore 5
+	.cfi_restore 3
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE11:
+	.size	fb_write_xy_scaled, .-fb_write_xy_scaled
 	.globl	fb_move_cursor
 	.type	fb_move_cursor, @function
 fb_move_cursor:
-.LFB11:
+.LFB12:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1221,12 +1276,12 @@ fb_move_cursor:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE12:
 	.size	fb_move_cursor, .-fb_move_cursor
 	.globl	fb_move_cursor_xy
 	.type	fb_move_cursor_xy, @function
 fb_move_cursor_xy:
-.LFB12:
+.LFB13:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1249,60 +1304,11 @@ fb_move_cursor_xy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE12:
+.LFE13:
 	.size	fb_move_cursor_xy, .-fb_move_cursor_xy
 	.globl	fb_copyBuffer
 	.type	fb_copyBuffer, @function
 fb_copyBuffer:
-.LFB13:
-	.cfi_startproc
-	endbr32
-	push	ebp
-	.cfi_def_cfa_offset 8
-	.cfi_offset 5, -8
-	mov	ebp, esp
-	.cfi_def_cfa_register 5
-	push	ebx
-	sub	esp, 16
-	.cfi_offset 3, -12
-	call	__x86.get_pc_thunk.ax
-	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	DWORD PTR -8[ebp], 0
-	jmp	.L51
-.L52:
-	mov	edx, DWORD PTR fb@GOT[eax]
-	mov	edx, DWORD PTR [edx]
-	mov	ecx, DWORD PTR -8[ebp]
-	sal	ecx, 2
-	lea	ebx, [edx+ecx]
-	mov	edx, DWORD PTR fb_backBuffer@GOT[eax]
-	mov	ecx, DWORD PTR -8[ebp]
-	mov	edx, DWORD PTR [edx+ecx*4]
-	mov	DWORD PTR [ebx], edx
-	add	DWORD PTR -8[ebp], 1
-.L51:
-	mov	edx, DWORD PTR fb_width@GOT[eax]
-	mov	ecx, DWORD PTR [edx]
-	mov	edx, DWORD PTR fb_height@GOT[eax]
-	mov	edx, DWORD PTR [edx]
-	imul	edx, ecx
-	cmp	DWORD PTR -8[ebp], edx
-	jb	.L52
-	nop
-	nop
-	add	esp, 16
-	pop	ebx
-	.cfi_restore 3
-	pop	ebp
-	.cfi_restore 5
-	.cfi_def_cfa 4, 4
-	ret
-	.cfi_endproc
-.LFE13:
-	.size	fb_copyBuffer, .-fb_copyBuffer
-	.globl	fb_clearBackBuffer
-	.type	fb_clearBackBuffer, @function
-fb_clearBackBuffer:
 .LFB14:
 	.cfi_startproc
 	endbr32
@@ -1319,10 +1325,15 @@ fb_clearBackBuffer:
 	mov	DWORD PTR -8[ebp], 0
 	jmp	.L54
 .L55:
+	mov	edx, DWORD PTR fb@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	mov	ecx, DWORD PTR -8[ebp]
+	sal	ecx, 2
+	lea	ebx, [edx+ecx]
 	mov	edx, DWORD PTR fb_backBuffer@GOT[eax]
 	mov	ecx, DWORD PTR -8[ebp]
-	mov	ebx, DWORD PTR 8[ebp]
-	mov	DWORD PTR [edx+ecx*4], ebx
+	mov	edx, DWORD PTR [edx+ecx*4]
+	mov	DWORD PTR [ebx], edx
 	add	DWORD PTR -8[ebp], 1
 .L54:
 	mov	edx, DWORD PTR fb_width@GOT[eax]
@@ -1343,29 +1354,73 @@ fb_clearBackBuffer:
 	ret
 	.cfi_endproc
 .LFE14:
+	.size	fb_copyBuffer, .-fb_copyBuffer
+	.globl	fb_clearBackBuffer
+	.type	fb_clearBackBuffer, @function
+fb_clearBackBuffer:
+.LFB15:
+	.cfi_startproc
+	endbr32
+	push	ebp
+	.cfi_def_cfa_offset 8
+	.cfi_offset 5, -8
+	mov	ebp, esp
+	.cfi_def_cfa_register 5
+	push	ebx
+	sub	esp, 16
+	.cfi_offset 3, -12
+	call	__x86.get_pc_thunk.ax
+	add	eax, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
+	mov	DWORD PTR -8[ebp], 0
+	jmp	.L57
+.L58:
+	mov	edx, DWORD PTR fb_backBuffer@GOT[eax]
+	mov	ecx, DWORD PTR -8[ebp]
+	mov	ebx, DWORD PTR 8[ebp]
+	mov	DWORD PTR [edx+ecx*4], ebx
+	add	DWORD PTR -8[ebp], 1
+.L57:
+	mov	edx, DWORD PTR fb_width@GOT[eax]
+	mov	ecx, DWORD PTR [edx]
+	mov	edx, DWORD PTR fb_height@GOT[eax]
+	mov	edx, DWORD PTR [edx]
+	imul	edx, ecx
+	cmp	DWORD PTR -8[ebp], edx
+	jb	.L58
+	nop
+	nop
+	add	esp, 16
+	pop	ebx
+	.cfi_restore 3
+	pop	ebp
+	.cfi_restore 5
+	.cfi_def_cfa 4, 4
+	ret
+	.cfi_endproc
+.LFE15:
 	.size	fb_clearBackBuffer, .-fb_clearBackBuffer
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB15:
+.LFB16:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE15:
+.LFE16:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB16:
+.LFB17:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE16:
+.LFE17:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

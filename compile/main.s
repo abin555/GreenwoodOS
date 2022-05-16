@@ -240,9 +240,13 @@ kmain:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
+	push	edi
+	push	esi
 	push	ebx
-	sub	esp, 20
-	.cfi_offset 3, -12
+	sub	esp, 44
+	.cfi_offset 7, -12
+	.cfi_offset 6, -16
+	.cfi_offset 3, -20
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	cmp	DWORD PTR 8[ebp], 920085129
@@ -252,27 +256,27 @@ kmain:
 .L29:
 	mov	eax, DWORD PTR 12[ebp]
 	add	eax, 8
-	mov	DWORD PTR -12[ebp], eax
+	mov	DWORD PTR -28[ebp], eax
 	jmp	.L31
 .L33:
-	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR -28[ebp]
 	mov	eax, DWORD PTR [eax]
 	cmp	eax, 8
 	jne	.L32
-	mov	eax, DWORD PTR -12[ebp]
-	mov	DWORD PTR -16[ebp], eax
+	mov	eax, DWORD PTR -28[ebp]
+	mov	DWORD PTR -44[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -16[ebp]
+	push	DWORD PTR -44[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L32:
-	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR -28[ebp]
 	mov	eax, DWORD PTR 4[eax]
 	add	eax, 7
 	and	eax, -8
-	add	DWORD PTR -12[ebp], eax
+	add	DWORD PTR -28[ebp], eax
 .L31:
-	mov	eax, DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR -28[ebp]
 	mov	eax, DWORD PTR [eax]
 	test	eax, eax
 	jne	.L33
@@ -291,15 +295,98 @@ kmain:
 	call	mem_init@PLT
 	add	esp, 16
 	call	pci_init@PLT
+	mov	DWORD PTR -32[ebp], 0
+	jmp	.L34
+.L37:
+	mov	DWORD PTR -36[ebp], 0
+	jmp	.L35
+.L36:
+	mov	eax, DWORD PTR -36[ebp]
+	movzx	esi, ax
+	mov	eax, DWORD PTR pci_devices@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR -32[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR 8[eax]
+	movzx	ecx, ax
+	mov	eax, DWORD PTR pci_devices@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR -32[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR 4[eax]
+	movzx	edx, ax
+	mov	eax, DWORD PTR pci_devices@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edi, DWORD PTR -32[ebp]
+	sal	edi, 2
+	add	eax, edi
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
+	movzx	eax, ax
+	push	esi
+	push	ecx
+	push	edx
+	push	eax
+	call	pci_read_word@PLT
+	add	esp, 16
+	movzx	eax, ax
+	mov	DWORD PTR -40[ebp], eax
+	push	0
+	push	16
+	push	DWORD PTR -40[ebp]
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR devs@GOT[ebx]
+	mov	edx, DWORD PTR [eax]
+	mov	eax, DWORD PTR -36[ebp]
+	add	eax, edx
+	lea	ecx, 1[eax]
+	mov	edx, DWORD PTR -32[ebp]
+	mov	eax, edx
+	sal	eax, 2
+	add	eax, edx
+	sub	esp, 12
+	push	ecx
+	push	eax
+	push	1
+	push	4
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	add	DWORD PTR -36[ebp], 1
+.L35:
+	cmp	DWORD PTR -36[ebp], 74
+	jle	.L36
+	add	DWORD PTR -32[ebp], 1
+.L34:
+	mov	eax, DWORD PTR devs@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	cmp	DWORD PTR -32[ebp], eax
+	jb	.L37
 	call	activate_Drivers@PLT
 	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0
 .L30:
-	mov	ebx, DWORD PTR -4[ebp]
-	leave
-	.cfi_restore 5
+	lea	esp, -12[ebp]
+	pop	ebx
 	.cfi_restore 3
+	pop	esi
+	.cfi_restore 6
+	pop	edi
+	.cfi_restore 7
+	pop	ebp
+	.cfi_restore 5
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc

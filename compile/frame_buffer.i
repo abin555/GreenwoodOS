@@ -587,6 +587,7 @@ void fb_clear(unsigned int color);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale);
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
@@ -822,6 +823,12 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
 
 
         fb_write_cell((y*fb_terminal_w)+x+index, Buffer[index+start], FG, BG);
+    }
+}
+
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale){
+    for(int index = 0; index < len; index++){
+        printChar_Scaled(x+index*(4*scale), y, Buffer[index+start], scale);
     }
 }
 

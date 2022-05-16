@@ -595,6 +595,7 @@ void fb_clear(unsigned int color);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale);
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
@@ -646,7 +647,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();

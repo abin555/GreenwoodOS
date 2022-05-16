@@ -87,6 +87,10 @@ add_pci_device:
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR [eax], edx
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR usb_driverName@GOT[ebx]
 	mov	DWORD PTR 4[eax], edx
@@ -119,6 +123,10 @@ add_pci_device:
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR [eax], edx
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR ide_driverName@GOT[ebx]
 	mov	DWORD PTR 4[eax], edx
@@ -420,12 +428,13 @@ getDeviceProgIF:
 	movzx	ecx, WORD PTR -36[ebp]
 	movzx	edx, WORD PTR -32[ebp]
 	movzx	eax, WORD PTR -28[ebp]
-	push	12
+	push	8
 	push	ecx
 	push	edx
 	push	eax
 	call	pci_read_word
 	add	esp, 16
+	shr	ax, 8
 	mov	WORD PTR -10[ebp], ax
 	movzx	eax, WORD PTR -10[ebp]
 	leave

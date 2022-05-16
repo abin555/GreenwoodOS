@@ -661,7 +661,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();
@@ -678,18 +678,31 @@ char usb_driverName[] = "Universal Serial Bus Driver";
 
 void usb_init_driver(int driverID){
     fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 40, driverID);
-    decodeHex(STR_edit,
-
-    getDeviceClass(
-        pci_drivers[driverID]->init_one->device_id->bus,
-        pci_drivers[driverID]->init_one->device_id->slot,
-        pci_drivers[driverID]->init_one->device_id->func
-    ),
-
-
-    16,
-    0);
-    fb_write_xy(STR_edit, 4, 1, 40+sizeof(usb_driverName)+1,driverID);
+    unsigned short progIF = getDeviceProgIF(
+        pci_drivers[driverID]->table->bus,
+        pci_drivers[driverID]->table->slot,
+        pci_drivers[driverID]->table->func
+    );
+    switch(progIF){
+        case 0x0:
+            fb_write_xy("UHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+        case 0x10:
+            fb_write_xy("OHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+        case 0x20:
+            fb_write_xy("EHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+        case 0x30:
+            fb_write_xy("XHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+        case 0x80:
+            fb_write_xy("UNKN", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+        case 0xFE:
+            fb_write_xy("USBD", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            break;
+    }
 }
 void usb_exit_driver(){
 

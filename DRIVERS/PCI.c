@@ -15,6 +15,7 @@ void add_pci_device(pci_device *pdev)
         case 0x0C03:;//Universal Serial Bus Controller
             //printChar(0,0,'U');
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->table = pdev->device_id;
             pdrive->name = usb_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
@@ -26,6 +27,7 @@ void add_pci_device(pci_device *pdev)
         break;
         case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->table = pdev->device_id;
             pdrive->name = ide_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
@@ -66,11 +68,11 @@ uint16_t getDeviceID(uint16_t bus, uint16_t device, uint16_t function)
 }
 
 uint16_t getDeviceClass(uint16_t bus, uint16_t device, uint16_t function){
-    uint16_t r0 = pci_read_word(bus, device, function, 10);
+    uint16_t r0 = pci_read_word(bus, device, function, 0xA);
     return r0;
 }
-uint16_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
-    uint16_t r0 = pci_read_word(bus, device, function, 0x2+0xA);
+uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
+    uint16_t r0 = pci_read_word(bus, device, function, 8) >> 8;
     return r0;
 }
 

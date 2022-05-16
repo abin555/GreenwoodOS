@@ -71,8 +71,7 @@ ide_driver_install:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 8[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -81,8 +80,7 @@ ide_driver_install:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -91,15 +89,14 @@ ide_driver_install:
 	sal	esi, 2
 	add	eax, esi
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR [eax]
 	movzx	eax, ax
 	sub	esp, 4
 	push	ecx
 	push	edx
 	push	eax
-	call	getDeviceClass@PLT
+	call	getDeviceProgIF@PLT
 	add	esp, 16
 	movzx	eax, ax
 	push	0

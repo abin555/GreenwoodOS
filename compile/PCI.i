@@ -670,7 +670,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();
@@ -691,6 +691,7 @@ void add_pci_device(pci_device *pdev)
         case 0x0C03:;
 
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->table = pdev->device_id;
             pdrive->name = usb_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
@@ -702,6 +703,7 @@ void add_pci_device(pci_device *pdev)
         break;
         case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->table = pdev->device_id;
             pdrive->name = ide_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
@@ -742,11 +744,11 @@ unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned s
 }
 
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function){
-    unsigned short r0 = pci_read_word(bus, device, function, 10);
+    unsigned short r0 = pci_read_word(bus, device, function, 0xA);
     return r0;
 }
-unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function){
-    unsigned short r0 = pci_read_word(bus, device, function, 0x2+0xA);
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function){
+    unsigned short r0 = pci_read_word(bus, device, function, 8) >> 8;
     return r0;
 }
 

@@ -37,6 +37,19 @@
 	.size	usb_driverName, 27
 usb_driverName:
 	.ascii	"Universal Serial Bus Driver"
+	.section	.rodata
+.LC0:
+	.string	"UHCI"
+.LC1:
+	.string	"OHCI"
+.LC2:
+	.string	"EHCI"
+.LC3:
+	.string	"XHCI"
+.LC4:
+	.string	"UNKN"
+.LC5:
+	.string	"USBD"
 	.text
 	.globl	usb_init_driver
 	.type	usb_init_driver, @function
@@ -51,6 +64,7 @@ usb_init_driver:
 	.cfi_def_cfa_register 5
 	push	esi
 	push	ebx
+	sub	esp, 16
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
@@ -71,8 +85,7 @@ usb_init_driver:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 8[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -81,8 +94,7 @@ usb_init_driver:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -91,34 +103,113 @@ usb_init_driver:
 	sal	esi, 2
 	add	eax, esi
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 20[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR [eax]
 	movzx	eax, ax
 	sub	esp, 4
 	push	ecx
 	push	edx
 	push	eax
-	call	getDeviceClass@PLT
+	call	getDeviceProgIF@PLT
 	add	esp, 16
-	movzx	eax, ax
-	push	0
-	push	16
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
+	cbw
+	mov	WORD PTR -10[ebp], ax
+	movzx	eax, WORD PTR -10[ebp]
+	cmp	eax, 254
+	je	.L2
+	cmp	eax, 254
+	jg	.L9
+	cmp	eax, 128
+	je	.L4
+	cmp	eax, 128
+	jg	.L9
+	cmp	eax, 48
+	je	.L5
+	cmp	eax, 48
+	jg	.L9
+	cmp	eax, 32
+	je	.L6
+	cmp	eax, 32
+	jg	.L9
+	test	eax, eax
+	je	.L7
+	cmp	eax, 16
+	je	.L8
+	jmp	.L9
+.L7:
 	mov	eax, DWORD PTR 8[ebp]
 	sub	esp, 12
 	push	eax
 	push	68
-	push	1
+	push	0
 	push	4
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	lea	eax, .LC0@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
+	jmp	.L3
+.L8:
+	mov	eax, DWORD PTR 8[ebp]
+	sub	esp, 12
+	push	eax
+	push	68
+	push	0
+	push	4
+	lea	eax, .LC1@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	jmp	.L3
+.L6:
+	mov	eax, DWORD PTR 8[ebp]
+	sub	esp, 12
+	push	eax
+	push	68
+	push	0
+	push	4
+	lea	eax, .LC2@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	jmp	.L3
+.L5:
+	mov	eax, DWORD PTR 8[ebp]
+	sub	esp, 12
+	push	eax
+	push	68
+	push	0
+	push	4
+	lea	eax, .LC3@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	jmp	.L3
+.L4:
+	mov	eax, DWORD PTR 8[ebp]
+	sub	esp, 12
+	push	eax
+	push	68
+	push	0
+	push	4
+	lea	eax, .LC4@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	jmp	.L3
+.L2:
+	mov	eax, DWORD PTR 8[ebp]
+	sub	esp, 12
+	push	eax
+	push	68
+	push	0
+	push	4
+	lea	eax, .LC5@GOTOFF[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	nop
+.L3:
+.L9:
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx

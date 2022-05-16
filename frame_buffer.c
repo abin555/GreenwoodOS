@@ -94,6 +94,12 @@ void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int 
     }
 }
 
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale){
+    for(int index = 0; index < len; index++){
+        printChar_Scaled(x+index*(4*scale), y, Buffer[index+start], scale);
+    }
+}
+
 void fb_move_cursor(unsigned int pos){
     fb_cursor = pos;
 }

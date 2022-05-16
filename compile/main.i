@@ -593,6 +593,7 @@ void fb_clear(unsigned int color);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale);
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
@@ -839,7 +840,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
-unsigned short getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
 
 void pci_init();
 void pci_probe();
@@ -944,6 +945,20 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   mem_init(0x10000000);
   pci_init();
+
+  for(unsigned int dev = 0; dev < devs; dev++){
+    for(int offset = 0; offset < 75; offset++){
+      unsigned int data = pci_read_word(
+        pci_devices[dev]->device_id->bus,
+        pci_devices[dev]->device_id->slot,
+        pci_devices[dev]->device_id->func,
+        offset
+      );
+      decodeHex(STR_edit, data, 16, 0);
+      fb_write_xy(STR_edit, 16/4, 1, dev*5, (devs+1)+offset);
+    }
+  }
+
   activate_Drivers();
 
   terminal_init();
