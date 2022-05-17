@@ -24,7 +24,7 @@ framebuffer_tag_start:
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
 	DD 1920
-	DD 1048
+	DD 1040
 	DD 32
 framebuffer_tag_end:
 align 8

@@ -35,6 +35,7 @@ os.iso: kernel.elf
 	grub-mkrescue -o GreenwoodOS.img iso
 run: os.iso transfer-compiled
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio \
+	-vga std \
 	-drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img   \
 	-usb \
 	-device usb-ehci,id=ehci
