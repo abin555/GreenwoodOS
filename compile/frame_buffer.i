@@ -434,6 +434,16 @@ extern unsigned char inb(unsigned short pos);
 extern void outportl(uint16_t port, uint32_t value);
 extern uint32_t inportl(uint16_t port);
 
+static inline void outdw(uint16_t port, uint32_t data) {
+ __asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
+}
+
+static inline uint32_t indw(uint16_t port) {
+ uint32_t data;
+ __asm__ volatile("in eax,dx" : "=a"(data) : "d"(port));
+ return data;
+}
+
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
 

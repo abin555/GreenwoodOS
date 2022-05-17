@@ -80,6 +80,16 @@ extern unsigned char inb(unsigned short pos);
 extern void outportl(uint16_t port, uint32_t value);
 extern uint32_t inportl(uint16_t port);
 
+static inline void outdw(uint16_t port, uint32_t data) {
+ __asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
+}
+
+static inline uint32_t indw(uint16_t port) {
+ uint32_t data;
+ __asm__ volatile("in eax,dx" : "=a"(data) : "d"(port));
+ return data;
+}
+
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
 
@@ -475,6 +485,7 @@ void fb_clear(unsigned int color);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale);
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
@@ -634,15 +645,22 @@ void activate_Drivers();
 struct __pci_driver;
 struct __pci_device_id;
 struct __pci_device;
+struct __pci_header0;
 
 typedef struct __pci_device{
- unsigned int vendor;
- unsigned int device;
- unsigned int func;
+ unsigned short vendor;
+ unsigned short device;
+ unsigned short func;
  unsigned short Class;
+ unsigned short progIF;
  struct __pci_driver *driver;
  struct __pci_device_id *device_id;
 } pci_device;
+
+typedef struct __pci_header0{
+ unsigned int BAR[5];
+ unsigned int CIS_P;
+} pci_header0;
 
 typedef struct __pci_device_id{
  unsigned int bus;
@@ -651,10 +669,10 @@ typedef struct __pci_device_id{
 } pci_device_id;
 
 typedef struct __pci_driver {
- pci_device_id *table;
  char *name;
- pci_device *init_one;
  int driverID;
+ pci_device *init_one;
+ pci_header0 header;
  void (*init_driver)(int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -664,13 +682,17 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
+void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
 char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+unsigned int getDeviceBar(unsigned short bus, unsigned short device, unsigned short function, unsigned short bar);
 
 void pci_init();
 void pci_probe();
@@ -682,40 +704,56 @@ unsigned int devs = 0;
 pci_driver **pci_drivers = 0;
 unsigned int drivs = 0;
 
+void pci_load_header0(pci_driver *pdrive, pci_header0 *header){
+    for(int bar = 0; bar <= 5; bar++){
+        header->BAR[bar] = getDeviceBar(
+            pdrive->init_one->device_id->bus,
+            pdrive->init_one->device_id->slot,
+            pdrive->init_one->device_id->func,
+            bar
+        );
+    }
+}
 
 void add_pci_device(pci_device *pdev)
 {
  pci_devices[devs] = pdev;
     pci_driver *pdrive;
+    pci_header0 *pheader0;
     switch(pdev->Class){
         case 0x0C03:;
 
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pdrive->table = pdev->device_id;
+            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = usb_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
+            pdrive->header = *pheader0;
 
             pci_drivers[drivs] = pdrive;
+            pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
-        case 0x0101:;
+        case 0x0102:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pdrive->table = pdev->device_id;
+            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
             pdrive->init_driver = ide_driver_install;
+            pdrive->header = *pheader0;
 
             pci_drivers[drivs] = pdrive;
+            pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
     }
  devs ++;
  return;
 }
+
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset)
 {
@@ -729,6 +767,18 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
     outportl (0xCF8, address);
     tmp = (unsigned short)((inportl (0xCFC) >> ((offset & 2) * 8)) & 0xffff);
     return (tmp);
+}
+# 83 "DRIVERS/PCI.c"
+unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset){
+    outdw(
+        0xcf8,
+        bus << 16 |
+        slot << 11 |
+        func << 8 |
+        (offset & 0xfc) |
+        1 << 31
+    );
+ return indw(0xcfc);
 }
 
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function)
@@ -752,6 +802,21 @@ char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short f
     return r0;
 }
 
+unsigned int getDeviceBar(unsigned short bus, unsigned short device, unsigned short function, unsigned short bar){
+    unsigned int bar_val = pci_read_dword(bus, device, function, 0x10 + bar*4);
+
+ if (bar_val & 1) {
+  return bar_val & 0xfffffffc;
+ } else {
+  if ((bar_val & 6) == 4) {
+   if (pci_read_dword(bus, device, function, 0x10 + bar * 4 + 4) != 0) {
+    return 0;
+   }
+  }
+  return bar_val & 0xfffffff0;
+ }
+}
+
 void pci_probe()
 {
     int DebugLine = 0;
@@ -765,6 +830,7 @@ void pci_probe()
                     if(vendor == 0xffff) continue;
                     unsigned short device = getDeviceID(bus, slot, function);
                     unsigned short Class = getDeviceClass(bus, slot, function);
+                    unsigned short progIF = getDeviceProgIF(bus,slot,function);
 
                     fb_write_xy("vendor:", 7, 0, 0, DebugLine);
                     decodeHex(STR_edit, vendor, 16, 0);
@@ -788,6 +854,7 @@ void pci_probe()
                     pdev->device = device;
                     pdev->func = function;
                     pdev->Class = Class;
+                    pdev->progIF = progIF;
                     pdev->driver = 0;
                     pdev->device_id = pdev_id;
                     add_pci_device(pdev);

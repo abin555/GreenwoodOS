@@ -438,6 +438,16 @@ extern unsigned char inb(unsigned short pos);
 extern void outportl(uint16_t port, uint32_t value);
 extern uint32_t inportl(uint16_t port);
 
+static inline void outdw(uint16_t port, uint32_t data) {
+ __asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
+}
+
+static inline uint32_t indw(uint16_t port) {
+ uint32_t data;
+ __asm__ volatile("in eax,dx" : "=a"(data) : "d"(port));
+ return data;
+}
+
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
 
@@ -591,6 +601,7 @@ void fb_clear(unsigned int color);
 int fb_write(char *buf, unsigned int len);
 int fb_write_start(char *buf, unsigned int len, unsigned int start);
 void fb_write_xy(char *Buffer, int len, int start, unsigned int x, unsigned int y);
+void fb_write_xy_scaled(char *Buffer, int len, int start, unsigned int x, unsigned int y, unsigned int scale);
 
 void fb_move_cursor(unsigned int pos);
 void fb_move_cursor_xy(unsigned int x, unsigned int y);
@@ -625,15 +636,22 @@ void activate_Drivers();
 struct __pci_driver;
 struct __pci_device_id;
 struct __pci_device;
+struct __pci_header0;
 
 typedef struct __pci_device{
- unsigned int vendor;
- unsigned int device;
- unsigned int func;
+ unsigned short vendor;
+ unsigned short device;
+ unsigned short func;
  unsigned short Class;
+ unsigned short progIF;
  struct __pci_driver *driver;
  struct __pci_device_id *device_id;
 } pci_device;
+
+typedef struct __pci_header0{
+ unsigned int BAR[5];
+ unsigned int CIS_P;
+} pci_header0;
 
 typedef struct __pci_device_id{
  unsigned int bus;
@@ -642,10 +660,10 @@ typedef struct __pci_device_id{
 } pci_device_id;
 
 typedef struct __pci_driver {
- pci_device_id *table;
  char *name;
- pci_device *init_one;
  int driverID;
+ pci_device *init_one;
+ pci_header0 header;
  void (*init_driver)(int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -655,13 +673,17 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
+void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
 char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+unsigned int getDeviceBar(unsigned short bus, unsigned short device, unsigned short function, unsigned short bar);
 
 void pci_init();
 void pci_probe();
@@ -677,32 +699,41 @@ void usb_exit_driver();
 char usb_driverName[] = "Universal Serial Bus Driver";
 
 void usb_init_driver(int driverID){
-    fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 40, driverID);
+    fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 30, fb_terminal_h-driverID-1);
     unsigned short progIF = getDeviceProgIF(
-        pci_drivers[driverID]->table->bus,
-        pci_drivers[driverID]->table->slot,
-        pci_drivers[driverID]->table->func
+        pci_drivers[driverID]->init_one->device_id->bus,
+        pci_drivers[driverID]->init_one->device_id->slot,
+        pci_drivers[driverID]->init_one->device_id->func
     );
     switch(progIF){
         case 0x0:
-            fb_write_xy("UHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("UHCI", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
         case 0x10:
-            fb_write_xy("OHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("OHCI", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
         case 0x20:
-            fb_write_xy("EHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("EHCI", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
         case 0x30:
-            fb_write_xy("XHCI", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("XHCI", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
         case 0x80:
-            fb_write_xy("UNKN", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("UNKN", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
         case 0xFE:
-            fb_write_xy("USBD", 4, 0, 40+sizeof(usb_driverName)+1,driverID);
+            fb_write_xy("USBD", 4, 0, 30+sizeof(usb_driverName)+1,fb_terminal_h-driverID-1);
             break;
     }
+
+    unsigned int dataBar = getDeviceBar(
+        pci_drivers[driverID]->init_one->device_id->bus,
+        pci_drivers[driverID]->init_one->device_id->slot,
+        pci_drivers[driverID]->init_one->device_id->func,
+        4
+    );
+    decodeHex(STR_edit, dataBar, 32, 50);
+    fb_write_xy(STR_edit, 8, 51, fb_terminal_w-9, fb_terminal_h-driverID-2);
 }
 void usb_exit_driver(){
 

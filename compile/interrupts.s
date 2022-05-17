@@ -48,7 +48,7 @@ SYS_MODE:
 	.globl	interrupts_init_descriptor
 	.type	interrupts_init_descriptor, @function
 interrupts_init_descriptor:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -88,12 +88,12 @@ interrupts_init_descriptor:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	interrupts_init_descriptor, .-interrupts_init_descriptor
 	.globl	interrupt_install_idt
 	.type	interrupt_install_idt, @function
 interrupt_install_idt:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -145,12 +145,12 @@ interrupt_install_idt:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	interrupt_install_idt, .-interrupt_install_idt
 	.globl	KERNEL_INTERRUPT
 	.type	KERNEL_INTERRUPT, @function
 KERNEL_INTERRUPT:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -197,12 +197,12 @@ KERNEL_INTERRUPT:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	KERNEL_INTERRUPT, .-KERNEL_INTERRUPT
 	.globl	SYS_CALL
 	.type	SYS_CALL, @function
 SYS_CALL:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -302,12 +302,12 @@ SYS_CALL:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	SYS_CALL, .-SYS_CALL
 	.globl	interrupt_handler
 	.type	interrupt_handler, @function
 interrupt_handler:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -362,30 +362,30 @@ interrupt_handler:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	interrupt_handler, .-interrupt_handler
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

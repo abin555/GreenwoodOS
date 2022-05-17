@@ -28,7 +28,7 @@
 	.globl	pong
 	.type	pong, @function
 pong:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -306,19 +306,19 @@ pong:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	pong, .-pong
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

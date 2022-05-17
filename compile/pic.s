@@ -5,7 +5,7 @@
 	.globl	pic_acknowledge
 	.type	pic_acknowledge, @function
 pic_acknowledge:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -49,12 +49,12 @@ pic_acknowledge:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	pic_acknowledge, .-pic_acknowledge
 	.globl	pic_remap
 	.type	pic_remap, @function
 pic_remap:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -134,30 +134,30 @@ pic_remap:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	pic_remap, .-pic_remap
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

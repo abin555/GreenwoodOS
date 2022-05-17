@@ -41,7 +41,7 @@ ide_driverName:
 	.globl	ide_driver_install
 	.type	ide_driver_install, @function
 ide_driver_install:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -51,14 +51,18 @@ ide_driver_install:
 	.cfi_def_cfa_register 5
 	push	esi
 	push	ebx
+	sub	esp, 16
 	.cfi_offset 6, -12
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	40
+	push	30
 	push	0
 	push	22
 	lea	eax, ide_driverName@GOTOFF[ebx]
@@ -71,7 +75,8 @@ ide_driver_install:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR 8[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -80,7 +85,8 @@ ide_driver_install:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -89,7 +95,8 @@ ide_driver_install:
 	sal	esi, 2
 	add	eax, esi
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR [eax]
 	movzx	eax, ax
 	sub	esp, 4
@@ -98,7 +105,7 @@ ide_driver_install:
 	push	eax
 	call	getDeviceProgIF@PLT
 	add	esp, 16
-	movzx	eax, ax
+	movsx	eax, al
 	push	0
 	push	16
 	push	eax
@@ -106,12 +113,47 @@ ide_driver_install:
 	push	eax
 	call	decodeHex@PLT
 	add	esp, 16
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	63
+	push	53
 	push	1
 	push	4
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
+	mov	DWORD PTR -12[ebp], eax
+	push	0
+	push	32
+	push	DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
+	mov	edx, eax
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 9
+	sub	esp, 12
+	push	edx
+	push	eax
+	push	1
+	push	8
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
@@ -127,19 +169,19 @@ ide_driver_install:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	ide_driver_install, .-ide_driver_install
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -46,7 +46,7 @@
 	.globl	kmain_loop
 	.type	kmain_loop, @function
 kmain_loop:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -63,12 +63,12 @@ kmain_loop:
 	call	terminal_handler@PLT
 	jmp	.L2
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	kmain_loop, .-kmain_loop
 	.globl	kmain
 	.type	kmain, @function
 kmain:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -76,13 +76,9 @@ kmain:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	push	edi
-	push	esi
 	push	ebx
-	sub	esp, 44
-	.cfi_offset 7, -12
-	.cfi_offset 6, -16
-	.cfi_offset 3, -20
+	sub	esp, 36
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
 	cmp	DWORD PTR 8[ebp], 920085129
@@ -92,27 +88,27 @@ kmain:
 .L4:
 	mov	eax, DWORD PTR 12[ebp]
 	add	eax, 8
-	mov	DWORD PTR -28[ebp], eax
+	mov	DWORD PTR -12[ebp], eax
 	jmp	.L6
 .L8:
-	mov	eax, DWORD PTR -28[ebp]
+	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR [eax]
 	cmp	eax, 8
 	jne	.L7
-	mov	eax, DWORD PTR -28[ebp]
-	mov	DWORD PTR -44[ebp], eax
+	mov	eax, DWORD PTR -12[ebp]
+	mov	DWORD PTR -28[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -44[ebp]
+	push	DWORD PTR -28[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L7:
-	mov	eax, DWORD PTR -28[ebp]
+	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR 4[eax]
 	add	eax, 7
 	and	eax, -8
-	add	DWORD PTR -28[ebp], eax
+	add	DWORD PTR -12[ebp], eax
 .L6:
-	mov	eax, DWORD PTR -28[ebp]
+	mov	eax, DWORD PTR -12[ebp]
 	mov	eax, DWORD PTR [eax]
 	test	eax, eax
 	jne	.L8
@@ -131,114 +127,81 @@ kmain:
 	call	mem_init@PLT
 	add	esp, 16
 	call	pci_init@PLT
-	mov	DWORD PTR -32[ebp], 0
+	mov	DWORD PTR -16[ebp], 0
 	jmp	.L9
 .L12:
-	mov	DWORD PTR -36[ebp], 0
+	mov	DWORD PTR -20[ebp], 0
 	jmp	.L10
 .L11:
-	mov	eax, DWORD PTR -36[ebp]
-	movzx	esi, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR -32[ebp]
+	mov	edx, DWORD PTR -16[ebp]
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	movzx	ecx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR -32[ebp]
-	sal	edx, 2
-	add	eax, edx
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 4[eax]
-	movzx	edx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edi, DWORD PTR -32[ebp]
-	sal	edi, 2
-	add	eax, edi
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
-	movzx	eax, ax
-	push	esi
-	push	ecx
-	push	edx
-	push	eax
-	call	pci_read_word@PLT
-	add	esp, 16
-	movzx	eax, ax
-	mov	DWORD PTR -40[ebp], eax
+	mov	edx, DWORD PTR -20[ebp]
+	mov	eax, DWORD PTR 12[eax+edx*4]
+	mov	DWORD PTR -24[ebp], eax
 	push	0
-	push	16
-	push	DWORD PTR -40[ebp]
+	push	32
+	push	DWORD PTR -24[ebp]
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	decodeHex@PLT
 	add	esp, 16
 	mov	eax, DWORD PTR devs@GOT[ebx]
 	mov	edx, DWORD PTR [eax]
-	mov	eax, DWORD PTR -36[ebp]
+	mov	eax, DWORD PTR -20[ebp]
 	add	eax, edx
 	lea	ecx, 1[eax]
-	mov	edx, DWORD PTR -32[ebp]
+	mov	edx, DWORD PTR -16[ebp]
 	mov	eax, edx
-	sal	eax, 2
+	sal	eax, 3
 	add	eax, edx
 	sub	esp, 12
 	push	ecx
 	push	eax
 	push	1
-	push	4
+	push	8
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	add	DWORD PTR -36[ebp], 1
+	add	DWORD PTR -20[ebp], 1
 .L10:
-	cmp	DWORD PTR -36[ebp], 74
+	cmp	DWORD PTR -20[ebp], 4
 	jle	.L11
-	add	DWORD PTR -32[ebp], 1
+	add	DWORD PTR -16[ebp], 1
 .L9:
 	mov	eax, DWORD PTR drivs@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	cmp	DWORD PTR -32[ebp], eax
+	cmp	DWORD PTR -16[ebp], eax
 	jb	.L12
 	call	activate_Drivers@PLT
 	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0
 .L5:
-	lea	esp, -12[ebp]
-	pop	ebx
-	.cfi_restore 3
-	pop	esi
-	.cfi_restore 6
-	pop	edi
-	.cfi_restore 7
-	pop	ebp
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	kmain, .-kmain
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

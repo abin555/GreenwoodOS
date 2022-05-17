@@ -28,7 +28,7 @@
 	.globl	gfx_line
 	.type	gfx_line, @function
 gfx_line:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -96,12 +96,12 @@ gfx_line:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	gfx_line, .-gfx_line
 	.globl	gfx_hline
 	.type	gfx_hline, @function
 gfx_hline:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -138,12 +138,12 @@ gfx_hline:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	gfx_hline, .-gfx_hline
 	.globl	gfx_vline
 	.type	gfx_vline, @function
 gfx_vline:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -180,19 +180,19 @@ gfx_vline:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	gfx_vline, .-gfx_vline
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

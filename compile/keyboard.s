@@ -54,7 +54,7 @@ _keyboard_disable:
 	.globl	keyboard_ctrl_read_status
 	.type	keyboard_ctrl_read_status, @function
 keyboard_ctrl_read_status:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -79,12 +79,12 @@ keyboard_ctrl_read_status:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	keyboard_ctrl_read_status, .-keyboard_ctrl_read_status
 	.globl	keyboard_ctrl_send_cmd
 	.type	keyboard_ctrl_send_cmd, @function
 keyboard_ctrl_send_cmd:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -123,12 +123,12 @@ keyboard_ctrl_send_cmd:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	keyboard_ctrl_send_cmd, .-keyboard_ctrl_send_cmd
 	.globl	keyboard_enc_read_buf
 	.type	keyboard_enc_read_buf, @function
 keyboard_enc_read_buf:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -153,12 +153,12 @@ keyboard_enc_read_buf:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	keyboard_enc_read_buf, .-keyboard_enc_read_buf
 	.globl	keyboard_enc_send_cmd
 	.type	keyboard_enc_send_cmd, @function
 keyboard_enc_send_cmd:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -197,12 +197,12 @@ keyboard_enc_send_cmd:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	keyboard_enc_send_cmd, .-keyboard_enc_send_cmd
 	.globl	keyboard_set_leds
 	.type	keyboard_set_leds, @function
 keyboard_set_leds:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -265,12 +265,12 @@ keyboard_set_leds:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	keyboard_set_leds, .-keyboard_set_leds
 	.globl	keyboard_self_test
 	.type	keyboard_self_test, @function
 keyboard_self_test:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -302,12 +302,12 @@ keyboard_self_test:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	keyboard_self_test, .-keyboard_self_test
 	.globl	keyboard_disable
 	.type	keyboard_disable, @function
 keyboard_disable:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -333,12 +333,12 @@ keyboard_disable:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	keyboard_disable, .-keyboard_disable
 	.globl	keyboard_enable
 	.type	keyboard_enable, @function
 keyboard_enable:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -364,12 +364,12 @@ keyboard_enable:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	keyboard_enable, .-keyboard_enable
 	.globl	keyboard_keyread
 	.type	keyboard_keyread, @function
 keyboard_keyread:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -400,12 +400,12 @@ keyboard_keyread:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.size	keyboard_keyread, .-keyboard_keyread
 	.globl	keyboard_flag_handler
 	.type	keyboard_flag_handler, @function
 keyboard_flag_handler:
-.LFB9:
+.LFB11:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -489,12 +489,12 @@ keyboard_flag_handler:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE11:
 	.size	keyboard_flag_handler, .-keyboard_flag_handler
 	.globl	convertascii
 	.type	convertascii, @function
 convertascii:
-.LFB10:
+.LFB12:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -532,12 +532,12 @@ convertascii:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE12:
 	.size	convertascii, .-convertascii
 	.globl	keyboard_handle_interrupt
 	.type	keyboard_handle_interrupt, @function
 keyboard_handle_interrupt:
-.LFB11:
+.LFB13:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -623,41 +623,41 @@ keyboard_handle_interrupt:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE13:
 	.size	keyboard_handle_interrupt, .-keyboard_handle_interrupt
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB12:
+.LFB14:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE12:
+.LFE14:
 	.section	.text.__x86.get_pc_thunk.dx,"axG",@progbits,__x86.get_pc_thunk.dx,comdat
 	.globl	__x86.get_pc_thunk.dx
 	.hidden	__x86.get_pc_thunk.dx
 	.type	__x86.get_pc_thunk.dx, @function
 __x86.get_pc_thunk.dx:
-.LFB13:
+.LFB15:
 	.cfi_startproc
 	mov	edx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE13:
+.LFE15:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB14:
+.LFB16:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE14:
+.LFE16:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

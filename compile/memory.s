@@ -51,7 +51,7 @@ last_alloc:
 	.globl	memcpy
 	.type	memcpy, @function
 memcpy:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -87,12 +87,12 @@ memcpy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	memcpy, .-memcpy
 	.globl	memset
 	.type	memset, @function
 memset:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -124,12 +124,12 @@ memset:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	memset, .-memset
 	.globl	mem_init
 	.type	mem_init, @function
 mem_init:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -158,12 +158,12 @@ mem_init:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	mem_init, .-mem_init
 	.globl	malloc
 	.type	malloc, @function
 malloc:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -321,12 +321,12 @@ malloc:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	malloc, .-malloc
 	.globl	free
 	.type	free, @function
 free:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -366,12 +366,12 @@ free:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	free, .-free
 	.globl	mgetSize
 	.type	mgetSize, @function
 mgetSize:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -392,7 +392,7 @@ mgetSize:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	mgetSize, .-mgetSize
 	.section	.rodata
 	.align 4
@@ -405,7 +405,7 @@ mgetSize:
 	.globl	printHeap
 	.type	printHeap, @function
 printHeap:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -553,30 +553,30 @@ printHeap:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	printHeap, .-printHeap
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -54,7 +54,7 @@ usb_driverName:
 	.globl	usb_init_driver
 	.type	usb_init_driver, @function
 usb_init_driver:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -69,10 +69,13 @@ usb_init_driver:
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	40
+	push	30
 	push	0
 	push	27
 	lea	eax, usb_driverName@GOTOFF[ebx]
@@ -85,7 +88,8 @@ usb_init_driver:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR 8[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -94,7 +98,8 @@ usb_init_driver:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
@@ -103,7 +108,8 @@ usb_init_driver:
 	sal	esi, 2
 	add	eax, esi
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
 	mov	eax, DWORD PTR [eax]
 	movzx	eax, ax
 	sub	esp, 4
@@ -118,29 +124,32 @@ usb_init_driver:
 	cmp	eax, 254
 	je	.L2
 	cmp	eax, 254
-	jg	.L9
+	jg	.L3
 	cmp	eax, 128
 	je	.L4
 	cmp	eax, 128
-	jg	.L9
+	jg	.L3
 	cmp	eax, 48
 	je	.L5
 	cmp	eax, 48
-	jg	.L9
+	jg	.L3
 	cmp	eax, 32
 	je	.L6
 	cmp	eax, 32
-	jg	.L9
+	jg	.L3
 	test	eax, eax
 	je	.L7
 	cmp	eax, 16
 	je	.L8
-	jmp	.L9
+	jmp	.L3
 .L7:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC0@GOTOFF[ebx]
@@ -149,10 +158,13 @@ usb_init_driver:
 	add	esp, 32
 	jmp	.L3
 .L8:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC1@GOTOFF[ebx]
@@ -161,10 +173,13 @@ usb_init_driver:
 	add	esp, 32
 	jmp	.L3
 .L6:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC2@GOTOFF[ebx]
@@ -173,10 +188,13 @@ usb_init_driver:
 	add	esp, 32
 	jmp	.L3
 .L5:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC3@GOTOFF[ebx]
@@ -185,10 +203,13 @@ usb_init_driver:
 	add	esp, 32
 	jmp	.L3
 .L4:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC4@GOTOFF[ebx]
@@ -197,10 +218,13 @@ usb_init_driver:
 	add	esp, 32
 	jmp	.L3
 .L2:
-	mov	eax, DWORD PTR 8[ebp]
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 1
 	sub	esp, 12
 	push	eax
-	push	68
+	push	58
 	push	0
 	push	4
 	lea	eax, .LC5@GOTOFF[ebx]
@@ -209,7 +233,67 @@ usb_init_driver:
 	add	esp, 32
 	nop
 .L3:
-.L9:
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR 8[eax]
+	movzx	ecx, ax
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR 8[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR 4[eax]
+	movzx	edx, ax
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	esi, DWORD PTR 8[ebp]
+	sal	esi, 2
+	add	eax, esi
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR [eax]
+	movzx	eax, ax
+	push	4
+	push	ecx
+	push	edx
+	push	eax
+	call	getDeviceBar@PLT
+	add	esp, 16
+	mov	DWORD PTR -16[ebp], eax
+	push	50
+	push	32
+	push	DWORD PTR -16[ebp]
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, DWORD PTR 8[ebp]
+	sub	eax, 2
+	mov	edx, eax
+	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	sub	eax, 9
+	sub	esp, 12
+	push	edx
+	push	eax
+	push	51
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx
@@ -221,12 +305,12 @@ usb_init_driver:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	usb_init_driver, .-usb_init_driver
 	.globl	usb_exit_driver
 	.type	usb_exit_driver, @function
 usb_exit_driver:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -242,30 +326,30 @@ usb_exit_driver:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	usb_exit_driver, .-usb_exit_driver
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

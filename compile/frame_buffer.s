@@ -506,7 +506,7 @@ fb_cursor:
 	.globl	fb_setPixel
 	.type	fb_setPixel, @function
 fb_setPixel:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -545,12 +545,12 @@ fb_setPixel:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	fb_setPixel, .-fb_setPixel
 	.globl	init_fb
 	.type	init_fb, @function
 init_fb:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -596,12 +596,12 @@ init_fb:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	init_fb, .-init_fb
 	.globl	fb_write_cell
 	.type	fb_write_cell, @function
 fb_write_cell:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -696,12 +696,12 @@ fb_write_cell:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	fb_write_cell, .-fb_write_cell
 	.globl	printChar
 	.type	printChar, @function
 printChar:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -783,12 +783,12 @@ printChar:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	printChar, .-printChar
 	.globl	printChar_Scaled
 	.type	printChar_Scaled, @function
 printChar_Scaled:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -873,12 +873,12 @@ printChar_Scaled:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	printChar_Scaled, .-printChar_Scaled
 	.globl	pixelScaled
 	.type	pixelScaled, @function
 pixelScaled:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -933,12 +933,12 @@ pixelScaled:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	pixelScaled, .-pixelScaled
 	.globl	fb_set_color
 	.type	fb_set_color, @function
 fb_set_color:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -960,12 +960,12 @@ fb_set_color:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	fb_set_color, .-fb_set_color
 	.globl	fb_clear
 	.type	fb_clear, @function
 fb_clear:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1002,12 +1002,12 @@ fb_clear:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	fb_clear, .-fb_clear
 	.globl	fb_write
 	.type	fb_write, @function
 fb_write:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1064,12 +1064,12 @@ fb_write:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.size	fb_write, .-fb_write
 	.globl	fb_write_start
 	.type	fb_write_start, @function
 fb_write_start:
-.LFB9:
+.LFB11:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1128,12 +1128,12 @@ fb_write_start:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE11:
 	.size	fb_write_start, .-fb_write_start
 	.globl	fb_write_xy
 	.type	fb_write_xy, @function
 fb_write_xy:
-.LFB10:
+.LFB12:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1198,12 +1198,12 @@ fb_write_xy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE12:
 	.size	fb_write_xy, .-fb_write_xy
 	.globl	fb_write_xy_scaled
 	.type	fb_write_xy_scaled, @function
 fb_write_xy_scaled:
-.LFB11:
+.LFB13:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1253,12 +1253,12 @@ fb_write_xy_scaled:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE13:
 	.size	fb_write_xy_scaled, .-fb_write_xy_scaled
 	.globl	fb_move_cursor
 	.type	fb_move_cursor, @function
 fb_move_cursor:
-.LFB12:
+.LFB14:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1276,12 +1276,12 @@ fb_move_cursor:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE12:
+.LFE14:
 	.size	fb_move_cursor, .-fb_move_cursor
 	.globl	fb_move_cursor_xy
 	.type	fb_move_cursor_xy, @function
 fb_move_cursor_xy:
-.LFB13:
+.LFB15:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1304,12 +1304,12 @@ fb_move_cursor_xy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE13:
+.LFE15:
 	.size	fb_move_cursor_xy, .-fb_move_cursor_xy
 	.globl	fb_copyBuffer
 	.type	fb_copyBuffer, @function
 fb_copyBuffer:
-.LFB14:
+.LFB16:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1353,12 +1353,12 @@ fb_copyBuffer:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE14:
+.LFE16:
 	.size	fb_copyBuffer, .-fb_copyBuffer
 	.globl	fb_clearBackBuffer
 	.type	fb_clearBackBuffer, @function
 fb_clearBackBuffer:
-.LFB15:
+.LFB17:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1397,30 +1397,30 @@ fb_clearBackBuffer:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE15:
+.LFE17:
 	.size	fb_clearBackBuffer, .-fb_clearBackBuffer
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB16:
+.LFB18:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE16:
+.LFE18:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB17:
+.LFB19:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE17:
+.LFE19:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

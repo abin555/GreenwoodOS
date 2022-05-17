@@ -17,7 +17,7 @@
 	.globl	STR_Compare
 	.type	STR_Compare, @function
 STR_Compare:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -56,12 +56,12 @@ STR_Compare:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	STR_Compare, .-STR_Compare
 	.globl	STR_INSERT
 	.type	STR_INSERT, @function
 STR_INSERT:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -98,12 +98,12 @@ STR_INSERT:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	STR_INSERT, .-STR_INSERT
 	.globl	decodeData
 	.type	decodeData, @function
 decodeData:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -158,12 +158,12 @@ decodeData:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	decodeData, .-decodeData
 	.globl	quadtoHex
 	.type	quadtoHex, @function
 quadtoHex:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -260,12 +260,12 @@ quadtoHex:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	quadtoHex, .-quadtoHex
 	.globl	hexToQuad
 	.type	hexToQuad, @function
 hexToQuad:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -402,12 +402,12 @@ hexToQuad:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	hexToQuad, .-hexToQuad
 	.globl	decodeHex
 	.type	decodeHex, @function
 decodeHex:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -466,12 +466,12 @@ decodeHex:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	decodeHex, .-decodeHex
 	.globl	encodeHex
 	.type	encodeHex, @function
 encodeHex:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -519,12 +519,12 @@ encodeHex:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	encodeHex, .-encodeHex
 	.globl	strcpy
 	.type	strcpy, @function
 strcpy:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -558,19 +558,19 @@ strcpy:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	strcpy, .-strcpy
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

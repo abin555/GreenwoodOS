@@ -24,3 +24,4 @@ uint32_t inportl(uint16_t portid)
 	asm volatile("in eax, dx":"=a"(ret):"d"(portid));
 	return ret;
 }
+

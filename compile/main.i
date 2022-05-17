@@ -75,6 +75,16 @@ extern unsigned char inb(unsigned short pos);
 extern void outportl(uint16_t port, uint32_t value);
 extern uint32_t inportl(uint16_t port);
 
+static inline void outdw(uint16_t port, uint32_t data) {
+ __asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
+}
+
+static inline uint32_t indw(uint16_t port) {
+ uint32_t data;
+ __asm__ volatile("in eax,dx" : "=a"(data) : "d"(port));
+ return data;
+}
+
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
 
@@ -804,15 +814,22 @@ void activate_Drivers();
 struct __pci_driver;
 struct __pci_device_id;
 struct __pci_device;
+struct __pci_header0;
 
 typedef struct __pci_device{
- unsigned int vendor;
- unsigned int device;
- unsigned int func;
+ unsigned short vendor;
+ unsigned short device;
+ unsigned short func;
  unsigned short Class;
+ unsigned short progIF;
  struct __pci_driver *driver;
  struct __pci_device_id *device_id;
 } pci_device;
+
+typedef struct __pci_header0{
+ unsigned int BAR[5];
+ unsigned int CIS_P;
+} pci_header0;
 
 typedef struct __pci_device_id{
  unsigned int bus;
@@ -821,10 +838,10 @@ typedef struct __pci_device_id{
 } pci_device_id;
 
 typedef struct __pci_driver {
- pci_device_id *table;
  char *name;
- pci_device *init_one;
  int driverID;
+ pci_device *init_one;
+ pci_header0 header;
  void (*init_driver)(int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -834,13 +851,17 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
+void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
+
 unsigned short getVendorID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceID(unsigned short bus, unsigned short device, unsigned short function);
 unsigned short getDeviceClass(unsigned short bus, unsigned short device, unsigned short function);
 char getDeviceProgIF(unsigned short bus, unsigned short device, unsigned short function);
+unsigned int getDeviceBar(unsigned short bus, unsigned short device, unsigned short function, unsigned short bar);
 
 void pci_init();
 void pci_probe();
@@ -893,15 +914,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   pci_init();
 
   for(unsigned int dev = 0; dev < drivs; dev++){
-    for(int offset = 0; offset < 75; offset++){
-      unsigned int data = pci_read_word(
-        pci_drivers[dev]->table->bus,
-        pci_drivers[dev]->table->slot,
-        pci_drivers[dev]->table->func,
-        offset
-      );
-      decodeHex(STR_edit, data, 16, 0);
-      fb_write_xy(STR_edit, 16/4, 1, dev*5, (devs+1)+offset);
+    for(int offset = 0; offset < 5; offset++){
+      unsigned int data = pci_drivers[dev]->header.BAR[offset];
+      decodeHex(STR_edit, data, 32, 0);
+      fb_write_xy(STR_edit, 32/4, 1, dev*9, (devs+1)+offset);
     }
   }
 

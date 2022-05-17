@@ -34,7 +34,7 @@
 	.globl	activate_Drivers
 	.type	activate_Drivers, @function
 activate_Drivers:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -56,14 +56,14 @@ activate_Drivers:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR 36[eax]
 	mov	edx, DWORD PTR pci_drivers@GOT[ebx]
 	mov	edx, DWORD PTR [edx]
 	movzx	ecx, WORD PTR -10[ebp]
 	sal	ecx, 2
 	add	edx, ecx
 	mov	edx, DWORD PTR [edx]
-	mov	edx, DWORD PTR 12[edx]
+	mov	edx, DWORD PTR 4[edx]
 	sub	esp, 12
 	push	edx
 	call	eax
@@ -86,19 +86,19 @@ activate_Drivers:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	activate_Drivers, .-activate_Drivers
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

@@ -35,7 +35,7 @@
 	.globl	draw_regions
 	.type	draw_regions, @function
 draw_regions:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -93,12 +93,12 @@ draw_regions:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	draw_regions, .-draw_regions
 	.globl	draw_axis
 	.type	draw_axis, @function
 draw_axis:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -278,12 +278,12 @@ draw_axis:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	draw_axis, .-draw_axis
 	.globl	plot_point
 	.type	plot_point, @function
 plot_point:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -440,12 +440,12 @@ plot_point:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	plot_point, .-plot_point
 	.globl	draw_graph
 	.type	draw_graph, @function
 draw_graph:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -528,12 +528,12 @@ draw_graph:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	draw_graph, .-draw_graph
 	.globl	clear_region
 	.type	clear_region, @function
 clear_region:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -581,12 +581,12 @@ clear_region:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	clear_region, .-clear_region
 	.globl	grapher_key_handler
 	.type	grapher_key_handler, @function
 grapher_key_handler:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -609,12 +609,12 @@ grapher_key_handler:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	grapher_key_handler, .-grapher_key_handler
 	.globl	grapher_entry
 	.type	grapher_entry, @function
 grapher_entry:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -720,12 +720,12 @@ grapher_entry:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	grapher_entry, .-grapher_entry
 	.globl	sqrt
 	.type	sqrt, @function
 sqrt:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -767,12 +767,12 @@ sqrt:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	sqrt, .-sqrt
 	.globl	grapher_draw_formulas
 	.type	grapher_draw_formulas, @function
 grapher_draw_formulas:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -865,7 +865,7 @@ grapher_draw_formulas:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.size	grapher_draw_formulas, .-grapher_draw_formulas
 	.section	.rodata
 	.align 4
@@ -889,34 +889,34 @@ grapher_draw_formulas:
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB9:
+.LFB11:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE11:
 	.section	.text.__x86.get_pc_thunk.cx,"axG",@progbits,__x86.get_pc_thunk.cx,comdat
 	.globl	__x86.get_pc_thunk.cx
 	.hidden	__x86.get_pc_thunk.cx
 	.type	__x86.get_pc_thunk.cx, @function
 __x86.get_pc_thunk.cx:
-.LFB10:
+.LFB12:
 	.cfi_startproc
 	mov	ecx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE12:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB11:
+.LFB13:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE11:
+.LFE13:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"
