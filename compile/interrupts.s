@@ -323,22 +323,26 @@ interrupt_handler:
 	cmp	DWORD PTR 40[ebp], 128
 	je	.L22
 	cmp	DWORD PTR 40[ebp], 128
-	ja	.L27
-	cmp	DWORD PTR 40[ebp], 33
+	ja	.L28
+	cmp	DWORD PTR 40[ebp], 44
 	je	.L24
-	cmp	DWORD PTR 40[ebp], 34
+	cmp	DWORD PTR 40[ebp], 44
+	ja	.L28
+	cmp	DWORD PTR 40[ebp], 33
 	je	.L25
-	jmp	.L27
-.L24:
+	cmp	DWORD PTR 40[ebp], 34
+	je	.L26
+	jmp	.L28
+.L25:
 	sub	esp, 12
 	push	DWORD PTR 40[ebp]
 	mov	ebx, eax
 	call	keyboard_handle_interrupt@PLT
 	add	esp, 16
-	jmp	.L26
-.L25:
+	jmp	.L27
+.L26:
 	call	KERNEL_INTERRUPT
-	jmp	.L26
+	jmp	.L27
 .L22:
 	push	DWORD PTR 36[ebp]
 	push	DWORD PTR 32[ebp]
@@ -350,10 +354,19 @@ interrupt_handler:
 	push	DWORD PTR 8[ebp]
 	call	SYS_CALL
 	add	esp, 32
-	jmp	.L26
-.L27:
+	jmp	.L27
+.L24:
+	sub	esp, 4
+	push	77
+	push	20
+	push	20
+	mov	ebx, eax
+	call	printChar@PLT
+	add	esp, 16
+	jmp	.L27
+.L28:
 	nop
-.L26:
+.L27:
 	nop
 	mov	ebx, DWORD PTR -4[ebp]
 	leave

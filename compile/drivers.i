@@ -648,8 +648,8 @@ typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 header;
- void (*init_driver)(int);
+ pci_header0 *header;
+ void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
 
@@ -677,13 +677,13 @@ void pci_probe();
 char usb_driverName[27];
 
 
-void usb_init_driver(int driverID);
+void usb_init_driver(int driverID, int reversedID);
 void usb_exit_driver();
 # 5 "./include/drivers.h" 2
 # 1 "./include/IDE.h" 1
 # 84 "./include/IDE.h"
 char ide_driverName[22];
-void ide_driver_install(int driverID);
+void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
 
@@ -692,7 +692,8 @@ void activate_Drivers();
 # 2 "drivers.c" 2
 
 void activate_Drivers(){
-    for(unsigned short driver = 0; driver < drivs; driver++){
-        pci_drivers[driver]->init_driver(pci_drivers[driver]->driverID);
+    for(int driver = 0; driver < (int) drivs; driver++){
+        pci_drivers[driver]->init_driver(driver, (drivs-1)-driver);
+
     }
 }

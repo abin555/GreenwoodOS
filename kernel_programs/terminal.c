@@ -257,5 +257,5 @@ void terminal_handler(){
 }
 
 void terminal_init(){
-    Terminal_Y = fb_height/8 - 8;
+    Terminal_Y = fb_height/8 - 1;
 }

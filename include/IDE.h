@@ -82,6 +82,6 @@
 
 
 char ide_driverName[22];
-void ide_driver_install(int driverID);
+void ide_driver_install(int driverID, int reversedID);
 
 #endif

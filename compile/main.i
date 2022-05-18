@@ -753,6 +753,7 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_44();
 extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);
@@ -797,13 +798,13 @@ void KYBRD_DEBUG_DISPLAY();
 char usb_driverName[27];
 
 
-void usb_init_driver(int driverID);
+void usb_init_driver(int driverID, int reversedID);
 void usb_exit_driver();
 # 5 "./include/drivers.h" 2
 # 1 "./include/IDE.h" 1
 # 84 "./include/IDE.h"
 char ide_driverName[22];
-void ide_driver_install(int driverID);
+void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
 
@@ -841,8 +842,8 @@ typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 header;
- void (*init_driver)(int);
+ pci_header0 *header;
+ void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
 
@@ -913,11 +914,17 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   mem_init(0x10000000);
   pci_init();
 
-  for(unsigned int dev = 0; dev < drivs; dev++){
-    for(int offset = 0; offset < 5; offset++){
-      unsigned int data = pci_drivers[dev]->header.BAR[offset];
+  for(unsigned int dev = 0; dev < devs; dev++){
+    for(int offset = 0; offset < 4*20; offset+=4){
+
+      unsigned int data = pci_read_dword(
+        pci_devices[dev]->device_id->bus,
+        pci_devices[dev]->device_id->slot,
+        pci_devices[dev]->device_id->func,
+        offset
+      );
       decodeHex(STR_edit, data, 32, 0);
-      fb_write_xy(STR_edit, 32/4, 1, dev*9, (devs+1)+offset);
+      fb_write_xy(STR_edit, 32/4, 1, dev*9, (devs+1)+(offset/4));
     }
   }
 

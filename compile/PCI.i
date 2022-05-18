@@ -628,13 +628,13 @@ void printHeap();
 char usb_driverName[27];
 
 
-void usb_init_driver(int driverID);
+void usb_init_driver(int driverID, int reversedID);
 void usb_exit_driver();
 # 5 "./include/drivers.h" 2
 # 1 "./include/IDE.h" 1
 # 84 "./include/IDE.h"
 char ide_driverName[22];
-void ide_driver_install(int driverID);
+void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
 
@@ -672,8 +672,8 @@ typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 header;
- void (*init_driver)(int);
+ pci_header0 *header;
+ void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
 
@@ -706,12 +706,13 @@ unsigned int drivs = 0;
 
 void pci_load_header0(pci_driver *pdrive, pci_header0 *header){
     for(int bar = 0; bar <= 5; bar++){
-        header->BAR[bar] = getDeviceBar(
-            pdrive->init_one->device_id->bus,
-            pdrive->init_one->device_id->slot,
-            pdrive->init_one->device_id->func,
-            bar
-        );
+            unsigned int bar_data = getDeviceBar(
+                pdrive->init_one->device_id->bus,
+                pdrive->init_one->device_id->slot,
+                pdrive->init_one->device_id->func,
+                bar
+            );
+            header->BAR[bar] = bar_data;
     }
 }
 
@@ -730,27 +731,27 @@ void add_pci_device(pci_device *pdev)
             pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
-            pdrive->header = *pheader0;
+            pdrive->header = pheader0;
 
             pci_drivers[drivs] = pdrive;
             pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
-        case 0x0102:;
+        case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
             pdrive->init_driver = ide_driver_install;
-            pdrive->header = *pheader0;
+            pdrive->header = pheader0;
 
             pci_drivers[drivs] = pdrive;
             pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
     }
- devs ++;
+ devs++;
  return;
 }
 
@@ -768,7 +769,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
     tmp = (unsigned short)((inportl (0xCFC) >> ((offset & 2) * 8)) & 0xffff);
     return (tmp);
 }
-# 83 "DRIVERS/PCI.c"
+# 84 "DRIVERS/PCI.c"
 unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset){
     outdw(
         0xcf8,

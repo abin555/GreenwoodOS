@@ -43,6 +43,7 @@ void interrupt_install_idt()
 	interrupts_init_descriptor(INTERRUPTS_KEYBOARD, (unsigned int) int_handler_33);
 	interrupts_init_descriptor(INTERRUPTS_KERNEL, (unsigned int) int_handler_34);
 	interrupts_init_descriptor(INTERRUPTS_SYSCALL, (unsigned int) int_handler_128);
+	//interrupts_init_descriptor(44, (unsigned int) int_handler_44);
 
 	idt.address = (int) &idt_descriptors;
 	idt.size = sizeof(struct IDTDescriptor) * INTERRUPT_DESCRIPTOR_COUNT;
@@ -104,6 +105,9 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 			break;
 		case INTERRUPTS_SYSCALL:
 			SYS_CALL(cpu);
+			break;
+		case 44:
+			printChar(20,20,'M');
 			break;
 		default:
 			break;

@@ -49,20 +49,16 @@ ide_driver_install:
 	.cfi_offset 5, -8
 	mov	ebp, esp
 	.cfi_def_cfa_register 5
-	push	esi
 	push	ebx
-	sub	esp, 16
-	.cfi_offset 6, -12
-	.cfi_offset 3, -16
+	sub	esp, 20
+	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	30
+	push	50
 	push	0
 	push	22
 	lea	eax, ide_driverName@GOTOFF[ebx]
@@ -71,68 +67,12 @@ ide_driver_install:
 	add	esp, 32
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR 8[ebp]
-	sal	edx, 2
-	add	eax, edx
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 8[eax]
-	movzx	ecx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR 8[ebp]
-	sal	edx, 2
-	add	eax, edx
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 4[eax]
-	movzx	edx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	esi, DWORD PTR 8[ebp]
-	sal	esi, 2
-	add	eax, esi
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR [eax]
-	movzx	eax, ax
-	sub	esp, 4
-	push	ecx
-	push	edx
-	push	eax
-	call	getDeviceProgIF@PLT
-	add	esp, 16
-	movsx	eax, al
-	push	0
-	push	16
-	push	eax
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	decodeHex@PLT
-	add	esp, 16
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
-	sub	esp, 12
-	push	eax
-	push	53
-	push	1
-	push	4
-	mov	eax, DWORD PTR STR_edit@GOT[ebx]
-	push	eax
-	call	fb_write_xy@PLT
-	add	esp, 32
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR 8[ebp]
+	mov	edx, DWORD PTR 12[ebp]
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 12[eax]
+	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR -12[ebp], eax
 	push	0
 	push	32
@@ -141,31 +81,41 @@ ide_driver_install:
 	push	eax
 	call	decodeHex@PLT
 	add	esp, 16
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
-	mov	edx, eax
-	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, 9
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
-	push	edx
 	push	eax
+	push	86
 	push	1
 	push	8
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
+	mov	eax, DWORD PTR 8[ebp]
+	push	0
+	push	8
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
+	sub	esp, 12
+	push	eax
+	push	73
+	push	1
+	push	2
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
 	nop
-	lea	esp, -8[ebp]
-	pop	ebx
-	.cfi_restore 3
-	pop	esi
-	.cfi_restore 6
-	pop	ebp
+	mov	ebx, DWORD PTR -4[ebp]
+	leave
 	.cfi_restore 5
+	.cfi_restore 3
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc

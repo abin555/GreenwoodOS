@@ -46,6 +46,7 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_44();
 extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);

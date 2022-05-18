@@ -69,13 +69,57 @@ usb_init_driver:
 	.cfi_offset 3, -16
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	edx, DWORD PTR 12[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
+	mov	eax, DWORD PTR 16[eax]
+	mov	DWORD PTR -12[ebp], eax
+	mov	eax, DWORD PTR 8[ebp]
+	push	0
+	push	8
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	30
+	push	83
+	push	1
+	push	2
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	push	0
+	push	32
+	push	DWORD PTR -12[ebp]
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
+	sub	esp, 12
+	push	eax
+	push	86
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
+	sub	esp, 12
+	push	eax
+	push	50
 	push	0
 	push	27
 	lea	eax, usb_driverName@GOTOFF[ebx]
@@ -119,8 +163,8 @@ usb_init_driver:
 	call	getDeviceProgIF@PLT
 	add	esp, 16
 	cbw
-	mov	WORD PTR -10[ebp], ax
-	movzx	eax, WORD PTR -10[ebp]
+	mov	WORD PTR -14[ebp], ax
+	movzx	eax, WORD PTR -14[ebp]
 	cmp	eax, 254
 	je	.L2
 	cmp	eax, 254
@@ -143,157 +187,105 @@ usb_init_driver:
 	je	.L8
 	jmp	.L3
 .L7:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC0@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	jmp	.L3
+	jmp	.L9
 .L8:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC1@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	jmp	.L3
+	jmp	.L9
 .L6:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC2@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	jmp	.L3
+	jmp	.L9
 .L5:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC3@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	jmp	.L3
+	jmp	.L9
 .L4:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC4@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	jmp	.L3
+	jmp	.L9
 .L2:
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 1
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
 	push	eax
-	push	58
+	push	78
 	push	0
 	push	4
 	lea	eax, .LC5@GOTOFF[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
-	nop
+	jmp	.L9
 .L3:
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR 8[ebp]
-	sal	edx, 2
-	add	eax, edx
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 8[eax]
-	movzx	ecx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	edx, DWORD PTR 8[ebp]
-	sal	edx, 2
-	add	eax, edx
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 4[eax]
-	movzx	edx, ax
-	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	mov	esi, DWORD PTR 8[ebp]
-	sal	esi, 2
-	add	eax, esi
-	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR [eax]
-	movzx	eax, ax
-	push	4
-	push	ecx
-	push	edx
+	movzx	eax, WORD PTR -14[ebp]
+	push	0
+	push	16
 	push	eax
-	call	getDeviceBar@PLT
-	add	esp, 16
-	mov	DWORD PTR -16[ebp], eax
-	push	50
-	push	32
-	push	DWORD PTR -16[ebp]
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	decodeHex@PLT
 	add	esp, 16
-	mov	eax, DWORD PTR fb_terminal_h@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, DWORD PTR 8[ebp]
-	sub	eax, 2
-	mov	edx, eax
-	mov	eax, DWORD PTR fb_terminal_w@GOT[ebx]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, 9
+	mov	eax, DWORD PTR 8[ebp]
+	add	eax, 1
 	sub	esp, 12
-	push	edx
 	push	eax
-	push	51
-	push	8
+	push	78
+	push	1
+	push	4
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	fb_write_xy@PLT
 	add	esp, 32
+	nop
+.L9:
 	nop
 	lea	esp, -8[ebp]
 	pop	ebx

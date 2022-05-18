@@ -8,12 +8,13 @@ uint32_t drivs = 0;
 
 void pci_load_header0(pci_driver *pdrive, pci_header0 *header){
     for(int bar = 0; bar <= 5; bar++){
-        header->BAR[bar] = getDeviceBar(
-            pdrive->init_one->device_id->bus,
-            pdrive->init_one->device_id->slot,
-            pdrive->init_one->device_id->func,
-            bar
-        );
+            uint32_t bar_data = getDeviceBar(
+                pdrive->init_one->device_id->bus,
+                pdrive->init_one->device_id->slot,
+                pdrive->init_one->device_id->func,
+                bar
+            ); 
+            header->BAR[bar] = bar_data;
     }
 }
 
@@ -32,27 +33,27 @@ void add_pci_device(pci_device *pdev)
             pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
-            pdrive->header = *pheader0;
+            pdrive->header = pheader0;
 
             pci_drivers[drivs] = pdrive;
             pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
-        case 0x0102:;
+        case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
             pdrive->init_one = pdev;
             pdrive->driverID = drivs;
             pdrive->init_driver = ide_driver_install;
-            pdrive->header = *pheader0;
+            pdrive->header = pheader0;
             
             pci_drivers[drivs] = pdrive;
             pci_load_header0(pdrive, pheader0);
             drivs++;
         break;
     }
-	devs ++;
+	devs++;
 	return;
 }
 

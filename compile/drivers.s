@@ -47,36 +47,33 @@ activate_Drivers:
 	.cfi_offset 3, -12
 	call	__x86.get_pc_thunk.bx
 	add	ebx, OFFSET FLAT:_GLOBAL_OFFSET_TABLE_
-	mov	WORD PTR -10[ebp], 0
+	mov	DWORD PTR -12[ebp], 0
 	jmp	.L2
 .L3:
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	movzx	edx, WORD PTR -10[ebp]
+	mov	edx, DWORD PTR -12[ebp]
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 36[eax]
-	mov	edx, DWORD PTR pci_drivers@GOT[ebx]
-	mov	edx, DWORD PTR [edx]
-	movzx	ecx, WORD PTR -10[ebp]
-	sal	ecx, 2
-	add	edx, ecx
-	mov	edx, DWORD PTR [edx]
-	mov	edx, DWORD PTR 4[edx]
-	sub	esp, 12
+	mov	eax, DWORD PTR 16[eax]
+	mov	edx, DWORD PTR drivs@GOT[ebx]
+	mov	ecx, DWORD PTR [edx]
+	mov	edx, DWORD PTR -12[ebp]
+	sub	ecx, edx
+	mov	edx, ecx
+	sub	edx, 1
+	sub	esp, 8
 	push	edx
+	push	DWORD PTR -12[ebp]
 	call	eax
 	add	esp, 16
-	movzx	eax, WORD PTR -10[ebp]
-	add	eax, 1
-	mov	WORD PTR -10[ebp], ax
+	add	DWORD PTR -12[ebp], 1
 .L2:
-	movzx	edx, WORD PTR -10[ebp]
 	mov	eax, DWORD PTR drivs@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
-	cmp	edx, eax
-	jb	.L3
+	cmp	DWORD PTR -12[ebp], eax
+	jl	.L3
 	nop
 	nop
 	mov	ebx, DWORD PTR -4[ebp]

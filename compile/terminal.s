@@ -71,7 +71,7 @@ Terminal_Y:
 	.globl	terminal_memory_view
 	.type	terminal_memory_view, @function
 terminal_memory_view:
-.LFB0:
+.LFB2:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -87,12 +87,12 @@ terminal_memory_view:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE0:
+.LFE2:
 	.size	terminal_memory_view, .-terminal_memory_view
 	.globl	terminal_renderer
 	.type	terminal_renderer, @function
 terminal_renderer:
-.LFB1:
+.LFB3:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -143,12 +143,12 @@ terminal_renderer:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE1:
+.LFE3:
 	.size	terminal_renderer, .-terminal_renderer
 	.globl	terminal_console
 	.type	terminal_console, @function
 terminal_console:
-.LFB2:
+.LFB4:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -237,12 +237,12 @@ terminal_console:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE2:
+.LFE4:
 	.size	terminal_console, .-terminal_console
 	.globl	terminal_output
 	.type	terminal_output, @function
 terminal_output:
-.LFB3:
+.LFB5:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -286,12 +286,12 @@ terminal_output:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE3:
+.LFE5:
 	.size	terminal_output, .-terminal_output
 	.globl	terminal_compare
 	.type	terminal_compare, @function
 terminal_compare:
-.LFB4:
+.LFB6:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -326,7 +326,7 @@ terminal_compare:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE4:
+.LFE6:
 	.size	terminal_compare, .-terminal_compare
 	.section	.rodata
 .LC0:
@@ -365,7 +365,7 @@ terminal_compare:
 	.globl	terminal_interpret
 	.type	terminal_interpret, @function
 terminal_interpret:
-.LFB5:
+.LFB7:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1098,12 +1098,12 @@ terminal_interpret:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE5:
+.LFE7:
 	.size	terminal_interpret, .-terminal_interpret
 	.globl	terminal_enter
 	.type	terminal_enter, @function
 terminal_enter:
-.LFB6:
+.LFB8:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1210,12 +1210,12 @@ terminal_enter:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE6:
+.LFE8:
 	.size	terminal_enter, .-terminal_enter
 	.globl	terminal_handler
 	.type	terminal_handler, @function
 terminal_handler:
-.LFB7:
+.LFB9:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1419,12 +1419,12 @@ terminal_handler:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE7:
+.LFE9:
 	.size	terminal_handler, .-terminal_handler
 	.globl	terminal_init
 	.type	terminal_init, @function
 terminal_init:
-.LFB8:
+.LFB10:
 	.cfi_startproc
 	endbr32
 	push	ebp
@@ -1437,7 +1437,7 @@ terminal_init:
 	mov	edx, DWORD PTR fb_height@GOT[eax]
 	mov	edx, DWORD PTR [edx]
 	shr	edx, 3
-	sub	edx, 8
+	sub	edx, 1
 	mov	DWORD PTR Terminal_Y@GOTOFF[eax], edx
 	nop
 	pop	ebp
@@ -1445,30 +1445,30 @@ terminal_init:
 	.cfi_def_cfa 4, 4
 	ret
 	.cfi_endproc
-.LFE8:
+.LFE10:
 	.size	terminal_init, .-terminal_init
 	.section	.text.__x86.get_pc_thunk.ax,"axG",@progbits,__x86.get_pc_thunk.ax,comdat
 	.globl	__x86.get_pc_thunk.ax
 	.hidden	__x86.get_pc_thunk.ax
 	.type	__x86.get_pc_thunk.ax, @function
 __x86.get_pc_thunk.ax:
-.LFB9:
+.LFB11:
 	.cfi_startproc
 	mov	eax, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE9:
+.LFE11:
 	.section	.text.__x86.get_pc_thunk.bx,"axG",@progbits,__x86.get_pc_thunk.bx,comdat
 	.globl	__x86.get_pc_thunk.bx
 	.hidden	__x86.get_pc_thunk.bx
 	.type	__x86.get_pc_thunk.bx, @function
 __x86.get_pc_thunk.bx:
-.LFB10:
+.LFB12:
 	.cfi_startproc
 	mov	ebx, DWORD PTR [esp]
 	ret
 	.cfi_endproc
-.LFE10:
+.LFE12:
 	.ident	"GCC: (Ubuntu 9.4.0-1ubuntu1~20.04.1) 9.4.0"
 	.section	.note.GNU-stack,"",@progbits
 	.section	.note.gnu.property,"a"

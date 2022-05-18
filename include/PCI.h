@@ -38,8 +38,8 @@ typedef struct __pci_driver {
 	char *name;
 	int driverID;
 	pci_device *init_one;
-	pci_header0 header;
-	void (*init_driver)(int);
+	pci_header0 *header;
+	void (*init_driver)(int, int);
 	void (*exit_driver)(void);
 } pci_driver;
 

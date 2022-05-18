@@ -153,6 +153,7 @@ void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();
 extern void int_handler_35();
+extern void int_handler_44();
 extern void int_handler_128();
 
 void load_idt(unsigned int idt_address);
@@ -799,6 +800,7 @@ void interrupt_install_idt()
  interrupts_init_descriptor(34, (unsigned int) int_handler_34);
  interrupts_init_descriptor(0x80, (unsigned int) int_handler_128);
 
+
  idt.address = (int) &idt_descriptors;
  idt.size = sizeof(struct IDTDescriptor) * 256;
  load_idt((int) &idt);
@@ -859,6 +861,9 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
    break;
   case 0x80:
    SYS_CALL(cpu);
+   break;
+  case 44:
+   printChar(20,20,'M');
    break;
   default:
    break;

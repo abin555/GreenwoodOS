@@ -632,7 +632,7 @@ void printHeap();
 char usb_driverName[27];
 
 
-void usb_init_driver(int driverID);
+void usb_init_driver(int driverID, int reversedID);
 void usb_exit_driver();
 # 5 "./include/drivers.h" 2
 # 1 "./include/IDE.h" 1
@@ -673,8 +673,8 @@ typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 header;
- void (*init_driver)(int);
+ pci_header0 *header;
+ void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
 
@@ -700,23 +700,19 @@ void pci_probe();
 # 5 "./include/IDE.h" 2
 # 84 "./include/IDE.h"
 char ide_driverName[22];
-void ide_driver_install(int driverID);
+void ide_driver_install(int driverID, int reversedID);
 # 2 "DRIVERS/IDE.c" 2
 
 char ide_driverName[] = "IDE CONTROLLER DRIVER";
 
-void ide_driver_install(int driverID){
-   fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 30, fb_terminal_h-driverID-1);
-   decodeHex(STR_edit,
-      getDeviceProgIF(
-         pci_drivers[driverID]->init_one->device_id->bus,
-         pci_drivers[driverID]->init_one->device_id->slot,
-         pci_drivers[driverID]->init_one->device_id->func
-      ),
-   16,
-   0);
-   fb_write_xy(STR_edit, 4, 1, 30+sizeof(ide_driverName)+1,fb_terminal_h-driverID-1);
-   unsigned int dataBar = pci_drivers[driverID]->header.BAR[0];
+void ide_driver_install(int driverID, int reversedID){
+   fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 50, driverID+1);
+
+   unsigned int dataBar = pci_drivers[reversedID]->header->BAR[0];
+
    decodeHex(STR_edit, dataBar, 32, 0);
-   fb_write_xy(STR_edit, 8, 1, fb_terminal_w-9, fb_terminal_h-driverID-1);
+   fb_write_xy(STR_edit, 8, 1, 50+sizeof(usb_driverName)+9, driverID+1);
+
+   decodeHex(STR_edit, driverID, 8, 0);
+   fb_write_xy(STR_edit, 2, 1, 50+sizeof(ide_driverName)+1, driverID+1);
 }
