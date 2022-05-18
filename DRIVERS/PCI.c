@@ -6,15 +6,15 @@ uint32_t devs = 0;
 pci_driver **pci_drivers = 0;
 uint32_t drivs = 0;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header){
+void pci_load_header0(pci_device *pdev, pci_driver *driver){
     for(int bar = 0; bar <= 5; bar++){
             uint32_t bar_data = getDeviceBar(
-                pdrive->init_one->device_id->bus,
-                pdrive->init_one->device_id->slot,
-                pdrive->init_one->device_id->func,
+                pdev->bus,
+                pdev->slot,
+                pdev->dev,
                 bar
             ); 
-            header->BAR[bar] = bar_data;
+            driver->BAR[bar] = bar_data;
     }
 }
 
@@ -22,12 +22,10 @@ void add_pci_device(pci_device *pdev)
 {
 	pci_devices[devs] = pdev;
     pci_driver *pdrive;
-    pci_header0 *pheader0;
     switch(pdev->Class){
         case 0x0C03:;//Universal Serial Bus Controller
             //printChar(0,0,'U');
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = usb_driverName;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
@@ -35,7 +33,6 @@ void add_pci_device(pci_device *pdev)
         break;
         case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
             pdrive->init_driver = ide_driver_install;
             goto generic_install;
@@ -46,10 +43,9 @@ void add_pci_device(pci_device *pdev)
     generic_install:;
     pdrive->init_one = pdev;
     pdrive->driverID = drivs;
-    pdrive->header = pheader0;
 
     pci_drivers[drivs] = pdrive;
-    pci_load_header0(pdrive, pheader0);
+    pci_load_header0(pdev, pdrive);
     drivs++;
     devs++;
     return;
@@ -154,10 +150,9 @@ void pci_probe()
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
-                    pci_device_id *pdev_id = (pci_device_id *)malloc(sizeof(pci_device_id));
-                    pdev_id->bus = bus;
-                    pdev_id->slot = slot;
-                    pdev_id->func = function;
+                    pdev->bus = bus;
+                    pdev->slot = slot;
+                    pdev->dev = function;
 
 
                     pdev->vendor = vendor;
@@ -166,7 +161,6 @@ void pci_probe()
                     pdev->Class = Class;
                     pdev->progIF = progIF;
                     pdev->driver = 0;
-                    pdev->device_id = pdev_id;
                     add_pci_device(pdev);
             }
         }

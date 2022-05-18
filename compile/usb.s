@@ -75,8 +75,7 @@ usb_init_driver:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 12[eax]
-	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR 28[eax]
 	mov	DWORD PTR -12[ebp], eax
 	mov	eax, DWORD PTR 8[ebp]
 	push	0
@@ -133,8 +132,7 @@ usb_init_driver:
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 8[eax]
+	movzx	eax, WORD PTR 4[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
@@ -144,7 +142,6 @@ usb_init_driver:
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 8[eax]
 	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
@@ -153,8 +150,7 @@ usb_init_driver:
 	add	eax, esi
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
 	movzx	eax, ax
 	sub	esp, 4
 	push	ecx

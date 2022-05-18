@@ -17,10 +17,11 @@ OBJECTS = \
 		DRIVERS/PCI.o\
 		DRIVERS/usb.o\
 		drivers.o\
-		DRIVERS/IDE.o
+		DRIVERS/IDE.o\
+		console.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -save-temps -masm=intel -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
@@ -52,9 +53,7 @@ build: os.iso transfer-compiled
 
 transfer-compiled:
 	cp *.o ./compile
-	cp *.i ./compile
-	cp *.s ./compile
-	rm -rf *.o *.i *.s
+	rm -rf *.o
 	rm -rf ./DRIVERS/*.o
 	cp ./compile/boot.s .
 

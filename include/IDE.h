@@ -82,6 +82,14 @@
 
 
 char ide_driverName[22];
+
+struct __IDE_DRIVER;
+
+typedef struct __IDE_DRIVER{
+    
+
+} IDE_driver;
+
 void ide_driver_install(int driverID, int reversedID);
 
 #endif

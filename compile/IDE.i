@@ -644,9 +644,7 @@ void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
 struct __pci_driver;
-struct __pci_device_id;
 struct __pci_device;
-struct __pci_header0;
 
 typedef struct __pci_device{
  unsigned short vendor;
@@ -654,26 +652,19 @@ typedef struct __pci_device{
  unsigned short func;
  unsigned short Class;
  unsigned short progIF;
- struct __pci_driver *driver;
- struct __pci_device_id *device_id;
-} pci_device;
 
-typedef struct __pci_header0{
- unsigned int BAR[5];
- unsigned int CIS_P;
-} pci_header0;
-
-typedef struct __pci_device_id{
  unsigned int bus;
  unsigned int slot;
- unsigned int func;
-} pci_device_id;
+ unsigned int dev;
+ struct __pci_driver *driver;
+} pci_device;
 
 typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 *header;
+ unsigned int BAR[5];
+ unsigned int CIS_P;
  void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -683,7 +674,7 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
+void pci_load_header0(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
@@ -700,6 +691,14 @@ void pci_probe();
 # 5 "./include/IDE.h" 2
 # 84 "./include/IDE.h"
 char ide_driverName[22];
+
+struct __IDE_DRIVER;
+
+typedef struct __IDE_DRIVER{
+
+
+} IDE_driver;
+
 void ide_driver_install(int driverID, int reversedID);
 # 2 "DRIVERS/IDE.c" 2
 
@@ -708,7 +707,7 @@ char ide_driverName[] = "IDE CONTROLLER DRIVER";
 void ide_driver_install(int driverID, int reversedID){
    fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 50, driverID+1);
 
-   unsigned int dataBar = pci_drivers[reversedID]->header->BAR[0];
+   unsigned int dataBar = pci_drivers[reversedID]->BAR[0];
 
    decodeHex(STR_edit, dataBar, 32, 0);
    fb_write_xy(STR_edit, 8, 1, 50+sizeof(usb_driverName)+9, driverID+1);

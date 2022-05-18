@@ -804,6 +804,14 @@ void usb_exit_driver();
 # 1 "./include/IDE.h" 1
 # 84 "./include/IDE.h"
 char ide_driverName[22];
+
+struct __IDE_DRIVER;
+
+typedef struct __IDE_DRIVER{
+
+
+} IDE_driver;
+
 void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
@@ -813,9 +821,7 @@ void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
 struct __pci_driver;
-struct __pci_device_id;
 struct __pci_device;
-struct __pci_header0;
 
 typedef struct __pci_device{
  unsigned short vendor;
@@ -823,26 +829,19 @@ typedef struct __pci_device{
  unsigned short func;
  unsigned short Class;
  unsigned short progIF;
- struct __pci_driver *driver;
- struct __pci_device_id *device_id;
-} pci_device;
 
-typedef struct __pci_header0{
- unsigned int BAR[5];
- unsigned int CIS_P;
-} pci_header0;
-
-typedef struct __pci_device_id{
  unsigned int bus;
  unsigned int slot;
- unsigned int func;
-} pci_device_id;
+ unsigned int dev;
+ struct __pci_driver *driver;
+} pci_device;
 
 typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 *header;
+ unsigned int BAR[5];
+ unsigned int CIS_P;
  void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -852,7 +851,7 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
+void pci_load_header0(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
@@ -918,9 +917,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     for(int offset = 0; offset < 4*20; offset+=4){
 
       unsigned int data = pci_read_dword(
-        pci_devices[dev]->device_id->bus,
-        pci_devices[dev]->device_id->slot,
-        pci_devices[dev]->device_id->func,
+        pci_devices[dev]->bus,
+        pci_devices[dev]->slot,
+        pci_devices[dev]->func,
         offset
       );
       decodeHex(STR_edit, data, 32, 0);
@@ -931,14 +930,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
     fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
     for(int bar = 0; bar < 5; bar++){
-      unsigned int data = pci_drivers[drive]->header->BAR[bar];
+      unsigned int data = pci_drivers[drive]->BAR[bar];
 
       decodeHex(STR_edit, data, 32, 0);
       fb_write_xy(STR_edit, 32/4, 1, drive*9, bar+31);
     }
   }
 
-
+  activate_Drivers();
 
   terminal_init();
 

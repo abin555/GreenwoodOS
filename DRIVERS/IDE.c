@@ -5,7 +5,7 @@ char ide_driverName[] = "IDE CONTROLLER DRIVER";
 void ide_driver_install(int driverID, int reversedID){
    fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 50, driverID+1);
    
-   uint32_t dataBar = pci_drivers[reversedID]->header->BAR[0]; 
+   uint32_t dataBar = pci_drivers[reversedID]->BAR[0]; 
    
    decodeHex(STR_edit, dataBar, 32, 0);
    fb_write_xy(STR_edit, 8, 1, 50+sizeof(usb_driverName)+9, driverID+1);

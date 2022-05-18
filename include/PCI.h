@@ -9,9 +9,7 @@
 #include "drivers.h"
 
 struct __pci_driver;
-struct __pci_device_id;
 struct __pci_device;
-struct __pci_header0;
 
 typedef struct __pci_device{
 	uint16_t vendor;
@@ -19,26 +17,19 @@ typedef struct __pci_device{
 	uint16_t func;
 	uint16_t Class;
 	uint16_t progIF;
-	struct __pci_driver *driver;
-	struct __pci_device_id *device_id;
-} pci_device;
-
-typedef struct __pci_header0{
-	uint32_t BAR[5];
-	uint32_t CIS_P;
-} pci_header0;
-
-typedef struct __pci_device_id{
+	//PCI Location Data
 	uint32_t bus;
 	uint32_t slot;
-	uint32_t func;
-} pci_device_id;
+	uint32_t dev;
+	struct __pci_driver *driver;
+} pci_device;
 
 typedef struct __pci_driver {
 	char *name;
 	int driverID;
 	pci_device *init_one;
-	pci_header0 *header;
+	uint32_t BAR[5];
+	uint32_t CIS_P;
 	void (*init_driver)(int, int);
 	void (*exit_driver)(void);
 } pci_driver;
@@ -48,7 +39,7 @@ pci_driver **pci_drivers;
 uint32_t devs;
 uint32_t drivs;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
+void pci_load_header0(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset);

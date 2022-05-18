@@ -72,7 +72,6 @@ ide_driver_install:
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 12[eax]
-	mov	eax, DWORD PTR [eax]
 	mov	DWORD PTR -12[ebp], eax
 	push	0
 	push	32

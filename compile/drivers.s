@@ -56,7 +56,7 @@ activate_Drivers:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 16[eax]
+	mov	eax, DWORD PTR 36[eax]
 	mov	edx, DWORD PTR drivs@GOT[ebx]
 	mov	ecx, DWORD PTR [edx]
 	mov	edx, DWORD PTR -12[ebp]

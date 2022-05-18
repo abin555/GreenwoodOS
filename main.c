@@ -12,6 +12,7 @@
 #include "PCI.h"
 #include "usb.h"
 #include "drivers.h"
+#include "console.h"
 //#include "IDE.h"
 
 extern void load_gdt();
@@ -59,9 +60,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     for(int offset = 0; offset < 4*20; offset+=4){
       //uint32_t data = pci_drivers[dev]->header->BAR[offset];
       uint32_t data = pci_read_dword(
-        pci_devices[dev]->device_id->bus,
-        pci_devices[dev]->device_id->slot,
-        pci_devices[dev]->device_id->func,
+        pci_devices[dev]->bus,
+        pci_devices[dev]->slot,
+        pci_devices[dev]->func,
         offset
       );
       decodeHex(STR_edit, data, 32, 0);
@@ -72,17 +73,16 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
     fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
     for(int bar = 0; bar < 5; bar++){
-      uint32_t data = pci_drivers[drive]->header->BAR[bar];
+      uint32_t data = pci_drivers[drive]->BAR[bar];
       
       decodeHex(STR_edit, data, 32, 0);
       fb_write_xy(STR_edit, 32/4, 1, drive*9, bar+31);
     }
   }
 
-  //activate_Drivers();
+  activate_Drivers();
 
   terminal_init();
-  //fb_write_xy(msg, heap_end - heap_begin, 0, 0, 6);
 
   kmain_loop();
   return 0;

@@ -134,19 +134,13 @@ pci_load_header0:
 	mov	eax, DWORD PTR -12[ebp]
 	movzx	ebx, ax
 	mov	eax, DWORD PTR 8[ebp]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 8[eax]
+	mov	eax, DWORD PTR 20[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR 8[ebp]
-	mov	eax, DWORD PTR 8[eax]
 	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR 8[ebp]
-	mov	eax, DWORD PTR 8[eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
 	movzx	eax, ax
 	push	ebx
 	push	ecx
@@ -158,7 +152,7 @@ pci_load_header0:
 	mov	eax, DWORD PTR 12[ebp]
 	mov	edx, DWORD PTR -12[ebp]
 	mov	ecx, DWORD PTR -16[ebp]
-	mov	DWORD PTR [eax+edx*4], ecx
+	mov	DWORD PTR 12[eax+edx*4], ecx
 	add	DWORD PTR -12[ebp], 1
 .L5:
 	cmp	DWORD PTR -12[ebp], 5
@@ -204,42 +198,32 @@ add_pci_device:
 	cmp	eax, 3075
 	jne	.L9
 	sub	esp, 12
-	push	24
+	push	44
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -12[ebp], eax
-	sub	esp, 12
-	push	24
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -16[ebp], eax
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR usb_driverName@GOT[ebx]
 	mov	DWORD PTR [eax], edx
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR usb_init_driver@GOT[ebx]
-	mov	DWORD PTR 16[eax], edx
+	mov	DWORD PTR 36[eax], edx
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR usb_exit_driver@GOT[ebx]
-	mov	DWORD PTR 20[eax], edx
+	mov	DWORD PTR 40[eax], edx
 	jmp	.L10
 .L8:
 	sub	esp, 12
-	push	24
+	push	44
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -12[ebp], eax
-	sub	esp, 12
-	push	24
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -16[ebp], eax
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR ide_driverName@GOT[ebx]
 	mov	DWORD PTR [eax], edx
 	mov	eax, DWORD PTR -12[ebp]
 	mov	edx, DWORD PTR ide_driver_install@GOT[ebx]
-	mov	DWORD PTR 16[eax], edx
+	mov	DWORD PTR 36[eax], edx
 	jmp	.L10
 .L9:
 	mov	eax, DWORD PTR devs@GOTOFF[ebx]
@@ -254,9 +238,6 @@ add_pci_device:
 	mov	edx, eax
 	mov	eax, DWORD PTR -12[ebp]
 	mov	DWORD PTR 4[eax], edx
-	mov	eax, DWORD PTR -12[ebp]
-	mov	edx, DWORD PTR -16[ebp]
-	mov	DWORD PTR 12[eax], edx
 	mov	eax, DWORD PTR pci_drivers@GOTOFF[ebx]
 	mov	edx, DWORD PTR drivs@GOTOFF[ebx]
 	sal	edx, 2
@@ -264,8 +245,8 @@ add_pci_device:
 	mov	eax, DWORD PTR -12[ebp]
 	mov	DWORD PTR [edx], eax
 	sub	esp, 8
-	push	DWORD PTR -16[ebp]
 	push	DWORD PTR -12[ebp]
+	push	DWORD PTR 8[ebp]
 	call	pci_load_header0
 	add	esp, 16
 	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
@@ -873,24 +854,19 @@ pci_probe:
 	add	esp, 32
 	add	DWORD PTR -12[ebp], 1
 	sub	esp, 12
-	push	20
+	push	28
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR -36[ebp], eax
-	sub	esp, 12
-	push	12
-	call	malloc@PLT
-	add	esp, 16
-	mov	DWORD PTR -40[ebp], eax
-	mov	eax, DWORD PTR -40[ebp]
+	mov	eax, DWORD PTR -36[ebp]
 	mov	edx, DWORD PTR -16[ebp]
-	mov	DWORD PTR [eax], edx
-	mov	eax, DWORD PTR -40[ebp]
+	mov	DWORD PTR 12[eax], edx
+	mov	eax, DWORD PTR -36[ebp]
 	mov	edx, DWORD PTR -20[ebp]
-	mov	DWORD PTR 4[eax], edx
-	mov	eax, DWORD PTR -40[ebp]
+	mov	DWORD PTR 16[eax], edx
+	mov	eax, DWORD PTR -36[ebp]
 	mov	edx, DWORD PTR -24[ebp]
-	mov	DWORD PTR 8[eax], edx
+	mov	DWORD PTR 20[eax], edx
 	mov	eax, DWORD PTR -36[ebp]
 	movzx	edx, WORD PTR -26[ebp]
 	mov	WORD PTR [eax], dx
@@ -908,10 +884,7 @@ pci_probe:
 	movzx	edx, WORD PTR -32[ebp]
 	mov	WORD PTR 8[eax], dx
 	mov	eax, DWORD PTR -36[ebp]
-	mov	DWORD PTR 12[eax], 0
-	mov	eax, DWORD PTR -36[ebp]
-	mov	edx, DWORD PTR -40[ebp]
-	mov	DWORD PTR 16[eax], edx
+	mov	DWORD PTR 24[eax], 0
 	sub	esp, 12
 	push	DWORD PTR -36[ebp]
 	call	add_pci_device
@@ -963,12 +936,12 @@ pci_init:
 	mov	eax, DWORD PTR drivs@GOTOFF[ebx]
 	mov	DWORD PTR devs@GOTOFF[ebx], eax
 	sub	esp, 12
-	push	640
+	push	896
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR pci_devices@GOTOFF[ebx], eax
 	sub	esp, 12
-	push	768
+	push	1408
 	call	malloc@PLT
 	add	esp, 16
 	mov	DWORD PTR pci_drivers@GOTOFF[ebx], eax

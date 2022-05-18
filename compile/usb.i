@@ -625,6 +625,14 @@ void fb_clearBackBuffer(u32 color);
 # 5 "./include/IDE.h" 2
 # 84 "./include/IDE.h"
 char ide_driverName[22];
+
+struct __IDE_DRIVER;
+
+typedef struct __IDE_DRIVER{
+
+
+} IDE_driver;
+
 void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
@@ -634,9 +642,7 @@ void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
 struct __pci_driver;
-struct __pci_device_id;
 struct __pci_device;
-struct __pci_header0;
 
 typedef struct __pci_device{
  unsigned short vendor;
@@ -644,26 +650,19 @@ typedef struct __pci_device{
  unsigned short func;
  unsigned short Class;
  unsigned short progIF;
- struct __pci_driver *driver;
- struct __pci_device_id *device_id;
-} pci_device;
 
-typedef struct __pci_header0{
- unsigned int BAR[5];
- unsigned int CIS_P;
-} pci_header0;
-
-typedef struct __pci_device_id{
  unsigned int bus;
  unsigned int slot;
- unsigned int func;
-} pci_device_id;
+ unsigned int dev;
+ struct __pci_driver *driver;
+} pci_device;
 
 typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 *header;
+ unsigned int BAR[5];
+ unsigned int CIS_P;
  void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -673,7 +672,7 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
+void pci_load_header0(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
@@ -699,7 +698,7 @@ void usb_exit_driver();
 char usb_driverName[] = "Universal Serial Bus Driver";
 
 void usb_init_driver(int driverID, int reversedID){
-    unsigned int dataBar = pci_drivers[reversedID]->header->BAR[4];
+    unsigned int dataBar = pci_drivers[reversedID]->BAR[4];
 
     decodeHex(STR_edit, driverID, 8, 0);
     fb_write_xy(STR_edit, 2, 1, 50+sizeof(usb_driverName)+6, driverID+1);
@@ -709,9 +708,9 @@ void usb_init_driver(int driverID, int reversedID){
 
     fb_write_xy(usb_driverName, sizeof(usb_driverName), 0, 50, driverID+1);
     unsigned short progIF = getDeviceProgIF(
-        pci_drivers[driverID]->init_one->device_id->bus,
-        pci_drivers[driverID]->init_one->device_id->slot,
-        pci_drivers[driverID]->init_one->device_id->func
+        pci_drivers[driverID]->init_one->bus,
+        pci_drivers[driverID]->init_one->slot,
+        pci_drivers[driverID]->init_one->func
     );
     switch(progIF){
         case 0x0:

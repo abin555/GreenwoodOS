@@ -145,8 +145,7 @@ kmain:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 8[eax]
+	movzx	eax, WORD PTR 4[eax]
 	movzx	ecx, ax
 	mov	eax, DWORD PTR pci_devices@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
@@ -155,7 +154,6 @@ kmain:
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
 	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR 4[eax]
 	movzx	edx, ax
 	mov	eax, DWORD PTR pci_devices@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
@@ -163,8 +161,7 @@ kmain:
 	sal	edi, 2
 	add	eax, edi
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 16[eax]
-	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
 	movzx	eax, ax
 	push	esi
 	push	ecx
@@ -254,9 +251,8 @@ kmain:
 	sal	edx, 2
 	add	eax, edx
 	mov	eax, DWORD PTR [eax]
-	mov	eax, DWORD PTR 12[eax]
 	mov	edx, DWORD PTR -44[ebp]
-	mov	eax, DWORD PTR [eax+edx*4]
+	mov	eax, DWORD PTR 12[eax+edx*4]
 	mov	DWORD PTR -48[ebp], eax
 	push	0
 	push	32
@@ -291,6 +287,7 @@ kmain:
 	mov	eax, DWORD PTR [eax]
 	cmp	DWORD PTR -40[ebp], eax
 	jb	.L16
+	call	activate_Drivers@PLT
 	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0

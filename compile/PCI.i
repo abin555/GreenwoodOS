@@ -634,6 +634,14 @@ void usb_exit_driver();
 # 1 "./include/IDE.h" 1
 # 84 "./include/IDE.h"
 char ide_driverName[22];
+
+struct __IDE_DRIVER;
+
+typedef struct __IDE_DRIVER{
+
+
+} IDE_driver;
+
 void ide_driver_install(int driverID, int reversedID);
 # 6 "./include/drivers.h" 2
 
@@ -643,9 +651,7 @@ void activate_Drivers();
 # 10 "./include/PCI.h" 2
 
 struct __pci_driver;
-struct __pci_device_id;
 struct __pci_device;
-struct __pci_header0;
 
 typedef struct __pci_device{
  unsigned short vendor;
@@ -653,26 +659,19 @@ typedef struct __pci_device{
  unsigned short func;
  unsigned short Class;
  unsigned short progIF;
- struct __pci_driver *driver;
- struct __pci_device_id *device_id;
-} pci_device;
 
-typedef struct __pci_header0{
- unsigned int BAR[5];
- unsigned int CIS_P;
-} pci_header0;
-
-typedef struct __pci_device_id{
  unsigned int bus;
  unsigned int slot;
- unsigned int func;
-} pci_device_id;
+ unsigned int dev;
+ struct __pci_driver *driver;
+} pci_device;
 
 typedef struct __pci_driver {
  char *name;
  int driverID;
  pci_device *init_one;
- pci_header0 *header;
+ unsigned int BAR[5];
+ unsigned int CIS_P;
  void (*init_driver)(int, int);
  void (*exit_driver)(void);
 } pci_driver;
@@ -682,7 +681,7 @@ pci_driver **pci_drivers;
 unsigned int devs;
 unsigned int drivs;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header);
+void pci_load_header0(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset);
@@ -704,15 +703,15 @@ unsigned int devs = 0;
 pci_driver **pci_drivers = 0;
 unsigned int drivs = 0;
 
-void pci_load_header0(pci_driver *pdrive, pci_header0 *header){
+void pci_load_header0(pci_device *pdev, pci_driver *driver){
     for(int bar = 0; bar <= 5; bar++){
             unsigned int bar_data = getDeviceBar(
-                pdrive->init_one->device_id->bus,
-                pdrive->init_one->device_id->slot,
-                pdrive->init_one->device_id->func,
+                pdev->bus,
+                pdev->slot,
+                pdev->dev,
                 bar
             );
-            header->BAR[bar] = bar_data;
+            driver->BAR[bar] = bar_data;
     }
 }
 
@@ -720,12 +719,10 @@ void add_pci_device(pci_device *pdev)
 {
  pci_devices[devs] = pdev;
     pci_driver *pdrive;
-    pci_header0 *pheader0;
     switch(pdev->Class){
         case 0x0C03:;
 
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = usb_driverName;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
@@ -733,7 +730,6 @@ void add_pci_device(pci_device *pdev)
         break;
         case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
-            pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
             pdrive->init_driver = ide_driver_install;
             goto generic_install;
@@ -744,10 +740,9 @@ void add_pci_device(pci_device *pdev)
     generic_install:;
     pdrive->init_one = pdev;
     pdrive->driverID = drivs;
-    pdrive->header = pheader0;
 
     pci_drivers[drivs] = pdrive;
-    pci_load_header0(pdrive, pheader0);
+    pci_load_header0(pdev, pdrive);
     drivs++;
     devs++;
     return;
@@ -767,7 +762,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
     tmp = (unsigned short)((inportl (0xCFC) >> ((offset & 2) * 8)) & 0xffff);
     return (tmp);
 }
-# 82 "DRIVERS/PCI.c"
+# 78 "DRIVERS/PCI.c"
 unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset){
     outdw(
         0xcf8,
@@ -843,10 +838,9 @@ void pci_probe()
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
-                    pci_device_id *pdev_id = (pci_device_id *)malloc(sizeof(pci_device_id));
-                    pdev_id->bus = bus;
-                    pdev_id->slot = slot;
-                    pdev_id->func = function;
+                    pdev->bus = bus;
+                    pdev->slot = slot;
+                    pdev->dev = function;
 
 
                     pdev->vendor = vendor;
@@ -855,7 +849,6 @@ void pci_probe()
                     pdev->Class = Class;
                     pdev->progIF = progIF;
                     pdev->driver = 0;
-                    pdev->device_id = pdev_id;
                     add_pci_device(pdev);
             }
         }
