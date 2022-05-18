@@ -927,8 +927,18 @@ int kmain(unsigned long magic, unsigned long magic_addr){
       fb_write_xy(STR_edit, 32/4, 1, dev*9, (devs+1)+(offset/4));
     }
   }
+  for(unsigned int drive = 0; drive < drivs; drive++){
+    decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
+    fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
+    for(int bar = 0; bar < 5; bar++){
+      unsigned int data = pci_drivers[drive]->header->BAR[bar];
 
-  activate_Drivers();
+      decodeHex(STR_edit, data, 32, 0);
+      fb_write_xy(STR_edit, 32/4, 1, drive*9, bar+31);
+    }
+  }
+
+
 
   terminal_init();
 

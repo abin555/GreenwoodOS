@@ -1,7 +1,7 @@
-# 1 "pong.c"
+# 1 "kernel_programs/pong.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "pong.c"
+# 1 "kernel_programs/pong.c"
 # 1 "./include/pong.h" 1
 
 
@@ -612,7 +612,7 @@ void fb_clearBackBuffer(u32 color);
 
 
 void pong();
-# 2 "pong.c" 2
+# 2 "kernel_programs/pong.c" 2
 
 
 

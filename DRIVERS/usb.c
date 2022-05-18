@@ -40,10 +40,7 @@ void usb_init_driver(int driverID, int reversedID){
             decodeHex(STR_edit, progIF, 16, 0);
             fb_write_xy(STR_edit, 4, 1, 50+sizeof(usb_driverName)+1,driverID+1);
             break;
-    }
-    
-    //uint32_t dataBar = pci_drivers[driverID]->header->BAR[4]; 
-    
+    }    
 }
 
 void usb_exit_driver(){

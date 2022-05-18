@@ -727,32 +727,30 @@ void add_pci_device(pci_device *pdev)
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = usb_driverName;
-            pdrive->init_one = pdev;
-            pdrive->driverID = drivs;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
-            pdrive->header = pheader0;
-
-            pci_drivers[drivs] = pdrive;
-            pci_load_header0(pdrive, pheader0);
-            drivs++;
+            goto generic_install;
         break;
         case 0x0101:;
             pdrive = (pci_driver *)malloc(sizeof(pci_driver));
             pheader0 = (pci_header0 *)malloc(sizeof(pci_header0));
             pdrive->name = ide_driverName;
-            pdrive->init_one = pdev;
-            pdrive->driverID = drivs;
             pdrive->init_driver = ide_driver_install;
-            pdrive->header = pheader0;
-
-            pci_drivers[drivs] = pdrive;
-            pci_load_header0(pdrive, pheader0);
-            drivs++;
+            goto generic_install;
         break;
     }
  devs++;
  return;
+    generic_install:;
+    pdrive->init_one = pdev;
+    pdrive->driverID = drivs;
+    pdrive->header = pheader0;
+
+    pci_drivers[drivs] = pdrive;
+    pci_load_header0(pdrive, pheader0);
+    drivs++;
+    devs++;
+    return;
 }
 
 
@@ -769,7 +767,7 @@ unsigned short pci_read_word(unsigned short bus, unsigned short slot, unsigned s
     tmp = (unsigned short)((inportl (0xCFC) >> ((offset & 2) * 8)) & 0xffff);
     return (tmp);
 }
-# 84 "DRIVERS/PCI.c"
+# 82 "DRIVERS/PCI.c"
 unsigned int pci_read_dword(unsigned short bus, unsigned short slot, unsigned short func, unsigned short offset){
     outdw(
         0xcf8,

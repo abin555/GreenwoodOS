@@ -5,15 +5,15 @@ OBJECTS = \
 		frame_buffer.o \
 		ascii_tables.o \
 		interrupts.o \
-		keyboard.o \
+		DRIVERS/keyboard.o \
 		kernel_programs/terminal.o \
 		kernel_programs/keyboard_test.o \
 		pic.o \
 		string.o\
 		memory.o\
 		gfx.o\
-		pong.o\
-		grapher.o\
+		kernel_programs/pong.o\
+		kernel_programs/grapher.o\
 		DRIVERS/PCI.o\
 		DRIVERS/usb.o\
 		drivers.o\

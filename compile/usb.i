@@ -737,9 +737,6 @@ void usb_init_driver(int driverID, int reversedID){
             fb_write_xy(STR_edit, 4, 1, 50+sizeof(usb_driverName)+1,driverID+1);
             break;
     }
-
-
-
 }
 
 void usb_exit_driver(){

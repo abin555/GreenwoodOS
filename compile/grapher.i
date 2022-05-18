@@ -1,7 +1,7 @@
-# 1 "grapher.c"
+# 1 "kernel_programs/grapher.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "grapher.c"
+# 1 "kernel_programs/grapher.c"
 # 1 "./include/grapher.h" 1
 
 
@@ -662,7 +662,7 @@ void grapher_key_handler(char key);
 void grapher_draw_formulas();
 void plot_point(float x, float y);
 float sqrt(float x);
-# 2 "grapher.c" 2
+# 2 "kernel_programs/grapher.c" 2
 
 void draw_regions(){
     gfx_vline(0,fb_height-fb_height/4, fb_width-fb_width/5, 0xFFFFFF);

@@ -100,9 +100,9 @@ kmain:
 	cmp	eax, 8
 	jne	.L7
 	mov	eax, DWORD PTR -28[ebp]
-	mov	DWORD PTR -44[ebp], eax
+	mov	DWORD PTR -56[ebp], eax
 	sub	esp, 12
-	push	DWORD PTR -44[ebp]
+	push	DWORD PTR -56[ebp]
 	call	init_fb@PLT
 	add	esp, 16
 .L7:
@@ -172,10 +172,10 @@ kmain:
 	push	eax
 	call	pci_read_dword@PLT
 	add	esp, 16
-	mov	DWORD PTR -40[ebp], eax
+	mov	DWORD PTR -52[ebp], eax
 	push	0
 	push	32
-	push	DWORD PTR -40[ebp]
+	push	DWORD PTR -52[ebp]
 	mov	eax, DWORD PTR STR_edit@GOT[ebx]
 	push	eax
 	call	decodeHex@PLT
@@ -213,7 +213,84 @@ kmain:
 	mov	eax, DWORD PTR [eax]
 	cmp	DWORD PTR -32[ebp], eax
 	jb	.L12
-	call	activate_Drivers@PLT
+	mov	DWORD PTR -40[ebp], 0
+	jmp	.L13
+.L16:
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR -40[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 8[eax]
+	movzx	eax, WORD PTR 6[eax]
+	movzx	eax, ax
+	push	0
+	push	32
+	push	eax
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	edx, DWORD PTR -40[ebp]
+	mov	eax, edx
+	sal	eax, 3
+	add	eax, edx
+	sub	esp, 12
+	push	30
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	mov	DWORD PTR -44[ebp], 0
+	jmp	.L14
+.L15:
+	mov	eax, DWORD PTR pci_drivers@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	mov	edx, DWORD PTR -40[ebp]
+	sal	edx, 2
+	add	eax, edx
+	mov	eax, DWORD PTR [eax]
+	mov	eax, DWORD PTR 12[eax]
+	mov	edx, DWORD PTR -44[ebp]
+	mov	eax, DWORD PTR [eax+edx*4]
+	mov	DWORD PTR -48[ebp], eax
+	push	0
+	push	32
+	push	DWORD PTR -48[ebp]
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	decodeHex@PLT
+	add	esp, 16
+	mov	eax, DWORD PTR -44[ebp]
+	add	eax, 31
+	mov	ecx, eax
+	mov	edx, DWORD PTR -40[ebp]
+	mov	eax, edx
+	sal	eax, 3
+	add	eax, edx
+	sub	esp, 12
+	push	ecx
+	push	eax
+	push	1
+	push	8
+	mov	eax, DWORD PTR STR_edit@GOT[ebx]
+	push	eax
+	call	fb_write_xy@PLT
+	add	esp, 32
+	add	DWORD PTR -44[ebp], 1
+.L14:
+	cmp	DWORD PTR -44[ebp], 4
+	jle	.L15
+	add	DWORD PTR -40[ebp], 1
+.L13:
+	mov	eax, DWORD PTR drivs@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	cmp	DWORD PTR -40[ebp], eax
+	jb	.L16
 	call	terminal_init@PLT
 	call	kmain_loop
 	mov	eax, 0

@@ -1,7 +1,7 @@
-# 1 "keyboard.c"
+# 1 "DRIVERS/keyboard.c"
 # 1 "<built-in>"
 # 1 "<command-line>"
-# 1 "keyboard.c"
+# 1 "DRIVERS/keyboard.c"
 # 1 "./include/keyboard.h" 1
 
 
@@ -169,7 +169,7 @@ unsigned int keyboard_ascii_pointer;
 
 unsigned char prev_Scancode;
 unsigned char char_scancode;
-# 2 "keyboard.c" 2
+# 2 "DRIVERS/keyboard.c" 2
 # 1 "./include/frame_buffer.h" 1
 
 
@@ -606,11 +606,11 @@ void fb_move_cursor_xy(unsigned int x, unsigned int y);
 
 void fb_copyBuffer();
 void fb_clearBackBuffer(u32 color);
-# 3 "keyboard.c" 2
+# 3 "DRIVERS/keyboard.c" 2
 # 1 "./include/ascii_tables.h" 1
-# 4 "keyboard.c" 2
+# 4 "DRIVERS/keyboard.c" 2
 # 1 "./include/string.h" 1
-# 5 "keyboard.c" 2
+# 5 "DRIVERS/keyboard.c" 2
 
 unsigned char prev_Scancode = 0;
 unsigned int keyboard_KEYBUFFER_POINTER = 0;
