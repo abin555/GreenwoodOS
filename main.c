@@ -54,8 +54,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   restore_kernel_addr = (u32 *) &kmain_loop;
 
   mem_init(0x10000000);
-  pci_init();
+
   initializeConsole();
+  
+  pci_init();
   
   for(unsigned int drive = 0; drive < drivs; drive++){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
@@ -66,6 +68,13 @@ int kmain(unsigned long magic, unsigned long magic_addr){
       decodeHex(STR_edit, data, 32, 0);
       fb_write_xy(STR_edit, 32/4, 1, drive*9, bar+31);
     }
+  }
+
+  while(0){
+    strcpy("  HELLO \n", STR_edit+1, sizeof("   HELLO \n"));
+    STR_edit[0]++;
+    printk(STR_edit);
+
   }
 
   activate_Drivers();

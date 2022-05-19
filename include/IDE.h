@@ -115,6 +115,7 @@ typedef struct __IDE_DRIVER{
     uint8_t IRQ1;
 } IDE_driver;
 
+void sleep(int msec);
 void ide_driver_install(int driverID);
 void ide_initialize(unsigned int BAR0, unsigned int BAR1, unsigned int BAR2, unsigned int BAR3, unsigned int BAR4);
 unsigned char ide_read(unsigned char channel, unsigned char reg);

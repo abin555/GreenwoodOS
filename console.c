@@ -10,7 +10,12 @@ void initializeConsole(){
 
 void console_putScreen(){
     for(int index = 0; index < fb_terminal_w * fb_terminal_h; index++){
-        fb_write_cell(index, consoleArray[index-consoleStart*fb_terminal_w], 0xFFFFFF, 0);
+        if(consoleArray[index] != '\n'){
+            fb_write_cell(index, consoleArray[index], 0xFFFFFF, 0);
+        }
+        else{
+            index += fb_terminal_w - (fb_terminal_w % index);
+        }
     }
 }
 
@@ -21,13 +26,14 @@ void printk(char* msg){
     //memset(consoleArray + consoleStart*fb_terminal_w - consoleLine*fb_terminal_w, 0, fb_terminal_w);
     while(p < (unsigned int)fb_terminal_w){
         if(msg[p] != '\n' && allowed){
-            consoleArray[consoleStart*fb_terminal_w - consoleLine*fb_terminal_w + p] = msg[p];
+            consoleArray[consoleLine*fb_terminal_w + p] = msg[p];
         }
         else if(msg[p] == '\n'){
+            consoleArray[consoleLine*fb_terminal_w + p] = msg[p];
             allowed = 0;
         }
         else{
-            consoleArray[consoleStart*fb_terminal_w - consoleLine*fb_terminal_w + p] = 0;
+            consoleArray[consoleLine*fb_terminal_w + p] = 0;
         }
         p++;
     }
@@ -35,11 +41,7 @@ void printk(char* msg){
     console_putScreen();
     consoleLine++;
     if(consoleLine == (unsigned int) fb_terminal_h){
-        consoleLine--;
-        consoleStart++;
-    }
-    if(consoleStart == (unsigned int) fb_terminal_h){
-        consoleStart = 0;
+        consoleLine = 0;
     }
 }
 /*
