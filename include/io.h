@@ -19,6 +19,8 @@ static inline uint32_t indw(uint16_t port) {
 	return data;
 }
 
+void insl(uint16_t port, unsigned int *buffer, int quads);
+
 void WriteMem(uint32_t Address, uint32_t Value);
 uint32_t ReadMem(uint32_t Address);
 

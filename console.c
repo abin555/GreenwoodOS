@@ -14,7 +14,7 @@ void console_putScreen(){
     }
 }
 
-void kprint(char* msg){
+void printk(char* msg){
     uint32_t p = 0;
     char allowed = 1;
     //printChar(p, consoleLine-consoleStart, msg[p]);

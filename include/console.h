@@ -12,7 +12,7 @@ uint32_t consoleSize;
 
 void initializeConsole();
 void console_putscreen();
-void kprint(char* msg);
+void printk(char* msg);
 void kprintF(const char* restrict fmt, ...);
 void panic(const char* restrict msg);
 

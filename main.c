@@ -55,20 +55,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   mem_init(0x10000000);
   pci_init();
-
-  for(unsigned int dev = 0; dev < devs; dev++){
-    for(int offset = 0; offset < 4*20; offset+=4){
-      //uint32_t data = pci_drivers[dev]->header->BAR[offset];
-      uint32_t data = pci_read_dword(
-        pci_devices[dev]->bus,
-        pci_devices[dev]->slot,
-        pci_devices[dev]->func,
-        offset
-      );
-      decodeHex(STR_edit, data, 32, 0);
-      fb_write_xy(STR_edit, 32/4, 1, dev*9, (devs+1)+(offset/4));
-    }
-  }
+  initializeConsole();
   
   for(unsigned int drive = 0; drive < drivs; drive++){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);

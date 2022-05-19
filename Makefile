@@ -55,7 +55,6 @@ transfer-compiled:
 	cp *.o ./compile
 	rm -rf *.o
 	rm -rf ./DRIVERS/*.o
-	cp ./compile/boot.s .
 
 build_clean: os.iso transfer-compiled
 build_clean_run: os.iso transfer-compiled run

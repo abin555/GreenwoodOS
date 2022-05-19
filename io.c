@@ -25,3 +25,11 @@ uint32_t inportl(uint16_t portid)
 	return ret;
 }
 
+void insl(uint16_t port, unsigned int *buffer, int quads)
+{
+    int index;
+    for(index = 0; index < quads; index++)
+    {
+        buffer[index] = inportl(port);
+    }
+}
