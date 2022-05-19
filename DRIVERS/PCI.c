@@ -6,8 +6,8 @@ uint32_t devs = 0;
 pci_driver **pci_drivers = 0;
 uint32_t drivs = 0;
 
-void pci_load_header0(pci_device *pdev, pci_driver *driver){
-    for(int bar = 0; bar <= 5; bar++){
+void pci_load_BAR(pci_device *pdev, pci_driver *driver){
+    for(int bar = 0; bar <= 6; bar++){
             uint32_t bar_data = getDeviceBar(
                 pdev->bus,
                 pdev->slot,
@@ -45,7 +45,7 @@ void add_pci_device(pci_device *pdev)
     pdrive->driverID = drivs;
 
     pci_drivers[drivs] = pdrive;
-    pci_load_header0(pdev, pdrive);
+    pci_load_BAR(pdev, pdrive);
     drivs++;
     devs++;
     return;

@@ -42,6 +42,7 @@ struct stack_state {
 	unsigned int eflags;
 } __attribute__((packed));
 
+void interrupts_init_descriptor(int index, unsigned int address);
 void interrupt_install_idt();
 extern void int_handler_33();
 extern void int_handler_34();

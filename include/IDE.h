@@ -90,6 +90,6 @@ typedef struct __IDE_DRIVER{
 
 } IDE_driver;
 
-void ide_driver_install(int driverID, int reversedID);
+void ide_driver_install(int driverID);
 
 #endif

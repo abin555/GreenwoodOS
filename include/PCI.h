@@ -28,9 +28,9 @@ typedef struct __pci_driver {
 	char *name;
 	int driverID;
 	pci_device *init_one;
-	uint32_t BAR[5];
+	uint32_t BAR[6];
 	uint32_t CIS_P;
-	void (*init_driver)(int, int);
+	void (*init_driver)(int);
 	void (*exit_driver)(void);
 } pci_driver;
 
@@ -39,7 +39,7 @@ pci_driver **pci_drivers;
 uint32_t devs;
 uint32_t drivs;
 
-void pci_load_header0(pci_device *pdev, pci_driver *driver);
+void pci_load_BAR(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
 
 uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset);
