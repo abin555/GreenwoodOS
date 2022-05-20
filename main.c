@@ -56,13 +56,13 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   mem_init(0x10000000);
 
   initializeConsole();
-  
+
   pci_init();
   
   for(unsigned int drive = 0; drive < drivs; drive++){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
     fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
-    for(int bar = 0; bar < 5; bar++){
+    for(int bar = 0; bar < 6; bar++){
       uint32_t data = pci_drivers[drive]->BAR[bar];
       
       decodeHex(STR_edit, data, 32, 0);

@@ -18,7 +18,8 @@ OBJECTS = \
 		DRIVERS/usb.o\
 		drivers.o\
 		DRIVERS/IDE.o\
-		console.o
+		console.o\
+		DRIVERS/ahci.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
@@ -37,7 +38,7 @@ os.iso: kernel.elf
 run: os.iso transfer-compiled
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio \
 	-vga std \
-	-drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img   \
+	-device ahci,id=ahci \
 	-usb \
 	-device usb-ehci,id=ehci
 

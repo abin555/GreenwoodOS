@@ -37,6 +37,11 @@ void add_pci_device(pci_device *pdev)
             pdrive->init_driver = ide_driver_install;
             goto generic_install;
         break;
+        case 0x0106:;
+            pdrive = (pci_driver *)malloc(sizeof(pci_driver));
+            pdrive->init_driver = initialize_AHCI;
+            goto generic_install;
+        break;
     }
 	devs++;
 	return;
