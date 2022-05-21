@@ -27,7 +27,7 @@ void decodeData(char *Buffer, int in, int len, int start){
   }
 }
 
-char quadtoHex(char quad){
+char quadToHex(char quad){
   switch(quad){
     case 0x00:
       return '0';
@@ -143,7 +143,7 @@ char hexToQuad(char hex){
 
 void decodeHex(char *Buffer, unsigned int in, int len, int start){
   for(int i = 0; i < len/4; i++){
-    Buffer[start+(len/4 - i)] = quadtoHex((in >> 4*i) & 0x0F);
+    Buffer[start+(len/4 - i)] = quadToHex((in >> 4*i) & 0x0F);
   }
 }
 

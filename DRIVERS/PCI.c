@@ -143,15 +143,7 @@ void pci_probe()
                     uint16_t Class = getDeviceClass(bus, slot, function);
                     uint16_t progIF = getDeviceProgIF(bus,slot,function);
 
-                    fb_write_xy("vendor:", 7, 0, 0, DebugLine);
-                    decodeHex(STR_edit, vendor, 16, 0);
-                    fb_write_xy(STR_edit, 5, 0, 7, DebugLine);
-                    fb_write_xy(" device: ", 10, 0, 12, DebugLine);
-                    decodeHex(STR_edit, device, 16, 0);
-                    fb_write_xy(STR_edit, 5, 0, 20, DebugLine);
-                    fb_write_xy(" class: ", 9, 0, 25, DebugLine);
-                    decodeHex(STR_edit, Class, 16, 0);
-                    fb_write_xy(STR_edit, 5, 0, 32, DebugLine);
+                    printk("PCI Vendor: %4h Device: %4h Class: %4h\n\0", vendor, device, Class);
                     DebugLine++;
 
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));

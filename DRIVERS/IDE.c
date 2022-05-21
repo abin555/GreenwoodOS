@@ -1,21 +1,16 @@
 #include "IDE.h"
 
-char ide_driverName[] = "IDE CONTROLLER DRIVER";
+char ide_driverName[] = "IDE CONTROLLER DRIVER\0";
 
 unsigned char ide_buf[2048] = {0};
 static unsigned char ide_irq_invoked = 0;
 static unsigned char atapi_packet[12] = {0xA8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
 void ide_driver_install(int driverID){
-   fb_write_xy(ide_driverName, sizeof(ide_driverName), 0, 50, driverID+1);
+   printk(ide_driverName);
+   printk(" %2h \0", pci_drivers[driverID]->init_one->progIF);
+   printk(" BAR: %8h\n\0", pci_drivers[driverID]->BAR[4]);
    
-   uint32_t dataBar = pci_drivers[driverID]->BAR[4]; 
-   
-   decodeHex(STR_edit, dataBar, 32, 0);
-   fb_write_xy(STR_edit, 8, 1, 50+sizeof(usb_driverName)+9, driverID+1);
-
-   decodeHex(STR_edit, pci_drivers[driverID]->init_one->progIF, 8, 0);
-   fb_write_xy(STR_edit, 2, 1, 50+sizeof(ide_driverName)+1, driverID+1);
    return;
    
    #define bus pci_drivers[driverID]->init_one->bus

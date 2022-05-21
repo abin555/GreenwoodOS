@@ -85,7 +85,7 @@
 #define      ATA_READ      0x00
 #define      ATA_WRITE      0x01
 
-char ide_driverName[22];
+char ide_driverName[23];
 
 
 struct channel {

@@ -5,6 +5,7 @@
 #include "IDE.h"
 #include "PCI.h"
 #include "ahci.h"
+#include "console.h"
 
 void activate_Drivers();
 

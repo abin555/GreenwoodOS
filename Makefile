@@ -21,7 +21,7 @@ OBJECTS = \
 		console.o\
 		DRIVERS/ahci.o
 CC = gcc
-CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
+CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm

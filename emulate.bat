@@ -1,1 +1,1 @@
-qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio -drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img -usb -device usb-ehci
+qemu-system-x86_64 -boot order=c -m 512 -monitor stdio -drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img -drive id=disk,file=GreenwoodOS.img,if=none -device ahci,id=ahci -device ide-hd,drive=disk,bus=ahci.0 -usb -device usb-ehci

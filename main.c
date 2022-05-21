@@ -56,9 +56,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   mem_init(0x10000000);
 
   initializeConsole();
-
+  printk("PCI Listing:\n\0");
   pci_init();
-  
+  /*
   for(unsigned int drive = 0; drive < drivs; drive++){
     decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
     fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
@@ -71,12 +71,13 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   }
 
   while(0){
-    strcpy("  HELLO \n", STR_edit+1, sizeof("   HELLO \n"));
+    strcpy("  HELLO \0", STR_edit+1, sizeof("   HELLO \0"));
     STR_edit[0]++;
     printk(STR_edit);
 
   }
-
+  */
+  printk("\nDriver Init:\n\0");
   activate_Drivers();
 
   terminal_init();

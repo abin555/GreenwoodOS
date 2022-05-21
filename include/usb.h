@@ -4,7 +4,7 @@
 #include "frame_buffer.h"
 #include "PCI.h"
 
-char usb_driverName[27];
+char usb_driverName[30];
 
 
 void usb_init_driver(int driverID);
