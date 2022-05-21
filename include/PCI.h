@@ -30,6 +30,7 @@ typedef struct __pci_driver {
 	pci_device *init_one;
 	uint32_t BAR[6];
 	uint32_t CIS_P;
+	uint8_t interrupt;
 	void (*init_driver)(int);
 	void (*exit_driver)(void);
 } pci_driver;
@@ -38,6 +39,7 @@ pci_device **pci_devices;
 pci_driver **pci_drivers;
 uint32_t devs;
 uint32_t drivs;
+bool AHCI_int_trigger;
 
 void pci_load_BAR(pci_device *pdev, pci_driver *driver);
 void add_pci_device();
@@ -50,7 +52,7 @@ uint16_t getDeviceID(uint16_t bus, uint16_t device, uint16_t function);
 uint16_t getDeviceClass(uint16_t bus, uint16_t device, uint16_t function);
 uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function);
 uint32_t getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint16_t bar);
-
+uint8_t getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function);
 void pci_init();
 void pci_probe();
 

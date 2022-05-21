@@ -48,7 +48,11 @@ void add_pci_device(pci_device *pdev)
     generic_install:;
     pdrive->init_one = pdev;
     pdrive->driverID = drivs;
-
+    pdrive->interrupt = getDeviceInterrupt(
+        pdev->bus,
+        pdev->slot,
+        pdev->dev
+    );
     pci_drivers[drivs] = pdrive;
     pci_load_BAR(pdev, pdrive);
     drivs++;
@@ -112,6 +116,11 @@ uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
     uint16_t r0 = pci_read_word(bus, device, function, 8) >> 8;
     return r0;
 }
+uint8_t getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function){
+    uint16_t r0 = pci_read_word(bus, device, function, 0x3C+1);
+    return r0;
+}
+
 
 uint32_t getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint16_t bar){
     uint32_t bar_val = pci_read_dword(bus, device, function, 0x10 + bar*4);

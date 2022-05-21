@@ -79,7 +79,22 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   */
   printk("\nDriver Init:\n\0");
   activate_Drivers();
-
+  
+  #define Width 100
+  uint8_t *FileBuffer = malloc(0x100);
+  AHCI_read(
+    Drive_PORTS[0],
+    0,
+    0,
+    10,
+    (uint16_t *)FileBuffer
+  );
+  //printk(FileBuffer);
+  for(int i = 0; i < Width; i++){
+    //fb_write_cell(i, FileBuffer[i], 0x00FF00, 0);
+    printChar(i, 0, FileBuffer[i]);
+  }
+  
   terminal_init();
 
   kmain_loop();
