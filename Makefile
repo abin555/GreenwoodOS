@@ -19,7 +19,8 @@ OBJECTS = \
 		drivers.o\
 		DRIVERS/IDE.o\
 		console.o\
-		DRIVERS/ahci.o
+		DRIVERS/ahci.o\
+		DRIVERS/filesystem.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c

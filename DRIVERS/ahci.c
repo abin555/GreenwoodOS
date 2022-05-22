@@ -37,6 +37,7 @@ void initialize_AHCI(int driverID){
 }
 
 void addAHCI_Drive(HBA_PORT *port, int portno){
+	addFileSystemDevice(FS_SATA_Device, "SATA DEVICE_____", (uint32_t *) port, AHCI_read, 0);
     Drive_PORTS[driveNUM] = port;
     devicePortNums[driveNUM] = portno;
     driveNUM++;

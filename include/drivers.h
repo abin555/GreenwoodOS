@@ -7,6 +7,7 @@
 #include "PCI.h"
 #include "ahci.h"
 #include "console.h"
+#include "filesystem.h"
 
 void activate_Drivers();
 

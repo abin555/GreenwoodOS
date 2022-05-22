@@ -13,6 +13,7 @@
 #include "usb.h"
 #include "drivers.h"
 #include "console.h"
+#include "filesystem.h"
 //#include "IDE.h"
 
 extern void load_gdt();
@@ -77,47 +78,18 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   }
   */
+  init_filesystem();
   printk("\nDriver Init:\n\0");
   activate_Drivers();
   
-  #define Size 2*512
-  #define Width 16
-  uint8_t *FileBuffer = malloc(Size);
-  bool working = false;
-  int sector = 0;
-  while(working){
-    working=AHCI_read(
-      Drive_PORTS[0],
-      sector,
-      0,
-      2,
-      (uint16_t *)FileBuffer
-    );
-    //printk(FileBuffer);
-    for(int y = 0; y < Size/8; y++){
-      for(int x = 0; x < 16; x++){
-        printChar(50+x, y, FileBuffer[x + y*16]);
-      }
-    }
-    if(FileBuffer[1] == 'E' && FileBuffer[2] == 'L' && FileBuffer[3] == 'F'){
-      working = false;
-      printk("%8h\n", sector);
-    }
-    sector++;
-    //for(unsigned int count =0; count < 0x111FFFF; count++){}
-  }
-  AHCI_read(
-    Drive_PORTS[0],
-    00,
-    0,
-    2,
-    (uint16_t *)FileBuffer
-  );
-  for(int y = 0; y < Size/8; y++){
+  uint8_t *FileBuffer = malloc(512);
+  FS_read(0, 0, 1, (uint16_t *)FileBuffer);
+  for(int y = 0; y < 32; y++){
     for(int x = 0; x < 16; x++){
-      printChar(75+x, y, FileBuffer[x + y*16]);
+      printChar(50+x, y, FileBuffer[x + y*16]);
     }
   }
+
   terminal_init();
 
   kmain_loop();
