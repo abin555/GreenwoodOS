@@ -80,19 +80,31 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   printk("\nDriver Init:\n\0");
   activate_Drivers();
   
-  #define Width 100
-  uint8_t *FileBuffer = malloc(0x100);
-  AHCI_read(
-    Drive_PORTS[0],
-    0,
-    0,
-    10,
-    (uint16_t *)FileBuffer
-  );
-  //printk(FileBuffer);
-  for(int i = 0; i < Width; i++){
-    //fb_write_cell(i, FileBuffer[i], 0x00FF00, 0);
-    printChar(i, 0, FileBuffer[i]);
+  #define Size 2*512
+  #define Width 16
+  uint8_t *FileBuffer = malloc(Size);
+  bool working = true;
+  int sector = 0;
+  while(working){
+    working=AHCI_read(
+      Drive_PORTS[0],
+      sector,
+      0,
+      2,
+      (uint16_t *)FileBuffer
+    );
+    //printk(FileBuffer);
+    for(int y = 0; y < Size/8; y++){
+      for(int x = 0; x < 16; x++){
+        printChar(50+x, y, FileBuffer[x + y*16]);
+      }
+    }
+    if(FileBuffer[1] == 'E' && FileBuffer[2] == 'L' && FileBuffer[3] == 'F'){
+      working = false;
+      printk("%8h\n", sector);
+    }
+    sector++;
+    //for(unsigned int count =0; count < 0x111FFFF; count++){}
   }
   
   terminal_init();

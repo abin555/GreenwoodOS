@@ -23,6 +23,7 @@ void init_fb(struct multiboot_tag_framebuffer *tagfb){
 void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
     u32 x = (index % fb_terminal_w)*CHAR_W;
     u32 y = (index / fb_terminal_w)*CHAR_H;
+    if(!(c >= 32 && c <=126))  c=' ';
     for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
             fb[fb_width * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
@@ -30,6 +31,7 @@ void fb_write_cell(u32 index, char c, u32 fg, u32 bg){
     }
 }
 void printChar(unsigned int x, unsigned int y, char c){
+    if(!(c >= 32 && c <=126))  c=' ';
     for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
             fb[fb_width * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? FG : BG;
