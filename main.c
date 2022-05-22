@@ -83,7 +83,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   #define Size 2*512
   #define Width 16
   uint8_t *FileBuffer = malloc(Size);
-  bool working = true;
+  bool working = false;
   int sector = 0;
   while(working){
     working=AHCI_read(
@@ -106,7 +106,18 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     sector++;
     //for(unsigned int count =0; count < 0x111FFFF; count++){}
   }
-  
+  AHCI_read(
+    Drive_PORTS[0],
+    00,
+    0,
+    2,
+    (uint16_t *)FileBuffer
+  );
+  for(int y = 0; y < Size/8; y++){
+    for(int x = 0; x < 16; x++){
+      printChar(75+x, y, FileBuffer[x + y*16]);
+    }
+  }
   terminal_init();
 
   kmain_loop();
