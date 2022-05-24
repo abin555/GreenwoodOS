@@ -2,12 +2,12 @@
 
 void init_filesystem(){
     printk("Filesystem Init\n");
-    FileSystems = (filesystemDrive **)malloc(32 * sizeof(filesystemDrive));
+    FileSystems = (filesystemDrive **)malloc(32);
     numFS = 0;
 }
 
 void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStruct, void *read, void *write){
-    printk("Added File System ID: %2h\n", deviceType);
+    printk("Added File System Type: %2h ID: \n", deviceType, numFS);
     FileSystems[numFS] = malloc(sizeof(filesystemDrive));
     FileSystems[numFS]->type = deviceType;
     FileSystems[numFS]->portData = portStruct;

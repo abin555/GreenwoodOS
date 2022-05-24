@@ -15,12 +15,16 @@ OBJECTS = \
 		kernel_programs/pong.o\
 		kernel_programs/grapher.o\
 		DRIVERS/PCI.o\
-		DRIVERS/usb.o\
+		DRIVERS/usb/usb.o\
 		drivers.o\
 		DRIVERS/IDE.o\
 		console.o\
 		DRIVERS/ahci.o\
-		DRIVERS/filesystem.o
+		DRIVERS/filesystem.o\
+		DRIVERS/usb/ohci.o\
+		DRIVERS/usb/uhci.o\
+		DRIVERS/usb/ehci.o\
+		DRIVERS/usb/xhci.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
@@ -57,6 +61,7 @@ transfer-compiled:
 	cp *.o ./compile
 	rm -rf *.o
 	rm -rf ./DRIVERS/*.o
+	rm -rf ./DRIVERS/usb/*.o
 
 build_clean: os.iso transfer-compiled
 build_clean_run: os.iso transfer-compiled run

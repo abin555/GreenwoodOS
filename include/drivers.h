@@ -2,7 +2,7 @@
 #define DRIVERS_H
 
 #include "gcc_stdint.h"
-#include "usb.h"
+#include "../DRIVERS/usb/usb.h"
 #include "IDE.h"
 #include "PCI.h"
 #include "ahci.h"

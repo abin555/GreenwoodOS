@@ -10,7 +10,6 @@
 #include "pong.h"
 #include "memory.h"
 #include "PCI.h"
-#include "usb.h"
 #include "drivers.h"
 #include "console.h"
 #include "filesystem.h"
@@ -54,9 +53,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
 
-  mem_init(0x10000000);
+  mem_init(0x01000000);
 
   initializeConsole();
+  init_filesystem();
   printk("PCI Listing:\n\0");
   pci_init();
   /*
@@ -78,17 +78,19 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   }
   */
-  init_filesystem();
+
   printk("\nDriver Init:\n\0");
   activate_Drivers();
   
-  uint8_t *FileBuffer = malloc(512);
+  /*
+  uint16_t *FileBuffer = malloc(512);
   FS_read(0, 0, 1, (uint16_t *)FileBuffer);
   for(int y = 0; y < 32; y++){
     for(int x = 0; x < 16; x++){
       printChar(50+x, y, FileBuffer[x + y*16]);
     }
   }
+  */
 
   terminal_init();
 

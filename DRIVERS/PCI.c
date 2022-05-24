@@ -45,6 +45,7 @@ void add_pci_device(pci_device *pdev)
     }
 	devs++;
 	return;
+
     generic_install:;
     pdrive->init_one = pdev;
     pdrive->driverID = drivs;
@@ -55,9 +56,11 @@ void add_pci_device(pci_device *pdev)
     );
     pci_drivers[drivs] = pdrive;
     pci_load_BAR(pdev, pdrive);
+    
     drivs++;
     devs++;
     return;
+    
 }
 
 
@@ -154,7 +157,6 @@ void pci_probe()
 
                     printk("PCI Vendor: %4h Device: %4h Class: %4h\n\0", vendor, device, Class);
                     DebugLine++;
-
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
                     pdev->bus = bus;
                     pdev->slot = slot;
@@ -178,6 +180,6 @@ void pci_init()
 {
 	devs = drivs = 0;
 	pci_devices = (pci_device **)malloc(32 * sizeof(pci_device));
-	pci_drivers = (pci_driver **)malloc(32 * sizeof(pci_driver));
+    pci_drivers = (pci_driver **)malloc(32 * sizeof(pci_driver));
 	pci_probe();
 }
