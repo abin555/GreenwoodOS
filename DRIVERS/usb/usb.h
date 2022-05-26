@@ -6,7 +6,7 @@
 #include "hci.h"
 #include "drivers.h"
 
-char usb_driverName[30];
+char usb_driverName[31];
 
 uint32_t **usb_host_device_list;
 uint32_t usb_host_device_num;
