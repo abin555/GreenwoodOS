@@ -173,6 +173,29 @@ void terminal_interpret(){
         
         Terminal_OUT_pointer+=fb_terminal_w;
     }
+    if(terminal_compare("readFS", 0, Terminal_Arguments[0], 6)){
+        uint8_t drive = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        uint32_t sector = encodeHex(Terminal_Buffer, Terminal_Arguments[1]+1, Terminal_Arguments[2]);
+        FS_read(drive, sector, 1, (uint16_t *) filesystem_default_read_buffer);
+        for(int y = 0; y < 32; y++){
+            for(int x = 0; x < 16; x++){
+                printChar(x + (fb_terminal_w - 16 - 43), y, filesystem_default_read_buffer[y*16+x]);
+            }
+        }
+        //printk("Read Filesystem %2h %8h\n", drive, sector);
+    }
+    if(terminal_compare("debugFS", 0, Terminal_Arguments[0], 7)){
+        uint8_t drive = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        uint32_t sector = encodeHex(Terminal_Buffer, Terminal_Arguments[1]+1, Terminal_Arguments[2]);
+        FS_read(drive, sector, 1, (uint16_t *) filesystem_default_read_buffer);
+        for(int y = 0; y < 32; y++){
+            for(int x = 0; x < 3*16; x+=3){
+                decodeHex(STR_edit, filesystem_default_read_buffer[y*16+x], 8, 0);
+                printChar(20+x, y, STR_edit[1]);
+                printChar(20+x+1, y, STR_edit[2]);
+            }
+        }
+    }
 }
 
 void terminal_enter(){    

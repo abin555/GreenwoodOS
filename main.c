@@ -59,38 +59,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   init_filesystem();
   printk("PCI Listing:\n\0");
   pci_init();
-  /*
-  for(unsigned int drive = 0; drive < drivs; drive++){
-    decodeHex(STR_edit, pci_drivers[drive]->init_one->Class, 32, 0);
-    fb_write_xy(STR_edit, 32/4, 1, drive*9, 30);
-    for(int bar = 0; bar < 6; bar++){
-      uint32_t data = pci_drivers[drive]->BAR[bar];
-      
-      decodeHex(STR_edit, data, 32, 0);
-      fb_write_xy(STR_edit, 32/4, 1, drive*9, bar+31);
-    }
-  }
-
-  while(0){
-    strcpy("  HELLO \0", STR_edit+1, sizeof("   HELLO \0"));
-    STR_edit[0]++;
-    printk(STR_edit);
-
-  }
-  */
 
   printk("\nDriver Init:\n\0");
   activate_Drivers();
-  
-  /*
-  uint16_t *FileBuffer = malloc(512);
-  FS_read(0, 0, 1, (uint16_t *)FileBuffer);
-  for(int y = 0; y < 32; y++){
-    for(int x = 0; x < 16; x++){
-      printChar(50+x, y, FileBuffer[x + y*16]);
-    }
-  }
-  */
 
   terminal_init();
 

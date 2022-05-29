@@ -24,6 +24,8 @@ typedef struct __filesytemDrive{
 filesystemDrive **FileSystems;
 uint32_t numFS;
 
+uint8_t *filesystem_default_read_buffer;
+
 void init_filesystem();
 
 void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStruct, void *read, void *write);

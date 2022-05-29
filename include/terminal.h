@@ -10,6 +10,8 @@
 #include "grapher.h"
 #include "memory.h"
 #include "gcc_stdint.h"
+#include "filesystem.h"
+#include "console.h"
 
 #define TERMINAL_Buffer_Size 75
 #define TERMINAL_SPLIT ' '
