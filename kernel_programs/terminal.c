@@ -190,9 +190,35 @@ void terminal_interpret(){
         FS_read(drive, sector, 1, (uint16_t *) filesystem_default_read_buffer);
         for(int y = 0; y < 32; y++){
             for(int x = 0; x < 3*16; x+=3){
-                decodeHex(STR_edit, filesystem_default_read_buffer[y*16+x], 8, 0);
+                decodeHex(STR_edit, filesystem_default_read_buffer[y*16+(x/3)], 8, 0);
                 printChar(20+x, y, STR_edit[1]);
                 printChar(20+x+1, y, STR_edit[2]);
+            }
+        }
+    }
+    if(terminal_compare("FSreadbyte", 0, Terminal_Arguments[0], 10)){
+        uint16_t Byte = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
+        decodeHex(STR_edit, filesystem_default_read_buffer[Byte], 8, 0);
+        fb_write_xy(STR_edit, 2, 1, Terminal_OUT_pointer+1, 0);
+        Terminal_OUT_pointer+=fb_terminal_w;
+        int targetX = Byte % 16;
+        int targetY = Byte / 16;
+        for(int y = 0; y < 32; y++){
+            for(int x = 0; x < 3*16; x+=3){
+                if((x / 3) == targetX && y == targetY){    
+                    FG = 0;
+                    BG = 0xAFFFAF;
+                    decodeHex(STR_edit, filesystem_default_read_buffer[y*16+(x/3)], 8, 0);
+                    printChar(20+x, y, STR_edit[1]);
+                    printChar(20+x+1, y, STR_edit[2]);
+                    FG = 0xFFFFFF;
+                    BG = 0;
+                }
+                else{
+                    decodeHex(STR_edit, filesystem_default_read_buffer[y*16+(x/3)], 8, 0);
+                    printChar(20+x, y, STR_edit[1]);
+                    printChar(20+x+1, y, STR_edit[2]);
+                }
             }
         }
     }
