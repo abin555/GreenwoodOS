@@ -6,6 +6,7 @@ void usb_init_driver(int driverID){
     if(!usb_organized){    
         usb_host_device_list = (uint32_t **) malloc(32);
         usb_host_device_num = 0;
+        usb_organized = true;
     }
     printk(usb_driverName);
     switch(pci_drivers[driverID]->init_one->progIF){

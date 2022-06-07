@@ -196,7 +196,7 @@ void terminal_interpret(){
             }
         }
     }
-    if(terminal_compare("FSreadbyte", 0, Terminal_Arguments[0], 10)){
+    if(terminal_compare("fs", 0, Terminal_Arguments[0], 2)){
         uint16_t Byte = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
         decodeHex(STR_edit, filesystem_default_read_buffer[Byte], 8, 0);
         fb_write_xy(STR_edit, 2, 1, Terminal_OUT_pointer+1, 0);
