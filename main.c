@@ -13,7 +13,6 @@
 #include "drivers.h"
 #include "console.h"
 #include "filesystem.h"
-//#include "IDE.h"
 
 extern void load_gdt();
 

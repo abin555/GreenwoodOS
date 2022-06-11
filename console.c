@@ -107,7 +107,17 @@ void printk(char* msg, ...){
                     consoleLinePlace += printDecimal(va_arg(listptd, unsigned int), setlength);
                 break;
                 default:
-                if(msg[p] == '1'){
+                if(msg[p] == '1' && msg[p+1] == '6'){
+                    setlength = 16;
+                    p++;
+                    goto parseaftermodify;
+                }
+                else if(msg[p] == '3' && msg[p+1] == '2'){
+                    setlength = 32;
+                    p++;
+                    goto parseaftermodify;
+                }
+                else if(msg[p] == '1'){
                     setlength = 1;
                     goto parseaftermodify;
                 }
@@ -125,16 +135,6 @@ void printk(char* msg, ...){
                 }
                 else if(msg[p] == '8'){
                     setlength = 8;
-                    goto parseaftermodify;
-                }
-                else if(msg[p] == '1' && msg[p+1] == '6'){
-                    setlength = 16;
-                    p++;
-                    goto parseaftermodify;
-                }
-                else if(msg[p] == '3' && msg[p+1] == '2'){
-                    setlength = 32;
-                    p++;
                     goto parseaftermodify;
                 }
             }
