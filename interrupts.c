@@ -4,10 +4,12 @@
 #include "frame_buffer.h"
 #include "pic.h"
 #include "terminal.h"
+#include "console.h"
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
+#define INTERRUPTS_MOUSE 12
 #define INTERRUPTS_SYSCALL 0x80
 
 unsigned char SYS_MODE = 1;
@@ -42,6 +44,7 @@ void interrupt_install_idt()
 {
 	interrupts_init_descriptor(INTERRUPTS_KEYBOARD, (unsigned int) int_handler_33);
 	interrupts_init_descriptor(INTERRUPTS_KERNEL, (unsigned int) int_handler_34);
+	interrupts_init_descriptor(INTERRUPTS_MOUSE, (unsigned int) int_handler_12);
 	interrupts_init_descriptor(INTERRUPTS_SYSCALL, (unsigned int) int_handler_128);
 	//interrupts_init_descriptor(44, (unsigned int) int_handler_44);
 
@@ -106,8 +109,8 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 		case INTERRUPTS_SYSCALL:
 			SYS_CALL(cpu);
 			break;
-		case 44:
-			printChar(20,20,'M');
+		case INTERRUPTS_MOUSE:
+			printk("Mouse Interrupt\n");
 			break;
 		default:
 			break;

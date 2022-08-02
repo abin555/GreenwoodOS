@@ -23,8 +23,8 @@ framebuffer_tag_start:
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 1920
-	DD 1080
+	DD 1280;1920
+	DD 800;1080
 	DD 32
 framebuffer_tag_end:
 align 8
@@ -181,7 +181,7 @@ common_interrupt_handler:
 	iret
 
 no_err_int 33 ; handler for interrupt 1 (keyboard)
-no_err_int 44 ; handler for interrupt 12 (mouse)
+no_err_int 12 ; handler for interrupt 12 (mouse)
 no_err_int 34 ; kernel interrupt handler
 no_err_int 128 ; SYSTEM CALL INTERRUPT HANDLER
 

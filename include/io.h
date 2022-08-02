@@ -13,9 +13,18 @@ static inline void outdw(uint16_t port, uint32_t data) {
 	__asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
 }
 
+static inline void outqw(uint16_t port, uint32_t data){
+	__asm__ volatile("out edx,ebx" :: "a"(data), "d"(port));
+}
+
 static inline uint32_t indw(uint16_t port) {
 	uint32_t data;
 	__asm__ volatile("in eax,dx" : "=a"(data) : "d"(port));
+	return data;
+}
+static inline uint32_t inqw(uint16_t port){
+	uint32_t data;
+	__asm__ volatile("in eax,edx" : "=a"(data) : "d"(port));
 	return data;
 }
 

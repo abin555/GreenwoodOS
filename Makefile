@@ -6,6 +6,7 @@ OBJECTS = \
 		ascii_tables.o \
 		interrupts.o \
 		DRIVERS/keyboard.o \
+		DRIVERS/mouse.o \
 		kernel_programs/terminal.o \
 		kernel_programs/keyboard_test.o \
 		pic.o \
@@ -32,7 +33,7 @@ LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
 
-all: kernel.elf
+all: kernel.elf transfer-compiled
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf

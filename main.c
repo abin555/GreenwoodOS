@@ -13,6 +13,7 @@
 #include "drivers.h"
 #include "console.h"
 #include "filesystem.h"
+#include "mouse.h"
 
 extern void load_gdt();
 
@@ -55,12 +56,17 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   mem_init(0x01000000);
 
   initializeConsole();
+  //keyboard_enable();
+  //mouse_init();
+  //keyboard_enable();
+  
   init_filesystem();
   printk("PCI Listing:\n\0");
   pci_init();
 
   printk("\nDriver Init:\n\0");
   activate_Drivers();
+
 
   terminal_init();
 
