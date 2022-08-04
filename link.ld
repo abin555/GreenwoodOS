@@ -21,16 +21,5 @@ SECTIONS {
 		*(.bss)
 	}
 	kernel_end = .;
-	
-	. = 0x01000000;
-	.PROGA ALIGN (0x2000):
-	{
-		*(.PROGA)	
-	}
-	. = 0x02000000;
-	.PROGB ALIGN (0x2000):
-	{
-		*(.PROGB)
-	}
 	heap_start = 0x10000000;
 }	

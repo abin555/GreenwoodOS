@@ -14,6 +14,8 @@ void init_ps2(){
     inb(PS2_DATA);
 
     ps2_write(PS2_CMD, PS2_READ_CONFIG);
+    
+
     uint8_t config = ps2_read(PS2_DATA);
 
     config |= PS2_CFG_SYSTEM_FLAG;
@@ -35,12 +37,16 @@ void init_ps2(){
         return;
     }
 
+    
+
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
 
     ps2_write(PS2_CMD, PS2_ENABLE_SECOND);
     ps2_write(PS2_CMD, PS2_READ_CONFIG);
     config = ps2_read(PS2_DATA);
+
+    
 
     if(config & PS2_CFG_SECOND_CLOCK){
         printk("[PS2] Only one PS/2 controller\n");
@@ -67,6 +73,8 @@ void init_ps2(){
         }
     }
 
+    
+
     if(ps2_controllers[0]){
         ps2_write(PS2_CMD, PS2_ENABLE_FIRST);
         config |= PS2_CFG_FIRST_PORT;
@@ -81,6 +89,8 @@ void init_ps2(){
 
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
+
+    
 
     for(uint32_t i = 0; i < 2; i++){
         if(!ps2_controllers[i]) continue;
@@ -98,9 +108,20 @@ void init_ps2(){
         }
     }
 
+    //return;
     for(uint32_t i = 0; i < 2; i++){
+        if(i == 0){
+            printk("[PS2] Keyboard\n");
+            init_keyboard(i);
+        }
+        else if(i == 1){
+            printk("[PS2] Mouse\n");
+            mouse_init(i);
+        }
+        /*
         if(ps2_controllers[i]){
             uint32_t type = ps2_identify_dev(i);
+            break;
             switch(type){
                 case PS2_KEYBOARD:
                 case PS2_KEYBOARD_TRANSLATED:
@@ -114,7 +135,7 @@ void init_ps2(){
                     mouse_init(i);
                     break;
             }
-        }
+        }*/
     }
     IRQ_RES;
 }

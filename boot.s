@@ -121,12 +121,6 @@ load_gdt:
     mov ss, eax
     ret
 
-global externalProgram ;Pointer to the address of program regions
-externalProgram: dd program_A ;Used in C code to change the execution region of code.
-
-global PROGA: 					;Global function to call and execute external program.
-PROGA:
-	jmp [externalProgram]		;Jump to program pointer
 SYS_STATE: DB 0 ;0 = Kernel 1 = PROG
 
 
@@ -211,41 +205,3 @@ restore_kernel:
 restore_kernel_addr: dd 0x00100000
 
 ;EXTERNAL TEST PROGRAMS
-
-section .PROGA
-program_A:
-	mov eax, 0x00000001
-	mov ebx, 0x00000000
-	mov ecx, 'A'
-	jmp program_A_loop
-program_A_loop:
-	cmp ecx, 'z'+100
-	je program_A_end
-	int 0x80
-	add ebx, 1
-	inc ecx
-	jmp program_A_loop
-program_A_end:
-	ret
-
-section .PROGB
-program_B:
-	mov eax, 0x00000001
-	mov ebx, 0x00000100
-	mov ecx, 'T'
-	int 0x80
-	mov eax, 4
-	mov ebx, 130
-	int 0x80
-	mov eax, 0x00000002
-	mov ebx, Message_PROGB
-	mov ecx, 28
-	mov edx, 0
-	int 0x80
-	mov eax, 5
-	mov ebx, 600
-	mov ecx, 600
-	mov edx, 0x2EFFE2
-	int 0x80
-	ret
-Message_PROGB: DB "HELLO WORLD SERIOUSLY THOUGH"

@@ -95,39 +95,6 @@ void terminal_interpret(){
         fb_write_xy(STR_edit, 18, 0, Terminal_OUT_pointer+1, 0);
         Terminal_OUT_pointer+=fb_terminal_w;
     }
-    if(terminal_compare("load", 0, Terminal_Arguments[0], 4)){
-        WriteMem((int) externalProgram, 0x000001b8);
-        WriteMem((int) externalProgram + 0x05, 0x0000efbb);
-        WriteMem((int) externalProgram + 0x0a, 0x000054b9);
-        WriteMem((int) externalProgram + 0x0f, 0x000080cd);
-        WriteMem((int) externalProgram + 0x11, 0x000000c3);
-    }
-    if(terminal_compare("exec", 0, Terminal_Arguments[0], 4)){
-        PROGA();
-    }
-    if(terminal_compare("wipe", 0, Terminal_Arguments[0], 4)){
-        for(int i = 0; i < 1000; i++){
-            WriteMem((int)externalProgram+4*i, 0x00000000);
-        }
-    }
-    if(terminal_compare("check", 0, Terminal_Arguments[0], 5)){
-        decodeHex(STR_edit, (int) externalProgram, 32, 0);
-        fb_write_xy(STR_edit, 9, 0, Terminal_OUT_pointer+1, 0);
-        fb_write_cell(Terminal_OUT_pointer, '-', FB_RED, FB_BLACK);
-        Terminal_OUT_pointer+=fb_terminal_w;
-    }
-    if(terminal_compare("swap_PROG", 0, Terminal_Arguments[0], 9)){
-        if((int) externalProgram == 0x01000000){
-            externalProgram = (unsigned int *) 0x02000000;
-        }
-        else if((int) externalProgram == 0x02000000){
-            externalProgram = (unsigned int *) 0x01000000;
-        }
-    }
-    if(terminal_compare("set_PROG", 0, Terminal_Arguments[0], 8)){
-        unsigned int addr = encodeHex(Terminal_Buffer, Terminal_Arguments[0]+1, Terminal_Arguments[1]);
-        externalProgram = (unsigned int *) addr;
-    }
     if(terminal_compare("clear", 0, Terminal_Arguments[0], 5)){
         fb_clear(0);
         Terminal_OUT_pointer = 0;
