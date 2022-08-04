@@ -55,6 +55,8 @@ void keyboard_handle_interrupt(unsigned int interrupt);
 
 char convertascii(unsigned char scan_code);
 
+void init_keyboard(uint32_t dev);
+
 unsigned char keyboard_KEYBUFFER[KEYBOARD_BUFFERSIZE];
 char keyboard_ASCIIBuffer[KEYBOARD_BUFFERSIZE];
 

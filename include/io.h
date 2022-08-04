@@ -3,6 +3,9 @@
 
 #include "gcc_stdint.h"
 
+#define IRQ_OFF { asm volatile ("cli"); }
+#define IRQ_RES { asm volatile ("sti"); }
+
 extern void outb(unsigned short port, unsigned char data);
 extern unsigned char inb(unsigned short pos);
 

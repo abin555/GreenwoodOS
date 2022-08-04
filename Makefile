@@ -25,7 +25,8 @@ OBJECTS = \
 		DRIVERS/usb/ohci.o\
 		DRIVERS/usb/uhci.o\
 		DRIVERS/usb/ehci.o\
-		DRIVERS/usb/xhci.o
+		DRIVERS/usb/xhci.o \
+		DRIVERS/ps2.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c

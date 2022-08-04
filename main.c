@@ -14,12 +14,23 @@
 #include "console.h"
 #include "filesystem.h"
 #include "mouse.h"
+#include "ps2.h"
+#include "pic.h"
 
 extern void load_gdt();
 
 void kmain_loop(){
+  int state = 0;
   while(1){
     terminal_handler();
+    if(state){
+      printChar(25, 25, 'A');
+    }
+    else{
+      printChar(25,25, 'Z');
+    }
+    state = !state;
+    //printk("%2h\n", inb(PS2_DATA));
   }
 }
 
@@ -50,12 +61,16 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
   load_gdt();
   interrupt_install_idt();
+
   fb_set_color(0xFFFFFF,0);
   restore_kernel_addr = (u32 *) &kmain_loop;
 
   mem_init(0x01000000);
 
   initializeConsole();
+  //mouse_init_sanik();
+  
+  init_ps2();
   //keyboard_enable();
   //mouse_init();
   //keyboard_enable();

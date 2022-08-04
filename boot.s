@@ -181,8 +181,10 @@ common_interrupt_handler:
 	iret
 
 no_err_int 33 ; handler for interrupt 1 (keyboard)
-no_err_int 12 ; handler for interrupt 12 (mouse)
 no_err_int 34 ; kernel interrupt handler
+
+no_err_int 44 ; handler for interrupt 12 (mouse)
+
 no_err_int 128 ; SYSTEM CALL INTERRUPT HANDLER
 
 global load_idt

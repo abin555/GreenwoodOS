@@ -2,6 +2,7 @@
 #include "frame_buffer.h"
 #include "ascii_tables.h"
 #include "string.h"
+#include "ps2.h"
 
 unsigned char prev_Scancode = 0;
 unsigned int keyboard_KEYBUFFER_POINTER = 0;
@@ -152,4 +153,30 @@ void keyboard_handle_interrupt(unsigned int interrupt){
     if(keyboard_KEYBUFFER_POINTER >= KEYBOARD_BUFFERSIZE){
         keyboard_KEYBUFFER_POINTER = 0;
     }
+}
+uint32_t keyboard_device;
+uint8_t keyboard_scancode_set;
+
+#define KBD_SSC_CMD 0xF0
+#define KBD_SSC_GET 0x00
+#define KBD_SSC_2 0x02
+#define KBD_SSC_3 0x03
+
+void init_keyboard(uint32_t dev){
+    ps2_write_device(dev, KBD_SSC_CMD);
+    ps2_expect_ack();
+    ps2_write_device(dev, KBD_SSC_GET);
+    ps2_expect_ack();
+    keyboard_scancode_set = ps2_read(PS2_DATA);
+    printk("[Keyboard] Scancode set %2h\n", keyboard_scancode_set);
+    if(keyboard_scancode_set != 1){
+        ps2_write_device(dev, KBD_SSC_CMD);
+        ps2_expect_ack();
+        ps2_write_device(dev, 1);
+        ps2_expect_ack();
+    }
+    printk("[Keyboard] Enabling Keyboard\n");
+    ps2_write_device(dev, PS2_DEV_ENABLE_SCAN);
+    ps2_expect_ack();
+    printk("[Keyboard] Keyboard Initialized\n");
 }

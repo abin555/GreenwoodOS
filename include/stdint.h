@@ -2,7 +2,7 @@
 #define STDINT_H
 
 #define bool _Bool
-#define uint8_t char
+#define uint8_t unsigned char
 #define true 1
 #define false 0
 #define uint16_t unsigned short

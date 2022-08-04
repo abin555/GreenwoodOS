@@ -5,5 +5,4 @@ qemu-system-x86_64 -boot order=c -m 512 -monitor stdio ^
 -device ahci,id=ahci ^
 -device ide-hd,drive=disk,bus=ahci.0 ^
 -device ide-hd,drive=disk2,bus=ahci.1 ^
--usb -device usb-ehci ^
--device usb-mouse
+-usb -device usb-ehci

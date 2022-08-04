@@ -5,11 +5,12 @@
 #include "pic.h"
 #include "terminal.h"
 #include "console.h"
+#include "mouse.h"
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 #define INTERRUPTS_KEYBOARD 33
 #define INTERRUPTS_KERNEL 34
-#define INTERRUPTS_MOUSE 12
+#define INTERRUPTS_MOUSE 44
 #define INTERRUPTS_SYSCALL 0x80
 
 unsigned char SYS_MODE = 1;
@@ -42,18 +43,32 @@ void interrupts_init_descriptor(int index, unsigned int address)
 
 void interrupt_install_idt()
 {
+	asm("cli");
+	//irq_remap();
+	pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
+	
+	//IRQ_clear_mask(0);
+	//IRQ_clear_mask(1);
+	IRQ_clear_mask(2);
+	//IRQ_clear_mask(3);
+	//IRQ_clear_mask(4);
+	//IRQ_clear_mask(5);
+	//IRQ_clear_mask(6);
+	//IRQ_clear_mask(7);
+	IRQ_clear_mask(12);
+
 	interrupts_init_descriptor(INTERRUPTS_KEYBOARD, (unsigned int) int_handler_33);
 	interrupts_init_descriptor(INTERRUPTS_KERNEL, (unsigned int) int_handler_34);
-	interrupts_init_descriptor(INTERRUPTS_MOUSE, (unsigned int) int_handler_12);
+	//interrupts_init_descriptor(INTERRUPTS_MOUSE, (unsigned int) int_handler_44);
 	interrupts_init_descriptor(INTERRUPTS_SYSCALL, (unsigned int) int_handler_128);
-	//interrupts_init_descriptor(44, (unsigned int) int_handler_44);
 
 	idt.address = (int) &idt_descriptors;
 	idt.size = sizeof(struct IDTDescriptor) * INTERRUPT_DESCRIPTOR_COUNT;
 	load_idt((int) &idt);
 
 	/*pic_remap(PIC_PIC1_OFFSET, PIC_PIC2_OFFSET);*/
-	pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
+	asm("sti");
+
 }
 
 void KERNEL_INTERRUPT(){
@@ -98,7 +113,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 {
 	//unsigned char scan_code;
 	//unsigned char ascii;;
-
+	//printk("Interrupt: %2h\n", interrupt);
 	switch (interrupt){
 		case INTERRUPTS_KEYBOARD:
             keyboard_handle_interrupt(interrupt);
@@ -110,7 +125,9 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 			SYS_CALL(cpu);
 			break;
 		case INTERRUPTS_MOUSE:
-			printk("Mouse Interrupt\n");
+			//printk("Mouse Interrupt\n");
+			mouse_interrupt_handler();
+			pic_acknowledge(interrupt); 
 			break;
 		default:
 			break;

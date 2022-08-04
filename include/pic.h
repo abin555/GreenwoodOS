@@ -44,4 +44,7 @@
 void pic_acknowledge(unsigned int interrupt);
 void pic_remap(int offset1, int offset2);
 
+void IRQ_set_mask(unsigned char IRQline);
+void IRQ_clear_mask(unsigned char IRQline);
+
 #endif
