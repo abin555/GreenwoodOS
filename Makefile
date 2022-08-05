@@ -1,32 +1,5 @@
 OBJECTS = \
-		boot.o \
-		main.o \
-		io.o \
-		frame_buffer.o \
-		ascii_tables.o \
-		interrupts.o \
-		DRIVERS/keyboard.o \
-		DRIVERS/mouse.o \
-		kernel_programs/terminal.o \
-		kernel_programs/keyboard_test.o \
-		pic.o \
-		string.o\
-		memory.o\
-		gfx.o\
-		kernel_programs/pong.o\
-		kernel_programs/grapher.o\
-		DRIVERS/PCI.o\
-		DRIVERS/usb/usb.o\
-		drivers.o\
-		DRIVERS/IDE.o\
-		console.o\
-		DRIVERS/ahci.o\
-		DRIVERS/filesystem.o\
-		DRIVERS/usb/ohci.o\
-		DRIVERS/usb/uhci.o\
-		DRIVERS/usb/ehci.o\
-		DRIVERS/usb/xhci.o \
-		DRIVERS/ps2.o
+		boot.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
