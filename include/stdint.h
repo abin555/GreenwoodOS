@@ -8,5 +8,6 @@
 #define uint16_t unsigned short
 #define uint32_t unsigned int
 #define uintptr_t unsigned int
+typedef unsigned long long int uint64_t;
 
 #endif

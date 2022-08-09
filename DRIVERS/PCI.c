@@ -155,7 +155,7 @@ void pci_probe()
                     uint16_t Class = getDeviceClass(bus, slot, function);
                     uint16_t progIF = getDeviceProgIF(bus,slot,function);
 
-                    printk("PCI Vendor: %4h Device: %4h Class: %4h\n\0", vendor, device, Class);
+                    printk("PCI Vendor: %4h Device: %4h Class: %4h ProgIf: %4x\n\0", vendor, device, Class, progIF);
                     DebugLine++;
                     pci_device *pdev = (pci_device *)malloc(sizeof(pci_device));
                     pdev->bus = bus;

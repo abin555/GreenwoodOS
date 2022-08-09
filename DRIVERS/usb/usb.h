@@ -5,6 +5,8 @@
 #include "PCI.h"
 #include "hci.h"
 #include "drivers.h"
+#include "xhci.h"
+#include "ehci.h"
 
 char usb_driverName[31];
 

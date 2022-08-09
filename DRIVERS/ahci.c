@@ -75,7 +75,7 @@ void probe_port(HBA_MEM *abar)
 			}
 			else
 			{
-				printk("No drive found at port %2h\n", i);
+				//printk("No drive found at port %2h\n", i);
 			}
 		}
  

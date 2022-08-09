@@ -12,8 +12,28 @@ char mouse_middle_pressed;
 uint32_t current_byte = 0;
 uint32_t bytes_per_packet = 3;
 uint8_t packet[4] = { 0 };
+uint32_t mouse_replace_pixels[8*8];
+
+char mouse_img[8] = {
+    0b10000000,
+    0b11000000,
+    0b11100000,
+    0b11110000,
+    0b11111000,
+    0b11111100,
+    0b11111110,
+    0b11111111
+};
+
 
 void mouse_interrupt_handler(){
+
+    for(int x = 0; x < 8; x++){
+        for(int y = 0; y < 8; y++){
+            fb_setPixel(mouse_x+x, mouse_y+y, mouse_replace_pixels[y*8+x]);
+        }
+    }
+
     //fb_setPixel(x, y, 0);
     uint8_t byte = ps2_read(PS2_DATA);
     if(current_byte == 0 && !(byte & MOUSE_ALWAYS_SET)){
@@ -26,9 +46,10 @@ void mouse_interrupt_handler(){
     }
     //fb_setPixel(x, y, 0xFF00FF);
 
-    for(int x = 0; x < 4; x++){
-        for(int y = 0; y < 4; y++){
-            fb_setPixel(mouse_x+x, mouse_y+y, 0xFFFFFF);
+    for(int x = 0; x < 8; x++){
+        for(int y = 0; y < 8; y++){
+            mouse_replace_pixels[y*8+x] = fb[((mouse_y + y)) * fb_width + (mouse_x + x)];
+            fb_setPixel(mouse_x+x, mouse_y+y, ((mouse_img[y] << x) & 0b10000000) ? 0xFFFFFF : mouse_replace_pixels[y*8+x]);
         }
     }
 }
@@ -62,75 +83,36 @@ void mouse_handle_packet(){
     mouse_right_pressed = flags & MOUSE_RIGHT;
     mouse_middle_pressed = flags & MOUSE_MIDDLE;
 
-    mouse_x += delta_x;
-    mouse_y -= delta_y;
+    //mouse_x += delta_x;
+    //mouse_y -= delta_y;
+
+    if((mouse_x + delta_x) > 0 && (mouse_x + delta_x) <= (int) fb_width){
+        mouse_x += delta_x;
+    }
+    else{
+        //mouse_x += -delta_x;
+    }
+    if((mouse_y - delta_y) > 0 && (mouse_y - delta_y) <= (int) fb_height){
+        mouse_y -= delta_y;
+    }
+    else{
+        //mouse_y -= -delta_y;
+    }
+
+    if(mouse_left_pressed){
+        printk("Mouse Left\n");
+    }
+
     //printk("Mouse X: %h Mouse Y: %h\n", x, y);
 }
 
-void mouse_wait(uint8_t type){
-    int timeout = 10000000;
-    if(type == 0){
-        while(timeout--){
-            if((inb(MOUSE_STATUS) & 0x01) == 1){
-                return;
-            }
-        }
-        printk("Mouse Timeout : 0\n");
-        return;
-    }
-    else{
-        while(timeout--){
-            if(!(inb(MOUSE_STATUS) & 0x02)){
-                return;
-            }
-        }
-        printk("Mouse Timeout : 1\n");
-        return;
-    }
-}
-void mouse_write(uint8_t data){
-    mouse_wait(1);
-    outb(MOUSE_STATUS, 0xD4);
-    mouse_wait(1);
-    outb(MOUSE_PORT, data);
-}
-uint8_t mouse_read(){
-    mouse_wait(0);
-    uint8_t in = inb(MOUSE_PORT);
-    printk("%b\n", in);
-    return in;
-}
-
-void mouse_init_sanik(){
-    uint8_t status;
-
-    mouse_wait(1);
-    outb(0x64, 0xA8);
-
-    mouse_wait(1);
-    outb(0x64, 0x20);
-    mouse_wait(0);
-    status=(inb(0x60) | 2);
-    mouse_wait(1);
-    outb(0x64, 0x60);
-    mouse_wait(1);
-    outb(0x60, status);
-
-    mouse_write(0xF6);
-    mouse_read();
-
-    mouse_write(0xF4);
-    mouse_read();
-
-    interrupts_init_descriptor(44, (unsigned int) int_handler_44);
-}
 
 void mouse_init(uint8_t device){
     printk("[ps2] Initializing Mouse\n");
     IRQ_OFF;
     mouse_device = device;
-    mouse_x = 0;
-    mouse_y = 0;
+    mouse_x = fb_width / 2;
+    mouse_y = fb_height / 2;
     mouse_left_pressed = 0;
     mouse_right_pressed = 0;
     mouse_middle_pressed = 0;

@@ -38,6 +38,7 @@ extern unsigned int kernel_end;
 
 int kmain(unsigned long magic, unsigned long magic_addr){
   struct multiboot_tag *tag;
+  __attribute__((unused)) struct multiboot_tag_mmap* memory_map; 
   //unsigned size;
   if(magic != MULTIBOOT2_BOOTLOADER_MAGIC){
     return 0xFF;
@@ -49,12 +50,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag + ((tag->size + 7) & ~7))
   ){
     switch(tag->type){
-      case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-        {
-            struct multiboot_tag_framebuffer *tagfb
-              = (struct multiboot_tag_framebuffer *) tag;
-            init_fb(tagfb);
-        }
+      case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:{
+        struct multiboot_tag_framebuffer *tagfb = (struct multiboot_tag_framebuffer *) tag;
+        init_fb(tagfb);
+        break;
+      }
+      case MULTIBOOT_TAG_TYPE_MMAP:
+        //memory_map = (struct multiboot_tag_mmap *) tag;
+        break;
     }
   }
 
@@ -68,12 +71,13 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   mem_init(0x01000000);
 
   initializeConsole();
-  //mouse_init_sanik();
-  
+  /*
+  printk("Memory Map:\n");
+  for(unsigned int i = 0; i < memory_map->entry_size; i++){
+    printk("Addr: %8h%8h Sz: %8h%8h Type: %2h Zero: %8h\n", memory_map->entries[i].addr, memory_map->entries[i].len, memory_map->entries[i].type, memory_map->entries[i].zero);
+  }
+  */
   init_ps2();
-  //keyboard_enable();
-  //mouse_init();
-  //keyboard_enable();
   
   init_filesystem();
   printk("PCI Listing:\n\0");

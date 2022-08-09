@@ -96,6 +96,8 @@ void printk(char* msg, ...){
             switch(msg[p]){
                 case 'h'://Hexadecimal
                 case 'H':
+                case 'x':
+                case 'X':
                     consoleLinePlace += printHex(va_arg(listptd, unsigned int), setlength);
                 break;
                 case 'b'://Binary
@@ -106,6 +108,10 @@ void printk(char* msg, ...){
                 case 'D':
                     consoleLinePlace += printDecimal(va_arg(listptd, unsigned int), setlength);
                 break;
+                case 'c':
+                case 'C':
+                    consoleLinePlace += va_arg(listptd, unsigned int);
+                    break;
                 default:
                 if(msg[p] == '1' && msg[p+1] == '6'){
                     setlength = 16;
@@ -166,6 +172,12 @@ void printk(char* msg, ...){
 
     console_putScreen();
     va_end(listptd);
+    /*
+    for(int loop1 = 0; loop1 < 0xFFFF; loop1++){
+        for(int loop2 = 0; loop2 < 0x6FF; loop2++){
+
+        }
+    }*/
 }
 /*
 void kprintF(const char* restrict fmt, ...){

@@ -17,10 +17,11 @@ void usb_init_driver(int driverID){
             printk("OHCI \0");
             break;
         case 0x20:
-            printk("EHCI \0");
+            //printk("EHCI \0");
+            ehci_init(driverID);
             break;
         case 0x30:
-            printk("XHCI \0");
+            xhci_init(driverID);
             break;
         case 0x80:
             printk("UNKN \0");
@@ -31,7 +32,7 @@ void usb_init_driver(int driverID){
         default:
             break;
     }
-    printk(" | %2h  USB BAR:\n\0", driverID);
+    printk("%2h  USB BAR:\n\0", driverID);
     for(int i = 0; i < 6; i++){
         printk("%1h %8h\n\0", i, pci_drivers[driverID]->BAR[i]);
     }  

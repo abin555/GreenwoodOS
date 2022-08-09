@@ -32,15 +32,11 @@ extern uint8_t mouse_cycle;
 extern char mouse_byte[3];
 extern int mouse_x;
 extern int mouse_y;
+extern uint32_t mouse_replace_pixels[8*8];
 
 void mouse_interrupt_handler();
 void mouse_handle_packet();
 
-void mouse_init_sanik();
-
-void mouse_wait(uint8_t type);
-void mouse_write(uint8_t data);
-uint8_t mouse_read();
 
 void mouse_init(uint8_t device);
 
