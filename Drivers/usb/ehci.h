@@ -161,19 +161,36 @@ struct ehci_PORTSC{//Port Status / Control
     uint32_t Reserved2 : 9;
 };
 
+enum ehci_OPER_Offsets{
+    EHCI_OPS_USBCMD = 0,
+    EHCI_OPS_USBSTS = 4,
+    EHCI_OPS_USBINTR = 8,
+    EHCI_OPS_FRINDEX = 12,
+    EHCI_OPS_CTRLDSSEGMENT = 16,
+    EHCI_OPS_PERIODICLISTBASE = 20,
+    EHCI_OPS_ASYNCLISTADDR = 24,
+    EHCI_OPS_CONFIGFLAG = (sizeof(uint32_t) * 9) + 24 + 4
+};
+
 struct ehci_operational_registers{
-    struct ehci_USBCMD USBCMD;
-    struct ehci_USBSTS USBSTS;
-    struct ehci_USBINTR USBINTR;
-    struct ehci_FRINDEX FRINDEX;
-    struct ehci_CTRLDSSEGMENT CTRLDSSEGMENT;
+    struct ehci_USBCMD USBCMD;//USB Command
+    struct ehci_USBSTS USBSTS;//USB Status
+    struct ehci_USBINTR USBINTR;//Usb Interrupt
+    struct ehci_FRINDEX FRINDEX;//Frame Index
+    struct ehci_CTRLDSSEGMENT CTRLDSSEGMENT;//Control DS Segment
     struct ehci_PERIODICLISTBASE PERIODICLISTBASE;
     struct ehci_ASYNCLISTADDR ASYNCLISTADDR;
+    uint32_t Reserved[9];
     struct ehci_CONFIGFLAG CONFIGFLAG;
     struct ehci_PORTSC PORTSC[];
 };
 
 void ehci_init(int PCI_Driver_ID);
 struct ehci_PORTSC ehci_read_port(int PCI_Driver_ID, int portnum);
+bool ehci_detect_root(int PCI_Driver_ID);
 
+void ehci_write_oper_reg(uint32_t base, uint32_t offset, uint32_t value);
+uint32_t ehci_read_oper_reg(uint32_t base, uint32_t offset);
+void ehci_write_cap_reg(uint32_t base, uint32_t offset, uint32_t value);
+uint32_t ehci_read_cap_reg(uint32_t base, uint32_t offset);
 #endif
