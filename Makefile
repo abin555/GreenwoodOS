@@ -26,7 +26,8 @@ OBJECTS = \
 		DRIVERS/usb/uhci.o\
 		DRIVERS/usb/ehci.o\
 		DRIVERS/usb/xhci.o \
-		DRIVERS/ps2.o
+		DRIVERS/ps2.o \
+		timer.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
@@ -46,8 +47,7 @@ run: os.iso transfer-compiled
 	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio \
 	-vga std \
 	-device ahci,id=ahci \
-	-usb \
-	-device usb-ehci,id=ehci
+	-usb
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

@@ -2,7 +2,7 @@
 #define USB_H
 
 #include "frame_buffer.h"
-#include "PCI.h"
+#include "pci.h"
 #include "hci.h"
 #include "drivers.h"
 #include "xhci.h"

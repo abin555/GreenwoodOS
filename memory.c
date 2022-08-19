@@ -56,7 +56,7 @@ void* malloc(unsigned int size){
             a->status = 1;//mark region as in use.;
             memset((uint32_t *) mem + sizeof(alloc_t), 0, size); //clear requested & available region.
             memory_used += size; //Increase counter of used memory
-            printHeap();
+            //printHeap();
             return (void *)((uint32_t) mem + sizeof(alloc_t));
             //last_alloc = (uint32_t) mem;
         } 
@@ -86,7 +86,7 @@ void* malloc(unsigned int size){
     //set memory in block
 	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
 
-    printHeap();
+    //printHeap();
     //return pointer
 	return (void *)((uint32_t)alloc + sizeof(alloc_t));
 }
@@ -99,7 +99,7 @@ void free(void *mem){
     if((uint32_t) mem == last_alloc){
         last_alloc -= (uint32_t) mem + sizeof(alloc_t);
     }
-    printHeap();
+    //printHeap();
 }
 
 unsigned int mgetSize(void *mem){

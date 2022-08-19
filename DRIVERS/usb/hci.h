@@ -3,7 +3,7 @@
 
 #include "drivers.h"
 #include "console.h"
-#include "PCI.h"
+#include "pci.h"
 #include "memory.h"
 
 typedef struct __uhci_cmd_reg{

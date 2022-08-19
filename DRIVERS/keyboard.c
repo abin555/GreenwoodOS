@@ -179,4 +179,5 @@ void init_keyboard(uint32_t dev){
     ps2_write_device(dev, PS2_DEV_ENABLE_SCAN);
     ps2_expect_ack();
     printk("[Keyboard] Keyboard Initialized\n");
+    interrupt_add_handle(33, &keyboard_handle_interrupt);
 }

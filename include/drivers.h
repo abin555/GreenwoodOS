@@ -4,7 +4,7 @@
 #include "gcc_stdint.h"
 #include "../DRIVERS/usb/usb.h"
 #include "IDE.h"
-#include "PCI.h"
+#include "pci.h"
 #include "ahci.h"
 #include "console.h"
 #include "filesystem.h"

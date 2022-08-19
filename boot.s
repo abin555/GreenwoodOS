@@ -174,9 +174,38 @@ common_interrupt_handler:
 	;return the system
 	iret
 
+no_err_int 0
+no_err_int 1
+no_err_int 2
+no_err_int 3
+no_err_int 4
+no_err_int 5
+no_err_int 6
+no_err_int 7
+err_int_handler 8
+no_err_int 9
+err_int_handler 10
+err_int_handler 11
+err_int_handler 12
+err_int_handler 13
+err_int_handler 14
+no_err_int 15
+no_err_int 16
+no_err_int 17
+no_err_int 18
+
+no_err_int 32
 no_err_int 33 ; handler for interrupt 1 (keyboard)
 no_err_int 34 ; kernel interrupt handler
-
+no_err_int 35
+no_err_int 36
+no_err_int 37
+no_err_int 38
+no_err_int 39
+no_err_int 40
+no_err_int 41
+no_err_int 42
+no_err_int 43
 no_err_int 44 ; handler for interrupt 12 (mouse)
 
 no_err_int 128 ; SYSTEM CALL INTERRUPT HANDLER

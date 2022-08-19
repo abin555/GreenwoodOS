@@ -1,4 +1,4 @@
-#include "PCI.h"
+#include "pci.h"
 
 pci_device **pci_devices = 0;
 uint32_t devs = 0;

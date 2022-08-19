@@ -9,13 +9,14 @@
 #include "gfx.h"
 #include "pong.h"
 #include "memory.h"
-#include "PCI.h"
+#include "pci.h"
 #include "drivers.h"
 #include "console.h"
 #include "filesystem.h"
 #include "mouse.h"
 #include "ps2.h"
 #include "pic.h"
+#include "timer.h"
 
 extern void load_gdt();
 
@@ -30,6 +31,7 @@ void kmain_loop(){
       printChar(25,25, 'Z');
     }
     state = !state;
+    delay(250);
     //printk("%2h\n", inb(PS2_DATA));
   }
 }
@@ -86,6 +88,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   printk("\nDriver Init:\n\0");
   activate_Drivers();
 
+  timer_init(1000);
 
   terminal_init();
 

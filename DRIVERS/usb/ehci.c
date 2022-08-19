@@ -35,7 +35,6 @@ void ehci_init(int PCI_Driver_ID){
         printk("\n");
         addr = (uint32_t *) ((uint32_t) addr + 4);
     }
-
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_USBINTR, 0x07);
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_FRINDEX, 0);
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_PERIODICLISTBASE, PERIODIC_BASE);
@@ -44,7 +43,21 @@ void ehci_init(int PCI_Driver_ID){
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_USBSTS, 0x0000003F);
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_USBCMD, 0x00080031);
     ehci_write_oper_reg(ehci_BAR, EHCI_OPS_CONFIGFLAG, 1);
+
+    for(int i = 0; i < capability_reg->HCSPARAMS.NPORTS; i++){
+        printk("[EHCI] Port %2x\n", i);
+        printk("Port Status %1x\n", operational_reg->PORTSC[i].Current_Connect_Status);
+        printk("Line Status %1x\n", operational_reg->PORTSC[i].Line_Status);
+    }
 }
+/*
+void ehci_reset_port(int PCI_Driver_ID, int port){
+    uint32_t ehci_BAR = pci_drivers[PCI_Driver_ID]->BAR[0];
+    struct ehci_capability_registers* capability_reg = (struct ehci_capability_registers *) ehci_BAR;
+    struct ehci_operational_registers* operational_reg = (struct ehci_operational_registers *) (ehci_BAR + capability_reg->CAPLENGTH);
+
+
+}*/
 
 struct ehci_PORTSC ehci_read_port(int PCI_Driver_ID, int portnum){
     uint32_t ehci_BAR = pci_drivers[PCI_Driver_ID]->BAR[0];
@@ -71,19 +84,8 @@ bool ehci_detect_root(int PCI_Driver_ID){
         }
     }
     printk("%x\n", *(uint32_t *) &operational_reg->USBCMD);
-    if(capability_reg->HCCPARAMS.Async_Sch_Park_Capability && (*(uint32_t *) &operational_reg->USBCMD != 0x00080B00)) goto Failure_to_Reset;
-    if(!capability_reg->HCCPARAMS.Async_Sch_Park_Capability && (*(uint32_t *) &operational_reg->USBCMD != 0x00080000)) goto Failure_to_Reset;
-    if(*(uint32_t *) &operational_reg->USBSTS != 0x00001000) goto Failure_to_Reset;
-    if(*(uint32_t *) &operational_reg->USBINTR != 0x00000000) goto Failure_to_Reset;
-    //if(*(uint32_t *) &operational_reg->FRINDEX != 0) goto Failure_to_Reset;
-    //if(*(uint32_t *) &operational_reg->CTRLDSSEGMENT != 0x00000000) goto Failure_to_Reset;
-    //if(*(uint32_t *) &operational_reg->CONFIGFLAG != 0x00000000) goto Failure_to_Reset;
-
 
     return true;
-    Failure_to_Reset:
-    printk("[USB] [EHCI] Failure to reinitialize\n");
-    return false;
 }
 
 void ehci_write_oper_reg(uint32_t base, uint32_t offset, uint32_t value){

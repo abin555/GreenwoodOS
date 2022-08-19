@@ -49,7 +49,8 @@ void mouse_interrupt_handler(){
     for(int x = 0; x < 8; x++){
         for(int y = 0; y < 8; y++){
             mouse_replace_pixels[y*8+x] = fb[((mouse_y + y)) * fb_width + (mouse_x + x)];
-            fb_setPixel(mouse_x+x, mouse_y+y, ((mouse_img[y] << x) & 0b10000000) ? 0xFFFFFF : mouse_replace_pixels[y*8+x]);
+            //fb_setPixel(mouse_x+x, mouse_y+y, ((mouse_img[y] << x) & 0b10000000) ? 0xFFFFFF : mouse_replace_pixels[y*8+x]);
+            fb_setPixel(mouse_x+x, mouse_y+y, 0xFFFFFF);
         }
     }
 }
@@ -129,7 +130,7 @@ void mouse_init(uint8_t device){
     ps2_write_device(device, PS2_DEV_ENABLE_SCAN);
     ps2_expect_ack();
 
-    interrupts_init_descriptor(44, (unsigned int) int_handler_44);
+    interrupt_add_handle(44, &mouse_interrupt_handler);
     IRQ_RES;
 }
 

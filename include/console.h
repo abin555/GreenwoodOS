@@ -13,7 +13,7 @@ uint32_t consoleSize;
 uint32_t consoleLinePlace;
 
 void initializeConsole();
-
+void shiftConsoleUp();
 int calculateNumberLength(unsigned int data, int base);
 int printDecimal(unsigned int data, int setlength);
 int printHex(unsigned int data, int setlength);

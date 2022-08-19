@@ -45,8 +45,9 @@ struct stack_state {
 void irq_remap();
 void interrupts_init_descriptor(int index, unsigned int address);
 void interrupt_install_idt();
+extern void (*interrupt_handlers[0xFF])(struct cpu_state);
 
-
+extern void int_handler_0();
 extern void int_handler_1();
 extern void int_handler_2();
 extern void int_handler_3();
@@ -65,21 +66,7 @@ extern void int_handler_15();
 extern void int_handler_16();
 extern void int_handler_17();
 extern void int_handler_18();
-extern void int_handler_19();
-extern void int_handler_20();
-extern void int_handler_21();
-extern void int_handler_22();
-extern void int_handler_23();
-extern void int_handler_24();
-extern void int_handler_25();
-extern void int_handler_26();
-extern void int_handler_27();
-extern void int_handler_28();
-extern void int_handler_29();
-extern void int_handler_30();
-extern void int_handler_31();
 extern void int_handler_32();
-
 extern void int_handler_33();
 extern void int_handler_34();
 
@@ -110,6 +97,8 @@ extern void int_handler_56();
 
 extern void int_handler_128();
 
+
+void interrupt_add_handle(uint8_t interrupt, void *handler);
 void load_idt(unsigned int idt_address);
 
 void KERNEL_INTERRUPT();

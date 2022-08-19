@@ -1,7 +1,7 @@
 #ifndef IDE_H
 #define IDE_H
 #include "io.h"
-#include "PCI.h"
+#include "pci.h"
 #include "console.h"
 
 #define    ATA_SR_BSY      0x80

@@ -11,15 +11,24 @@ void initializeConsole(){
 
 void console_putScreen(){
     for(int indexY = 0; indexY < fb_terminal_h; indexY++){
+        char clearline = 0;
         for(int indexX = 0; indexX < fb_terminal_w; indexX++){
+            fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
             char sym = consoleArray[indexX + indexY * fb_terminal_w];
-            if(sym != '\0' && sym != '\n'){
+            if(sym != '\0' && sym != '\n' && !clearline){
                 fb_write_cell(indexX + indexY * fb_terminal_w, sym, 0xFFFFFF, 0);
-            }   
-            else if(sym == '\n'){
-                indexY++;
-                indexX=-1;
             }
+            else{
+                clearline = 1;
+            }
+        }
+    }
+}
+
+void shiftConsoleUp(){
+    for(int places = 0; places < fb_terminal_w; places++){
+        for(int i = 0; i < fb_terminal_h*fb_terminal_w-1; i++){
+            consoleArray[i] = consoleArray[i+1];
         }
     }
 }
@@ -149,10 +158,12 @@ void printk(char* msg, ...){
             
             consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = msg[p];
             if(msg[p] == '\n'){
-                consoleLinePlace = 0;
-                consoleLine++;            
-                if(consoleLine == (unsigned int) fb_terminal_h){
-                    consoleLine = 0;
+                consoleLinePlace = 0;          
+                if(consoleLine == (unsigned int) fb_terminal_h-2){
+                    shiftConsoleUp();
+                }
+                else{
+                    consoleLine++;  
                 }
             }
             else{
@@ -171,6 +182,7 @@ void printk(char* msg, ...){
     }
 
     console_putScreen();
+    printChar(0, consoleLine, '*');
     va_end(listptd);
     /*
     for(int loop1 = 0; loop1 < 0xFFFF; loop1++){
