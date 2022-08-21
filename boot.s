@@ -71,7 +71,11 @@ inb:
 
 global kreboot
 kreboot:
+	cli
 	jmp 0xFFFF:0
+	hlt
+	hlt
+	hlt
 
 ;GLOBAL DESCRIPTOR TABLE SETUP
 global load_gdt

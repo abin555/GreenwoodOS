@@ -120,7 +120,7 @@ uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
     return r0;
 }
 uint8_t getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function){
-    uint16_t r0 = pci_read_word(bus, device, function, 0x3C+1);
+    uint16_t r0 = pci_read_word(bus, device, function, 0x3C)>>8;
     return r0;
 }
 

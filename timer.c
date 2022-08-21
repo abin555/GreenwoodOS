@@ -6,9 +6,7 @@ uint32_t timer_freq;
 
 void delay(uint32_t msec){
     uint32_t start_tick = timer_ticks;
-    while (timer_ticks - start_tick <= msec){
-
-    }
+    while (timer_ticks - start_tick <= msec){}
 }
 
 void timer_init(uint32_t frequency){

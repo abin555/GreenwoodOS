@@ -17,7 +17,7 @@ static inline void outdw(uint16_t port, uint32_t data) {
 }
 
 static inline void outqw(uint16_t port, uint32_t data){
-	__asm__ volatile("out edx,ebx" :: "a"(data), "d"(port));
+	__asm__ volatile("out edx,eax" :: "a"(data), "d"(port));
 }
 
 static inline uint32_t indw(uint16_t port) {

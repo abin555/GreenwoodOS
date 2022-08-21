@@ -3,6 +3,8 @@
 
 #include "io.h"
 #include "stdint.h"
+#include "interrupts.h"
+#include "pic.h"
 
 #define KEYBOARD_MAX_ASCII 256
 #define KEYBOARD_BUFFERSIZE 0xFF

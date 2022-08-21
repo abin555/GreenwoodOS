@@ -163,6 +163,7 @@ uint8_t keyboard_scancode_set;
 #define KBD_SSC_3 0x03
 
 void init_keyboard(uint32_t dev){
+    IRQ_OFF;
     ps2_write_device(dev, KBD_SSC_CMD);
     ps2_expect_ack();
     ps2_write_device(dev, KBD_SSC_GET);
@@ -180,4 +181,6 @@ void init_keyboard(uint32_t dev){
     ps2_expect_ack();
     printk("[Keyboard] Keyboard Initialized\n");
     interrupt_add_handle(33, &keyboard_handle_interrupt);
+    IRQ_clear_mask(2);
+    IRQ_RES;
 }

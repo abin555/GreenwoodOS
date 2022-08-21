@@ -21,7 +21,7 @@ void usb_init_driver(int driverID){
             break;
         case 0x30:
             printk("XHCI \n");
-            xhci_init(driverID);
+            xhci_init(pci_drivers[driverID]->BAR[0],pci_drivers[driverID]->interrupt);
             usb_host_device_num++;
             break;
         case 0x80:

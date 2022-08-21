@@ -10,7 +10,7 @@ void initializeConsole(){
 }
 
 void console_putScreen(){
-    for(int indexY = 0; indexY < fb_terminal_h; indexY++){
+    for(int indexY = 0; indexY < fb_terminal_h-1; indexY++){
         char clearline = 0;
         for(int indexX = 0; indexX < fb_terminal_w; indexX++){
             fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
@@ -198,3 +198,7 @@ void kprintF(const char* restrict fmt, ...){
 void panic(const char* restrict msg){
 
 }*/
+
+void console_moveline(int count){
+    consoleLine += count;
+}

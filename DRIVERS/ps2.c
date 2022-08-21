@@ -116,7 +116,7 @@ void init_ps2(){
         }
         else if(i == 1){
             printk("[PS2] Mouse\n");
-            mouse_init(i);
+            //mouse_init(i);
         }
         /*
         if(ps2_controllers[i]){

@@ -294,7 +294,7 @@ enum Capability_Reg_Members{
     VTIOSOFF = 10
 };
 
-uint32_t xhci_get_capability_register(int PCI_DriverID, int component);
-void xhci_init(int PCI_DriverID);
+uint32_t xhci_get_capability_register(uint32_t BaseAddr, int component);
+void xhci_init(uint32_t base_address, uint8_t irq);
 
 #endif

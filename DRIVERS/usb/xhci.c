@@ -1,8 +1,6 @@
 #include "xhci.h"
 
-uint32_t xhci_get_capability_register(int PCI_DriverID, int component){
-    pci_driver* xhci_PCI_driver = pci_drivers[PCI_DriverID];
-    uint32_t BaseAddr = xhci_PCI_driver->BAR[0];
+uint32_t xhci_get_capability_register(uint32_t BaseAddr, int component){
     switch(component){
         case CAPLENGTH:
             return 0xFF & *((uint8_t*) BaseAddr);
@@ -46,15 +44,14 @@ uint32_t xhci_get_capability_register(int PCI_DriverID, int component){
     return 0;
 }
 
-void xhci_init(int PCI_DriverID){
-    pci_driver* xhci_PCI_driver = pci_drivers[PCI_DriverID];
-    uint32_t Base_Addr_Reg = xhci_PCI_driver->BAR[0];
+void xhci_init(uint32_t base_address, uint8_t irq){
+    uint32_t Base_Addr_Reg = base_address;
     xhci_capability_regs* capability_regs = (xhci_capability_regs*) Base_Addr_Reg;
     xhci_operational_regs* operational_regs = (xhci_operational_regs *) (Base_Addr_Reg + capability_regs->CAPLENGTH);
-    printk("[USB] [XHCI] Initialization: %2x %x %x %2x %2x\n", PCI_DriverID, capability_regs, operational_regs, capability_regs->CAPLENGTH, xhci_get_capability_register(PCI_DriverID, CAPLENGTH));
+    printk("[USB] [XHCI] Initialization: %1x %x %x %2x %2x\n", irq, capability_regs, operational_regs, capability_regs->CAPLENGTH, xhci_get_capability_register(base_address, CAPLENGTH));
     printk("[USB] [XHCI] %x %x\n", sizeof(xhci_capability_regs), sizeof(xhci_operational_regs));
     printk("[USB] [XHCI] Version: ");
-    switch(xhci_get_capability_register(PCI_DriverID, HCIVERSION)){
+    switch(xhci_get_capability_register(base_address, HCIVERSION)){
         case 0x0095:
             printk("0.95\n");
             break;
@@ -76,8 +73,4 @@ void xhci_init(int PCI_DriverID){
     printk("[USB] [XHCI] Number of Interrupts : %3x\n", capability_regs->HCSPARAMS1.MaxIntrs);
     printk("[USB] [XHCI] Max Ports: %2x\n", capability_regs->HCSPARAMS1.MaxPorts);
     printk("[USB] [XHCI] Page Size: %16b\n", operational_regs->pagesize.PageSize);
-    for(uint32_t* addr = (uint32_t *) operational_regs-2, i = 0; i < 12; i++){
-        addr++;
-        printk("[USB] [XHCI] %8x %32b %8x\n", (uint32_t) addr, *addr, *addr);
-    }
 }

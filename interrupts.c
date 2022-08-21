@@ -45,19 +45,19 @@ void interrupts_init_descriptor(int index, unsigned int address)
 
 void interrupt_install_idt()
 {
-	asm("cli");
+	IRQ_OFF;
 	//irq_remap();
 	pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
 	
 	//IRQ_clear_mask(0);
 	//IRQ_clear_mask(1);
-	IRQ_clear_mask(2);
+	//IRQ_clear_mask(2);
 	//IRQ_clear_mask(3);
 	//IRQ_clear_mask(4);
 	//IRQ_clear_mask(5);
 	//IRQ_clear_mask(6);
 	//IRQ_clear_mask(7);
-	IRQ_clear_mask(12);
+	//IRQ_clear_mask(12);
 
 	interrupts_init_descriptor(0, (unsigned int) int_handler_0);
 	interrupts_init_descriptor(1, (unsigned int) int_handler_1);
@@ -99,7 +99,7 @@ void interrupt_install_idt()
 	load_idt((int) &idt);
 
 	/*pic_remap(PIC_PIC1_OFFSET, PIC_PIC2_OFFSET);*/
-	asm("sti");
+	IRQ_RES;
 
 }
 
@@ -158,6 +158,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned in
 	else{
 		printk("Uninitialized Interrupt %2x\n", interrupt);
 	}
+	if(interrupt == INTERRUPTS_MOUSE) printk("Interrupt Mouse\n");
 }
 
 void interrupt_add_handle(uint8_t interrupt, void *handler){

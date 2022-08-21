@@ -6,6 +6,7 @@
 #include "drivers.h"
 #include "console.h"
 #include "memory.h"
+#include "timer.h"
 
 struct uhci_cmd{ __attribute__((packed))
     uint16_t RunStop : 1;
@@ -74,6 +75,18 @@ struct uhci_io_reg{ __attribute__((packed))
     struct uhci_port_status_control PortSC2;
 };
 
+struct uhci_io_reg_vals{ __attribute__((packed))
+    uint16_t USBCMD;
+    uint16_t USBSTS;
+    uint16_t USBINTR;
+    uint16_t FRNUM;
+    uint32_t FRBASEADD;
+    uint8_t SOFMOD;
+    uint8_t Reserved1;
+    uint16_t Reserved2;
+    uint16_t PortSC1;
+    uint16_t PortSC2;
+};
 
-bool uhci_detect_root(uint32_t base, bool io_space);
+bool uhci_detect_root(struct uhci_io_reg* io_reg);
 #endif

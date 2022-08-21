@@ -21,17 +21,9 @@
 extern void load_gdt();
 
 void kmain_loop(){
-  int state = 0;
   while(1){
     terminal_handler();
-    if(state){
-      printChar(25, 25, 'A');
-    }
-    else{
-      printChar(25,25, 'Z');
-    }
-    state = !state;
-    delay(250);
+    //console_moveline(-1);
     //printk("%2h\n", inb(PS2_DATA));
   }
 }
@@ -79,6 +71,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     printk("Addr: %8h%8h Sz: %8h%8h Type: %2h Zero: %8h\n", memory_map->entries[i].addr, memory_map->entries[i].len, memory_map->entries[i].type, memory_map->entries[i].zero);
   }
   */
+  timer_init(1000);
   init_ps2();
   
   init_filesystem();
@@ -88,7 +81,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   printk("\nDriver Init:\n\0");
   activate_Drivers();
 
-  timer_init(1000);
+
 
   terminal_init();
 

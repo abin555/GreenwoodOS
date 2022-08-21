@@ -27,7 +27,9 @@ char mouse_img[8] = {
 
 
 void mouse_interrupt_handler(){
-
+    printk("Mouse Handler\n");
+    return;
+    
     for(int x = 0; x < 8; x++){
         for(int y = 0; y < 8; y++){
             fb_setPixel(mouse_x+x, mouse_y+y, mouse_replace_pixels[y*8+x]);
@@ -53,6 +55,7 @@ void mouse_interrupt_handler(){
             fb_setPixel(mouse_x+x, mouse_y+y, 0xFFFFFF);
         }
     }
+    printk("Mouse escape\n");
 }
 
 void mouse_handle_packet(){
@@ -111,6 +114,7 @@ void mouse_handle_packet(){
 void mouse_init(uint8_t device){
     printk("[ps2] Initializing Mouse\n");
     IRQ_OFF;
+    IRQ_clear_mask(12);
     mouse_device = device;
     mouse_x = fb_width / 2;
     mouse_y = fb_height / 2;
@@ -130,7 +134,7 @@ void mouse_init(uint8_t device){
     ps2_write_device(device, PS2_DEV_ENABLE_SCAN);
     ps2_expect_ack();
 
-    interrupt_add_handle(44, &mouse_interrupt_handler);
+    interrupt_add_handle(0x2C, &mouse_interrupt_handler);
     IRQ_RES;
 }
 

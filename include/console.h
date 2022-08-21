@@ -23,5 +23,5 @@ void console_putscreen();
 void printk(char* msg, ...);
 void kprintF(const char* restrict fmt, ...);
 void panic(const char* restrict msg);
-
+void console_moveline(int count);
 #endif
