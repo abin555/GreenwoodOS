@@ -194,10 +194,15 @@ void printk(char* msg, ...){
 /*
 void kprintF(const char* restrict fmt, ...){
 
-}
-void panic(const char* restrict msg){
-
 }*/
+
+void panic(char* msg){
+    printk("\n[KERNEL PANIC]\n");
+    printk(msg);
+    printk("\n\nHALTING CPU!\n");
+    asm("cli");
+    asm("hlt");
+}
 
 void console_moveline(int count){
     consoleLine += count;

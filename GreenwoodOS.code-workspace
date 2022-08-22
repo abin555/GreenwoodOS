@@ -1,10 +1,12 @@
 {
 	"folders": [
 		{
+			"name": "GreenwoodOS",
 			"path": "."
 		}
 	],
 	"settings": {
+		"C_Cpp.errorSquiggles": "Disabled",
 		"files.associations": {
 			"stdint.h": "c",
 			"frame_buffer.h": "c",

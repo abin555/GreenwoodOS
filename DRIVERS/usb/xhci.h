@@ -295,6 +295,8 @@ enum Capability_Reg_Members{
 };
 
 uint32_t xhci_get_capability_register(uint32_t BaseAddr, int component);
+uint32_t xhci_get_operational_register(uint32_t BaseAddr, int offset);
+void xhci_write_operational_register(uint32_t BaseAddr, int offset, uint32_t value);
 void xhci_init(uint32_t base_address, uint8_t irq);
-
+bool det_xhci_root(uint32_t BaseAddr);
 #endif

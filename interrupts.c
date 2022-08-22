@@ -140,12 +140,15 @@ void SYS_CALL(struct cpu_state cpu){
 			break;
 	}
 }
-
+struct cpu_state most_recent_int_cpu_state;
+struct stack_state most_recent_int_stack_state;
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, unsigned int interrupt, __attribute__((unused)) struct stack_state stack)
 {
 	//unsigned char scan_code;
 	//unsigned char ascii;;
 	//printk("Interrupt: %2h\n", interrupt);
+	most_recent_int_cpu_state = cpu;
+	most_recent_int_stack_state = stack;
 	if(interrupt >= 32 && interrupt <= 47){
 		if(interrupt >= 40){
 			outb(0x20, 0x20);

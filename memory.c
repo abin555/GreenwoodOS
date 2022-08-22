@@ -1,6 +1,6 @@
 #include "memory.h"
 
-#define HEAP_SIZE 0xFFFFF //Heap is 4 MB in size
+#define HEAP_SIZE 0x100000 //Heap is 4 MB in size
 
 uint32_t last_alloc = 0;
 uint32_t heap_end = 0;
@@ -26,6 +26,7 @@ void mem_init(uint32_t kernelEnd){
     heap_begin = last_alloc;
     heap_end = heap_begin + HEAP_SIZE;
     memset((char *) heap_begin, 0, HEAP_SIZE);
+    placement_address = heap_begin + HEAP_SIZE + 0x1000;
 }
 
 
@@ -130,4 +131,19 @@ void printHeap(){
         mem = mem +  a->size + sizeof(alloc_t);
 
     }
+}
+
+uint32_t placement_address;
+uint32_t kmalloc(uint32_t size, int align, uint32_t* physical_mem){
+    if (align == 1 && (placement_address & 0xFFFFF000)){ // If the address is not already page-aligned
+        // Align it.
+        placement_address &= 0xFFFFF000;
+        placement_address += 0x1000;
+    }
+    if (physical_mem){
+        *physical_mem = placement_address;
+    }
+    uint32_t tmp = placement_address;
+    placement_address += size;
+    return tmp;
 }

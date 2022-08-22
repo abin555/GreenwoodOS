@@ -27,7 +27,8 @@ OBJECTS = \
 		DRIVERS/usb/ehci.o\
 		DRIVERS/usb/xhci.o \
 		DRIVERS/ps2.o \
-		timer.o
+		timer.o \
+		paging.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -masm=intel -c
@@ -44,10 +45,12 @@ os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o GreenwoodOS.img iso
 run: os.iso transfer-compiled
-	qemu-system-x86_64 -boot d -cdrom GreenwoodOS.img -m 512 -monitor stdio \
+	qemu-system-x86_64 -boot d -m 512 -monitor stdio \
 	-vga std \
+	-drive id=disk,file=GreenwoodOS.img,if=none \
 	-device ahci,id=ahci \
-	-usb
+	-device ide-hd,drive=disk,bus=ahci.0 \
+	-device nec-usb-xhci
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@

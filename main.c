@@ -17,6 +17,7 @@
 #include "ps2.h"
 #include "pic.h"
 #include "timer.h"
+#include "paging.h"
 
 extern void load_gdt();
 
@@ -63,8 +64,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
   restore_kernel_addr = (u32 *) &kmain_loop;
 
   mem_init(0x01000000);
-
+  
   initializeConsole();
+  printk("[HEAP] Heap memory initialized at %8x\n[HEAP] Paging memory address initialized to %8x\n", heap_begin, placement_address);
+  //init_paging();
   /*
   printk("Memory Map:\n");
   for(unsigned int i = 0; i < memory_map->entry_size; i++){

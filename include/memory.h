@@ -5,6 +5,7 @@
 #include "gcc_stdint.h"
 #include "frame_buffer.h"
 #include "string.h"
+#include "console.h"
 
 uint32_t memory_used;
 uint32_t heap_begin;
@@ -24,4 +25,9 @@ void mem_init(uint32_t kernelEnd);
 unsigned int mgetSize(void *mem);
 
 void printHeap();
+
+extern uint32_t placement_address;
+uint32_t kmalloc(uint32_t size, int align, uint32_t* physical_mem);
+
+
 #endif

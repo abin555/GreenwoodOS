@@ -22,6 +22,6 @@ int printBinary(unsigned int data, int setlength);
 void console_putscreen();
 void printk(char* msg, ...);
 void kprintF(const char* restrict fmt, ...);
-void panic(const char* restrict msg);
+void panic(char* msg);
 void console_moveline(int count);
 #endif

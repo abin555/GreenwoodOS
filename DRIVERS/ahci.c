@@ -33,7 +33,8 @@ void initialize_AHCI(int driverID){
 
 
     printk("Enabling AHCI Interrupts\n");
-    interrupts_init_descriptor(pci_drivers[driverID]->interrupt,(unsigned int) AHCI_Interrupt_Handler);
+    //interrupts_init_descriptor(pci_drivers[driverID]->interrupt,(unsigned int) AHCI_Interrupt_Handler);
+	interrupt_add_handle(pci_drivers[driverID]->interrupt, &AHCI_Interrupt_Handler);
 }
 
 void addAHCI_Drive(HBA_PORT *port, int portno){

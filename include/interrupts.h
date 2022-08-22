@@ -105,8 +105,8 @@ void KERNEL_INTERRUPT();
 void SYS_CALL(
 	struct cpu_state cpu;
 );
-
-
+extern struct cpu_state most_recent_int_cpu_state;
+extern struct stack_state most_recent_int_stack_state;
 void interrupt_handler(
     struct cpu_state cpu, 
     unsigned int interrupt, 
