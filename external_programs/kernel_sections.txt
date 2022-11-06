@@ -1,0 +1,366 @@
+
+../kernel.elf:     file format elf32-i386
+../kernel.elf
+architecture: i386, flags 0x00000112:
+EXEC_P, HAS_SYMS, D_PAGED
+start address 0x10000032
+
+Program Header:
+    LOAD off    0x00001000 vaddr 0x10000000 paddr 0x10000000 align 2**12
+         filesz 0x00004dcb memsz 0x00004dcb flags r-x
+    LOAD off    0x00006000 vaddr 0x10006000 paddr 0x10006000 align 2**12
+         filesz 0x00007568 memsz 0x00007568 flags r--
+    LOAD off    0x0000e000 vaddr 0x1000e000 paddr 0x1000e000 align 2**12
+         filesz 0x00000034 memsz 0x00000034 flags rw-
+    LOAD off    0x00000000 vaddr 0x10010000 paddr 0x10010000 align 2**12
+         filesz 0x00000000 memsz 0x00101b40 flags rw-
+    LOAD off    0x0000f000 vaddr 0x12000000 paddr 0x12000000 align 2**12
+         filesz 0x00001000 memsz 0x00001000 flags r--
+   STACK off    0x00000000 vaddr 0x00000000 paddr 0x00000000 align 2**4
+         filesz 0x00000000 memsz 0x00000000 flags rwx
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         00004dbf  10000000  10000000  00001000  2**4
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .text.__x86.get_pc_thunk.ax 00000004  10004dbf  10004dbf  00005dbf  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .text.__x86.get_pc_thunk.bx 00000004  10004dc3  10004dc3  00005dc3  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .text.__x86.get_pc_thunk.cx 00000004  10004dc7  10004dc7  00005dc7  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  4 .rodata       0000684d  10006000  10006000  00006000  2**5
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  5 .eh_frame     00000d18  1000c850  1000c850  0000c850  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  6 .data         00000027  1000e000  1000e000  0000e000  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  7 .got.plt      0000000c  1000e028  1000e028  0000e028  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  8 .bss          00101b40  10010000  10010000  0000f000  2**5
+                  ALLOC
+  9 program       00001000  12000000  12000000  0000f000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+ 10 .comment      0000002b  00000000  00000000  00010000  2**0
+                  CONTENTS, READONLY
+SYMBOL TABLE:
+10000000 l    d  .text	00000000 .text
+10004dbf l    d  .text.__x86.get_pc_thunk.ax	00000000 .text.__x86.get_pc_thunk.ax
+10004dc3 l    d  .text.__x86.get_pc_thunk.bx	00000000 .text.__x86.get_pc_thunk.bx
+10004dc7 l    d  .text.__x86.get_pc_thunk.cx	00000000 .text.__x86.get_pc_thunk.cx
+10006000 l    d  .rodata	00000000 .rodata
+1000c850 l    d  .eh_frame	00000000 .eh_frame
+1000e000 l    d  .data	00000000 .data
+1000e028 l    d  .got.plt	00000000 .got.plt
+10010000 l    d  .bss	00000000 .bss
+12000000 l    d  program	00000000 program
+00000000 l    d  .comment	00000000 .comment
+00000000 l    df *ABS*	00000000 src/boot.s
+10000000 l       .text	00000000 header_start
+10000010 l       .text	00000000 framebuffer_tag_start
+10000024 l       .text	00000000 framebuffer_tag_end
+10000030 l       .text	00000000 header_end
+1000003d l       .text	00000000 loader.loop
+1000005c l       .text	00000000 gdt_start
+1000005c l       .text	00000000 gdt_null
+10000064 l       .text	00000000 gdt_code
+1000006c l       .text	00000000 gdt_data
+10000074 l       .text	00000000 gdt_end
+10000074 l       .text	00000000 gdt_descriptor
+00000008 l       *ABS*	00000000 CODE_SEG
+00000010 l       *ABS*	00000000 DATA_SEG
+10000088 l       .text	00000000 load_gdt.setcs
+10000098 l       .text	00000000 SYS_STATE
+10000099 l       .text	00000000 common_interrupt_handler
+1000e000 l       .data	00000000 test_string
+1000e00d l       .data	00000000 kernel_msg
+00000000 l    df *ABS*	00000000 main.c
+10006000 l     O .rodata	00000400 FONT
+10006400 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+10006500 l     O .rodata	00000100 kbd_US
+10006600 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 framebuffer.c
+10006740 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 interrupts.c
+10006b60 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 pic.c
+00000000 l    df *ABS*	00000000 io.c
+00000000 l    df *ABS*	00000000 memory.c
+10006fa0 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 console.c
+100073c0 l     O .rodata	00000400 FONT
+10001741 l       .text	00000000 .L54
+100016b9 l       .text	00000000 .L59
+1000171f l       .text	00000000 .L58
+100016ec l       .text	00000000 .L57
+10001686 l       .text	00000000 .L55
+10001959 l       .text	00000000 .L92
+10001960 l       .text	00000000 .L91
+10001967 l       .text	00000000 .L90
+1000196e l       .text	00000000 .L89
+10001975 l       .text	00000000 .L88
+1000197c l       .text	00000000 .L87
+10001983 l       .text	00000000 .L86
+1000198a l       .text	00000000 .L85
+10001991 l       .text	00000000 .L84
+10001998 l       .text	00000000 .L83
+1000199f l       .text	00000000 .L82
+100019a6 l       .text	00000000 .L81
+100019ad l       .text	00000000 .L80
+100019b4 l       .text	00000000 .L79
+100019bb l       .text	00000000 .L78
+100019c2 l       .text	00000000 .L76
+00000000 l    df *ABS*	00000000 ps2.c
+100078e0 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 keyboard.c
+10007e20 l     O .rodata	00000400 FONT
+10008220 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+10008320 l     O .rodata	00000100 kbd_US
+10008420 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 pci.c
+1000229f l     F .text	00000022 outdw
+100022c1 l     F .text	00000026 indw
+10008580 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 timer.c
+10008a00 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 ahci.c
+10008e20 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 filesystem.c
+100093c0 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 drivers.c
+10009820 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 syscalls.c
+10009c20 l     O .rodata	00000400 FONT
+1000a020 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+1000a120 l     O .rodata	00000100 kbd_US
+1000a220 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 terminal.c
+1000a360 l     O .rodata	00000400 FONT
+1000a760 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+1000a860 l     O .rodata	00000100 kbd_US
+1000a960 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 processes.c
+1000aac0 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 editor.c
+1000aec0 l     O .rodata	00000400 FONT
+1000b2c0 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+1000b3c0 l     O .rodata	00000100 kbd_US
+1000b4c0 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 art.c
+1000b5e0 l     O .rodata	00000400 FONT
+1000b9e0 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+1000bae0 l     O .rodata	00000100 kbd_US
+1000bbe0 l     O .rodata	00000100 kbd_US_shift
+100047ff l       .text	00000000 .L21
+10004992 l       .text	00000000 .L15
+1000497c l       .text	00000000 .L14
+1000493a l       .text	00000000 .L13
+10004950 l       .text	00000000 .L12
+10004966 l       .text	00000000 .L10
+00000000 l    df *ABS*	00000000 programs.c
+1000bd40 l     O .rodata	00000400 FONT
+00000000 l    df *ABS*	00000000 src/processes_asm.s
+10004a80 l       .text	00000000 restore_process_eax
+00000000 l    df *ABS*	00000000 hex.c
+1000c140 l     O .rodata	00000400 FONT
+1000c540 l     O .rodata	00000100 KBD_US_ASCII_NO_SHIFT
+1000c640 l     O .rodata	00000100 kbd_US
+1000c740 l     O .rodata	00000100 kbd_US_shift
+00000000 l    df *ABS*	00000000 src/program_region.s
+12000002 l       program	00000000 label
+1200000f l       program	00000000 data_string
+00000000 l    df *ABS*	00000000 
+1000e028 l     O .got.plt	00000000 _GLOBAL_OFFSET_TABLE_
+10004dc7 g     F .text.__x86.get_pc_thunk.cx	00000000 .hidden __x86.get_pc_thunk.cx
+10001e6a g     F .text	0000004f ps2_read
+10000199 g       .text	00000000 load_idt
+10000133 g       .text	00000000 int_handler_35
+1000004a g       .text	00000000 inb
+100000dc g       .text	00000000 int_handler_7
+1000290e g     F .text	0000004c getDeviceClass
+100000be g       .text	00000000 int_handler_2
+100011d1 g     F .text	000000d8 console_putScreen
+100023d2 g     F .text	000001c4 pci_probe
+1000007a g       .text	00000000 load_gdt
+10010000 g     O .bss	00000004 driveNUM
+10002596 g     F .text	0000011a pci_add_device
+10003632 g     F .text	00000328 AHCI_write
+10004a40 g     F .text	00000033 exec_user_program
+10111aac g     O .bss	00000004 MEMORY_USED
+10001eb9 g     F .text	0000005f ps2_write
+10000160 g       .text	00000000 int_handler_40
+12000000 g       program	00000000 program
+101119a0 g     O .bss	00000100 keystrokes
+10010004 g     O .bss	00000004 Drive_PORTS
+10111aa0 g     O .bss	00000001 keyboard_scancode
+10000172 g       .text	00000000 int_handler_42
+10000573 g     F .text	000000c6 fb_setChar
+10001119 g     F .text	000000b8 initialize_console
+1000018d g       .text	00000000 int_handler_128
+10010008 g     O .bss	00000004 pci_device_num
+1000010c g       .text	00000000 int_handler_17
+10006b44 g     O .rodata	00000004 CHAR_W
+100001ff g     F .text	00000060 keyboard_dbg
+10004406 g     F .text	00000340 Editor
+100010b1 g     F .text	00000068 initialize_heap
+1001000c g     O .bss	00000004 terminal_buffer_index
+10010020 g     O .bss	00000294 processes
+10000dc0 g     F .text	00000074 memcpy
+1000395a g     F .text	00000069 find_cmdslot
+10002b8a g     F .text	000000db timer_callback
+100032f5 g     F .text	0000003e AHCI_Interrupt_Handler
+100102b4 g     O .bss	00000004 console_width
+10004355 g     F .text	00000036 kill_process
+100102b8 g     O .bss	00000004 keyboard_ascii_index
+10002366 g     F .text	0000006c pci_load_BAR
+100001a1 g     F .text	0000002f test_timer
+100102bc g     O .bss	00000004 pci_drivers
+100102c0 g     O .bss	00000004 fb_terminal_w
+10000e6f g     F .text	000001bf malloc
+10003bb3 g     F .text	00000079 FS_write
+100102c4 g     O .bss	00000004 consoleLinePlace
+10001479 g     F .text	00000022 printDecimal
+10002adb g     F .text	000000af init_timer
+10004dbf g     F .text.__x86.get_pc_thunk.ax	00000000 .hidden __x86.get_pc_thunk.ax
+10000695 g     F .text	00000052 fb_clear
+10003333 g     F .text	000002ff AHCI_read
+100029aa g     F .text	00000050 getDeviceInterrupt
+100000e6 g       .text	00000000 int_handler_9
+100102c8 g     O .bss	00000001 AHCI_int_trigger
+100102cc g     O .bss	00000004 numFS
+10000121 g       .text	00000000 int_handler_33
+100102d0 g     O .bss	00000004 fb_width
+100027fa g     F .text	0000007c pci_read_dword
+1000308c g     F .text	0000008c check_type
+10004746 g     F .text	000002fa Art
+100102d4 g     O .bss	00000004 consoleArray
+10000639 g     F .text	0000005c fb_write_xy
+10002cb7 g     F .text	000001f4 initialize_AHCI
+100000ec g       .text	00000000 int_handler_10
+100102e0 g     O .bss	000000ff keyboard_KEYBUFFER
+10002eab g     F .text	00000080 addAHCI_Drive
+10003c2c g     F .text	00000057 drivers_init_pci
+10002876 g     F .text	0000004c getVendorID
+100000f4 g       .text	00000000 int_handler_12
+10001fb8 g     F .text	0000010e initialize_ps2_keyboard
+1000013c g       .text	00000000 int_handler_36
+1000315e g     F .text	0000005a stop_cmd
+100103e0 g     O .bss	000007f8 timer_attached_functions
+100000b2 g       .text	00000000 int_handler_0
+10110d40 g     O .bss	00000004 BUFFER_COUNT
+1000041c g     F .text	00000055 fb_setPixel
+100020c6 g     F .text	000001d9 keyboard_handler
+10000112 g       .text	00000000 int_handler_18
+10010bd8 g     O .bss	00000004 terminal_last_char
+100001d0 g     F .text	0000002f test_timer2
+1000014e g       .text	00000000 int_handler_38
+10010bdc g     O .bss	00000001 process_num
+10000118 g       .text	00000000 int_handler_32
+10111ac0 g     O .bss	00000080 devicePortNums
+100022e7 g     F .text	0000007f init_pci
+100026b0 g     F .text	0000014a pci_read_word
+1000132c g     F .text	0000008e shiftConsoleUp
+10010be0 g     O .bss	00000004 FileSystems
+100019d0 g     F .text	00000095 console_clear
+10000d96 g     F .text	0000002a inportl
+10000471 g     F .text	00000102 fb_write_cell
+100000fc g       .text	00000000 int_handler_14
+10001dc8 g     F .text	00000051 ps2_wait_write
+1000438b g     F .text	0000007b process_scheduler
+10003b3a g     F .text	00000079 FS_read
+10002f2b g     F .text	00000161 probe_port
+10111b40 g       .bss	00000000 kernel_end
+10000106 g       .text	00000000 int_handler_16
+10001f69 g     F .text	0000004f ps2_expect_ack
+10003c83 g     F .text	00000045 init_syscalls
+10010be4 g     O .bss	00000004 fb_terminal_h
+10000b6a g     F .text	00000043 pic_acknowledge
+10111ab8 g     O .bss	00000004 last_alloc
+10010be8 g     O .bss	00000004 console_last_line
+10001558 g     F .text	000000b9 printBinary
+10004dc3 g     F .text.__x86.get_pc_thunk.bx	00000000 .hidden __x86.get_pc_thunk.bx
+100000c4 g       .text	00000000 int_handler_3
+12001000 g       program	00000000 program_end
+10001611 g     F .text	00000316 printk
+10000714 g     F .text	0000006a interrupts_init_descriptor
+100042e3 g     F .text	00000072 add_process
+10010bec g     O .bss	00000004 console_height
+10111abc g     O .bss	00000004 timer_ticks
+1000003f g       .text	00000000 outb
+10004a94 g     F .text	0000032b hex_editor
+10003cc8 g     F .text	0000004b syscalls_callback
+100000b8 g       .text	00000000 int_handler_1
+10010bf0 g     O .bss	00000004 framebuffer
+10000e34 g     F .text	0000003b memset
+10111aa4 g     O .bss	00000004 timer_attached_functions_num
+100000f0 g       .text	00000000 int_handler_11
+10001a65 g     F .text	00000363 init_ps2
+100028c2 g     F .text	0000004c getDeviceID
+10110d60 g     O .bss	000007f8 idt_descriptors
+10010bf4 g     O .bss	00000004 filesystem_default_read_buffer
+100013ba g     F .text	000000bf calculateNumberLength
+10010bf8 g     O .bss	00000004 ABAR
+100000ca g       .text	00000000 int_handler_4
+10111ab0 g     O .bss	00000004 HEAP_BEGIN
+10111558 g     O .bss	00000006 idt
+10000a70 g     F .text	000000fa interrupt_handler
+10002aab g     F .text	00000030 delay
+10010bfc g     O .bss	00000004 consoleSize
+10000169 g       .text	00000000 int_handler_41
+10010c00 g     O .bss	00000004 keyboard_KEYBUFFER_index
+10001e19 g     F .text	00000051 ps2_wait_read
+1000017b g       .text	00000000 int_handler_43
+10003a2a g     F .text	00000110 addFileSystemDevice
+10010c04 g     O .bss	00000004 terminal_buffer
+10010c08 g     O .bss	00000004 terminal_last_key
+10111560 g     O .bss	000003fc interrupt_handlers
+10010c0c g     O .bss	00000004 pci_driver_num
+100000d0 g       .text	00000000 int_handler_5
+10010c10 g     O .bss	00000004 consoleStart
+10000032 g       .text	00000000 loader
+100031b8 g     F .text	0000013d rebase_PORT
+10000bad g     F .text	000000d1 pic_remap
+100039c3 g     F .text	00000067 init_filesystem
+1000149b g     F .text	000000bd printHex
+10010c14 g     O .bss	00000004 pci_devices
+10001927 g     F .text	000000a9 quadToHex
+1000e025 g     O .data	00000002 ps2_controllers
+10111aa8 g     O .bss	00000004 timer_freq
+10000145 g       .text	00000000 int_handler_37
+10000cf6 g     F .text	0000007a IRQ_clear_mask
+10111ab4 g     O .bss	00000004 HEAP_END
+10000051 g       .text	00000000 kreboot
+10000396 g     F .text	00000086 init_framebuffer
+10000100 g       .text	00000000 int_handler_15
+100000d6 g       .text	00000000 int_handler_6
+10111960 g     O .bss	00000020 most_recent_int_cpu_state
+10001f18 g     F .text	00000051 ps2_write_device
+10000184 g       .text	00000000 int_handler_44
+100029fa g     F .text	000000b1 getDeviceBar
+10003d9b g     F .text	00000548 terminal_callback
+10000157 g       .text	00000000 int_handler_39
+10004a84 g       .text	00000000 restore_process
+10003118 g     F .text	00000046 start_cmd
+10006b40 g     O .rodata	00000004 CHAR_H
+10010c18 g     O .bss	00000004 fb_height
+10010c1c g     O .bss	00000001 kbd_flags
+10003d13 g     F .text	00000088 init_terminal
+100000e2 g       .text	00000000 int_handler_8
+100012a9 g     F .text	00000083 console_putLine
+10111980 g     O .bss	00000010 most_recent_int_stack_state
+1000025f g     F .text	00000137 kmain
+1000012a g       .text	00000000 int_handler_34
+100000f8 g       .text	00000000 int_handler_13
+10010c20 g     O .bss	000fffff KERNEL_HEAP
+100006e7 g     F .text	0000002d interrupt_add_handle
+1000295a g     F .text	00000050 getDeviceProgIF
+10000d70 g     F .text	00000026 outportl
+10110c20 g     O .bss	00000004 consoleLine
+1000077e g     F .text	000002f2 interrupts_install_idt
+1000108d g     F .text	00000024 mgetSize
+10002c65 g     F .text	00000052 timer_attach
+10110c40 g     O .bss	000000ff keyboard_ASCIIBuffer
+1000102e g     F .text	0000005f free
+10000c7e g     F .text	00000078 IRQ_set_mask
+
+
