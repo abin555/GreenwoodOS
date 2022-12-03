@@ -67,6 +67,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     load_gdt();
     print_serial("Serial Online\0");
     interrupts_install_idt();
+    init_paging();
     print_serial("Interrupts Online\0");
     fb_setChar(1,1, 'R', 0xF0FFFF, 0);
     print_serial("Heap 0x%x\n", KERNEL_HEAP);
@@ -81,13 +82,12 @@ int kmain(unsigned long magic, unsigned long magic_addr){
             memory_map->entries[i].type
         );
     }
-    init_paging();
 
     initialize_ps2_keyboard(0);
     init_filesystem();
     
     init_pci();
-    
+
     //drivers_init_pci();
     
     init_syscalls();
@@ -108,7 +108,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
     timer_attach(10, keyboard_dbg);
     //add_process(exec_user_program);
+    //exec_user_program(0);
     process_scheduler();
+
     asm("hlt");
     //timer_attach(10, test_timer);
     //timer_attach(20, test_timer2);

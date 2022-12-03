@@ -6,15 +6,15 @@ void init_syscalls(){
 }
 
 void syscalls_callback(struct cpu_state cpu, struct stack_state stack __attribute__((unused))){
-    char str[2];
     switch(cpu.eax){
         case 0x01:
             printk((char *) cpu.ebx);
             break;
         case 0x02:
-            str[0] = cpu.ebx;
-            str[1] = '\n';
-            printk(str);
+            fb_setChar(fb_terminal_h-4,fb_terminal_w, cpu.ebx, 0x0000FF, 0);
+            break;
+        case 0x03:
+            printk((char *) cpu.ebx, cpu.edx);
             break;
     }
 }

@@ -33,7 +33,7 @@ OBJECTS = \
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c
-LDFLAGS = -T link.ld -melf_i386
+LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
 

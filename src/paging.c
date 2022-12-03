@@ -11,8 +11,10 @@ void init_paging(){
 
     printk("[Paging] Page Table Addr: 0x%x\n", &boot_page_directory);
     uint32_t *page_table = (uint32_t*) &boot_page_directory;
-    page_table[0] = ((uint32_t) program & 0xFFFF0000) | 0x83;
+    //page_table[0] = ((uint32_t) program & 0xFFFF0000) | 0x83;
     //page_table[get_page_index_from_addr(0xffffb6b2)] = (0xffffb6b2 & 0xFFFF0000) | 0x83;
+    create_page_entry((uint32_t) program, 0x0);
+    create_page_entry((uint32_t) framebuffer, (uint32_t) framebuffer);
     for(int i = 0; i < 1024; i++){
         if(page_table[i]){
             printk("[Page Table] index %x = %x\n", i, page_table[i]);
@@ -31,4 +33,13 @@ void paging_error(){
     printk("[KERNEL PANIC]\n");
     asm volatile("cli");
     asm volatile("hlt");
+}
+
+void create_page_entry(
+    uint32_t base_address,
+    uint32_t target_address
+){
+    uint32_t *page_table = (uint32_t*) &boot_page_directory;
+    page_table[get_page_index_from_addr(target_address)] = ((base_address & 0xFFFF0000) | 0x83);
+    __native_flush_tlb_single(target_address);
 }

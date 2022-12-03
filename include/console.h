@@ -13,6 +13,9 @@ uint32_t consoleLinePlace;
 uint32_t console_width;
 uint32_t console_height;
 uint32_t console_last_line;
+char console_initialized;
+uint32_t console_color_fg;
+uint32_t console_color_bg;
 
 void initialize_console(uint32_t width, uint32_t height);
 

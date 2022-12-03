@@ -10,9 +10,13 @@ void initialize_console(uint32_t width, uint32_t height){
     console_width = width;
     console_height = height;
     console_last_line = 0;
+    console_initialized = 1;
+    console_color_fg = 0xFFFFFF;
+    console_color_bg = 0;
 }
 
 void console_putScreen(){
+    if(!console_initialized) return;
     //fb_clear(0);
     for(uint32_t indexY = console_last_line; indexY < consoleLine+1; indexY++){
         char clearline = 0;
@@ -20,7 +24,7 @@ void console_putScreen(){
             //fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
             char sym = consoleArray[indexX + indexY * fb_terminal_w];
             if(sym != '\0' && sym != '\n' && !clearline){
-                fb_write_cell(indexX + indexY * fb_terminal_w, sym, 0xFFFFFF, 0);
+                fb_write_cell(indexX + indexY * fb_terminal_w, sym, console_color_fg, console_color_bg);
             }
             else{
                 clearline = 1;
@@ -104,6 +108,7 @@ int printBinary(unsigned int data, int setlength){
 }
 
 void printk(char* msg, ...){
+    if(!console_initialized) return;
     uint32_t p = 0;
     char allowed = 1;
     va_list listptd;
@@ -264,6 +269,7 @@ char quadToHex(char quad){
 }
 
 void console_clear(){
+    if(!console_initialized) return;
     memset(consoleArray, 0, fb_terminal_h*fb_terminal_w);
     memset(consoleArray, 0, consoleSize);
     consoleLine = 0;

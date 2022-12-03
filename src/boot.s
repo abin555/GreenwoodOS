@@ -55,7 +55,7 @@ KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; Page directory index of ke
 MULTIBOOT_VIRTUAL_BASE equ 0x87400000
 MULTIBOOT_PAGE_NUMBER equ (MULTIBOOT_VIRTUAL_BASE >> 22)
 
-FB_VB equ 0xFD000000
+FB_VB equ 0xFE400000
 FB_PN equ (FB_VB >> 22)
 
 align 0x1000
@@ -66,13 +66,13 @@ boot_page_directory:
 
 	times (KERNEL_PAGE_NUMBER - 1) dd 0
 	dd 0x00000083
-	dd 0x00040000
-	dd 0x00080000
-	dd 0x000C0000
-	dd 0x00100000
-	times (FB_PN - KERNEL_PAGE_NUMBER - 5) dd 0
-	dd 0xfd000083
-	times (1024 - FB_PN - 1) dd 0
+	dd 0x00400083
+	dd 0x00800083
+	dd 0x00C00083
+	dd 0x01000083
+	times (1024 - KERNEL_PAGE_NUMBER - 5) dd 0
+	;dd 0xFE400083
+	;times (1024 - FB_PN - 1) dd 0
 
 
 KERNEL_STACK_SIZE equ 0x2000

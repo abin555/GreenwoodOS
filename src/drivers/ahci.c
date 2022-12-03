@@ -17,27 +17,20 @@
 int devicePortNums[32] = {0};
 
 void initialize_AHCI(int driverID){
-    //printk("AHCI DRIVER INIT\n");
+    printk("AHCI DRIVER INIT\n");
     printk("AHCI Driver %2h BAR: %8h INT: %8h\n\0", pci_drivers[driverID]->device->progIF, pci_drivers[driverID]->BAR[5], pci_drivers[driverID]->interrupt);
+	create_page_entry((uint32_t) pci_drivers[driverID]->BAR[5], (uint32_t) pci_drivers[driverID]->BAR[5]);
+	
+	printk("Paging Update?\n");
     ABAR = (volatile HBA_MEM *)pci_drivers[driverID]->BAR[5];
+	printk("Passed?\n");
     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
+	printk("MALLOC WORK?\n");
     AHCI_int_trigger = false;
-    printk(" Ver: %8h\n\0", ABAR->vs);
+	printk("YIKES?\n");
+    printk("Version: %8x\n", ABAR->vs);
     probe_port(ABAR);
-
-    /*
-	printk("Rebaseing Ports:\n");
-    for(unsigned int i = 0; i < driveNUM; i++){
-        //rebase_PORT(Drive_PORTS[i], devicePortNums[i]);
-		paging_map_virt_to_phys((uint32_t) Drive_PORTS[0]->clb, (uint32_t) Drive_PORTS[0]->clb, 1);
-    }
-    printk(" Port CMD base Address: %8h %8h\n", Drive_PORTS[0]->clb, Drive_PORTS[0]->clbu);
-	//paging_map_virt_to_phys((uint32_t) Drive_PORTS[0]->clb, (uint32_t) Drive_PORTS[0]->clb, 1);
-	*/
-	for(unsigned int i = 0; i < 1; i++){
-        //rebase_PORT(Drive_PORTS[i], devicePortNums[i]);
-		printk(" Port CMD base Address: %8h %8h\n", Drive_PORTS[0]->clb, Drive_PORTS[0]->clbu);
-    }
+    
     printk("Enabling AHCI Interrupts @ %2x\n", pci_drivers[driverID]->interrupt);
     //interrupts_init_descriptor(pci_drivers[driverID]->interrupt,(unsigned int) AHCI_Interrupt_Handler);
 	interrupt_add_handle(pci_drivers[driverID]->interrupt, &AHCI_Interrupt_Handler);
