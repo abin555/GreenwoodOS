@@ -14,24 +14,34 @@
 #define HBA_PORT_IPM_ACTIVE 1
 #define HBA_PORT_DET_PRESENT 3
 
+#define	AHCI_BASE	0x800000	// 4M 
+#define HBA_PxCMD_ST    0x0001
+#define HBA_PxCMD_FRE   0x0010
+#define HBA_PxCMD_FR    0x4000
+#define HBA_PxCMD_CR    0x8000
+
 int devicePortNums[32] = {0};
 
 void initialize_AHCI(int driverID){
     printk("AHCI DRIVER INIT\n");
-    printk("AHCI Driver %2h BAR: %8h INT: %8h\n\0", pci_drivers[driverID]->device->progIF, pci_drivers[driverID]->BAR[5], pci_drivers[driverID]->interrupt);
+	create_page_entry(AHCI_BASE, AHCI_BASE);
+	create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000);
 	create_page_entry((uint32_t) pci_drivers[driverID]->BAR[5], (uint32_t) pci_drivers[driverID]->BAR[5]);
-	
-	printk("Paging Update?\n");
+
+    printk("AHCI Driver %2h BAR: %8h INT: %8h\n\0", pci_drivers[driverID]->device->progIF, pci_drivers[driverID]->BAR[5], pci_drivers[driverID]->interrupt);
     ABAR = (volatile HBA_MEM *)pci_drivers[driverID]->BAR[5];
-	printk("Passed?\n");
     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
-	printk("MALLOC WORK?\n");
     AHCI_int_trigger = false;
-	printk("YIKES?\n");
-    printk("Version: %8x\n", ABAR->vs);
+    printk(" Ver: %8h\n\0", ABAR->vs);
     probe_port(ABAR);
-    
-    printk("Enabling AHCI Interrupts @ %2x\n", pci_drivers[driverID]->interrupt);
+    printk(" Port CMD base Address: %8h %8h\n", Drive_PORTS[0]->clb, Drive_PORTS[0]->clbu);
+    printk("Rebaseing Ports:\n");
+    for(unsigned int i = 0; i < driveNUM; i++){
+        rebase_PORT(Drive_PORTS[i], devicePortNums[i]);
+    }
+    printk(" Port CMD base Address: %8h %8h\n", Drive_PORTS[0]->clb, Drive_PORTS[0]->clbu);
+
+    printk("Enabling AHCI Interrupts\n");
     //interrupts_init_descriptor(pci_drivers[driverID]->interrupt,(unsigned int) AHCI_Interrupt_Handler);
 	interrupt_add_handle(pci_drivers[driverID]->interrupt, &AHCI_Interrupt_Handler);
 }
@@ -111,13 +121,6 @@ int check_type(HBA_PORT *port)
 }
 
 
-#define	AHCI_BASE	0x400000	// 4M 
-#define HBA_PxCMD_ST    0x0001
-#define HBA_PxCMD_FRE   0x0010
-#define HBA_PxCMD_FR    0x4000
-#define HBA_PxCMD_CR    0x8000
-
-
 // Start command engine
 void start_cmd(HBA_PORT *port)
 {
@@ -162,6 +165,7 @@ void rebase_PORT(HBA_PORT *port, int portno){
 	port->clb = AHCI_BASE + (portno<<10);
 	port->clbu = 0;
 	memset((void*)(port->clb), 0, 1024);
+	printk("Command List Addr: %8x\n", port->clb);
  
 	// FIS offset: 32K+256*portno
 	// FIS entry size = 256 bytes per port
@@ -196,8 +200,9 @@ void AHCI_Interrupt_Handler(unsigned int interrupt){
 #define ATA_DEV_DRQ 0x08
 #define HBA_PxIS_TFES   (1 << 30)       /* TFES - Task File Error Status */
  
-bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf)
+bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)
 {
+	uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int slot = find_cmdslot(port);
@@ -217,14 +222,14 @@ bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	// 8K bytes (16 sectors) per PRDT
 	for (int i=0; i<cmdheader->prdtl-1; i++)
 	{
-		cmdtbl->prdt_entry[i].dba = (uint32_t) buf;
+		cmdtbl->prdt_entry[i].dba = (uint32_t) phy_buf;
 		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
-		buf += 4*1024;	// 4K words
+		phy_buf += 4*1024;	// 4K words
 		count -= 16;	// 16 sectors
 	}
 	// Last entry
-	cmdtbl->prdt_entry[cmdheader->prdtl-1].dba = (uint32_t) buf;
+	cmdtbl->prdt_entry[cmdheader->prdtl-1].dba = (uint32_t) phy_buf;
 	cmdtbl->prdt_entry[cmdheader->prdtl-1].dbc = (count<<9)-1;	// 512 bytes per sector
 	cmdtbl->prdt_entry[cmdheader->prdtl-1].i = 1;
  
@@ -284,23 +289,21 @@ bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 	return true;
 }
 
-bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf){
-	port->is = 0xFFFF;
+bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf)
+{
+	uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
+	port->is = (uint32_t) -1;		// Clear pending interrupt bits
+	int spin = 0; // Spin lock timeout counter
 	int slot = find_cmdslot(port);
-	if(slot == -1) return false;
-	uint64_t addr = 0;
-
-	addr = (((addr | port->clbu) << 32) | port->clb);
-	HBA_CMD_HEADER* cmdheader = (HBA_CMD_HEADER*)port->clb;
+	if (slot == -1)
+		return false;
+ 
+	HBA_CMD_HEADER *cmdheader = (HBA_CMD_HEADER*)port->clb;
 	cmdheader += slot;
 	cmdheader->cfl = sizeof(FIS_REG_H2D)/sizeof(uint32_t);	// Command FIS size
-	cmdheader->w = 1;		// Read from device
-	cmdheader->c = 1;
-	cmdheader->p = 1;
+	cmdheader->w = 1;		// Write to device
 	cmdheader->prdtl = (uint16_t)((count-1)>>4) + 1;	// PRDT entries count
-
-	addr = 0;
-
+ 
 	HBA_CMD_TBL *cmdtbl = (HBA_CMD_TBL*)(cmdheader->ctba);
 	memset(cmdtbl, 0, sizeof(HBA_CMD_TBL) +
  		(cmdheader->prdtl-1)*sizeof(HBA_PRDT_ENTRY));
@@ -308,56 +311,73 @@ bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count
 	// 8K bytes (16 sectors) per PRDT
 	for (int i=0; i<cmdheader->prdtl-1; i++)
 	{
-		cmdtbl->prdt_entry[i].dba = (uint32_t) buf;
+		cmdtbl->prdt_entry[i].dba = (uint32_t) phy_buf;
 		cmdtbl->prdt_entry[i].dbc = 8*1024-1;	// 8K bytes (this value should always be set to 1 less than the actual value)
 		cmdtbl->prdt_entry[i].i = 1;
-		buf += 4*1024;	// 4K words
+		phy_buf += 4*1024;	// 4K words
 		count -= 16;	// 16 sectors
 	}
-
-	cmdtbl->prdt_entry[cmdheader->prdtl-1].dba = (uint32_t) buf;
+	// Last entry
+	cmdtbl->prdt_entry[cmdheader->prdtl-1].dba = (uint32_t) phy_buf;
 	cmdtbl->prdt_entry[cmdheader->prdtl-1].dbc = (count<<9)-1;	// 512 bytes per sector
-	cmdtbl->prdt_entry[cmdheader->prdtl-1].i = 0;
-
+	cmdtbl->prdt_entry[cmdheader->prdtl-1].i = 1;
+ 
+	// Setup command
 	FIS_REG_H2D *cmdfis = (FIS_REG_H2D*)(&cmdtbl->cfis);
+ 
 	cmdfis->fis_type = FIS_TYPE_REG_H2D;
-	cmdfis->c = 1;
+	cmdfis->c = 1;	// Command
 	cmdfis->command = ATA_CMD_WRITE_DMA_EXT;
-
+ 
 	cmdfis->lba0 = (uint8_t)startl;
-	cmdfis->lba1 = (uint8_t)(startl >> 8);
-	cmdfis->lba2 = (uint8_t)(startl >> 16);
-	cmdfis->device = 1<<6;
-
-	cmdfis->lba3 = (uint8_t)(startl >> 24);
+	cmdfis->lba1 = (uint8_t)(startl>>8);
+	cmdfis->lba2 = (uint8_t)(startl>>16);
+	cmdfis->device = 1<<6;	// LBA mode
+ 
+	cmdfis->lba3 = (uint8_t)(startl>>24);
 	cmdfis->lba4 = (uint8_t)starth;
 	cmdfis->lba5 = (uint8_t)(starth>>8);
-	
-	cmdfis->countl = count & 0xff;
-	cmdfis->counth = count >> 8;
-
-	port->ci = 1;
-
-	while(1){
-		if((port->ci & (1<<slot)) == 0){
+ 
+	cmdfis->countl = count & 0xFF;
+	cmdfis->counth = (count >> 8) & 0xFF;
+ 
+	// The below loop waits until the port is no longer busy before issuing a new command
+	while ((port->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)) && spin < 1000000)
+	{
+		spin++;
+	}
+	if (spin == 1000000)
+	{
+		printk("Port is hung\n");
+		return false;
+	}
+ 
+	port->ci = 1<<slot;	// Issue command
+ 
+	// Wait for completion
+	while (1)
+	{
+		// In some longer duration reads, it may be helpful to spin on the DPS bit 
+		// in the PxIS port field as well (1 << 5)
+		if ((port->ci & (1<<slot)) == 0) 
 			break;
-		}
-		if(port->is & HBA_PxIS_TFES){
-			printk("[AHCI] Read Disk Error\n");
+		if (port->is & HBA_PxIS_TFES)	// Task file error
+		{
+			printk("Write disk error\n");
 			return false;
 		}
 	}
-	if(port->is & HBA_PxIS_TFES){
-		printk("[AHCI] Read Disk Error\n");
+ 
+	// Check again
+	if (port->is & HBA_PxIS_TFES)
+	{
+		printk("Write disk error\n");
 		return false;
 	}
-
-	while(port->ci != 0){
-
-	}
+ 
 	return true;
 }
- 
+
 // Find a free command list slot
 int find_cmdslot(HBA_PORT *port)
 {

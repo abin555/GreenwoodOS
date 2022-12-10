@@ -62,7 +62,7 @@ void* malloc(unsigned int size){
 
     if(last_alloc+size+sizeof(alloc_t) >= HEAP_END){//Check if the location of the last allocated block plus the size requested would be past the heap end
         char error[] = "Out of HEAP memory";
-        fb_write_xy(error, sizeof(error), 0, 0);
+        fb_write_xy(error, sizeof(error), 0, 0, 0xFFFFFF, 0);
         return 0;
     }
 
@@ -106,5 +106,5 @@ void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
     HEAP_BEGIN = heap_begin;
     HEAP_END = HEAP_BEGIN + heap_size;
     memset((char *) HEAP_BEGIN, 0, heap_size);
-    fb_write_xy("HEAP READY", 10, 0, 0);
+    fb_write_xy("HEAP READY", 10, 0, 0, 0xFFFFFF, 0);
 }

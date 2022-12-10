@@ -18,8 +18,16 @@ uint32_t terminal_buffer_index;
 uint32_t terminal_last_key;
 uint32_t terminal_last_char;
 
+uint16_t terminal_number_of_blocks;
+uint16_t terminal_block_index[0xFF];
+
+int strcmp(const char *X, const char *Y, int block);
+
 void init_terminal();
 
-void terminal_callback(uint8_t process_id);
+void terminal_locate_blocks();
+void terminal_parse();
+
+void terminal_callback(uint8_t process_id, uint32_t args[10]);
 
 #endif

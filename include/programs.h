@@ -8,5 +8,5 @@
 extern void program();
 extern void program_end();
 
-void exec_user_program(int pid);
+void exec_user_program(int pid, uint32_t args[10]);
 #endif

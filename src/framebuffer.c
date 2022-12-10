@@ -36,9 +36,9 @@ void fb_setChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
     }
 }
 
-void fb_write_xy(char* Buffer, int length, int x, int y){
+void fb_write_xy(char* Buffer, int length, int x, int y, uint32_t fg, uint32_t bg){
     for(int i = 0; i < length; i++){
-        fb_setChar(x+i, y, Buffer[i], 0xFFFFFF, 0);
+        fb_setChar(x+i, y, Buffer[i], fg, bg);
     }
 }
 

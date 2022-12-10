@@ -1,6 +1,6 @@
 #include "art.h"
 
-void Art(uint8_t process){
+void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
     uint32_t key_index = 0;
 
     fb_clear(0);
@@ -35,7 +35,7 @@ void Art(uint8_t process){
             }
             if(x >= fb_width){
                 dx = -dx;
-                x = fb_width/2;
+                x = fb_width - 1;
             }
             if(y <= 0){
                 dy = -dy;

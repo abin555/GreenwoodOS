@@ -4,7 +4,7 @@ struct IDTDescriptor idt_descriptors[0xFF];
 struct IDT idt;
 
 unsigned int BUFFER_COUNT;
-void (*interrupt_handlers[0xFF])(struct cpu_state, struct stack_state);
+struct cpu_state (*interrupt_handlers[0xFF])(struct cpu_state, struct stack_state);
 
 void interrupt_add_handle(uint8_t interrupt, void* handler){
 	interrupt_handlers[interrupt] = handler;
@@ -92,7 +92,7 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, __attribute
 	}
 
 	if((uint32_t) interrupt_handlers[interrupt]){
-		interrupt_handlers[interrupt](cpu, stack);
+		cpu = interrupt_handlers[interrupt](cpu, stack);
 	}
 	else{
 		printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);

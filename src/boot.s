@@ -58,6 +58,9 @@ MULTIBOOT_PAGE_NUMBER equ (MULTIBOOT_VIRTUAL_BASE >> 22)
 FB_VB equ 0xFE400000
 FB_PN equ (FB_VB >> 22)
 
+AHCI_VB equ 0xfe800000
+AHCI_PN equ (AHCI_VB >> 22)
+
 align 0x1000
 
 global boot_page_directory
@@ -70,9 +73,10 @@ boot_page_directory:
 	dd 0x00800083
 	dd 0x00C00083
 	dd 0x01000083
-	times (1024 - KERNEL_PAGE_NUMBER - 5) dd 0
-	;dd 0xFE400083
-	;times (1024 - FB_PN - 1) dd 0
+	times (AHCI_PN - KERNEL_PAGE_NUMBER - 5) dd 0
+	;dd 0xfe800083
+	dd 0
+	times (1024 - AHCI_PN - 1) dd 0
 
 
 KERNEL_STACK_SIZE equ 0x2000

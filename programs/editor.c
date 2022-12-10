@@ -1,12 +1,15 @@
 #include "editor.h"
 
-void Editor(uint8_t process){
+void Editor(uint8_t process, uint32_t args[10]__attribute__((unused))){
+    uint32_t drive = args[0];
+    uint32_t sector = args[1];
+
     int index = 0;
     uint32_t ascii_index = 0;
     uint32_t key_index = 0;
-
+    console_initialized = 0;
     fb_clear(0);
-    console_clear();
+    //console_clear();
     memset(keyboard_KEYBUFFER, 0, sizeof(keyboard_KEYBUFFER));
     memset(keyboard_ASCIIBuffer, 0, sizeof(keyboard_ASCIIBuffer));
     keyboard_KEYBUFFER_index = 0;
@@ -16,7 +19,7 @@ void Editor(uint8_t process){
     if(!numFS){
         kill_process(process);
     }
-    FS_read(0, 1, 1, (uint32_t *) filesystem_default_read_buffer);
+    FS_read(drive, sector, 1, (uint32_t *) filesystem_default_read_buffer);
     while(1){
         for(int y = 0; y < 32; y++){
             for(int x = 0; x < 16; x++){
@@ -63,13 +66,16 @@ void Editor(uint8_t process){
         }
     }
     EXIT:
-    FS_write(0, 1, 1, (uint32_t *) filesystem_default_read_buffer);
+    FS_write(drive, sector, 1, (uint32_t *) filesystem_default_read_buffer);
     memset(keyboard_KEYBUFFER, 0, sizeof(keyboard_KEYBUFFER));
     memset(keyboard_ASCIIBuffer, 0, sizeof(keyboard_ASCIIBuffer));
     keyboard_KEYBUFFER_index = 0;
     keyboard_ascii_index = 0;
     //console_clear();
     fb_clear(0);
- 
+    console_initialized = 1;
+    console_fullPut();
+    printk("Text Editor Ended\n");
+
     kill_process(process);
 }

@@ -30,7 +30,7 @@ void initialize_ps2_keyboard(int device){
     IRQ_RES;
 }
 
-void keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+struct cpu_state keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
     //pic_acknowledge(33);
     uint8_t scancode = inb(PS2_DATA);
     //printk("[INT] KEYBOARD INTERRUPT | SC: %2x\n", scancode);
@@ -43,6 +43,7 @@ void keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack
                 keyboard_ASCIIBuffer[keyboard_ascii_index] = kbd_US[scancode];
             }
             keyboard_ascii_index++;
+            keyboard_ASCIIBuffer[keyboard_ascii_index] = 0;
         }
         else{
             switch(scancode){
@@ -77,4 +78,5 @@ void keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack
     if(keyboard_KEYBUFFER_index >= KEYBOARD_BUFFERSIZE){
         keyboard_KEYBUFFER_index = 0;
     }
+    return cpu;
 }

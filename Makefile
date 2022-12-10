@@ -29,7 +29,9 @@ OBJECTS = \
 		src/gdt.o \
 		src/interrupts_asm.o \
 		src/io_asm.o \
-		src/serial.o
+		src/serial.o \
+		programs/image.o \
+		src/drivers/FAT.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c

@@ -27,8 +27,9 @@ int printDecimal(unsigned int data, int setlength);
 int printHex(unsigned int data, int setlength);
 int printBinary(unsigned int data, int setlength);
 void printk(char* msg, ...);
-char quadToHex(char quad);
+char quadToHex(uint8_t quad);
 
 void console_clear();
 
+void console_fullPut();
 #endif

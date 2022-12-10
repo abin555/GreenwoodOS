@@ -46,7 +46,7 @@ struct stack_state {
 void irq_remap();
 void interrupts_init_desciptor(uint32_t index, uint32_t address);
 void interrupts_install_idt();
-extern void (*interrupt_handlers[0xFF])(struct cpu_state, struct stack_state);
+extern struct cpu_state (*interrupt_handlers[0xFF])(struct cpu_state, struct stack_state);
 void interrupt_add_handle(uint8_t interrupt, void *handler);
 extern void load_idt(unsigned int idt_address);
 

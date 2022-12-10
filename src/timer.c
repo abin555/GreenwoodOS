@@ -23,15 +23,16 @@ void init_timer(uint32_t frequency){
     timer_freq = frequency;
 }
 
-void timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
     timer_ticks++;
-    if(timer_ticks % 2) fb_setChar(fb_terminal_w-1, fb_terminal_h-1, '0', 0xFFFFFF, 0);
-    else fb_setChar(fb_terminal_w-1, fb_terminal_h-1, '*', 0xFFFFFF, 0);
+    if(timer_ticks % 2) fb_setChar(fb_terminal_w-1, fb_terminal_h-3, '0', 0xFFFFFF, 0);
+    else fb_setChar(fb_terminal_w-1, fb_terminal_h-3, '*', 0xFFFFFF, 0);
     for(uint32_t i = 0; i < timer_attached_functions_num; i++){
         if(timer_ticks % timer_attached_functions[i].divisor == 0){
             timer_attached_functions[i].attached_function();
         }
     }
+    return cpu;
 }
 
 void timer_attach(int divisor, void* callback){

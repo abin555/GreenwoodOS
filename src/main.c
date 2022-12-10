@@ -17,6 +17,8 @@
 #include "programs.h"
 #include "paging.h"
 #include "serial.h"
+#include "programs/image.h"
+
 
 void test_timer(){
     printk("Callback\n");
@@ -37,7 +39,6 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     
     init_serial();
     struct multiboot_tag *tag;
-    struct multiboot_tag_mmap* memory_map;
     // unsigned size;
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
@@ -58,9 +59,6 @@ int kmain(unsigned long magic, unsigned long magic_addr){
             init_framebuffer(tagfb);
             break;
         }
-        case MULTIBOOT_TAG_TYPE_MMAP:
-            memory_map = (struct multiboot_tag_mmap *) tag;
-            break;
         }
     }
 
@@ -73,46 +71,27 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     print_serial("Heap 0x%x\n", KERNEL_HEAP);
     initialize_heap((uint32_t) KERNEL_HEAP, sizeof(KERNEL_HEAP));
     initialize_console(fb_terminal_w,fb_terminal_h);
-    printk("[GRUB MULTIBOOT] Address 0x%x\n", magic_addr);
-    for(int i = 0; i < 10; i++){
-        //struct multiboot_mmap_entry mmap_entry = memory_map->entries[i];
-        printk("[Memory Map] Address: 0x%x Length: 0x%x Type: %x \n",
-            memory_map->entries[i].upper_addr,
-            memory_map->entries[i].upper_len,
-            memory_map->entries[i].type
-        );
-    }
-
     initialize_ps2_keyboard(0);
     init_filesystem();
     
     init_pci();
 
-    //drivers_init_pci();
+    drivers_init_pci();
     
     init_syscalls();
 
-
-    init_timer(1);
+    init_timer(1000);
     
     init_terminal();
+
     printk("Program Mem Located at 0x%x\n", &program);
 
-    uint8_t *mem = 0;
-    for(int y = 0; y < 10; y++){
-        for(int x = 0; x < 10; x++){
-            printk("%2x ", mem[y*10+x]);
-        }
-        printk("\n");
-    }
-
     timer_attach(10, keyboard_dbg);
-    //add_process(exec_user_program);
-    //exec_user_program(0);
+
+    printk("Address: %x\n", (uint32_t) filesystem_default_read_buffer);
+    
     process_scheduler();
 
     asm("hlt");
-    //timer_attach(10, test_timer);
-    //timer_attach(20, test_timer2);
     return 0;
 }

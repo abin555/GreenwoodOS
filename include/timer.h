@@ -13,7 +13,7 @@ void delay(uint32_t msec);
 
 void init_timer(uint32_t frequency);
 
-void timer_callback(struct cpu_state cpu, struct stack_state stack);
+struct cpu_state timer_callback(struct cpu_state cpu, struct stack_state stack);
 
 struct timer_function{
     void (*attached_function)(void);

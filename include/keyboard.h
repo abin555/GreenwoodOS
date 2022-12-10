@@ -30,6 +30,6 @@ uint32_t keyboard_ascii_index;
 
 void initialize_ps2_keyboard(int device);
 
-void keyboard_handler(struct cpu_state cpu, struct stack_state stack);
+struct cpu_state keyboard_handler(struct cpu_state cpu, struct stack_state stack);
 
 #endif

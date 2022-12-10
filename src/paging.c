@@ -40,6 +40,15 @@ void create_page_entry(
     uint32_t target_address
 ){
     uint32_t *page_table = (uint32_t*) &boot_page_directory;
-    page_table[get_page_index_from_addr(target_address)] = ((base_address & 0xFFFF0000) | 0x83);
+    page_table[get_page_index_from_addr(target_address)] = ((base_address & 0xFFC00000) | 0x83);
+    printk("[Paging] Mapped Addr: %x at Index: %x To Addr: %x Set Value: %x\n", base_address, get_page_index_from_addr(target_address), target_address, ((base_address & 0xFFC00000) | 0x83));
     __native_flush_tlb_single(target_address);
+}
+
+uint32_t get_physical(uint32_t address){
+    uint32_t* page_table = (uint32_t *) &boot_page_directory;
+    uint32_t page_dir = address >> 22;
+    uint32_t value = page_table[page_dir];
+    printk("Directory Address: %x\nDirectory Reference: %x\n", (uint32_t) page_table, value);
+    return value;
 }

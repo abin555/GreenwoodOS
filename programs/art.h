@@ -4,4 +4,4 @@
 #include "filesystem.h"
 #include "framebuffer.h"
 
-void Art(uint8_t process);
+void Art(uint8_t process, uint32_t args[10]);

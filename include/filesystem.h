@@ -31,4 +31,5 @@ void init_filesystem();
 void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStruct, void *read, void *write);
 void FS_read(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer);
 void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer);
+
 #endif

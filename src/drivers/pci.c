@@ -76,6 +76,7 @@ void pci_add_device(struct pci_device *pdev)
         case 0x0106:
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
             pdrive->init_driver = initialize_AHCI;
+            printk("[PCI Driver] Added AHCI to Driver List\n");
             goto generic_install;
         break;
     }

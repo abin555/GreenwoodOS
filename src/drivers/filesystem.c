@@ -19,7 +19,7 @@ void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStru
 }
 
 void FS_read(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer){
-    printk("[FS] Reading\n");
+    printk("[FS] Reading Drive %2x Sector %x to %x\n", drive, sector, (uint32_t) buffer);
     if(drive < numFS){
         FileSystems[drive]->read(
             FileSystems[drive]->portData,
@@ -32,7 +32,7 @@ void FS_read(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *b
 }
 
 void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer){
-    printk("[FS] Writing\n");
+    printk("[FS] Writing Drive %2x Sector %x from %x\n", drive, sector, (uint32_t) buffer);
     if(drive < numFS){
         FileSystems[drive]->write(
             FileSystems[drive]->portData,

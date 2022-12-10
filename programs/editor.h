@@ -7,6 +7,6 @@
 #include "filesystem.h"
 #include "framebuffer.h"
 
-void Editor(uint8_t process);
+void Editor(uint8_t process, uint32_t args[10]);
 
 #endif

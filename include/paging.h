@@ -29,4 +29,6 @@ void create_page_entry(
 static inline void __native_flush_tlb_single(unsigned long addr) {
    asm volatile("invlpg [%0]" ::"r" (addr) : "memory");
 }
+
+uint32_t get_physical(uint32_t address);
 #endif

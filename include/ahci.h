@@ -369,7 +369,7 @@ void start_CMD(HBA_PORT *port);
 void stop_CMD(HBA_PORT *port);
 
 void AHCI_Interrupt_Handler(unsigned int interrupt);
-bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf);
+bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
 bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf);
 int find_cmdslot(HBA_PORT *port);
 

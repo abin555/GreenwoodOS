@@ -34,6 +34,25 @@ void console_putScreen(){
     console_last_line = consoleLine-1;
 }
 
+void console_fullPut(){
+    if(!console_initialized) return;
+    //fb_clear(0);
+    for(uint32_t indexY = 0; indexY < consoleLine+1; indexY++){
+        char clearline = 0;
+        for(uint32_t indexX = 0; indexX < console_width; indexX++){
+            //fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
+            char sym = consoleArray[indexX + indexY * fb_terminal_w];
+            if(sym != '\0' && sym != '\n' && !clearline){
+                fb_write_cell(indexX + indexY * fb_terminal_w, sym, console_color_fg, console_color_bg);
+            }
+            else{
+                clearline = 1;
+            }
+        }
+    }
+    console_last_line = consoleLine-1;
+}
+
 void console_putLine(uint32_t places){
     for(uint32_t index = 0; index < places; index++){
         fb_write_cell(consoleLine*fb_terminal_w + index, consoleArray[consoleLine*fb_terminal_w + index], 0xFFFFFF, 0);
@@ -137,8 +156,20 @@ void printk(char* msg, ...){
                 break;
                 case 'c':
                 case 'C':
-                    consoleLinePlace += va_arg(listptd, unsigned int);
+                    //consoleLinePlace += va_arg(listptd, char);
+                    consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = (char) va_arg(listptd, unsigned int);
+                    consoleLinePlace += 1;
                     break;
+                case 's':
+                case 'S': {
+                    char *str = (char *) va_arg(listptd, unsigned int);
+                    while(*str != 0){
+                        consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = *str;
+                        consoleLinePlace += 1;
+                        str++;
+                    }
+                }
+                break;
                 default:
                 if(msg[p] == '1' && msg[p+1] == '6'){
                     setlength = 16;
@@ -214,54 +245,69 @@ void printk(char* msg, ...){
     }*/
 }
 
-char quadToHex(char quad){
+char quadToHex(uint8_t quad){
   switch(quad){
     case 0x00:
       return '0';
       break;
     case 0x01:
+    case 0x10:
       return '1';
       break;
     case 0x02:
+    case 0x20:
       return '2';
       break;
     case 0x03:
+    case 0x30:
       return '3';
       break;
     case 0x04:
+    case 0x40:
       return '4';
       break;
     case 0x05:
+    case 0x50:
       return '5';
       break;
     case 0x06:
+    case 0x60:
       return '6';
       break;
     case 0x07:
+    case 0x70:
       return '7';
       break;
     case 0x08:
+    case 0x80:
       return '8';
       break;
     case 0x09:
+    case 0x90:
       return '9';
       break;
     case 0x0a:
+    case 0xa0:
       return 'A';
       break;
     case 0x0b:
+    case 0xb0:
       return 'B';
       break;
     case 0x0c:
+    case 0xc0:
       return 'C';
       break;
     case 0x0d:
+    case 0xd0:
       return 'D';
       break;
     case 0x0e:
+    case 0xe0:
       return 'E';
       break;
     case 0x0f:
+    case 0xf0:
       return 'F';
       break;
   }
