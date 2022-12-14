@@ -47,6 +47,32 @@ struct cpu_state syscalls_callback(struct cpu_state cpu, struct stack_state stac
         case 0x0D:
             FS_read(cpu.ebx, cpu.ecx, 1, (uint32_t *) cpu.edx);
             break;
+        case 0x0E:
+            for(uint32_t scan_y = 0; scan_y < image_buffer_def.height; scan_y++){
+                for(uint32_t scan_x = 0; scan_x < image_buffer_def.width; scan_x++){
+                    fb_setPixel(cpu.ebx + scan_x, cpu.ecx + scan_y, 0);
+                }
+            }
+            break;
+        case 0x0F:
+            console_initialized = !console_initialized;
+            cpu_state.eax = console_initialized;
+            break;
+        case 0x10:
+            fb_clear(0);
+            break;
+        case 0x11:
+            cpu_state.eax = (uint32_t) fopen(cpu.ebx, (char*) cpu.ecx);
+            break;
+        case 0x12:
+            cpu_state.eax = fclose((FILE*) cpu.ebx);
+            break;
+        case 0x13:
+            cpu_state.eax = (uint32_t) fread(cpu.ebx, cpu.ecx);
+            break;
+        case 0x14:
+            cpu_state.eax = timer_ticks;
+            break;
     }
     return cpu_state;
 }

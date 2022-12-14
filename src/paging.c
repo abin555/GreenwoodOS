@@ -46,9 +46,12 @@ void create_page_entry(
 }
 
 uint32_t get_physical(uint32_t address){
+    uint32_t lower_addr = address & ~0xFFC00000;
     uint32_t* page_table = (uint32_t *) &boot_page_directory;
     uint32_t page_dir = address >> 22;
     uint32_t value = page_table[page_dir];
-    printk("Directory Address: %x\nDirectory Reference: %x\n", (uint32_t) page_table, value);
+    value &= 0xFFC00000;
+    value |= lower_addr;
+    //printk("Directory Address: %x\nDirectory Reference: %x\n", (uint32_t) page_table, value);
     return value;
 }

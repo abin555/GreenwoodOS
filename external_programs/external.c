@@ -19,3 +19,5 @@ void print(char *str){
     register char* arg       asm("ebx") = str;
     asm volatile("int 0x80");
 }
+
+#include "flappy_bird.c"

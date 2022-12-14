@@ -18,7 +18,7 @@
 #include "paging.h"
 #include "serial.h"
 #include "programs/image.h"
-
+#include "ISO9660.h"
 
 void test_timer(){
     printk("Callback\n");
@@ -67,13 +67,13 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     interrupts_install_idt();
     init_paging();
     print_serial("Interrupts Online\0");
-    fb_setChar(1,1, 'R', 0xF0FFFF, 0);
+    fb_setChar(1,1, 'R', 0x00FFFF, 0);
     print_serial("Heap 0x%x\n", KERNEL_HEAP);
     initialize_heap((uint32_t) KERNEL_HEAP, sizeof(KERNEL_HEAP));
     initialize_console(fb_terminal_w,fb_terminal_h);
     initialize_ps2_keyboard(0);
     init_filesystem();
-    
+
     init_pci();
 
     drivers_init_pci();
@@ -84,12 +84,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     
     init_terminal();
 
+    ISO_read_volume_descriptor(0);
+
     printk("Program Mem Located at 0x%x\n", &program);
+    printk("Physical Addr 0x%x\n", get_physical(0));
 
     timer_attach(10, keyboard_dbg);
 
     printk("Address: %x\n", (uint32_t) filesystem_default_read_buffer);
-    
     process_scheduler();
 
     asm("hlt");

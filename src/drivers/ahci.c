@@ -46,13 +46,20 @@ void initialize_AHCI(int driverID){
 	interrupt_add_handle(pci_drivers[driverID]->interrupt, &AHCI_Interrupt_Handler);
 }
 
-void addAHCI_Drive(HBA_PORT *port, int portno){
+void addSATA_Drive(HBA_PORT *port, int portno){
 	addFileSystemDevice(FS_SATA_Device, "SATA DEVICE_____", (uint32_t *) port, AHCI_read, AHCI_write);
     Drive_PORTS[driveNUM] = port;
     devicePortNums[driveNUM] = portno;
     driveNUM++;
 }
- 
+
+void addSATAPI_Drive(HBA_PORT *port, int portno){
+	//addFileSystemDevice(FS_SATAPI_Device, "SATAPI DEVICE_____", (uint32_t *) port, SATAPI_read, SATAPI_write);
+    Drive_PORTS[driveNUM] = port;
+    devicePortNums[driveNUM] = portno;
+    driveNUM++;
+}
+
 void probe_port(HBA_MEM *abar)
 {
 	// Search disk in implemented ports
@@ -66,22 +73,22 @@ void probe_port(HBA_MEM *abar)
 			if (dt == AHCI_DEV_SATA)
 			{
 				printk("SATA drive found at port %2h\n", i);
-                addAHCI_Drive(&abar->ports[i], i);
+                addSATA_Drive(&abar->ports[i], i);
 			}
 			else if (dt == AHCI_DEV_SATAPI)
 			{
 				printk("SATAPI drive found at port %2h\n", i);
-                addAHCI_Drive(&abar->ports[i], i);
+                //addSATAPI_Drive(&abar->ports[i], i);
 			}
 			else if (dt == AHCI_DEV_SEMB)
 			{
 				printk("SEMB drive found at port %2h\n", i);
-                addAHCI_Drive(&abar->ports[i], i);
+                //addAHCI_Drive(&abar->ports[i], i);
 			}
 			else if (dt == AHCI_DEV_PM)
 			{
 				printk("PM drive found at port %2h\n", i);
-                addAHCI_Drive(&abar->ports[i], i);
+                //addAHCI_Drive(&abar->ports[i], i);
 			}
 			else
 			{
@@ -202,7 +209,8 @@ void AHCI_Interrupt_Handler(unsigned int interrupt){
  
 bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)
 {
-	uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
+	//uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
+	uint32_t phy_buf = get_physical((uint32_t) buf);
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int slot = find_cmdslot(port);
@@ -291,7 +299,7 @@ bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 
 bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf)
 {
-	uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
+	uint32_t phy_buf = get_physical((uint32_t) buf);
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits
 	int spin = 0; // Spin lock timeout counter
 	int slot = find_cmdslot(port);
@@ -392,3 +400,11 @@ int find_cmdslot(HBA_PORT *port)
 	printk("Cannot find free command list entry\n");
 	return -1;
 }
+/*
+void SATAPI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf){
+	
+}
+void SATAPI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf){
+
+}
+*/

@@ -77,10 +77,8 @@ void* malloc(unsigned int size){
     //last_alloc += 4;
     //increase memory labeled as used
     MEMORY_USED += size + sizeof(alloc_t);
-
     //set memory in block
 	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
-
     //printHeap();
     //return pointer
 	return (void *)((uint32_t)alloc + sizeof(alloc_t));

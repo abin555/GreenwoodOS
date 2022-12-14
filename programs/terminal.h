@@ -12,6 +12,7 @@
 #include "programs/art.h"
 #include "programs/hex.h"
 #include "programs.h"
+#include "ISO9660.h"
 
 char* terminal_buffer;
 uint32_t terminal_buffer_index;

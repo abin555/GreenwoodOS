@@ -360,7 +360,8 @@ uint32_t driveNUM;
 bool AHCI_int_trigger;
 
 void initialize_AHCI(int driverID);
-void addAHCI_Drive(HBA_PORT *port, int portno);
+void addSATA_Drive(HBA_PORT *port, int portno);
+void addSATAPI_Drive(HBA_PORT *port, int portno);
 void probe_port(HBA_MEM *abar);
 int check_type(HBA_PORT *port);
 
@@ -372,5 +373,8 @@ void AHCI_Interrupt_Handler(unsigned int interrupt);
 bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
 bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf);
 int find_cmdslot(HBA_PORT *port);
+
+void SATAPI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
+void SATAPI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
 
 #endif

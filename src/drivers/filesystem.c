@@ -43,3 +43,32 @@ void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *
         );
     }
 }
+
+FILE* fopen(int drive, char* filename){
+    struct Internal_FILE Ifile;
+    FILE* file;
+    if(ISO_checkFS(drive)){
+        Ifile = ISO_open_file(drive, filename);
+        file = (FILE*) malloc(sizeof(FILE));
+        file->drive = Ifile.drive;
+        file->sector = Ifile.sector;
+        file->sector_count = Ifile.sector_count;
+        file->size = Ifile.size;
+    }
+    return file;
+}
+
+uint8_t *fread(int drive, uint32_t sector){
+    if(ISO_checkFS(drive)){
+        ISO_read_sector(drive, sector);
+        return ISO9660_sector_buffer;
+    }
+    return 0;
+}
+
+int fclose(FILE* file){
+    printk("Closing File\n");
+    free(file);
+    return 1;
+}
+

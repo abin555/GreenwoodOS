@@ -31,7 +31,8 @@ OBJECTS = \
 		src/io_asm.o \
 		src/serial.o \
 		programs/image.o \
-		src/drivers/FAT.o
+		src/drivers/FAT.o \
+		src/drivers/ISO9660.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c
@@ -39,7 +40,7 @@ LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
 
-all: kernel.elf transfer-compiled
+all: kernel.elf transfer-compiled make_fs
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
@@ -63,7 +64,7 @@ clean:8535
 	rm -rf src/*.o src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
 cleanup:
 	rm -rf src/*.o src/*.i src/main.s *\~
-build: os.iso transfer-compiled debug
+build: os.iso transfer-compiled debug make_fs
 debug: build
 	objcopy --only-keep-debug kernel.elf kernel.sym
 	objcopy --strip-debug kernel.elf
@@ -76,3 +77,6 @@ transfer-compiled:
 
 build_clean: os.iso transfer-compiled
 build_clean_run: os.iso transfer-compiled run
+
+make_fs:
+	mkisofs -o ./filesystem.iso ./filesystem/

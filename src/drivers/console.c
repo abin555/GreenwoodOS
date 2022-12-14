@@ -163,7 +163,8 @@ void printk(char* msg, ...){
                 case 's':
                 case 'S': {
                     char *str = (char *) va_arg(listptd, unsigned int);
-                    while(*str != 0){
+                    int step = 0;
+                    while(*str != 0 && (step < setlength || !setlength)){
                         consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = *str;
                         consoleLinePlace += 1;
                         str++;
@@ -195,6 +196,18 @@ void printk(char* msg, ...){
                 }
                 else if(msg[p] == '4'){
                     setlength = 4;
+                    goto parseaftermodify;
+                }
+                else if(msg[p] == '5'){
+                    setlength = 5;
+                    goto parseaftermodify;
+                }
+                else if(msg[p] == '6'){
+                    setlength = 6;
+                    goto parseaftermodify;
+                }
+                else if(msg[p] == '7'){
+                    setlength = 7;
                     goto parseaftermodify;
                 }
                 else if(msg[p] == '8'){

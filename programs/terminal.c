@@ -187,9 +187,53 @@ void terminal_parse(){
         uint32_t sector = atoi(4);
         printk("Saving from memory at %x of size %x to drive #%1x sector %x for %x sectors\n", address, size, drive, sector, size);
         for(uint32_t i = 0; i < size; i++){
-            memcpy((void*) 0x0, filesystem_default_read_buffer, 512*i);
-            FS_write(drive, sector+i, size, (uint32_t*) filesystem_default_read_buffer);
+            FS_write(drive, sector+i, size, (uint32_t*) address);
         }
+    }
+    else if(strcmp(terminal_buffer, "dump", 0) == 0){
+        uint8_t *address = (uint8_t *) atoi(1);
+        uint32_t count = atoi(2);
+        for(uint32_t i = 0; i < count; i++){
+            printk("%2x ", *address);
+            address++;
+        }
+        printk("\n");
+    }
+    else if(strcmp(terminal_buffer, "loadfs", 0) == 0){
+        uint32_t start = terminal_block_index[0]+1;
+        printk("Loading File %s\n", terminal_buffer[start]);
+        FILE* file = fopen(0, terminal_buffer+start);
+        uint8_t *data_buf = (uint8_t*) 0;
+        printk("Size: %x\n", file->size);
+        for(uint32_t sector = 0; sector < file->sector_count; sector++){
+            uint8_t* read_buf = ISO_read_sector(file->drive, file->sector+sector);
+            for(int index = 0; index < 0x800; index++){
+                data_buf[sector*0x800 + index] = read_buf[index];
+                if(sector * 0x800 + index >= file->size){
+                    break;
+                }
+            }    
+        }
+        fclose(file);
+    }
+    else if(strcmp(terminal_buffer, "exec", 0) == 0){
+        uint32_t start = terminal_block_index[0]+1;
+        printk("Loading File %s\n", terminal_buffer[start]);
+        FILE* file = fopen(0, terminal_buffer+start);
+        uint8_t *data_buf = (uint8_t*) 0;
+        //printk("Size: %x\n", file->size);
+        for(uint32_t sector = 0; sector < file->sector_count; sector++){
+            uint8_t* read_buf = ISO_read_sector(file->drive, file->sector+sector);
+            for(int index = 0; index < 0x800; index++){
+                data_buf[sector*0x800 + index] = read_buf[index];
+                if(sector * 0x800 + index >= file->size){
+                    break;
+                }
+            }    
+        }
+        fclose(file);
+
+        add_process(exec_user_program, 0);
     }
     else{
         printk("Command Does not Exist\n");
