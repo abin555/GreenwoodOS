@@ -12,3 +12,4 @@ test.iso
 *.img
 GreenwoodOS.img
 *.iso
+serial.log
