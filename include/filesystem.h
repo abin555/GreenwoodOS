@@ -5,6 +5,7 @@
 #include "drivers.h"
 #include "console.h"
 #include "stdint.h"
+#include "utilities.h"
 
 typedef enum{
     FS_UNDEF_Device = 0,
@@ -51,5 +52,29 @@ typedef struct FILE{
 FILE* fopen(int drive, char* filename);
 int fclose(FILE* file);
 uint8_t *fread(int drive, uint32_t sector);
+
+extern uint32_t active_directory;
+
+enum FS_types{
+    ISO = 1,
+    File = 1,
+    Folder = 2
+};
+
+struct FS_Item_Entry{
+    uint8_t type;
+    uint8_t drive;
+    uint32_t sector;
+    uint32_t size;
+    uint16_t sector_count;
+    uint32_t parent_path_entry;
+    uint32_t parent_item_entry;
+    uint8_t FS_type;
+    char name[20];
+};
+
+extern uint32_t num_fs_entries;
+struct FS_Item_Entry FS_entries[0xFFF];
+int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, char name[20]);
 
 #endif

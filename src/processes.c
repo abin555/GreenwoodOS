@@ -18,6 +18,7 @@ uint8_t add_process(void* program, int args, ...){
 
 void kill_process(uint8_t process_id){
     processes[process_id].running = 0;
+    process_num--;
 }
 
 void process_scheduler(){

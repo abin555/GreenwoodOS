@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "console.h"
 #include "filesystem.h"
+#include "utilities.h"
 
 extern uint8_t ISO9660_sector_buffer[0x800];
 
@@ -90,21 +91,9 @@ union ISO_Volume_Descriptor{
     char _bits[2048];
 }__attribute__((packed));
 
-struct ISO_FS_Item_Entry{
-    uint8_t type;
-    uint8_t drive;
-    uint32_t sector;
-    uint32_t size;
-    uint16_t sector_count;
-    uint32_t parent_path_entry;
-    uint32_t parent_item_entry;
-    char name[20];
-};
 
 
 
-extern uint32_t num_entries;
-struct ISO_FS_Item_Entry ISO_FS[0xFF];
 
 uint8_t* ISO_read_sector(int drive, int sector);
 void ISO_list_files();

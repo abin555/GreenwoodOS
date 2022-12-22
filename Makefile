@@ -32,7 +32,10 @@ OBJECTS = \
 		src/serial.o \
 		programs/image.o \
 		src/drivers/FAT.o \
-		src/drivers/ISO9660.o
+		src/drivers/ISO9660.o \
+		src/drivers/cpu.o \
+		src/utilities.o \
+		src/drivers/mouse.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c

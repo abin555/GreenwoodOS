@@ -4,7 +4,7 @@ int strcmp(const char *X, const char *Y, int block){
     int start = 0;
     int end = 0;
     if(block != 0){
-        start = terminal_block_index[block-1];
+        start = terminal_block_index[block-1]+1;
     }
     end = terminal_block_index[block];
     X+=start;
@@ -235,14 +235,79 @@ void terminal_parse(){
 
         add_process(exec_user_program, 0);
     }
+    else if(strcmp(terminal_buffer, "ls", 0) == 0){
+        if(strcmp(terminal_buffer, "-a", 1) == 0){
+            ISO_list_files();
+        }
+        else{
+            printk("File Listing of %s:\n", FS_entries[active_directory].name);
+            printk("Parent: %s\n", FS_entries[FS_entries[active_directory].parent_item_entry].name);
+            for(uint32_t i = 0; i < num_fs_entries; i++){
+                if(FS_entries[i].parent_item_entry == active_directory){
+                    printk("- %s\n", FS_entries[i].name);
+                }
+            }
+        }
+    }
+    else if(strcmp(terminal_buffer, "cd", 0) == 0){
+        if(strcmp(terminal_buffer, "..", 1) == 0){
+            active_directory = FS_entries[active_directory].parent_item_entry;
+        }
+        else{
+            for(uint32_t i = 0; i < num_fs_entries; i++){
+                if(FS_entries[i].parent_item_entry == active_directory){
+                    if(strcmp(terminal_buffer, FS_entries[i].name, 1) == 0){
+                        active_directory = i;
+                        break;
+                    }
+                }
+            }
+        }
+        printk("Dir: %s\n", FS_entries[active_directory].name);
+    }
     else{
-        printk("Command Does not Exist\n");
+        int select_program = -1;
+        uint32_t bin_folder_index;
+        for(uint32_t i = 0; i < num_fs_entries; i++){
+            if(check_str_equ(FS_entries[i].name, "BIN") == 0 && FS_entries[i].parent_item_entry == 0){
+                bin_folder_index = i;
+                break;
+            }
+        }
+        for(uint32_t i = 0; i < num_fs_entries; i++){
+            if((strcmp(terminal_buffer, FS_entries[i].name, 0) == 0) && (FS_entries[i].parent_item_entry == active_directory || FS_entries[i].parent_item_entry == bin_folder_index) && FS_entries[i].type == File){
+                select_program = i;
+                printk("Found Index: %x\n", select_program);
+                break;
+            }
+        }
+        if(select_program == -1){
+            printk("Command Does not Exist\n");
+        }
+        else{
+            uint8_t *data_buf = (uint8_t*) 0;
+            struct FS_Item_Entry* file = &FS_entries[select_program];
+
+            for(uint32_t sector = 0; sector < file->sector_count; sector++){
+                uint8_t* read_buf = ISO_read_sector(file->drive, file->sector+sector);
+                for(int index = 0; index < 0x800; index++){
+                    data_buf[sector*0x800 + index] = read_buf[index];
+                    if(sector * 0x800 + index >= file->size){
+                        break;
+                    }
+                }    
+            }
+            
+            add_process(exec_user_program, 0);
+            //exec_user_program(0, 0);
+        }
     }
 }
 
 void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10]__attribute__((unused))){
     char ascii;
     uint8_t keycode;
+    int directory_namesize = 0;
     if(keyboard_ascii_index != terminal_last_char){
         ascii = keyboard_ASCIIBuffer[keyboard_ascii_index-1];
         terminal_last_char = keyboard_ascii_index;
@@ -286,13 +351,20 @@ void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10
                 break;
         }
     }
+    directory_namesize=0;
+    while(FS_entries[active_directory].name[directory_namesize]){
+        fb_setChar(directory_namesize, fb_terminal_h-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
+        directory_namesize++;
+    }
+    fb_setChar(directory_namesize, fb_terminal_h-1, '>', 0xFFFFFF, 0);
+
     for(uint32_t i = 0; i < fb_terminal_w; i++){
         //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
         if(i == terminal_buffer_index){
-            fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0, 0xFFFFFF);
+            fb_setChar(directory_namesize+i+1, fb_terminal_h-1, terminal_buffer[i], 0, 0xFFFFFF);
         }
         else{
-            fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
+            fb_setChar(directory_namesize+i+1, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
         }
     }
 }

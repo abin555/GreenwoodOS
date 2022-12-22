@@ -2,7 +2,7 @@ OUTPUT_FORMAT(elf32-i386)
 ENTRY(loader)
 SECTIONS {
 	
-	. = 0x01000000;
+	. = 0x02000000;
 	program ALIGN (0x2000) :
 	{
 		*(program)

@@ -8,6 +8,7 @@
 #include "console.h"
 #include "multiboot.h"
 #include "programs.h"
+#include "cpu.h"
 
 extern void update_page();
 extern uint32_t boot_page_directory; 
@@ -23,7 +24,8 @@ extern void load_page_directory();
 extern void enable_paging();
 void create_page_entry(
     uint32_t base_address,
-    uint32_t target_address
+    uint32_t target_address,
+    uint16_t flag
 );
 
 static inline void __native_flush_tlb_single(unsigned long addr) {
@@ -31,4 +33,6 @@ static inline void __native_flush_tlb_single(unsigned long addr) {
 }
 
 uint32_t get_physical(uint32_t address);
+
+void set_PAT();
 #endif

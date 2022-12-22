@@ -7,22 +7,6 @@ uint8_t* ISO_read_sector(int drive, int sector){
     return ISO9660_sector_buffer;
 }
 
-uint32_t num_entries = 0;
-int add_ISO_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, char name[20]){
-    int start_index = num_entries;
-    ISO_FS[num_entries].type = type;
-    ISO_FS[num_entries].drive = drive;
-    ISO_FS[num_entries].sector = sector;
-    ISO_FS[num_entries].parent_item_entry = parent_item_entry;
-    ISO_FS[num_entries].size = size;
-    ISO_FS[num_entries].sector_count = sector_count;
-    //memcpy(ISO_FS[num_entries].name, name, 20);
-    memcpy(name, ISO_FS[num_entries].name, 20);
-
-    num_entries++;
-    return start_index;
-}
-
 void read_directory(int drive, int parent_FS_index, int directory_sector){
     
     struct ISO_Directory_Entry *root_dir = (struct ISO_Directory_Entry*) ISO_read_sector(drive, directory_sector);   
@@ -52,7 +36,7 @@ void read_directory(int drive, int parent_FS_index, int directory_sector){
         root_dir = (struct ISO_Directory_Entry *)((uint8_t *)(root_dir)+root_dir->length);
 
         if(!isFolder){
-            add_ISO_FS_Item(1, drive, sector, parent_FS_index, size, sector_size, name);
+            add_FS_Item(1, drive, sector, parent_FS_index, size, sector_size, name);
         }
     }
 }
@@ -74,8 +58,6 @@ void read_path(int drive, int path_sector, int path_size){
         }
         struct ISO_PathTable_Entry *pathtable = (struct ISO_PathTable_Entry *) (((uint32_t) path_mem_sector)+index);
         
-        //memcpy(name, pathtable->name-2, Name_Length);
-        //memcpy(pathtable->name-2, name, Name_Length);
         if(index == 0){
             name[0] = '.';
         }
@@ -86,7 +68,7 @@ void read_path(int drive, int path_sector, int path_size){
         }
         uint32_t sector = *((uint32_t*) (path_mem_sector+index+2));
         
-        int parent = add_ISO_FS_Item(2, 0, sector, *((uint8_t*) (path_mem_sector+index+5)), 1, 1, name);
+        int parent = add_FS_Item(2, 0, sector, *((uint8_t*) (path_mem_sector+index+5)), 1, 1, name);
         
         read_directory(drive, parent, sector);
         index+=Path_Entry_Length;
@@ -95,26 +77,15 @@ void read_path(int drive, int path_sector, int path_size){
 
 void ISO_list_files(){
     printk("\nFiles:\n");
-    for(uint32_t i = 0; i < num_entries; i++){
-        if(ISO_FS[i].type == 1){
-            printk("File: %s Parent Folder: %s Size: %x Secotrs: %x", ISO_FS[i].name, ISO_FS[ISO_FS[i].parent_item_entry].name, ISO_FS[i].size, ISO_FS[i].sector_count);
+    for(uint32_t i = 0; i < num_fs_entries; i++){
+        if(FS_entries[i].type == 1){
+            printk("File: %s Parent Folder: %s Size: %x Sectors: %x", FS_entries[i].name, FS_entries[FS_entries[i].parent_item_entry].name, FS_entries[i].size, FS_entries[i].sector_count);
         }
-        else if(ISO_FS[i].type == 2){
-            printk("Folder: %s Parent Folder: %s Size: %x Sectors: %x", ISO_FS[i].name, ISO_FS[ISO_FS[i].parent_item_entry].name, ISO_FS[i].size, ISO_FS[i].sector_count);
+        else if(FS_entries[i].type == 2){
+            printk("Folder: %s Parent Folder: %s Size: %x Sectors: %x", FS_entries[i].name, FS_entries[FS_entries[i].parent_item_entry].name, FS_entries[i].size, FS_entries[i].sector_count);
         }
-        printk(" Sector: %x\n", ISO_FS[i].sector);
+        printk(" Sector: %x\n", FS_entries[i].sector);
     }
-}
-
-int check_str_equ(char *str1, char *str2){
-    while(*str1){
-        if(*str1 != *str2){
-            break;
-        }
-        str1++;
-        str2++;
-    }
-    return *(const unsigned char*)str1 - *(const unsigned char*)str2;
 }
 
 struct Internal_FILE ISO_open_file(int drive, char *filename){
@@ -152,39 +123,32 @@ struct Internal_FILE ISO_open_file(int drive, char *filename){
         scan_index++;
         //printf("Partial Name %s\n", name);
 
-        for(uint32_t file = 0; file < num_entries; file++){
-            if(!check_str_equ(name, ISO_FS[file].name)){
+        for(uint32_t file = 0; file < num_fs_entries; file++){
+            if(!check_str_equ(name, FS_entries[file].name)){
                 //printf("Name Matches %d\n", file);
-                if(ISO_FS[file].parent_item_entry == parent){
+                if(FS_entries[file].parent_item_entry == parent){
                     parent = file;
                     //printf("Matching Parent!\n");
                 }
             }
         }
     }
-    //printf("Parent Index: %d Parent Name: %s\n", parent, ISO_FS[parent].name);
-    for(uint32_t file = 0; file < num_entries; file++){
-        if(!check_str_equ(filename+scan_index, ISO_FS[file].name)){
+    //printf("Parent Index: %d Parent Name: %s\n", parent, FS_entries[parent].name);
+    for(uint32_t file = 0; file < num_fs_entries; file++){
+        if(!check_str_equ(filename+scan_index, FS_entries[file].name)){
             //printf("Name Matches %d\n", file);
-            if(ISO_FS[file].parent_item_entry == parent){
+            if(FS_entries[file].parent_item_entry == parent){
                 parent = file;
                 //printf("Matching File!\n");
                 fileFound = 1;
-                fileSector = ISO_FS[file].sector;
-                fileSize = ISO_FS[file].size;
-                fileSectorCount = ISO_FS[file].sector_count;
+                fileSector = FS_entries[file].sector;
+                fileSize = FS_entries[file].size;
+                fileSectorCount = FS_entries[file].sector_count;
             }
         }
     }
 
     if(fileFound){
-        //printf("Correct File Identified! @ Sector %x\n", fileSector);
-        //printf("Printing Contents:\n");
-        /*
-        for(uint32_t i = 0; i < fileSize; i++){
-            printk("%s\n", ISO_read_sector(drive, fileSector+i));
-        }
-        */
         output.drive = drive;
         output.sector = fileSector;
         output.sector_count = fileSectorCount;
@@ -199,19 +163,25 @@ void ISO_read_volume_descriptor(int drive){
 
     //uint32_t *directory_entry = (uint32_t *) (ISO_read_sector(drive, 0x10) + 0x9E);
 
-    read_path(drive, *((uint32_t *) primary_vol->path_table_le.le), 0x1a);
+    read_path(drive, *((uint32_t *) primary_vol->path_table_le.le), *((uint32_t*)(primary_vol->path_table_size.le)));
 
-    ISO_list_files();
+    //ISO_list_files();
 }
 
 int ISO_checkFS(int drive){
     struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) (ISO_read_sector(drive, 0x10));
-    if(check_str_equ(primary_vol->hdr.magic, "CD001")){
-        printk("Is ISO Format\n");
+    if(
+        primary_vol->hdr.magic[0] == 'C' &&
+        primary_vol->hdr.magic[1] == 'D' &&
+        primary_vol->hdr.magic[2] == '0' &&
+        primary_vol->hdr.magic[3] == '0' &&
+        primary_vol->hdr.magic[4] == '1'
+    ){
+        printk("Drive %x Is ISO Format: %s\n", drive, primary_vol->hdr.magic);
         return 1;
     }
     else{
-        printk("Not ISO Format\n");
+        printk("Drive %x Is not ISO Format %s\n", drive, primary_vol->hdr.magic);
         return 0;
     }
 }

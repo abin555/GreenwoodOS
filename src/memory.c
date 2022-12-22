@@ -6,16 +6,14 @@ uint32_t HEAP_END = 0;
 uint32_t MEMORY_USED = 0;
 
 void memcpy(void* source, void* target, uint32_t size){
-    if((uint32_t) source > (uint32_t) target){
-        for(uint32_t index = 0; index < size; index++){
-            *(volatile char*)(target+index) = *(volatile char*)(source+index);
-        }
-    }
-    else{
-        for(uint32_t index = size; index > 0; index--){
-            *(volatile char*)(target+index) = *(volatile char*)(source+index);
-        }
-    }
+    asm volatile ("rep movsb"
+    : "=D" (target),
+    "=S" (source),
+    "=c" (size)
+    : "0" (target),
+    "1" (source),
+    "2" (size)
+    : "memory");
 }
 
 void memset(void* target, uint32_t val, uint32_t size){
@@ -100,6 +98,7 @@ unsigned int mgetSize(void *mem){
 }
 
 void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
+    create_page_entry(heap_begin, heap_begin, 0x83);
     last_alloc = heap_begin;
     HEAP_BEGIN = heap_begin;
     HEAP_END = HEAP_BEGIN + heap_size;

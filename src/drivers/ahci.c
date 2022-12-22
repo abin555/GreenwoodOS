@@ -24,9 +24,9 @@ int devicePortNums[32] = {0};
 
 void initialize_AHCI(int driverID){
     printk("AHCI DRIVER INIT\n");
-	create_page_entry(AHCI_BASE, AHCI_BASE);
-	create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000);
-	create_page_entry((uint32_t) pci_drivers[driverID]->BAR[5], (uint32_t) pci_drivers[driverID]->BAR[5]);
+	create_page_entry(AHCI_BASE, AHCI_BASE, 0x83);
+	create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000, 0x83);
+	create_page_entry((uint32_t) pci_drivers[driverID]->BAR[5], (uint32_t) pci_drivers[driverID]->BAR[5], 0x83);
 
     printk("AHCI Driver %2h BAR: %8h INT: %8h\n\0", pci_drivers[driverID]->device->progIF, pci_drivers[driverID]->BAR[5], pci_drivers[driverID]->interrupt);
     ABAR = (volatile HBA_MEM *)pci_drivers[driverID]->BAR[5];

@@ -10,7 +10,7 @@
 #include "programs/image.h"
 
 void init_syscalls();
-
+extern uint32_t syscall_fb_color;
 struct cpu_state syscalls_callback(struct cpu_state cpu, struct stack_state stack);
 
 #endif

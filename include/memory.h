@@ -4,6 +4,7 @@
 #include "console.h"
 #include "stdint.h"
 #include "framebuffer.h"
+#include "paging.h"
 
 #define HEAP_SIZE 0x100000
 
@@ -17,6 +18,7 @@ typedef struct alloc_t{
 } alloc_t;
 
 void memcpy(void* source, void* target, uint32_t size);
+
 void memset(void* target, uint32_t val, uint32_t size);
 unsigned int mgetSize(void *mem);
 
