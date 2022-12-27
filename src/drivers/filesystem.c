@@ -1,5 +1,6 @@
 #include "filesystem.h"
 uint32_t active_directory;
+uint8_t active_drive;
 
 void init_filesystem(){
     printk("Filesystem Init\n");
@@ -7,6 +8,15 @@ void init_filesystem(){
     filesystem_default_read_buffer = (uint8_t *) malloc(512);
     numFS = 0;
     active_directory = 0;
+    active_drive = 0;
+}
+
+void ready_filesystem(){
+    for(uint32_t i = 0; i < numFS; i++){
+        if(ISO_checkFS(i)){
+            ISO_read_volume_descriptor(i);
+        }
+    }
 }
 
 void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStruct, void *read, void *write){
@@ -46,11 +56,12 @@ void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *
     }
 }
 
-FILE* fopen(int drive, char* filename){
+FILE* fopen(char* filename){
     struct Internal_FILE Ifile;
     FILE* file;
-    if(ISO_checkFS(drive)){
-        Ifile = ISO_open_file(drive, filename);
+    
+    if(ISO_checkFS(active_drive)){
+        Ifile = ISO_open_file(active_drive, active_directory, filename);
         file = (FILE*) malloc(sizeof(FILE));
         file->drive = Ifile.drive;
         file->sector = Ifile.sector;
@@ -73,7 +84,7 @@ int fclose(FILE* file){
     return 1;
 }
 uint32_t num_fs_entries = 0;
-int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, char name[20]){
+int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, uint8_t FS_Type, char name[20]){
     int start_index = num_fs_entries;
     FS_entries[num_fs_entries].type = type;
     FS_entries[num_fs_entries].drive = drive;
@@ -81,6 +92,7 @@ int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_it
     FS_entries[num_fs_entries].parent_item_entry = parent_item_entry;
     FS_entries[num_fs_entries].size = size;
     FS_entries[num_fs_entries].sector_count = sector_count;
+    FS_entries[num_fs_entries].FS_type = FS_Type;
     //memcpy(ISO_FS[num_fs_entries].name, name, 20);
     memcpy(name, FS_entries[num_fs_entries].name, 20);
 

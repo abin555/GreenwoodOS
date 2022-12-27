@@ -15,8 +15,7 @@ void printval(char *str, int val){
 
 FILE* fopen(char* filename){
     register int syscall_num asm("eax") = 0x11;
-    register int drive_val asm("ebx") = 0;
-    register char* filename_val asm("ecx") = filename;
+    register char* filename_val asm("ebx") = filename;
     asm volatile("int 0x80");
     register FILE* return_val asm("eax");
     return return_val;
@@ -30,9 +29,9 @@ int fclose(FILE* file){
     return return_val;
 }
 
-unsigned char* fread(unsigned int sector){
+unsigned char* fread(unsigned int drive, unsigned int sector){
     register int syscall_num asm("eax") = 0x13;
-    register int drive asm("ebx") = 0;
+    register int drive_val asm("ebx") = drive;
     register int sector_val asm("ecx") = sector;
     asm volatile("int 0x80");
     register unsigned char *return_val asm("eax");

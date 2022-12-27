@@ -16,7 +16,7 @@ void init_framebuffer(struct multiboot_tag_framebuffer* tagfb){
 }
 
 void init_backbuffer(){
-    //back_buffer = (uint32_t*) malloc(sizeof(uint32_t) * fb_width * fb_height);
+    back_buffer = (uint32_t*) malloc(sizeof(uint32_t) * fb_width * fb_height);
 }
 
 void fb_drawChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){

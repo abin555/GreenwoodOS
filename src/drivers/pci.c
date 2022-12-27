@@ -59,17 +59,10 @@ void pci_add_device(struct pci_device *pdev)
     switch(pdev->class){
         /*
         case 0x0C03://Universal Serial Bus Controller
-            //printChar(0,0,'U');
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
             pdrive->name = usb_driverName;
             pdrive->init_driver = usb_init_driver;
             pdrive->exit_driver = usb_exit_driver;
-            goto generic_install;
-        break;
-        case 0x0101:
-            pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
-            pdrive->name = ide_driverName;
-            pdrive->init_driver = ide_driver_install;
             goto generic_install;
         break;
         */
@@ -78,6 +71,13 @@ void pci_add_device(struct pci_device *pdev)
             pdrive->init_driver = initialize_AHCI;
             printk("[PCI Driver] Added AHCI to Driver List\n");
             goto generic_install;
+        /*
+        case 0x0403:
+            pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
+            pdrive->init_driver = initialize_INTEL_HDA;
+            printk("[PCI Driver] Added Intel HDA to Driver List\n");
+            goto generic_install;
+        */
         break;
     }
 	pci_device_num++;

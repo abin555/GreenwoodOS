@@ -30,7 +30,7 @@ uint32_t numFS;
 uint8_t *filesystem_default_read_buffer;
 
 void init_filesystem();
-
+void ready_filesystem();
 void addFileSystemDevice(unsigned int deviceType, char *name, uint32_t *portStruct, void *read, void *write);
 void FS_read(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer);
 void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer);
@@ -49,11 +49,12 @@ typedef struct FILE{
     uint32_t size;
 } FILE;
 
-FILE* fopen(int drive, char* filename);
+FILE* fopen(char* filename);
 int fclose(FILE* file);
 uint8_t *fread(int drive, uint32_t sector);
 
 extern uint32_t active_directory;
+extern uint8_t active_drive;
 
 enum FS_types{
     ISO = 1,
@@ -75,6 +76,6 @@ struct FS_Item_Entry{
 
 extern uint32_t num_fs_entries;
 struct FS_Item_Entry FS_entries[0xFFF];
-int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, char name[20]);
+int add_FS_Item(uint8_t type, uint8_t drive, uint32_t sector, uint32_t parent_item_entry, uint32_t size, uint16_t sector_count, uint8_t FS_Type, char name[20]);
 
 #endif

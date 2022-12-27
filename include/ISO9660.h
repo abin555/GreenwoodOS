@@ -97,7 +97,7 @@ union ISO_Volume_Descriptor{
 
 uint8_t* ISO_read_sector(int drive, int sector);
 void ISO_list_files();
-struct Internal_FILE ISO_open_file(int drive, char *filename);
+struct Internal_FILE ISO_open_file(int drive, int active_directory, char *filename);
 void ISO_read_volume_descriptor(int drive);
 int ISO_checkFS(int drive);
 

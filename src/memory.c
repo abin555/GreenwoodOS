@@ -72,7 +72,7 @@ void* malloc(unsigned int size){
     //increase the location of the last alloc
     last_alloc += size;
     last_alloc += sizeof(alloc_t);
-    //last_alloc += 4;
+    last_alloc += 4;
     //increase memory labeled as used
     MEMORY_USED += size + sizeof(alloc_t);
     //set memory in block
@@ -98,7 +98,9 @@ unsigned int mgetSize(void *mem){
 }
 
 void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
-    create_page_entry(heap_begin, heap_begin, 0x83);
+    for(uint32_t i = 0; i < (heap_size / 0x400000); i++){
+        create_page_entry(heap_begin+(i*0x400000), heap_begin+(i*0x400000), 0x83);
+    }
     last_alloc = heap_begin;
     HEAP_BEGIN = heap_begin;
     HEAP_END = HEAP_BEGIN + heap_size;

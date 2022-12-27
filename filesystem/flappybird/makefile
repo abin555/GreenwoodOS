@@ -6,7 +6,6 @@ all:
 	$(CC) $(CFLAGS) main.c -o main.o
 	$(CC) $(CFLAGS) ../libc/libc.c -o libc.o
 	ld $(LDFLAGS) main.o libc.o -o flappy.elf
-	objdump -d flappy.elf > flappy.txt
 	objcopy -O binary --only-section=.text flappy.elf flappy.exe
 	rm main.o
 	rm libc.o

@@ -1,6 +1,7 @@
 #include "ISO9660.H"
 
 uint8_t ISO9660_sector_buffer[0x800];
+uint32_t ISO9660_drive_root_file;
 
 uint8_t* ISO_read_sector(int drive, int sector){
     FS_read(drive, sector*4, 4, (uint32_t*) &ISO9660_sector_buffer);
@@ -8,7 +9,6 @@ uint8_t* ISO_read_sector(int drive, int sector){
 }
 
 void read_directory(int drive, int parent_FS_index, int directory_sector){
-    
     struct ISO_Directory_Entry *root_dir = (struct ISO_Directory_Entry*) ISO_read_sector(drive, directory_sector);   
     char name[20];
     while(root_dir->length){
@@ -36,7 +36,7 @@ void read_directory(int drive, int parent_FS_index, int directory_sector){
         root_dir = (struct ISO_Directory_Entry *)((uint8_t *)(root_dir)+root_dir->length);
 
         if(!isFolder){
-            add_FS_Item(1, drive, sector, parent_FS_index, size, sector_size, name);
+            add_FS_Item(File, drive, sector, parent_FS_index, size, sector_size, ISO, name);
         }
     }
 }
@@ -59,7 +59,9 @@ void read_path(int drive, int path_sector, int path_size){
         struct ISO_PathTable_Entry *pathtable = (struct ISO_PathTable_Entry *) (((uint32_t) path_mem_sector)+index);
         
         if(index == 0){
-            name[0] = '.';
+            ISO9660_drive_root_file = num_fs_entries;
+            name[0] = 'A'+drive;
+            name[1] = ':';
         }
         else{
             for(uint32_t i = 0; i < Name_Length; i++){
@@ -68,7 +70,14 @@ void read_path(int drive, int path_sector, int path_size){
         }
         uint32_t sector = *((uint32_t*) (path_mem_sector+index+2));
         
-        int parent = add_FS_Item(2, 0, sector, *((uint8_t*) (path_mem_sector+index+5)), 1, 1, name);
+        int parent;
+
+        if(index == 0){
+            parent = add_FS_Item(Folder, drive, sector, 0, 1, 1, ISO, name);
+        }
+        else{
+            parent = add_FS_Item(Folder, drive, sector, ISO9660_drive_root_file+*((uint8_t*) (path_mem_sector+index+5)), 1, 1, ISO, name);
+        }
         
         read_directory(drive, parent, sector);
         index+=Path_Entry_Length;
@@ -84,11 +93,11 @@ void ISO_list_files(){
         else if(FS_entries[i].type == 2){
             printk("Folder: %s Parent Folder: %s Size: %x Sectors: %x", FS_entries[i].name, FS_entries[FS_entries[i].parent_item_entry].name, FS_entries[i].size, FS_entries[i].sector_count);
         }
-        printk(" Sector: %x\n", FS_entries[i].sector);
+        printk(" Sector: %x Drive: %x\n", FS_entries[i].sector, FS_entries[i].drive);
     }
 }
 
-struct Internal_FILE ISO_open_file(int drive, char *filename){
+struct Internal_FILE ISO_open_file(int drive, int active_directory, char *filename){
     printk("\nOpening File: %s\n", filename);
     struct Internal_FILE output = {
         0,
@@ -110,7 +119,7 @@ struct Internal_FILE ISO_open_file(int drive, char *filename){
     }
     //printf("%d Directories to trace\n", directory_count);
     int scan_index = 0;
-    uint32_t parent = 0;
+    uint32_t parent = active_directory;
     for(int i = 0; i < directory_count; i++){
         char name[20];
         memset(name, 0, 20);

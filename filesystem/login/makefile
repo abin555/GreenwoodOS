@@ -6,7 +6,6 @@ all:
 	$(CC) $(CFLAGS) main.c -o main.o
 	$(CC) $(CFLAGS) ../libc/libc.c -o libc.o
 	ld $(LDFLAGS) main.o libc.o -o login.elf
-	objdump -d login.elf > login.txt
 	objcopy -O binary --only-section=.text login.elf login.exe
 	rm main.o
 	rm libc.o

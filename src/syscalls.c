@@ -63,7 +63,7 @@ struct cpu_state syscalls_callback(struct cpu_state cpu, struct stack_state stac
             fb_clear(cpu.ebx);
             break;
         case 0x11:
-            cpu_state.eax = (uint32_t) fopen(cpu.ebx, (char*) cpu.ecx);
+            cpu_state.eax = (uint32_t) fopen((char*) cpu.ebx);
             break;
         case 0x12:
             cpu_state.eax = fclose((FILE*) cpu.ebx);

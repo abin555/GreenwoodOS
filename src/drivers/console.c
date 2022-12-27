@@ -104,6 +104,7 @@ int calculateNumberLength(unsigned int data, int base){
 }
 
 int printDecimal(unsigned int data, int setlength){
+    
     return data % setlength;
 }
 
@@ -163,8 +164,7 @@ void printk(char* msg, ...){
                 case 's':
                 case 'S': {
                     char *str = (char *) va_arg(listptd, unsigned int);
-                    int step = 0;
-                    while(*str != 0 && (step < setlength || !setlength)){
+                    while(*str != '\0'){
                         consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = *str;
                         consoleLinePlace += 1;
                         str++;

@@ -98,7 +98,7 @@ int main(){
 void load_image(FILE* file, unsigned char *target_buffer){
     unsigned char *file_buf;
     for(unsigned int sector = 0; sector < file->sector_count; sector++){
-        file_buf = fread(file->sector + sector);
+        file_buf = fread(file->drive, file->sector + sector);
         for(unsigned int i = 0; i < 0x800; i++){
             if(sector * 0x800 + i >= file->size){
                 break;

@@ -1,6 +1,10 @@
 #ifndef LIBC_H
 #define LIBC_H
 
+typedef  unsigned char uint8_t;
+typedef  unsigned short uint16_t;
+typedef unsigned int uint32_t ;
+
 typedef struct FILE{
     unsigned char drive;
     unsigned int sector;
@@ -15,7 +19,7 @@ struct display{
 
 FILE* fopen(char* filename);
 int fclose(FILE* file);
-unsigned char* fread(unsigned int sector);
+unsigned char* fread(unsigned int drive, unsigned int sector);
 void image_load_buffer(unsigned int width, unsigned int height, unsigned char* buffer);
 void draw_image(unsigned int x, unsigned int y);
 void print(char *str);

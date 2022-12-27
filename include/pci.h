@@ -7,6 +7,7 @@
 #include "console.h"
 #include "ahci.h"
 #include "paging.h"
+#include "intel_hda.h"
 
 struct pci_device{
     uint16_t vendor;

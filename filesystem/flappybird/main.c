@@ -7,6 +7,9 @@ void render_background();
 void clear_bird();
 void draw_pipe(int x, int y);
 
+//uint32_t fb_width;
+//uint32_t fb_height;
+
 #define fb_width 1280
 #define fb_height 720
 
@@ -21,7 +24,7 @@ struct PIPE{
     int y;
 };
 
-
+struct display Display;
 
 struct PIPE pipes[4] = {
     {320*1-100, 400},
@@ -33,6 +36,8 @@ int main(){
     key_index_prev = get_ascii_key_index();
     printval("Ticks %x\n", get_timer_ticks());
     print("Program Start!\n");
+    Display = get_display();
+
     toggle_console();
     set_backbuffer(1);
     clear_screen(0x71C5CF);
@@ -191,7 +196,7 @@ void delay(unsigned int ticks){
 void load_image(FILE* file, unsigned char *target_buffer){
     unsigned char *file_buf;
     for(unsigned int sector = 0; sector < file->sector_count; sector++){
-        file_buf = fread(file->sector + sector);
+        file_buf = fread(file->drive, file->sector + sector);
         for(unsigned int i = 0; i < 0x800; i++){
             if(sector * 0x800 + i >= file->size){
                 break;

@@ -16,6 +16,8 @@
 #include "utilities.h"
 
 char* terminal_buffer;
+char* terminal_arg_buffer;
+
 uint32_t terminal_buffer_index;
 uint32_t terminal_last_key;
 uint32_t terminal_last_char;

@@ -35,7 +35,8 @@ OBJECTS = \
 		src/drivers/ISO9660.o \
 		src/drivers/cpu.o \
 		src/utilities.o \
-		src/drivers/mouse.o
+		src/drivers/mouse.o \
+		src/drivers/intel_hda.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c

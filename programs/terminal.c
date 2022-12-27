@@ -112,12 +112,13 @@ uint32_t atoi(int block){
 
 void init_terminal(){
     terminal_buffer = malloc(sizeof(char) * fb_terminal_w);
+    terminal_arg_buffer = malloc(sizeof(char) * fb_terminal_w);
     terminal_last_key = keyboard_KEYBUFFER_index;
     terminal_last_char = keyboard_ascii_index;
     terminal_buffer_index = 0;
 
     memset(terminal_block_index, 0, sizeof(terminal_block_index));
-
+    printk("Terminal Buffer Address: %x\n", terminal_buffer);
     //timer_attach(2, terminal_callback);
     add_process(terminal_callback, 0);
     //printk("[Terminal Program] Initialized\n");
@@ -202,7 +203,7 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "loadfs", 0) == 0){
         uint32_t start = terminal_block_index[0]+1;
         printk("Loading File %s\n", terminal_buffer[start]);
-        FILE* file = fopen(0, terminal_buffer+start);
+        FILE* file = fopen(terminal_buffer+start);
         uint8_t *data_buf = (uint8_t*) 0;
         printk("Size: %x\n", file->size);
         for(uint32_t sector = 0; sector < file->sector_count; sector++){
@@ -219,7 +220,7 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "exec", 0) == 0){
         uint32_t start = terminal_block_index[0]+1;
         printk("Loading File %s\n", terminal_buffer[start]);
-        FILE* file = fopen(0, terminal_buffer+start);
+        FILE* file = fopen(terminal_buffer+start);
         uint8_t *data_buf = (uint8_t*) 0;
         //printk("Size: %x\n", file->size);
         for(uint32_t sector = 0; sector < file->sector_count; sector++){
@@ -238,6 +239,15 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "ls", 0) == 0){
         if(strcmp(terminal_buffer, "-a", 1) == 0){
             ISO_list_files();
+        }
+        else if(strcmp(terminal_buffer, "-v", 1) == 0){
+            printk("File Listing of %s:\n", FS_entries[active_directory].name);
+            printk("Parent: %s\n", FS_entries[FS_entries[active_directory].parent_item_entry].name);
+            for(uint32_t i = 0; i < num_fs_entries; i++){
+                if(FS_entries[i].parent_item_entry == active_directory){
+                    printk("- %s Size: %x Sector: %x %x Sector Count: %x\n", FS_entries[i].name, FS_entries[i].size, FS_entries[i].sector, FS_entries[i].sector*4, FS_entries[i].sector_count);
+                }
+            }
         }
         else{
             printk("File Listing of %s:\n", FS_entries[active_directory].name);
@@ -263,7 +273,14 @@ void terminal_parse(){
                 }
             }
         }
+        active_drive = FS_entries[active_directory].drive;
         printk("Dir: %s\n", FS_entries[active_directory].name);
+    }
+    else if(strcmp(terminal_buffer, "memory?", 0) == 0){
+        printk("Used Memory: %x\nRemaining Memory: %x\n", MEMORY_USED, (HEAP_END-HEAP_BEGIN)-MEMORY_USED);
+    }
+    else if(strcmp(terminal_buffer, "display?", 0) == 0){
+        printk("Display %xx%x\n", fb_width, fb_height);
     }
     else{
         int select_program = -1;
@@ -298,7 +315,7 @@ void terminal_parse(){
                 }    
             }
             
-            add_process(exec_user_program, 0);
+            add_process(exec_user_program, 1, terminal_arg_buffer);
             //exec_user_program(0, 0);
         }
     }
@@ -342,6 +359,10 @@ void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10
                 printk("> ");
                 printk(terminal_buffer);
                 printk("\n");
+
+                for(uint32_t i = 0; i < fb_terminal_w; i++){
+                    terminal_arg_buffer[i] = terminal_buffer[i];
+                }
 
                 terminal_locate_blocks();
                 terminal_parse();
