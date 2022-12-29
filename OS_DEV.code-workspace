@@ -16,7 +16,8 @@
 			"processes.h": "c",
 			"math.h": "c",
 			"corecrt_math.h": "c",
-			"corecrt.h": "c"
+			"corecrt.h": "c",
+			"memory.h": "c"
 		},
 		"C_Cpp.errorSquiggles": "Disabled",
 		"cortex-debug.registerUseNaturalFormat": false

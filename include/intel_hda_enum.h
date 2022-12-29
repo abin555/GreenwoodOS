@@ -1,110 +1,181 @@
 #ifndef INTEL_HDA_ENUM_H
 #define INTEL_HDA_ENUM_H
 
-#define REG_SDnCTL(stream)   ((stream)->offset + 0x00)
-#define REG_SDnCBL(stream)   ((stream)->offset + 0x08)
-#define REG_SDnLVI(stream)   ((stream)->offset + 0x0c)
-#define REG_SDnFMT(stream)   ((stream)->offset + 0x12)
-#define REG_SDnBDLPL(stream) ((stream)->offset + 0x18)
-#define REG_SDnBDLPU(stream) ((stream)->offset + 0x1c)
+typedef unsigned int size_t;
 
-#define VERB_GET_PARAM          0xf00
-#define VERB_GET_CONLIST        0xf02
-#define VERB_SET_STREAM_FORMAT  0x200
-#define VERB_SET_CH_STREAM_ID   0x706
-#define VERB_SET_PIN_WIDGET_CTL 0x707
-#define VERB_GET_AMP_GAIN_MUTE  0xb00
-#define VERB_SET_AMP_GAIN_MUTE  0x300
-#define VERB_SET_POWER_STATE    0x705
+#define BDL_SIZE 4
+#define BUFFER_SIZE 0x10000
 
-#define PARAM_NODE_CNT          0x04
-#define PARAM_AUDIO_WIDGET_CAPS 0x09
-#define PARAM_CON_LIST_LEN      0x0e
+#define BDL_BYTES_ROUNDED ((BDL_SIZE * sizeof(struct hda_bdl_entry) + 127) & ~127)
 
-#define NID_ROOT 0
-#define WIDGET_TYPE_PIN 4
+#define SAMPLES_PER_BUFFER (BUFFER_SIZE / 2)
 
-enum HDA_REG_OFFSET{
-    GCAP = 0x00,//2B
-    VMIN = 0x02,//1B
-    VMAJ = 0x03,//1B
-    OUTPAY = 0x04,//2B
-    INPAY = 0x06,//2B
-    GCTL = 0x08,//4B
-    WAKEEN = 0x0C,//2B
-    STATESTS = 0x0E,//2B
-    GSTS = 0x10,//2B
-    OUTSTRMPAY = 0x18,//2B
-    INSTRMPAY = 0x1A,//2B
-    INTCTL = 0x20,//4B
-    INTSTS = 0x24,//4B
-    WALLCLOCK = 0x30,//4B
-    SSYNC = 0x38,//4B
-    CORB_LOW = 0x40,//4B
-    CORB_HIGH = 0x44,//4B
-    CORBWP = 0x48,//2B
-    CORBRP = 0x4A,//2B
-    CORBCTL = 0x4C,//1B
-    CORBSTS = 0x4D,//1B
-    CORBSIZE = 0x4E,//1B
-    RIRBLBASE = 0x50,//4B
-    RIRBUBASE = 0x54,//4B
-    RIRBWP = 0x58,//2B
-    RINTCNT = 0x5A,//2B
-    RIRBCTL = 0x5C,//1B
-    RIRBSTS = 0x5D,//1B
-    RIRBSIZE = 0x5E,//1B
-    DPLBASE = 0x70,//4B
-    DPUBASE = 0x74,//4B
-    SDnCTL = 0x80,//3B *** IS THREE BYTES
-    SD0STS = 0x83,//1B
-    SDnLPIB = 0x84,//4B
-    SDnCBL = 0x88,//4B
-    ISDnLVI = 0x8C,//2B
-    SDnFIFOS = 0x90,//2B
-    SDnFMT = 0x92,//2B
-    SDnBDPL = 0x98,//4B
-    SDnBDPU = 0x9C,//4B
-    WALCLKA = 0x2030,//4B
+/** HD Audio Memory Mapped Registers */
+enum hda_reg {
+    REG_GCTL        = 0x08, ///< GCTL - Global Control
+    REG_WAKEEN      = 0x0c, ///< WAKEEN - Wake Enable
+    REG_STATESTS    = 0x0e, ///< STATESTS - State Change Status
+    REG_INTCTL      = 0x20, ///< INTCTL - Interrupt Control
+    REG_INTSTS      = 0x24, ///< INTSTS - Interrupt Status
 
-    //IOBI Stream Descriptor N Link Position in Buffer Alias (4B each)
-    SDnLICBA = 0x2084,
+    REG_CORBLBASE   = 0x40, ///< CORBLBASE - CORB Lower Base Address
+    REG_CORBUBASE   = 0x44, ///< CORBUBASE - CORB Upper Base Address
+    REG_CORBWP      = 0x48, ///< CORBWP - CORB Write Pointer
+    REG_CORBRP      = 0x4a, ///< CORBRP - CORB Read Pointer
+    REG_CORBCTL     = 0x4c, ///< CORBCTL - CORB Control
+    REG_CORBSIZE    = 0x4e, ///< CORBSIZE - CORB size
 
-    Immediate_Command_Output_Interface = 0x60,//4B
-    Immediate_Response_Input_Interface = 0x64,//4B
-    Immediate_Command_Status = 0x68//2B
+    REG_RIRBLBASE   = 0x50, ///< RIRBLBASE - RIRB Lower Base Address
+    REG_RIRBUBASE   = 0x54, ///< RIRBUBASE - RIRB Upper Base Address
+    REG_RIRBWP      = 0x58, ///< RIRBWP - RIRB Write Pointer
+    REG_RINTCNT     = 0x5a, ///< RINTCNT - Respone Interrupt Count
+    REG_RIRBCTL     = 0x5c, ///< RIRBCTL - RIRB Control
+    REG_RIRBSTS     = 0x5d, ///< RIRBSTS - RIRB Interrupt Status
+    REG_RIRBSIZE    = 0x5e, ///< RIRBSIZE - RIRB size
+
+    REG_DPLBASE     = 0x70, ///< DPLBASE - DMA Position Lower Base Address
+    REG_DPUBASE     = 0x74, ///< DPUBASE - DMA Posiition Upper Base Address
+
+    REG_O0_CTLL     = 0x100,    ///< Output 0 - Control Lower
+    REG_O0_CTLU     = 0x102,    ///< Output 0 - Control Upper
+    REG_O0_STS      = 0x103,    ///< Output 0 - Status
+    REG_O0_CBL      = 0x108,    ///< Output 0 - Cyclic Buffer Length
+    REG_O0_STLVI    = 0x10c,    ///< Output 0 - Last Valid Index
+    REG_O0_FMT      = 0x112,    ///< Output 0 - Format
+    REG_O0_BDLPL    = 0x118,    ///< Output 0 - BDL Pointer Lower
+    REG_O0_BDLPU    = 0x11c,    ///< Output 0 - BDL Pointer Upper
 };
 
-enum HDA_GCAP{//Global Capabilities
-    OSS = 0xF000,
-    ISS = 0x0F00,
-    BSS = 0x00F8,
-    NDSO = 0x0006,
-    OK64 = 0x0001
+/* GCTL bits */
+enum hda_reg_gctl {
+    GCTL_RESET  =   (1 << 0),
 };
 
-enum HDA_GCTL{//Global Control
-    FCNTRL = 0b10,
-    UNSOL = 0x100,
-    CRST = 0b1
+/* CORBCTL bits */
+enum hda_reg_corbctl {
+    CORBCTL_CORBRUN = (1 << 1),
 };
 
-enum HDA_INTCTL{//Interrupt Control
-    GIE = 0x80000000,
-    CIE = 0x40000000,
-    SIE = 0x3FFFFFFF
+/* RIRBCTL bits */
+enum hda_reg_rirbctl {
+    RIRBCTL_RIRBRUN = (1 << 1),
 };
 
-enum HDA_INTSTS{//Interrupt Status
-    GIS = 0x80000000,
-    CIS = 0x40000000,
-    SIS = 0x3FFFFFFF
+/* Stream Descriptor Control Register bits */
+enum hda_reg_sdctl {
+    SDCTL_RUN   =   0x2, ///< Enable DMA Engine
+    SDCTL_IOCE  =   0x4, ///< Enable Interrupt on Complete
 };
 
-enum HDA_CORB_RIRB_CTL{
-    CORBRUN = 0b10,
-    RIRBDMAEN = 0b10
+/** Represents an address of an output widget */
+struct hda_output {
+    //struct cdi_audio_stream stream;
+
+    uint8_t     codec;
+    uint16_t    nid;
+
+    uint32_t    sample_rate;
+    int         amp_gain_steps;
+    int         num_channels;
 };
 
+/** Buffer Descriptor List Entry */
+struct hda_bdl_entry {
+    uint64_t paddr;
+    uint32_t length;
+    uint32_t flags;
+} __attribute__((packed));
+
+/** Represents the state of an HD Audio PCI card */
+struct hda_device {
+    //struct cdi_audio_device audio;
+
+    struct hda_output output;
+
+    struct cdi_mem_area* mmio;
+    uint32_t *mmio_base;
+
+
+    //struct cdi_mem_area*    rings;          ///< Buffer for CORB and RIRB
+    uint32_t *rings;
+    uint32_t *corb_base;
+    uint64_t *rirb_base;
+    uint32_t*               corb;           ///< Command Outbound Ring Buffer
+    volatile uint64_t*      rirb;           ///< Response Inbound Ring Buffer
+    struct hda_bdl_entry*   bdl;            ///< Buffer Descriptor List
+    volatile uint32_t*      dma_pos;        ///< DMA Position in Current Buffer
+
+    size_t                  corb_entries;   ///< Number of CORB entries
+    size_t                  rirb_entries;   ///< Number of RIRB entries
+    uint16_t                rirbrp;         ///< RIRB Read Pointer
+
+    struct cdi_mem_area*    buffer;
+    int                     buffers_completed;
+};
+
+enum codec_verbs {
+    VERB_GET_PARAMETER      = 0xf0000,
+    VERB_SET_STREAM_CHANNEL = 0x70600,
+    VERB_SET_FORMAT         = 0x20000,
+    VERB_GET_AMP_GAIN_MUTE  = 0xb0000,
+    VERB_SET_AMP_GAIN_MUTE  = 0x30000,
+    VERB_GET_CONFIG_DEFAULT = 0xf1c00,
+    VERB_GET_CONN_LIST      = 0xf0200,
+    VERB_GET_CONN_SELECT    = 0xf0100,
+    VERB_GET_PIN_CONTROL    = 0xf0700,
+    VERB_SET_PIN_CONTROL    = 0x70700,
+    VERB_GET_EAPD_BTL       = 0xf0c00,
+    VERB_SET_EAPD_BTL       = 0x70c00,
+    VERB_GET_POWER_STATE    = 0xf0500,
+    VERB_SET_POWER_STATE    = 0x70500,
+};
+
+enum codec_parameters {
+    PARAM_NODE_COUNT        = 0x04,
+    PARAM_FN_GROUP_TYPE     = 0x05,
+    PARAM_AUDIO_WID_CAP     = 0x09,
+    PARAM_PIN_CAP           = 0x0c,
+    PARAM_CONN_LIST_LEN     = 0x0e,
+    PARAM_OUT_AMP_CAP       = 0x12,
+};
+
+enum fn_group_type {
+    FN_GROUP_AUDIO          = 0x01,
+};
+
+enum widget_type {
+    WIDGET_OUTPUT           = 0x0,
+    WIDGET_INPUT            = 0x1,
+    WIDGET_MIXER            = 0x2,
+    WIDGET_SELECTOR         = 0x3,
+    WIDGET_PIN              = 0x4,
+    WIDGET_POWER            = 0x5,
+    WIDGET_VOLUME_KNOB      = 0x6,
+    WIDGET_BEEP_GEN         = 0x7,
+    WIDGET_VENDOR_DEFINED   = 0xf,
+};
+
+enum widget_capabilities {
+    WIDGET_CAP_POWER_CNTRL  = (1 << 10),
+
+    WIDGET_CAP_TYPE_SHIFT   = 20,
+    WIDGET_CAP_TYPE_MASK    = (0xf << 20),
+};
+
+enum pin_capabilities {
+    PIN_CAP_OUTPUT          = (1 << 4),
+    PIN_CAP_INPUT           = (1 << 5),
+};
+
+enum pin_ctl_flags {
+    PIN_CTL_ENABLE_OUTPUT   = (1 << 6),
+};
+
+enum sample_format {
+    SR_48_KHZ               = 0,
+    SR_44_KHZ               = (1 << 14),
+    BITS_32                 = (4 <<  4),
+    BITS_16                 = (1 <<  4),
+};
 
 #endif

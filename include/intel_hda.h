@@ -5,21 +5,8 @@
 #include "pci.h"
 #include "paging.h"
 #include "memory.h"
+#include "timer.h"
 
-struct hdaudio_stream {
-    int id;
-    uint32_t offset;
-    uint32_t buffer_dma;
-    uint32_t buffer_size;
-    uint32_t bdl_dma;
-};
-
-struct hdaudio_buffer_desc{__attribute__((packed))
-    uint64_t buffer_addr;
-    uint32_t buffer_len;
-    /// Interrupt on Completion.
-    uint32_t ioc;
-};
 
 void initialize_INTEL_HDA(int driverID);
 

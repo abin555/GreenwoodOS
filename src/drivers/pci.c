@@ -32,7 +32,7 @@ void pci_probe(){
                 uint16_t class = getDeviceClass(bus, slot, function);
                 uint16_t progIF = getDeviceProgIF(bus,slot,function);
 
-                printk("[PCI Device] Vendor: %4x Device: %4x Class: %4x ProgIf: %4x\n", vendor, device, class, progIF);
+                //printk("[PCI Device] Vendor: %4x Device: %4x Class: %4x ProgIf: %4x\n", vendor, device, class, progIF);
 
                 struct pci_device *pdev = (struct pci_device*)malloc(sizeof(struct pci_device));
                 pdev->bus = bus;
@@ -71,13 +71,13 @@ void pci_add_device(struct pci_device *pdev)
             pdrive->init_driver = initialize_AHCI;
             printk("[PCI Driver] Added AHCI to Driver List\n");
             goto generic_install;
-        /*
+        
         case 0x0403:
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
             pdrive->init_driver = initialize_INTEL_HDA;
             printk("[PCI Driver] Added Intel HDA to Driver List\n");
             goto generic_install;
-        */
+        
         break;
     }
 	pci_device_num++;

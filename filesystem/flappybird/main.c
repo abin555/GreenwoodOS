@@ -11,7 +11,7 @@ void draw_pipe(int x, int y);
 //uint32_t fb_height;
 
 #define fb_width 1280
-#define fb_height 720
+#define fb_height 768
 
 unsigned char bird_buf[0x334];
 unsigned char BACK_buf[0x27604];

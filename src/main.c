@@ -84,11 +84,12 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
     init_pci();
 
+    init_timer(2000);
+
     drivers_init_pci();
     
     init_syscalls();
 
-    init_timer(2000);
     
     init_terminal();
     ready_filesystem();
