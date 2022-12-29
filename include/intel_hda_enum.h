@@ -1,6 +1,7 @@
 #ifndef INTEL_HDA_ENUM_H
 #define INTEL_HDA_ENUM_H
-
+#include "intel_hda.h"
+#include "stdint.h"
 typedef unsigned int size_t;
 
 #define BDL_SIZE 4
@@ -69,7 +70,7 @@ enum hda_reg_sdctl {
 
 /** Represents an address of an output widget */
 struct hda_output {
-    //struct cdi_audio_stream stream;
+    struct audio_stream stream;
 
     uint8_t     codec;
     uint16_t    nid;
@@ -88,15 +89,11 @@ struct hda_bdl_entry {
 
 /** Represents the state of an HD Audio PCI card */
 struct hda_device {
-    //struct cdi_audio_device audio;
+    struct audio_device_hw audio;
 
     struct hda_output output;
+    uint32_t mmio;
 
-    struct cdi_mem_area* mmio;
-    uint32_t *mmio_base;
-
-
-    //struct cdi_mem_area*    rings;          ///< Buffer for CORB and RIRB
     uint32_t *rings;
     uint32_t *corb_base;
     uint64_t *rirb_base;
@@ -109,7 +106,7 @@ struct hda_device {
     size_t                  rirb_entries;   ///< Number of RIRB entries
     uint16_t                rirbrp;         ///< RIRB Read Pointer
 
-    struct cdi_mem_area*    buffer;
+    uint32_t*    buffer;
     int                     buffers_completed;
 };
 
@@ -169,13 +166,6 @@ enum pin_capabilities {
 
 enum pin_ctl_flags {
     PIN_CTL_ENABLE_OUTPUT   = (1 << 6),
-};
-
-enum sample_format {
-    SR_48_KHZ               = 0,
-    SR_44_KHZ               = (1 << 14),
-    BITS_32                 = (4 <<  4),
-    BITS_16                 = (1 <<  4),
 };
 
 #endif

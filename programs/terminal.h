@@ -14,6 +14,7 @@
 #include "programs.h"
 #include "ISO9660.h"
 #include "utilities.h"
+#include "audio.h"
 
 char* terminal_buffer;
 char* terminal_arg_buffer;

@@ -21,6 +21,7 @@
 #include "ISO9660.h"
 #include "cpu.h"
 #include "mouse.h"
+#include "audio.h"
 
 void test_timer(){
     printk("Callback\n");
@@ -94,6 +95,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_terminal();
     ready_filesystem();
 
+    if(audio_device_present){
+        audio_devices[0]->set_volume(audio_devices[0]->hardware->stream, 255);
+        audio_play(framebuffer, fb_width*fb_height);
+    }
 
     //timer_attach(10, keyboard_dbg);
 

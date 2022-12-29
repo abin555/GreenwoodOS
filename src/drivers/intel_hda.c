@@ -1,3 +1,9 @@
+/*
+TODO: Switch to using variable references rather than global definitions for the HDA device.
+Too lazy to do tonight.
+*/
+
+
 #include "intel_hda.h"
 #include "intel_hda_enum.h"
 //#define WIDGET_DEBUG
@@ -7,6 +13,20 @@ void hda_reset();
 void setup_corb();
 void setup_rirb();
 void hda_enumerate_codecs();
+void init_output_widget();
+void init_stream_descriptor();
+uint32_t codec_query(int codec, int nid, uint32_t payload);
+
+void HDA_set_volume(struct audio_stream* stream, uint8_t volume);
+int HDA_set_sample_rate(struct audio_stream* stream, int sample_rate);
+int HDA_set_number_of_channels(struct audio_device* device, int channels);
+int HDA_transfer_data(struct audio_stream* stream, uint32_t size, uint32_t* memory, uint32_t offset);
+audio_status_t HDA_change_device_status(struct audio_device* device, audio_status_t status);
+void HDA_get_position(struct audio_stream* stream, audio_position_t* position);
+
+void HDA_interrupt_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+    printk("[INTEL HDA] Interrupt!\n");
+}
 
 void initialize_INTEL_HDA(int driverID){
     printk("Intel High Definition Audio Driver Init | %2x\n", driverID);
@@ -14,13 +34,40 @@ void initialize_INTEL_HDA(int driverID){
     HDA_BAR = pci_drivers[driverID]->BAR[0];
     create_page_entry(HDA_BAR, HDA_BAR, 0x83);
     HDA = malloc(sizeof(struct hda_device));
+    HDA->mmio = HDA_BAR;
     HDA->rings = (uint32_t *) ((uint32_t)((uint32_t *) malloc(1024 + 2048 + BDL_BYTES_ROUNDED + 128 + 0x100) + 0x100) & ~0x7F);
     HDA->corb = (uint32_t *) HDA->rings + 0;
     HDA->rirb = (uint64_t *) HDA->rings + 1024;
     HDA->bdl = (struct hda_bdl_entry*) HDA->rings + 3072;
     HDA->dma_pos = (uint32_t *)HDA->rings + 3072+ BDL_BYTES_ROUNDED;
+    HDA->buffer = (uint32_t *) malloc(BDL_SIZE * BUFFER_SIZE);
+
+    interrupt_add_handle(pci_drivers[driverID]->interrupt, HDA_interrupt_handler);
 
     hda_reset();
+    if(!HDA->output.nid){
+        printk("[INTEL HDA] No OUTPUT!\n");
+        free(HDA->buffer);
+        free(HDA->rings);
+        free(HDA);
+        return;
+    }
+    init_output_widget();
+    init_stream_descriptor();
+    HDA->audio.device = (void*) HDA;
+    HDA->audio.record = 0;
+    HDA->audio.stream = &HDA->output.stream;
+
+    struct audio_device* audio_dev = (struct audio_device*) malloc(sizeof(struct audio_device));
+    audio_dev->type = INTEL_HDA;
+    audio_dev->hardware = &HDA->audio;
+    audio_dev->set_volume = HDA_set_volume;
+    audio_dev->set_sample_rate = HDA_set_sample_rate;
+    audio_dev->set_number_of_channels = HDA_set_number_of_channels;
+    audio_dev->transfer_data = HDA_transfer_data;
+    audio_dev->change_device_status = HDA_change_device_status;
+    audio_dev->get_position = HDA_get_position;
+    add_audio_device(audio_dev);
 }
 
 void hda_reset(){
@@ -271,7 +318,8 @@ void widget_init(int codec, int nid){
             codec_query(codec, nid, VERB_SET_EAPD_BTL | eapd_btl | 0x2);
             break;
         }
-        case WIDGET_OUTPUT:{
+        //case WIDGET_OUTPUT:{
+        case WIDGET_BEEP_GEN:{
             if(!HDA->output.nid){
                 printk("[INTEL HDA] Using output ID: %x!\n", nid);
                 HDA->output.codec = codec;
@@ -342,6 +390,54 @@ void hda_enumerate_codecs(){
     }
 }
 
+void configure_output_widget(){
+    uint16_t format = BITS_16 | HDA->output.sample_rate | (HDA->output.num_channels - 1);
+    codec_query(HDA->output.codec, HDA->output.nid, VERB_SET_FORMAT | format);
+    set_32_offset(HDA_BAR, REG_O0_FMT, format);
+}
+
+void init_output_widget(){
+    HDA->output.stream.device = &HDA->audio;
+    HDA->output.stream.num_buffers = BDL_SIZE;
+    HDA->output.stream.buffer_size = BUFFER_SIZE / 2;
+    HDA->output.stream.sample_format = CDI_AUDIO_16SI;
+
+    codec_query(HDA->output.codec, HDA->output.nid, VERB_SET_STREAM_CHANNEL | 0x10);
+
+    HDA->output.sample_rate = SR_48_KHZ;
+    HDA->output.num_channels = 2;
+    configure_output_widget();
+}
+
+void init_stream_descriptor(){
+    uint32_t bdl_base, dma_pos_base;
+    int i;
+
+    set_8_offset(HDA_BAR, REG_O0_CTLU, 0x10);
+    set_32_offset(HDA_BAR, REG_O0_CBL, BDL_SIZE * BUFFER_SIZE);
+    set_16_offset(HDA_BAR, REG_O0_STLVI, BDL_SIZE - 1);
+
+    bdl_base = HDA->bdl->paddr;
+    set_32_offset(HDA_BAR, REG_O0_BDLPL, bdl_base & 0xffffffff);
+    set_32_offset(HDA_BAR, REG_O0_BDLPU, 0);
+
+    for(i = 0; i < BDL_SIZE; i++){
+        HDA->bdl[i].paddr = (uint64_t) get_physical((uint32_t)HDA->buffer + (i*BUFFER_SIZE));
+        HDA->bdl[i].length = BUFFER_SIZE;
+        HDA->bdl[i].flags = 1;
+    }
+
+    memset(HDA->buffer, 0, BDL_SIZE * BUFFER_SIZE);
+    for(i = 0; i < 8; i++){
+        HDA->dma_pos[i] = 0;
+    }
+
+    dma_pos_base = get_physical((uint32_t) HDA->dma_pos);
+    set_32_offset(HDA_BAR, REG_DPLBASE, dma_pos_base & 0xffffffff);
+    set_32_offset(HDA_BAR, REG_DPUBASE, 0);
+
+}
+
 
 uint32_t get_bitfield(uint32_t field, uint32_t bit){
     uint32_t val = field & bit;
@@ -388,4 +484,75 @@ void set_32_offset(uint32_t BAR, uint32_t offset, uint32_t val){
     uint32_t address = BAR + offset;
     uint32_t *reg = (uint32_t *) address;
     *reg = val;
+}
+
+
+void HDA_set_volume(struct audio_stream* stream, uint8_t volume){
+    struct hda_device* hda = (struct hda_device*) stream->device->device;
+    int meta = 0xb000;
+    printk("Setting Volume to %2x\n", volume);
+    if(volume == 0){
+        volume = 0x80;
+    }
+    else{
+        volume = volume * hda->output.amp_gain_steps / 255;
+    }
+    codec_query(hda->output.codec, hda->output.nid, VERB_SET_AMP_GAIN_MUTE | meta | volume);
+}
+
+int HDA_set_sample_rate(struct audio_stream* stream, int sample_rate){
+    struct hda_device* hda = (struct hda_device*) stream->device->device;
+    switch(sample_rate){
+        case 44100:
+            hda->output.sample_rate = SR_44_KHZ;
+            break;
+        default:
+            sample_rate = 48000;
+            hda->output.sample_rate = SR_48_KHZ;
+            break;
+    }
+    configure_output_widget();
+    return sample_rate;
+}
+
+int HDA_set_number_of_channels(struct audio_device* device, int channels){
+    struct hda_device* hda = (struct hda_device*) device->hardware->device;
+    if(channels < 1 || channels > 2){
+        channels = 2;
+    }
+    hda->output.num_channels = channels;
+    configure_output_widget();
+    return channels;
+}
+
+int HDA_transfer_data(struct audio_stream* stream, uint32_t size, uint32_t* memory, uint32_t offset){
+    struct hda_device* hda = (struct hda_device*) stream->device->device;
+    printk("[Intel HDA] Transfer Data: size %x, off %x\n", size, offset);
+    if(size > BDL_SIZE*BUFFER_SIZE || offset >= SAMPLES_PER_BUFFER){
+        return -1;
+    }
+    //memcpy(memory, hda->buffer + size * BUFFER_SIZE + (offset * 2), (SAMPLES_PER_BUFFER - offset) * 2);
+    memcpy(memory, hda->buffer, size);
+    return 0;
+}
+
+audio_status_t HDA_change_device_status(struct audio_device* device, audio_status_t status){
+    struct hda_device* hda = (struct hda_device*) device->hardware->device;
+    uint16_t ctl;
+    printk("[INTEL HDA] Change Status %x\n", status);
+    if(status == CDI_AUDIO_PLAY){
+        ctl = SDCTL_RUN | SDCTL_IOCE;
+    }
+    else{
+        ctl = 0;
+    }
+    set_16_offset(hda->mmio, REG_O0_CTLL, ctl);
+    return status;
+}
+void HDA_get_position(struct audio_stream* stream, audio_position_t* position){
+    struct hda_device* hda = (struct hda_device*) stream->device->device;
+    uint32_t pos = hda->dma_pos[4] & 0xffffffff;
+    position->buffer = pos / BUFFER_SIZE;
+    position->frame = (pos % BUFFER_SIZE) / 2;
+    printk("[INTEL HDA] Position: %x/%x\n", position->buffer, position->frame);
 }

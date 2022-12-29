@@ -1,11 +1,13 @@
 #ifndef INTEL_HDA_H
 #define INTEL_HDA_H
-
+#include "audio.h"
+#include "intel_hda_enum.h"
 #include "console.h"
 #include "pci.h"
 #include "paging.h"
 #include "memory.h"
 #include "timer.h"
+#include "interrupts.h"
 
 
 void initialize_INTEL_HDA(int driverID);
@@ -20,4 +22,7 @@ uint32_t get_24_offset(uint32_t BAR, uint32_t offset);
 void set_8_offset(uint32_t BAR, uint32_t offset, uint8_t val);
 void set_16_offset(uint32_t BAR, uint32_t offset, uint16_t val);
 void set_32_offset(uint32_t BAR, uint32_t offset, uint32_t val);
+
+
+
 #endif
