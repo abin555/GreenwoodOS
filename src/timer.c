@@ -20,7 +20,7 @@ void init_timer(uint32_t frequency){
     timer_freq = frequency;
     interrupt_add_handle(32, &timer_callback);
     IRQ_clear_mask(0);
-    //printk("[Timer] Initialized at %xhz\n", frequency);
+    printk("[Timer] Initialized at %xhz\n", frequency);
 }
 
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){

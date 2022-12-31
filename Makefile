@@ -38,7 +38,8 @@ OBJECTS = \
 		src/drivers/mouse.o \
 		src/drivers/audio/intel_hda.o \
 		src/drivers/audio/audio.o \
-		src/drivers/audio/pcspk.o
+		src/drivers/audio/pcspk.o \
+		src/drivers/audio/sb16.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I. -masm=intel -g -c
@@ -82,7 +83,6 @@ debug: build
 	objcopy --only-keep-debug kernel.elf kernel.sym
 	objcopy --strip-debug kernel.elf
 transfer-compiled:
-	cp src/*.o ./compile
 	rm -rf src/*.o
 	rm -rf src/drivers/*.o
 	rm -rf src/drivers/usb/*.o

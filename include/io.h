@@ -7,7 +7,7 @@
 #define IRQ_RES { asm volatile ("sti"); }
 
 extern void outb(unsigned short port, unsigned char data);
-extern unsigned char inb(unsigned short pos);
+extern unsigned char inb(unsigned short port);
 
 extern void outportl(uint16_t port, uint32_t value);
 extern uint32_t inportl(uint16_t port);

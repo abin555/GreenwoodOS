@@ -52,6 +52,7 @@ uint8_t mouse_read()
 }
 
 struct cpu_state mouse_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+    printk("[INT] Mouse Interrupt!\n");
     switch(mouse_cycle){
         case 0:
             mouse_byte[0] = inb(0x60);
@@ -93,7 +94,7 @@ void initialize_ps2_mouse(){
     mouse_write(0xF4);
     mouse_read();
 
-    interrupt_add_handle(44, &mouse_handler);
+    interrupt_add_handle(32+12, &mouse_handler);
     IRQ_clear_mask(12);
 
     IRQ_RES;

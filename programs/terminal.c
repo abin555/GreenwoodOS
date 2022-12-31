@@ -283,7 +283,7 @@ void terminal_parse(){
         printk("Display %xx%x\n", fb_width, fb_height);
     }
     else if(strcmp(terminal_buffer, "beep", 0) == 0){
-        beep();
+        audio_beep();
     }
     else{
         int select_program = -1;

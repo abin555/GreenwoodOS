@@ -23,28 +23,25 @@
 #include "mouse.h"
 #include "drivers/audio/audio.h"
 #include "drivers/audio/pcspk.h"
+#include "drivers/audio/sb16.h"
 
-void test_timer(){
-    printk("Callback\n");
-}
-void test_timer2(){
-    printk("BackCall\n");
-}
-uint32_t freq = 100;
-void beep_dbg(){
-    play_sound(freq);
-    freq *= 2;
-    if(freq > 10000){
-        freq = 100;
+uint32_t last_keycode_index;
+void sys_timer_callback(){
+    if(keyboard_KEYBUFFER_index != last_keycode_index){
+        last_keycode_index = keyboard_KEYBUFFER_index;
+        switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_index-1]){
+            case 0xC3:
+                audio_setEnable(!audio_muted);
+                break;
+            case 0xD8:
+                if(!audio_muted){
+                    play_sound(1000);
+                    for(int i = 0; i < 40000000; i++){}
+                    mute();
+                }
+                break;
+        }
     }
-}
-
-void keyboard_dbg(){
-    fb_setChar(fb_terminal_w-1, fb_terminal_h-2, keyboard_ASCIIBuffer[keyboard_ascii_index-1], 0xFFFFFF, 0);
-    write_serial(keyboard_ASCIIBuffer[keyboard_ascii_index-1]);
-}
-void mouse_dbg(){
-    fb_setPixel(mouse_x, mouse_y, 0xFF0000);
 }
 
 int kmain(unsigned long magic, unsigned long magic_addr){    
@@ -79,10 +76,9 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     fb_setChar(1,1, 'R', 0x00FFFF, 0);
     initialize_heap(0x04000000, 0x800000);
     init_backbuffer();
-    fb_setChar(2,1, 'R', 0x00FFFF, 0);
     initialize_console(fb_terminal_w,fb_terminal_h);
-    fb_setChar(3,1, 'R', 0x00FFFF, 0);
     initialize_ps2_keyboard(0);
+    initialize_ps2_mouse();
     init_filesystem();
 
     getCPUVendorString();
@@ -93,13 +89,15 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_timer(2000);
 
     drivers_init_pci();
-    
+    //init_soundblaster();
     init_syscalls();
 
     
     init_terminal();
+    audio_init();
+    
     ready_filesystem();
-
+    timer_attach(100, sys_timer_callback);
     process_scheduler();
     asm("hlt");
     return 0;

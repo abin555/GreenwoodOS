@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "console.h"
+#include "pcspk.h"
 
 typedef struct audio_position {
     uint32_t buffer;
@@ -59,8 +60,26 @@ struct audio_device{
     audio_status_t (*change_device_status)(struct audio_device* device, audio_status_t status);
     void (*get_position)(struct audio_stream* stream, audio_position_t* position);
 };
-struct audio_device* audio_devices[2];
-bool audio_device_present;
+
+
+
+struct audio_device* audio_devices[4];
+int audio_active_driver;
+int audio_device_count;
+
+bool audio_muted;
+bool audio_active;
+
+void audio_init();
+
 void add_audio_device(struct audio_device* audio_dev);
 void audio_play(uint32_t *buffer, uint32_t size);
+void audio_beep();
+
+typedef enum{
+    MUTE = 1,
+    UNMUTE = 0
+} audio_enable;
+
+void audio_setEnable(audio_enable state);
 #endif

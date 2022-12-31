@@ -74,7 +74,8 @@ boot_page_directory:
 	dd 0x00C00083
 	dd 0x01000083
 	dd 0x01400083
-	times (AHCI_PN - KERNEL_PAGE_NUMBER - 6) dd 0
+	dd 0x01800083
+	times (AHCI_PN - KERNEL_PAGE_NUMBER - 7) dd 0
 	;dd 0xfe800083
 	dd 0
 	times (1024 - AHCI_PN - 1) dd 0
