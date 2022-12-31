@@ -15,6 +15,7 @@
 #include "ISO9660.h"
 #include "utilities.h"
 #include "audio.h"
+#include "pcspk.h"
 
 char* terminal_buffer;
 char* terminal_arg_buffer;

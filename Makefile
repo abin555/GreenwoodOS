@@ -36,11 +36,12 @@ OBJECTS = \
 		src/drivers/cpu.o \
 		src/utilities.o \
 		src/drivers/mouse.o \
-		src/drivers/intel_hda.o \
-		src/drivers/audio.o
+		src/drivers/audio/intel_hda.o \
+		src/drivers/audio/audio.o \
+		src/drivers/audio/pcspk.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
@@ -53,13 +54,20 @@ kernel.elf: $(OBJECTS)
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
 	grub-mkrescue -o GreenwoodOS.img iso
-run: os.iso transfer-compiled
-	qemu-system-x86_64 -boot d -m 512 -monitor stdio \
-	-vga std \
-	-drive id=disk,file=GreenwoodOS.img,if=none \
+run: os.iso transfer-compiled emulate
+
+DEBUG_EMU = 
+
+emulate:
+	qemu-system-i386 $(DEBUG_EMU) -boot order=c -m 512 -monitor stdio -serial file:serial.log \
+	-device ich9-intel-hda \
+	-audiodev pa,id=snd0 \
+	-device hda-output,audiodev=snd0 \
+	-drive id=disk,file=GreenwoodOS.img,if=none,format=raw \
+	-drive id=disk2,file=filesystem.iso,if=none,format=raw \
 	-device ahci,id=ahci \
-	-device ide-hd,drive=disk,bus=ahci.0 \
-	-device nec-usb-xhci
+	-device ide-hd,drive=disk2,bus=ahci.0,bootindex=2 \
+	-device ide-hd,drive=disk,bus=ahci.1,bootindex=1
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
@@ -78,10 +86,7 @@ transfer-compiled:
 	rm -rf src/*.o
 	rm -rf src/drivers/*.o
 	rm -rf src/drivers/usb/*.o
+	rm -rf src/drivers/audio/*.o
 	rm -rf programs/*.o
-
-build_clean: os.iso transfer-compiled
-build_clean_run: os.iso transfer-compiled run
-
 make_fs:
 	mkisofs -o ./filesystem.iso ./filesystem/

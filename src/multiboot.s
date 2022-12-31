@@ -19,6 +19,8 @@ framebuffer_tag_start:
 	DD 768
 	;DD 1920
 	;DD 1080
+	;DD 640
+	;DD 480
 	DD 32
 framebuffer_tag_end:
 align 8

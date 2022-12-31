@@ -21,13 +21,22 @@
 #include "ISO9660.h"
 #include "cpu.h"
 #include "mouse.h"
-#include "audio.h"
+#include "drivers/audio/audio.h"
+#include "drivers/audio/pcspk.h"
 
 void test_timer(){
     printk("Callback\n");
 }
 void test_timer2(){
     printk("BackCall\n");
+}
+uint32_t freq = 100;
+void beep_dbg(){
+    play_sound(freq);
+    freq *= 2;
+    if(freq > 10000){
+        freq = 100;
+    }
 }
 
 void keyboard_dbg(){
@@ -39,7 +48,7 @@ void mouse_dbg(){
 }
 
 int kmain(unsigned long magic, unsigned long magic_addr){    
-    //init_serial();
+    init_serial();
     struct multiboot_tag *tag;
     // unsigned size;
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
@@ -57,7 +66,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
         {
             struct multiboot_tag_framebuffer *tagfb = (struct multiboot_tag_framebuffer *)tag;
-            //print_serial("Multiboot Address: 0x%x \nFramebuffer Address: 0x%x\0", (unsigned int) magic_addr, tagfb->common.framebuffer_addr);
+            print_serial("Multiboot Address: 0x%x \nFramebuffer Address: 0x%x\0", (unsigned int) magic_addr, tagfb->common.framebuffer_addr);
             init_framebuffer(tagfb);
             break;
         }
@@ -70,18 +79,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     fb_setChar(1,1, 'R', 0x00FFFF, 0);
     initialize_heap(0x04000000, 0x800000);
     init_backbuffer();
+    fb_setChar(2,1, 'R', 0x00FFFF, 0);
     initialize_console(fb_terminal_w,fb_terminal_h);
+    fb_setChar(3,1, 'R', 0x00FFFF, 0);
     initialize_ps2_keyboard(0);
     init_filesystem();
 
     getCPUVendorString();
-    if(getCPUFeatures(CPUID_FEAT_EDX_PAT)){
-        printk("CPU supports PAT\n");
-        set_PAT();
-    }
-    if(getCPUFeatures(CPUID_FEAT_EDX_MTRR)){
-        printk("CPU supports MTRR\n");
-    }
+    set_PAT();
 
     init_pci();
 
@@ -95,15 +100,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_terminal();
     ready_filesystem();
 
-    if(audio_device_present){
-        audio_devices[0]->set_volume(audio_devices[0]->hardware->stream, 255);
-        audio_play(framebuffer, fb_width*fb_height);
-    }
-
-    //timer_attach(10, keyboard_dbg);
-
     process_scheduler();
-
     asm("hlt");
     return 0;
 }

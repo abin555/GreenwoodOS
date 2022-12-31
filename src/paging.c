@@ -34,6 +34,9 @@ void paging_error(){
     printk("Page Fault at 0x%x\n", faulting_address);
     print_serial("Page Fault at 0x%x\n", faulting_address);
     printk("[KERNEL PANIC]\n");
+    play_sound(1000);
+    for(uint32_t i = 0; i < (0xFFFFFFE / 2); i++){}
+    mute();
     asm volatile("cli");
     asm volatile("hlt");
 }
@@ -56,18 +59,15 @@ uint32_t get_physical(uint32_t address){
     uint32_t value = page_table[page_dir];
     value &= 0xFFC00000;
     value |= lower_addr;
-    //printk("Directory Address: %x\nDirectory Reference: %x\n", (uint32_t) page_table, value);
     return value;
 }
 
 void set_PAT(){
     if(getCPUFeatures(CPUID_FEAT_EDX_PAT)){
         uint32_t IA32_PAT_low = getMTRR_low(0x277);
-        printk("PAT Initial: %b\n", IA32_PAT_low);
         IA32_PAT_low = 0b00000000000000010000010000000110;
         setMTRR_low(0x277, IA32_PAT_low);
         IA32_PAT_low = getMTRR_low(0x277);
-        printk("PAT   After: %b\n", IA32_PAT_low);
     }
     else{
         printk("Unable to set PAT");

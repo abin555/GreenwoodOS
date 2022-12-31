@@ -46,3 +46,4 @@ void setMTRR_high(uint32_t register_address, uint32_t value){
     register uint32_t eax asm("eax")__attribute__((unused)) = getMTRR_low(register_address);
     asm volatile("WRMSR");
 }
+

@@ -9,6 +9,7 @@
 #include "multiboot.h"
 #include "programs.h"
 #include "cpu.h"
+#include "pcspk.h"
 
 extern void update_page();
 extern uint32_t boot_page_directory; 

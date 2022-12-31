@@ -26,7 +26,6 @@ void initialize_ps2_keyboard(int device){
     ps2_expect_ack();
     interrupt_add_handle(33, &keyboard_handler);
     IRQ_clear_mask(1);
-
     IRQ_RES;
 }
 

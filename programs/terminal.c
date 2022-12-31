@@ -282,6 +282,9 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "display?", 0) == 0){
         printk("Display %xx%x\n", fb_width, fb_height);
     }
+    else if(strcmp(terminal_buffer, "beep", 0) == 0){
+        beep();
+    }
     else{
         int select_program = -1;
         uint32_t bin_folder_index;

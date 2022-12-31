@@ -2,9 +2,12 @@
 #define TIMER_H
 
 #include "interrupts.h"
+#include "pic.h"
 #include "stdint.h"
 #include "io.h"
 #include "console.h"
+
+struct stack_state;
 
 extern uint32_t timer_ticks;
 extern uint32_t timer_freq;

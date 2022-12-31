@@ -11,16 +11,16 @@ void delay(uint32_t msec){
 }
 
 void init_timer(uint32_t frequency){
-    printk("[Timer] Initialized at %xhz\n", frequency);
-    interrupt_add_handle(32, &timer_callback);
-    IRQ_clear_mask(0);
     uint32_t divisor = 1193180 / frequency;
-    outb(0x43, 0x36);
     uint8_t l = (uint8_t)(divisor & 0xFF);
     uint8_t h = (uint8_t)((divisor >> 8) & 0xFF);
+    outb(0x43, 0x36);
     outb(0x40, l);
     outb(0x40, h);
     timer_freq = frequency;
+    interrupt_add_handle(32, &timer_callback);
+    IRQ_clear_mask(0);
+    //printk("[Timer] Initialized at %xhz\n", frequency);
 }
 
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){

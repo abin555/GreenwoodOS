@@ -3,6 +3,7 @@
 #include <cpuid.h>
 #include "console.h"
 #include "memory.h"
+#include "paging.h"
 
 void getCPUVendorString();
 uint8_t getCPUFeatures(uint32_t feature);

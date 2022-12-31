@@ -1,5 +1,9 @@
 qemu-system-i386 -boot order=c -m 512 -monitor stdio -serial file:serial.log ^
--audiodev id=jack,driver=dsound -device ich9-intel-hda -device hda-duplex,audiodev=jack ^
+-device ich9-intel-hda ^
+-audiodev dsound,id=snd0 ^
+-device hda-output,audiodev=snd0 ^
+-audio dsound,model=sb16 ^
+-audiodev dsound,id=pcspeaker -machine pcspk-audiodev=pcspeaker ^
 -drive if=none,id=usbstick,format=raw,file=GreenwoodOS.img ^
 -drive id=disk,file=GreenwoodOS.img,if=none,format=raw ^
 -drive id=disk2,file=filesystem.iso,if=none,format=raw ^
