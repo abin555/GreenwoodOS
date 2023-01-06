@@ -157,7 +157,7 @@ void terminal_parse(){
         add_process(Art, 0);
     }
     else if(strcmp(terminal_buffer, "clear", 0) == 0){
-        fb_clear(0);
+        console_wipebuf();
         memset(consoleArray, 0, console_width*console_height);
         consoleLine = 0;
     }    
@@ -377,18 +377,18 @@ void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10
     }
     directory_namesize=0;
     while(FS_entries[active_directory].name[directory_namesize]){
-        fb_setChar(directory_namesize, fb_terminal_h-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
+        buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
         directory_namesize++;
     }
-    fb_setChar(directory_namesize, fb_terminal_h-1, '>', 0xFFFFFF, 0);
+    buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
 
-    for(uint32_t i = 0; i < fb_terminal_w; i++){
+    for(uint32_t i = 0; i < console_width; i++){
         //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
         if(i == terminal_buffer_index){
-            fb_setChar(directory_namesize+i+1, fb_terminal_h-1, terminal_buffer[i], 0, 0xFFFFFF);
+            buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
         }
         else{
-            fb_setChar(directory_namesize+i+1, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
+            buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
         }
     }
 }

@@ -24,6 +24,7 @@
 #include "drivers/audio/audio.h"
 #include "drivers/audio/pcspk.h"
 #include "drivers/audio/sb16.h"
+#include "window_manager.h"
 
 uint32_t last_keycode_index;
 void sys_timer_callback(){
@@ -77,8 +78,15 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     initialize_heap(0x04000000, 0x800000);
     init_backbuffer();
     initialize_console(fb_terminal_w,fb_terminal_h);
+    
+    //init_ps2();
+    init_timer(1000);
+
     initialize_ps2_keyboard(0);
-    initialize_ps2_mouse();
+    initialize_ps2_mouse(0);
+    
+    
+    
     init_filesystem();
 
     getCPUVendorString();
@@ -86,19 +94,40 @@ int kmain(unsigned long magic, unsigned long magic_addr){
 
     init_pci();
 
-    init_timer(2000);
-
     drivers_init_pci();
     //init_soundblaster();
     init_syscalls();
-
+    
+    ready_filesystem();
+    
     
     init_terminal();
     audio_init();
+    init_mouse();
     
-    ready_filesystem();
     timer_attach(100, sys_timer_callback);
+    //process_scheduler();
+
+    printk("Press T for old style terminal, no window manager\nPress W for window manager\n");
+    for(int i = 0; i < 10000; i++){
+        if(keyboard_ASCIIBuffer[keyboard_ascii_index-1] == 'T'){
+            use_window = false;
+            break;
+        }
+        else if(keyboard_ASCIIBuffer[keyboard_ascii_index-1] == 'W'){
+            use_window = true;
+            break;
+        }
+        delay(1);
+    }
+    if(use_window){
+        init_window_manager(10);
+        console_addWindow();
+        printk("Window Manager Init!\n");
+        timer_attach(10, draw_screen);
+    }
     process_scheduler();
+
     asm("hlt");
     return 0;
 }

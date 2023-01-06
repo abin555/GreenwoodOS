@@ -15,7 +15,7 @@ framebuffer_tag_start:
 	DW 5 ;MULTIBOOT_HEADER_TAG_FRAMEBUFFER
 	DW 1 ;MULTIBOOT_HEADER_TAG_OPTIONAL
 	DD framebuffer_tag_end - framebuffer_tag_start
-	DD 1280
+	DD 1366
 	DD 768
 	;DD 1920
 	;DD 1080

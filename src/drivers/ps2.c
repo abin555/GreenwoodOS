@@ -79,12 +79,14 @@ void init_ps2(){
         ps2_write(PS2_CMD, PS2_ENABLE_FIRST);
         config |= PS2_CFG_FIRST_PORT;
         config &= ~PS2_CFG_FIRST_CLOCK;
+        printk("[PS2] Port 1 Enabled\n");
     }
 
     if(ps2_controllers[1]){
         ps2_write(PS2_CMD, PS2_ENABLE_SECOND);
         config |= PS2_CFG_SECOND_PORT;
         config &= ~PS2_CFG_SECOND_CLOCK;
+        printk("[PS2] Port 2 Enabled\n");
     }
 
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
@@ -108,9 +110,54 @@ void init_ps2(){
         }
     }
 
+    for(int i = 0; i < 2; i++){
+        if(ps2_controllers[i]){
+            uint32_t type = ps2_identify_dev(i);
+            switch(type){
+                case PS2_KEYBOARD:
+                case PS2_KEYBOARD_TRANSLATED:
+                    printk("[PS2] Keyboard on %1x\n", i);
+                    //initialize_ps2_keyboard(i);
+                    break;
+                case PS2_MOUSE:
+                case PS2_MOUSE_SCROLL_WHEEL:
+                case PS2_MOUSE_FIVE_BUTTONS:
+                    printk("[PS2] Mouse on %1x\n", i);
+                    break;
+            }
+        }
+    }
+
 
     IRQ_RES;
     printk("[PS2] Initialized\n");
+}
+
+
+uint32_t ps2_identify_dev(uint32_t dev_num){
+    ps2_write_device(dev_num, PS2_DEV_DISABLE_SCAN);
+    ps2_expect_ack();
+    ps2_write_device(dev_num, PS2_DEV_IDENTIFY);
+    ps2_expect_ack();
+
+    uint32_t first_id_byte = ps2_read(PS2_DATA);
+    uint32_t second_id_byte = ps2_read(PS2_DATA);
+
+    return ps2_identify_bytes_to_type(first_id_byte, second_id_byte);
+}
+
+uint32_t ps2_identify_bytes_to_type(uint8_t first, uint8_t second){
+    if (first == 0x00 || first == 0x03 || first == 0x04) {
+        return first; // PS2_MOUSE* match the first byte
+    } else if (first == 0xAB) {
+        if (second == 0x41 || second == 0xC1) {
+            return PS2_KEYBOARD_TRANSLATED;
+        } else if (second == 0x83) {
+            return PS2_KEYBOARD;
+        }
+    }
+
+    return PS2_DEVICE_UNKNOWN;
 }
 
 char ps2_wait_write(){

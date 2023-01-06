@@ -44,10 +44,29 @@ void fb_write_cell(uint32_t index, char c, uint32_t fg, uint32_t bg){
     }
 }
 
+void buf_write_cell(uint32_t *buf, uint32_t w, uint32_t index, char c, uint32_t fg, uint32_t bg){
+    uint32_t x = (index % (w/CHAR_W))*CHAR_W;
+    uint32_t y = (index / (w/CHAR_W))*CHAR_H;
+    if(!(c >= 32 && c <= 126)) c = ' ';
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            buf[w * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}
+
 void fb_setChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
     for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
             framebuffer[fb_real_w * ((y*CHAR_H)+layer) + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}
+
+void buf_setChar(uint32_t *buf, uint32_t w, uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            buf[(w * ((y*CHAR_H)+layer))*CHAR_W + (x*CHAR_W)+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
         }
     }
 }

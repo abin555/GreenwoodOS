@@ -39,10 +39,13 @@ OBJECTS = \
 		src/drivers/audio/intel_hda.o \
 		src/drivers/audio/audio.o \
 		src/drivers/audio/pcspk.o \
-		src/drivers/audio/sb16.o
+		src/drivers/audio/sb16.o \
+		src/drivers/usb/USB.o \
+		src/drivers/usb/ehci.o \
+		src/window_manager.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf

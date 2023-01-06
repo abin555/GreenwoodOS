@@ -8,6 +8,19 @@
 #include "ahci.h"
 #include "paging.h"
 #include "intel_hda.h"
+#include "USB.h"
+
+#define BIT(x) (1<<x)
+#define PCI_CMD_IO                           BIT(0)
+#define PCI_CMD_MMIO                         BIT(1)
+#define PCI_CMD_BUSMASTER                    BIT(2)
+#define PCI_CMD_SPECIALCYCLES                BIT(3)
+#define PCI_CMD_MEMORYWRITEINVALIDATEENABLE  BIT(4)
+#define PCI_CMD_VGAPALETTESNOOP              BIT(5)
+#define PCI_CMD_PARITYERRORRESPONSE          BIT(6)
+#define PCI_CMD_SERRENABLE                   BIT(8)
+#define PCI_CMD_FASTBACKTOBACKENABLE         BIT(9)
+#define PCI_CMD_INTERRUPTDISABLE             BIT(10)
 
 struct pci_device{
     uint16_t vendor;
@@ -19,6 +32,7 @@ struct pci_device{
     uint32_t bus;
     uint32_t slot;
     uint32_t dev;
+    uint8_t configuration_offset;
     struct pci_driver* driver;
 };
 
@@ -43,8 +57,12 @@ void init_pci();
 void pci_probe();
 void pci_add_device(struct pci_device* pdev);
 
-uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset);
-uint32_t pci_read_dword(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset);
+uint8_t pci_read_byte(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset);
+uint16_t pci_read_word(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset);
+uint32_t pci_read_dword(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset);
+void pci_write_byte(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint8_t value);
+void pci_write_word(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint16_t value);
+void pci_write_dword(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint32_t value);
 
 uint16_t getVendorID(uint16_t bus, uint16_t device, uint16_t function);
 uint16_t getDeviceID(uint16_t bus, uint16_t device, uint16_t function);

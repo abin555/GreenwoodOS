@@ -16,6 +16,7 @@ uint32_t console_last_line;
 char console_initialized;
 uint32_t console_color_fg;
 uint32_t console_color_bg;
+uint32_t *console_fb;
 
 void initialize_console(uint32_t width, uint32_t height);
 
@@ -30,6 +31,8 @@ void printk(char* msg, ...);
 char quadToHex(uint8_t quad);
 
 void console_clear();
+void console_wipebuf();
 
 void console_fullPut();
+void console_addWindow();
 #endif

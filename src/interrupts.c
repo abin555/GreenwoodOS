@@ -62,12 +62,18 @@ void interrupts_install_idt()
 	interrupts_init_descriptor(36, (unsigned int) int_handler_36);
 	interrupts_init_descriptor(37, (unsigned int) int_handler_37);
 	interrupts_init_descriptor(38, (unsigned int) int_handler_38);
-	interrupts_init_descriptor(39, (unsigned int) int_handler_39);
+	//interrupts_init_descriptor(39, (unsigned int) int_handler_39);
 	interrupts_init_descriptor(40, (unsigned int) int_handler_40);
 	interrupts_init_descriptor(41, (unsigned int) int_handler_41);
 	interrupts_init_descriptor(42, (unsigned int) int_handler_42);
 	interrupts_init_descriptor(43, (unsigned int) int_handler_43);
 	interrupts_init_descriptor(44, (unsigned int) int_handler_44);
+	
+	interrupts_init_descriptor(50, (unsigned int) int_handler_50);
+	interrupts_init_descriptor(51, (unsigned int) int_handler_51);
+	interrupts_init_descriptor(52, (unsigned int) int_handler_52);
+	interrupts_init_descriptor(53, (unsigned int) int_handler_53);
+
 	interrupts_init_descriptor(128, (unsigned int) int_handler_128);
 
 	idt.address = (int) &idt_descriptors;
@@ -83,13 +89,6 @@ struct stack_state most_recent_int_stack_state;
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, __attribute__((unused)) unsigned int interrupt, __attribute__((unused)) struct stack_state stack){
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
-	//fb_setChar(2,1, 'I', 0xFFFFFF, 0);
-	if(interrupt >= 32 && interrupt <= 47){
-		if(interrupt >= 40){
-			outb(0x20, 0x20);
-		}
-		outb(0x20, 0x20);
-	}
 
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);

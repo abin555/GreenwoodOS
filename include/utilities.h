@@ -5,7 +5,7 @@
 
 int check_str_equ(char *str1, char *str2);
 uint32_t get_bitfield(uint32_t field, uint32_t bit);
-
+int calculate_shift(uint32_t field);
 uint8_t get_8_offset(uint32_t BAR, uint32_t offset);
 uint16_t get_16_offset(uint32_t BAR, uint32_t offset);
 uint32_t get_32_offset(uint32_t BAR, uint32_t offset);

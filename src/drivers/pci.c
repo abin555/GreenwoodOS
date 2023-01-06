@@ -3,8 +3,8 @@
 void init_pci(){
     printk("[PCI] Initializing\n");
     pci_device_num = pci_driver_num = 0;
-    pci_devices = (struct pci_device**) malloc(32 * sizeof(struct pci_device));
-    pci_drivers = (struct pci_driver**) malloc(32 * sizeof(struct pci_driver));
+    pci_devices = (struct pci_device**) malloc(32 * sizeof(struct pci_device*));
+    pci_drivers = (struct pci_driver**) malloc(32 * sizeof(struct pci_driver*));
     pci_probe();
 }
 
@@ -57,27 +57,27 @@ void pci_add_device(struct pci_device *pdev)
 	pci_devices[pci_device_num] = pdev;
     struct pci_driver *pdrive;
     switch(pdev->class){
-        /*
+        
         case 0x0C03://Universal Serial Bus Controller
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
-            pdrive->name = usb_driverName;
+            pdrive->name = "USB Device";
             pdrive->init_driver = usb_init_driver;
-            pdrive->exit_driver = usb_exit_driver;
+            printk("[PCI Driver] Added USB to Driver List\n");
             goto generic_install;
         break;
-        */
+        
         case 0x0106:
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
             pdrive->init_driver = initialize_AHCI;
             printk("[PCI Driver] Added AHCI to Driver List\n");
             goto generic_install;
-        
+        /*
         case 0x0403:
             pdrive = (struct pci_driver *)malloc(sizeof(struct pci_driver));
             pdrive->init_driver = initialize_INTEL_HDA;
             printk("[PCI Driver] Added Intel HDA to Driver List\n");
             goto generic_install;
-        
+        */
         break;
     }
 	pci_device_num++;
@@ -99,7 +99,18 @@ void pci_add_device(struct pci_device *pdev)
     return;    
 }
 
-uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset)
+uint8_t pci_read_byte(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset){
+    int shift = ((offset & 3) * 8);
+    uint32_t val = 0x80000000 |
+        (bus << 16) |
+        (slot << 11) |
+        (func << 8) |
+        (offset & 0xFC);
+    outdw(0xCF8, val);
+    return (indw(0xCFC) >> shift) & 0xFF;
+}
+
+uint16_t pci_read_word(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset)
 {
 	uint64_t address;
     uint64_t lbus = (uint64_t)bus;
@@ -122,7 +133,7 @@ uint16_t pci_read_word(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offs
 #define PCI_IO_CONF_FUNCNUM 8
 #define PCI_IO_CONF_REGNUM 2
 
-uint32_t pci_read_dword(uint16_t bus, uint16_t slot, uint16_t func, uint16_t offset){
+uint32_t pci_read_dword(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset){
     outdw(
         PCI_IO_CONFADD, 
         bus << PCI_IO_CONF_BUSNUM | 
@@ -132,6 +143,50 @@ uint32_t pci_read_dword(uint16_t bus, uint16_t slot, uint16_t func, uint16_t off
         1 << PCI_IO_CONF_CONE
     );
 	return indw(PCI_IO_CONFDATA);
+}
+
+void pci_write_byte(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint8_t value){
+    uint32_t shift = ((offset & 3) * 8);
+    uint32_t val = 0x80000000 |
+        (bus << 16) |
+        (slot << 11) |
+        (func << 8) |
+        (offset & 0xFC);
+    outdw(0xCF8, val);
+    outdw(0xCFC, (indw(0xCFC) & ~(0xFF << shift)) | (value << shift));
+}
+
+void pci_write_word(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint16_t value){
+    if((offset & 3) <= 2){
+        uint32_t val = 0x80000000 |
+            (bus << 16) |
+            (slot << 11) |
+            (func << 8) |
+            (offset & 0xFC);
+        outdw(0xCF8, val);
+        outdw(0xCFC, value);
+    }
+    else{
+        pci_write_byte(bus, slot, func, offset+0, (value & 0xFFFF));
+        pci_write_byte(bus, slot, func, offset+2, (value >> 16));
+    }
+}
+
+void pci_write_dword(uint32_t bus, uint32_t slot, uint32_t func, uint32_t offset, uint32_t value){
+    if((offset & 3) == 0){
+        uint32_t shift = ((offset & 3) * 8);
+        uint32_t val = 0x80000000 |
+            (bus << 16) |
+            (slot << 11) |
+            (func << 8) |
+            (offset & 0xFC);
+        outdw(0xCF8, val);
+        outdw(0xCFC, (indw(0xCFC) & ~(0xFFFF << shift)) | (value << shift));
+    }
+    else{
+        pci_write_byte(bus, slot, func, offset+0, (value & 0xFF));
+        pci_write_byte(bus, slot, func, offset+1, (value >> 8));
+    }
 }
 
 uint16_t getVendorID(uint16_t bus, uint16_t device, uint16_t function)
@@ -155,7 +210,7 @@ uint8_t getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function){
     return r0;
 }
 uint8_t getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function){
-    uint16_t r0 = pci_read_word(bus, device, function, 0x3C)>>8;
+    uint16_t r0 = pci_read_byte(bus, device, function, 0x3C);
     return r0;
 }
 

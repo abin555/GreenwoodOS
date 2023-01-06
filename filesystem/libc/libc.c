@@ -177,3 +177,33 @@ unsigned int *getFramebuffer(){
     register unsigned int *fb asm("eax");
     return fb;
 }
+
+void toggle_mouse(){
+    register unsigned int syscall asm("eax") = 0x1B;
+    asm volatile ("int 0x80");
+}
+
+void mouse_draw(){
+    register unsigned int syscall asm("eax") = 0x1C;
+    asm volatile ("int 0x80");
+}
+
+struct mouse_state get_mouse_data(){
+    register uint32_t syscall asm("eax") = 0x1D;
+    asm volatile ("int 0x80");
+    register uint32_t buttons asm("ebx");
+    register uint32_t X asm("ecx");
+    register uint32_t Y asm("edx");
+    struct mouse_state state = {
+        buttons,
+        X,
+        Y
+    };
+    return state;
+}
+
+void toggle_window(bool enable){
+    register uint32_t syscall asm("eax") = 0x1E;
+    register uint32_t enable_reg asm("ebx") = enable;
+    asm volatile ("int 0x80");
+}

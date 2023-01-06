@@ -3,7 +3,8 @@
 
 typedef  unsigned char uint8_t;
 typedef  unsigned short uint16_t;
-typedef unsigned int uint32_t ;
+typedef unsigned int uint32_t;
+typedef unsigned char bool;
 
 typedef struct FILE{
     unsigned char drive;
@@ -45,5 +46,18 @@ void printChar(unsigned int x, unsigned int y, char c);
 void setPrintColor(unsigned int color);
 unsigned int *getFramebuffer();
 
+void toggle_mouse();
+void mouse_draw();
+
+struct mouse_state{
+    uint32_t buttons;
+    uint32_t x;
+    uint32_t y;
+};
+
+struct mouse_state get_mouse_data();
+
 extern int key_index_prev;
+
+void toggle_window(bool enable);
 #endif

@@ -6,6 +6,8 @@
 #include "stdint.h"
 #include "interrupts.h"
 #include "PIC.h"
+#include "utilities.h"
+#include "keyboard.h"
 
 // Ports
 #define PS2_CMD 0x64
@@ -59,7 +61,8 @@ enum{
 
 void init_ps2();
 
-
+uint32_t ps2_identify_dev(uint32_t dev_num);
+uint32_t ps2_identify_bytes_to_type(uint8_t first, uint8_t second);
 char ps2_wait_write();
 char ps2_wait_read();
 uint8_t ps2_read(uint32_t port);

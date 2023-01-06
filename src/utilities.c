@@ -13,11 +13,20 @@ int check_str_equ(char *str1, char *str2){
 
 uint32_t get_bitfield(uint32_t field, uint32_t bit){
     uint32_t val = field & bit;
-    while((bit & 0b1) != 0b1){
+    while((bit & 1) == 0){
         val >>= 1;
         bit >>= 1;
     }
     return val;
+}
+
+int calculate_shift(uint32_t field){
+    int shift = 0;
+    while((field & 1) == 0 && shift < 32){
+        field >>= 1;
+        shift++;
+    }
+    return shift;
 }
 
 uint8_t get_8_offset(uint32_t BAR, uint32_t offset){

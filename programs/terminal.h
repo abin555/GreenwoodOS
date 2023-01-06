@@ -16,6 +16,7 @@
 #include "utilities.h"
 #include "audio.h"
 #include "pcspk.h"
+#include "window_manager.h"
 
 char* terminal_buffer;
 char* terminal_arg_buffer;

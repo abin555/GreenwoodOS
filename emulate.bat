@@ -10,4 +10,5 @@ qemu-system-i386 -boot order=c -m 512 -monitor stdio -serial file:serial.log ^
 -device ahci,id=ahci ^
 -device ide-hd,drive=disk2,bus=ahci.0,bootindex=2 ^
 -device ide-hd,drive=disk,bus=ahci.1,bootindex=1 ^
--device qemu-xhci
+-usb ^
+-device usb-ehci,id=ehci

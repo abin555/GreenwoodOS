@@ -3,10 +3,10 @@
 
 void pic_acknowledge(unsigned int interrupt){
 
-	if(interrupt >= 8){
-		outb(PIC_2_COMMAND, PIC_ACK);
+	if(interrupt > 0x28){
+		outb(0xA0, 0x20);
 	}
-	outb(PIC_1_COMMAND, PIC_ACK);
+	outb(0x20, 0x20);
 
 	/*
     if ( interrupt < PIC1_START_INTERRUPT || interrupt > PIC2_END_INTERRUPT){
@@ -21,6 +21,8 @@ void pic_acknowledge(unsigned int interrupt){
 }
 void pic_remap(int offset1, int offset2)
 {
+
+    /*
 	outb(PIC_1_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);	// starts the initialization sequence (in cascade mode)
 	outb(PIC_2_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
 	outb(PIC_1_DATA, offset1);				// ICW2: Master PIC vector offset
@@ -36,6 +38,18 @@ void pic_remap(int offset1, int offset2)
 	outb(PIC_2_DATA, 0xFF);
 
 	//asm("sti"); // Enable interrupts.
+    */
+    outb(0x20, 0x11);
+	outb(0xA0, 0x11);
+	outb(0x21, offset1);
+	outb(0xA1, offset2);
+	outb(0x21, 0x04);
+	outb(0xA1, 0x02);
+	outb(0x21, 0x01);
+	outb(0xA1, 0x01);
+	outb(0x21, 0xFF);
+	outb(0xA1, 0xFF);
+    asm("sti");
 }
 
 void IRQ_set_mask(unsigned char IRQline) {

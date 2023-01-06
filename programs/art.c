@@ -1,6 +1,7 @@
 #include "art.h"
-
+#define window_size 240
 void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
+    struct window* art_window = create_window(window_size,window_size);
     uint32_t key_index = 0;
 
     fb_clear(0);
@@ -11,8 +12,8 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
     keyboard_ascii_index = 0;
 
 
-    uint32_t x = fb_width/2;
-    uint32_t y = fb_height/2;
+    uint32_t x = window_size/2;
+    uint32_t y = window_size/2;
     int dx = 1;
     int dy = -1;
     uint32_t color = 0;
@@ -21,28 +22,30 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
     uint8_t pause = 0;
     while(1){
         if(!pause){
-            fb_setPixel(x, y, old_color);
+            //fb_setPixel(x, y, old_color);
+            art_window->window_buf[x + y*window_size] = old_color; 
             old_color = color;
             color++;
 
             x += dx;
             y += dy;
-            fb_setPixel(x, y, color);
+            //fb_setPixel(x, y, color);
+            art_window->window_buf[x + y*window_size] = color;
             
             if(x <= 0){
                 dx = -dx;
                 x = 1;
             }
-            if(x >= fb_width){
+            if(x >= window_size){
                 dx = -dx;
-                x = fb_width - 1;
+                x = window_size - 1;
             }
             if(y <= 0){
                 dy = -dy;
             }
-            if(y >= fb_height){
+            if(y >= window_size){
                 dy = -dy;
-                y = fb_height - 1;
+                y = window_size - 1;
             }
         }
 
@@ -72,13 +75,13 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
                         dy++;
                     }
                     break;
-                case 0x39:
+                case 0x39://Space Bar
                     fb_clear(0);
                     break;
-                case 0x1D:
+                case 0x1D://Left Control
                     pause = 1;
                 break;
-                case 0x9D:
+                case 0x9D://Right Control
                     pause = 0;
             }
         }
@@ -89,7 +92,7 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
     keyboard_KEYBUFFER_index = 0;
     keyboard_ascii_index = 0;
     //console_clear();
-    fb_clear(0);
- 
+    //fb_clear(0);
+    close_window(art_window);
     kill_process(process);
 }

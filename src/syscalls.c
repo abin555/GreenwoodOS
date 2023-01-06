@@ -92,6 +92,25 @@ struct cpu_state syscalls_callback(struct cpu_state cpu, struct stack_state stac
         case 0x1A:
             syscall_fb_color = cpu.ebx;
             break;
+        case 0x1B:
+            mouse_enable = !mouse_enable;
+            break;
+        case 0x1C:
+            mouse_draw();
+            break;
+        case 0x1E:
+            if(window_init) use_window = cpu_state.ebx;
+            //if(window_init) 
+            //use_window = !use_window;
+            break;
+        case 0x1D:{
+            uint32_t mouse_state;
+            mouse_state = (mouse_left_click << 2) | (mouse_middle_click << 1) | mouse_right_click;
+            cpu_state.ebx = mouse_state;
+            cpu_state.ecx = mouse_x;
+            cpu_state.edx = mouse_y;
+            break;
+        }
     }
     return cpu_state;
 }

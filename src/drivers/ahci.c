@@ -20,6 +20,8 @@
 #define HBA_PxCMD_FR    0x4000
 #define HBA_PxCMD_CR    0x8000
 
+#define AHCI_IRQ 10
+
 int devicePortNums[32] = {0};
 
 void initialize_AHCI(int driverID){
@@ -42,8 +44,21 @@ void initialize_AHCI(int driverID){
     printk(" Port CMD base Address: %8h %8h\n", Drive_PORTS[0]->clb, Drive_PORTS[0]->clbu);
 
     printk("Enabling AHCI Interrupts\n");
+
+	pci_write_byte(
+		pci_drivers[driverID]->device->bus,
+		pci_drivers[driverID]->device->slot,
+		pci_drivers[driverID]->device->dev,
+		0x3C,
+		AHCI_IRQ
+	);
+	printk("IRQ: %2x\n", getDeviceInterrupt(
+		pci_drivers[driverID]->device->bus,
+		pci_drivers[driverID]->device->slot,
+		pci_drivers[driverID]->device->dev
+	));
     //interrupts_init_descriptor(pci_drivers[driverID]->interrupt,(unsigned int) AHCI_Interrupt_Handler);
-	interrupt_add_handle(pci_drivers[driverID]->interrupt, &AHCI_Interrupt_Handler);
+	interrupt_add_handle(32+AHCI_IRQ, &AHCI_Interrupt_Handler);
 }
 
 void addSATA_Drive(HBA_PORT *port, int portno){

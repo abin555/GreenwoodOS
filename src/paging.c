@@ -34,8 +34,8 @@ void paging_error(){
     printk("Page Fault at 0x%x\n", faulting_address);
     print_serial("Page Fault at 0x%x\n", faulting_address);
     printk("[KERNEL PANIC]\n");
-    play_sound(1000);
-    for(uint32_t i = 0; i < (0xFFFFFFE / 2); i++){}
+    play_sound(500);
+    for(int i = 0xFFFFFFF; i > 0; i--){}
     mute();
     asm volatile("cli");
     asm volatile("hlt");

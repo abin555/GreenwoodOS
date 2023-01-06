@@ -24,6 +24,7 @@ void init_timer(uint32_t frequency){
 }
 
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+    pic_acknowledge(32);
     timer_ticks++;
     if(timer_ticks % 2) fb_setChar(fb_terminal_w-1, fb_terminal_h-3, '0', 0xFFFFFF, 0);
     else fb_setChar(fb_terminal_w-1, fb_terminal_h-3, '*', 0xFFFFFF, 0);

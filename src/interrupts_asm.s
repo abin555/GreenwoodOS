@@ -72,14 +72,19 @@ no_err_int 33 ; handler for interrupt 1 (keyboard)
 no_err_int 34 ; kernel interrupt handler
 no_err_int 35
 no_err_int 36
-no_err_int 37
-no_err_int 38
-no_err_int 39
-no_err_int 40
-no_err_int 41
+no_err_int 37 ;OHCI IRQ: 5
+no_err_int 38 ;UHCI IRQ: 6
+no_err_int 39 ;EHCI IRQ: 7
+no_err_int 40 ;XHCI IRQ: 8
+no_err_int 41 ;AHCI IRQ: 9
 no_err_int 42
 no_err_int 43
 no_err_int 44 ; handler for interrupt 12 (mouse)
+
+no_err_int 50 
+no_err_int 51 
+no_err_int 52 
+no_err_int 53 
 
 no_err_int 128 ; SYSTEM CALL INTERRUPT HANDLER
 

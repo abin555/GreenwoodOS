@@ -17,10 +17,23 @@ void initialize_ps2_keyboard(int device){
     ps2_expect_ack();
     ps2_write_device(device, KBD_SSC_GET);
     ps2_expect_ack();
-
     keyboard_scancode = ps2_read(PS2_DATA);
-
     printk("[KEYBOARD] Scancode is currently: %2x\n", keyboard_scancode);
+
+    if(keyboard_scancode != 0x41){
+        ps2_write_device(device, KBD_SSC_CMD);
+        ps2_expect_ack();
+        ps2_write_device(device, 1);
+        ps2_expect_ack();
+    }
+
+    ps2_write_device(device, KBD_SSC_CMD);
+    ps2_expect_ack();
+    ps2_write_device(device, KBD_SSC_GET);
+    ps2_expect_ack();
+    keyboard_scancode = ps2_read(PS2_DATA);
+    printk("[KEYBOARD] Scancode is currently: %2x\n", keyboard_scancode);
+
     printk("[KEYBOARD] Enabling\n");
     ps2_write_device(device, PS2_DEV_ENABLE_SCAN);
     ps2_expect_ack();
@@ -30,7 +43,7 @@ void initialize_ps2_keyboard(int device){
 }
 
 struct cpu_state keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    //pic_acknowledge(33);
+    pic_acknowledge(33);
     uint8_t scancode = inb(PS2_DATA);
     //printk("[INT] KEYBOARD INTERRUPT | SC: %2x\n", scancode);
     if(scancode){

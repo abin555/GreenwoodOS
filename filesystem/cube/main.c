@@ -23,8 +23,8 @@ unsigned int *fb;
 struct display Display;
 
 
-int move_x = 0;
-int move_y = 0;
+int move_x = 50;
+int move_y = 50;
 float scale = 1;
 struct point point_list[8];
 struct edge edge_list[12];
@@ -35,6 +35,7 @@ int PIVY = 50;
 int main(){
     toggle_console();
     set_backbuffer(1);
+    toggle_window(0);
     Display = get_display();
     fb = getFramebuffer();
     get_keycode();
@@ -121,6 +122,7 @@ int main(){
     clear_screen(0);
     swap_buffers();
     set_backbuffer(0);
+    toggle_window(1);
     toggle_console();
 }
 

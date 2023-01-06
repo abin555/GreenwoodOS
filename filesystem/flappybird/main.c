@@ -39,6 +39,7 @@ int main(){
     Display = get_display();
 
     toggle_console();
+    toggle_window(0);
     set_backbuffer(1);
     clear_screen(0x71C5CF);
     swap_buffers();
@@ -143,6 +144,7 @@ int main(){
     fclose(bird);
     set_backbuffer(0);
     clear_screen(0);
+    toggle_window(1);
     toggle_console();
     print("Program Done!\n");
     printval("Ticks %x\n", get_timer_ticks());

@@ -1,8 +1,9 @@
 #include "console.h"
+#include "window_manager.h"
 
 void initialize_console(uint32_t width, uint32_t height){
     consoleArray = (char *) malloc(width * height);
-    consoleSize = mgetSize(consoleArray);
+    consoleSize = width*height;
     memset(consoleArray, 0, consoleSize);
     consoleLine = 0;
     consoleStart = 0;
@@ -13,6 +14,7 @@ void initialize_console(uint32_t width, uint32_t height){
     console_initialized = 1;
     console_color_fg = 0xFFFFFF;
     console_color_bg = 0;
+    console_fb = framebuffer;
 }
 
 void console_putScreen(){
@@ -22,9 +24,9 @@ void console_putScreen(){
         char clearline = 0;
         for(uint32_t indexX = 0; indexX < console_width; indexX++){
             //fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
-            char sym = consoleArray[indexX + indexY * fb_terminal_w];
+            char sym = consoleArray[indexX + indexY * console_width];
             if(sym != '\0' && sym != '\n' && !clearline){
-                fb_write_cell(indexX + indexY * fb_terminal_w, sym, console_color_fg, console_color_bg);
+                buf_write_cell(console_fb, console_width*8, indexX + indexY * console_width, sym, console_color_fg, console_color_bg);
             }
             else{
                 clearline = 1;
@@ -32,6 +34,7 @@ void console_putScreen(){
         }
     }
     console_last_line = consoleLine-1;
+    if(use_window) request_redraw();
 }
 
 void console_fullPut(){
@@ -41,9 +44,9 @@ void console_fullPut(){
         char clearline = 0;
         for(uint32_t indexX = 0; indexX < console_width; indexX++){
             //fb_write_cell(indexX + indexY * fb_terminal_w, ' ', 0xFFFFFF, 0);
-            char sym = consoleArray[indexX + indexY * fb_terminal_w];
+            char sym = consoleArray[indexX + indexY * console_width];
             if(sym != '\0' && sym != '\n' && !clearline){
-                fb_write_cell(indexX + indexY * fb_terminal_w, sym, console_color_fg, console_color_bg);
+                buf_write_cell(console_fb, console_width*8, indexX + indexY * console_width, sym, console_color_fg, console_color_bg);
             }
             else{
                 clearline = 1;
@@ -55,14 +58,14 @@ void console_fullPut(){
 
 void console_putLine(uint32_t places){
     for(uint32_t index = 0; index < places; index++){
-        fb_write_cell(consoleLine*fb_terminal_w + index, consoleArray[consoleLine*fb_terminal_w + index], 0xFFFFFF, 0);
+        buf_write_cell(console_fb, console_width*8, consoleLine*console_width + index, consoleArray[consoleLine*console_width + index], 0xFFFFFF, 0);
     }
 }
 
 void shiftConsoleUp(){
     console_last_line = 0;
-    for(uint32_t places = 0; places < fb_terminal_w; places++){
-        for(uint32_t i = 0; i < fb_terminal_h*fb_terminal_w-1; i++){
+    for(uint32_t places = 0; places < console_width; places++){
+        for(uint32_t i = 0; i < console_height*console_width-1; i++){
             consoleArray[i] = consoleArray[i+1];
         }
     }
@@ -104,13 +107,12 @@ int calculateNumberLength(unsigned int data, int base){
 }
 
 int printDecimal(unsigned int data, int setlength){
-    
     return data % setlength;
 }
 
 int printHex(unsigned int data, int setlength){
     for(int i = 0; i < (setlength ? setlength : 8); i++){
-        consoleArray[consoleLine*fb_terminal_w + consoleLinePlace + (setlength ? setlength : 8) - 1 - i] = quadToHex((data >> 4*i) & 0xF);
+        consoleArray[consoleLine*console_width + consoleLinePlace + (setlength ? setlength : 8) - 1 - i] = quadToHex((data >> 4*i) & 0xF);
     }
     return (setlength ? setlength : 8);
 }
@@ -118,10 +120,10 @@ int printHex(unsigned int data, int setlength){
 int printBinary(unsigned int data, int setlength){
     for(int i = 0; i < (setlength ? setlength : 32); i++){
         if((data >> i) & 1){
-            consoleArray[consoleLine*fb_terminal_w + consoleLinePlace + i] = '1';
+            consoleArray[consoleLine*console_width + consoleLinePlace + i] = '1';
         }
         else{
-            consoleArray[consoleLine*fb_terminal_w + consoleLinePlace + i] = '0';
+            consoleArray[consoleLine*console_width + consoleLinePlace + i] = '0';
         }
     }
     return 32;
@@ -135,7 +137,7 @@ void printk(char* msg, ...){
     va_start(listptd, msg);
     //printChar(p, consoleLine-consoleStart, msg[p]);
     //memset(consoleArray + consoleStart*fb_terminal_w - consoleLine*fb_terminal_w, 0, fb_terminal_w);
-    while(p < (unsigned int)fb_terminal_w){
+    while(p < (unsigned int)console_width){
         int setlength = 0;
         if(msg[p] == '%'){
             parseaftermodify:;
@@ -158,14 +160,14 @@ void printk(char* msg, ...){
                 case 'c':
                 case 'C':
                     //consoleLinePlace += va_arg(listptd, char);
-                    consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = (char) va_arg(listptd, unsigned int);
+                    consoleArray[consoleLine*console_width + consoleLinePlace] = (char) va_arg(listptd, unsigned int);
                     consoleLinePlace += 1;
                     break;
                 case 's':
                 case 'S': {
                     char *str = (char *) va_arg(listptd, unsigned int);
                     while(*str != '\0'){
-                        consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = *str;
+                        consoleArray[consoleLine*console_width + consoleLinePlace] = *str;
                         consoleLinePlace += 1;
                         str++;
                     }
@@ -218,12 +220,12 @@ void printk(char* msg, ...){
         }
         else if(msg[p] != '\0' && allowed){
             
-            consoleArray[consoleLine*fb_terminal_w + consoleLinePlace] = msg[p];
+            consoleArray[consoleLine*console_width + consoleLinePlace] = msg[p];
             if(msg[p] == '\n'){
                 consoleLinePlace = 0;          
-                if(consoleLine == (unsigned int) fb_terminal_h-2){
+                if(consoleLine == (unsigned int) console_height-2){
                     shiftConsoleUp();
-                    fb_clear(0);
+                    console_wipebuf();
                     //memset(consoleArray, 0, console_width*console_height);
                     //consoleLine = 0;
                 }
@@ -329,10 +331,22 @@ char quadToHex(uint8_t quad){
 
 void console_clear(){
     if(!console_initialized) return;
-    memset(consoleArray, 0, fb_terminal_h*fb_terminal_w);
     memset(consoleArray, 0, consoleSize);
     consoleLine = 0;
     consoleStart = 0;
     consoleLinePlace = 0;
     console_last_line = 0;
+}
+
+struct window* console_window;
+void console_addWindow(){
+    console_clear();
+    console_width = 60;
+    console_height = 60;
+    console_window = create_window(console_width*8, console_height*8);
+    console_fb = console_window->window_buf;
+}
+
+void console_wipebuf(){
+    memset(console_fb, 0, sizeof(uint32_t) * (8*console_width)*(8*console_height));
 }
