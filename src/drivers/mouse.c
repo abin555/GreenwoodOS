@@ -216,8 +216,8 @@ void initialize_ps2_mouse(){
     mouse_send(Enable);
     mouse_ack();
 
-    mouse_x = 0;
-    mouse_y = 0;
+    mouse_x = fb_width/2;
+    mouse_y = fb_height/2;
     mouse_left_click = false;
     mouse_right_click = false;
     mouse_middle_click = false;

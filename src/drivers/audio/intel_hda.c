@@ -2,10 +2,16 @@
 TODO: Switch to using variable references rather than global definitions for the HDA device.
 Too lazy to do tonight.
 */
-
-
 #include "intel_hda.h"
 #include "intel_hda_enum.h"
+
+#define BDL_SIZE 4
+#define BUFFER_SIZE 0x10000
+
+#define BDL_BYTES_ROUNDED ((BDL_SIZE * sizeof(struct hda_bdl_entry) + 127) & ~127)
+
+#define SAMPLES_PER_BUFFER (BUFFER_SIZE / 2)
+
 #define WIDGET_DEBUG
 //uint32_t HDA_BAR;
 #define HDA_BAR HDA->mmio

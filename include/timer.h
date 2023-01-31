@@ -1,7 +1,6 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "interrupts.h"
 #include "pic.h"
 #include "stdint.h"
 #include "io.h"

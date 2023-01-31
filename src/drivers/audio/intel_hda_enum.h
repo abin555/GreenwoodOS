@@ -1,15 +1,32 @@
 #ifndef INTEL_HDA_ENUM_H
 #define INTEL_HDA_ENUM_H
-#include "intel_hda.h"
 #include "stdint.h"
-typedef unsigned int size_t;
+typedef enum {
+    // 16 bit signed integer
+    CDI_AUDIO_16SI = 0,
+    // 8 bit signed integer
+    CDI_AUDIO_8SI,
+    // 32 bit signed integer
+    CDI_AUDIO_32SI
+} audio_sample_format_t;
 
-#define BDL_SIZE 4
-#define BUFFER_SIZE 0x10000
+struct audio_stream{
+    struct audio_device_hw* device;
+    uint32_t num_buffers;
+    uint32_t buffer_size;
+    int fixed_sample_rate;
+    audio_sample_format_t sample_format;
+};
 
-#define BDL_BYTES_ROUNDED ((BDL_SIZE * sizeof(struct hda_bdl_entry) + 127) & ~127)
+struct audio_device_hw{
+    void* device;
+    int record;//0 = playback, 1 = recording.
+    void* stream;//Generous buffer of two pointers to possible audio streams.
+};
+#define AUDIO_STRUCTS
+#include "audio.h"
 
-#define SAMPLES_PER_BUFFER (BUFFER_SIZE / 2)
+#include "intel_hda.h"
 
 /** HD Audio Memory Mapped Registers */
 enum hda_reg {

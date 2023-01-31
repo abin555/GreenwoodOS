@@ -285,6 +285,18 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "beep", 0) == 0){
         audio_beep();
     }
+    else if(strcmp(terminal_buffer, "pagedump", 0) == 0){
+        dump_page_map();
+    }
+    else if(strcmp(terminal_buffer, "heapdump", 0) == 0){
+        mem_dump();
+    }
+    else if(strcmp(terminal_buffer, "malloc", 0) == 0){
+        printk("%x\n", malloc(atoi(1)));
+    }
+    else if(strcmp(terminal_buffer, "free", 0) == 0){
+        free((void*) atoi(1));
+    }
     else{
         int select_program = -1;
         uint32_t bin_folder_index;

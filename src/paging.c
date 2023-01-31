@@ -13,7 +13,6 @@ void init_paging(){
     uint32_t *page_table = (uint32_t*) &boot_page_directory;
     //page_table[0] = ((uint32_t) program & 0xFFFF0000) | 0x83;
     //page_table[get_page_index_from_addr(0xffffb6b2)] = (0xffffb6b2 & 0xFFFF0000) | 0x83;
-    create_page_entry((uint32_t) program, 0x0, 0x83);
     create_page_entry((uint32_t) real_framebuffer, (uint32_t) real_framebuffer, 0x93);
     create_page_entry((uint32_t) real_framebuffer+0x400000, (uint32_t) real_framebuffer+0x400000, 0x93);
     for(int i = 0; i < 1024; i++){
@@ -25,19 +24,27 @@ void init_paging(){
     update_page();
     printk("[Paging] Initialized\n");
 }
-
+#include "window_manager.h"
 void paging_error(){
+    asm volatile("cli");
     uint32_t faulting_address;
     asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
     console_initialized = 1;
+    use_window = 0;
+    fb_clear(0);
+    console_fb = framebuffer;
+    console_width = fb_terminal_w;
+    console_height = fb_terminal_h;
+    console_clear();
     console_fullPut();
     printk("Page Fault at 0x%x\n", faulting_address);
     print_serial("Page Fault at 0x%x\n", faulting_address);
+    printk("Saved EIP: 0x%x\n", most_recent_int_stack_state.eip);
     printk("[KERNEL PANIC]\n");
-    play_sound(500);
-    for(int i = 0xFFFFFFF; i > 0; i--){}
-    mute();
-    asm volatile("cli");
+    swap_buffers();
+    //play_sound(500);
+    //for(int i = 0xFFFFFFF; i > 0; i--){}
+    //mute();
     asm volatile("hlt");
 }
 
@@ -71,5 +78,16 @@ void set_PAT(){
     }
     else{
         printk("Unable to set PAT");
+    }
+}
+
+void dump_page_map(){
+    uint32_t *page_table = (uint32_t *) &boot_page_directory;
+    printk("Page Dump:\n");
+    printk("IDX |  Virtual -> Physical\n");
+    for(uint32_t i = 0; i < 1024; i++){
+        if(page_table[i]){
+            printk("%3x | %x -> %x\n", i, i << 22, page_table[i] & 0xFFC00000);
+        }
     }
 }

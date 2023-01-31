@@ -35,7 +35,7 @@ int PIVY = 50;
 int main(){
     toggle_console();
     set_backbuffer(1);
-    toggle_window(0);
+    toggle_window();
     Display = get_display();
     fb = getFramebuffer();
     get_keycode();
@@ -122,7 +122,7 @@ int main(){
     clear_screen(0);
     swap_buffers();
     set_backbuffer(0);
-    toggle_window(1);
+    toggle_window();
     toggle_console();
 }
 

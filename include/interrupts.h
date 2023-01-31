@@ -52,6 +52,7 @@ extern void load_idt(unsigned int idt_address);
 
 extern struct cpu_state most_recent_int_cpu_state;
 extern struct stack_state most_recent_int_stack_state;
+extern bool override_state_return;
 void interrupt_handler(
     struct cpu_state cpu, 
     unsigned int interrupt, 

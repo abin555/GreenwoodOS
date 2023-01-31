@@ -202,8 +202,30 @@ struct mouse_state get_mouse_data(){
     return state;
 }
 
-void toggle_window(bool enable){
+void toggle_window(){
     register uint32_t syscall asm("eax") = 0x1E;
-    register uint32_t enable_reg asm("ebx") = enable;
+    asm volatile ("int 0x80");
+}
+
+void *open_window(uint32_t width, uint32_t height, uint32_t *buf){
+    register uint32_t *buf_val asm("edx") = buf;
+    register uint32_t height_val asm("ecx") = height;
+    register uint32_t width_val asm("ebx") = width;
+    register uint32_t syscall asm("eax") = 0x1F;
+    asm volatile ("int 0x80");
+    register void *window asm("ebx");
+    return window;
+}
+
+void close_window(void *window){
+    register void *window_ptr asm("ebx") = window;
+    register uint32_t syscall asm("eax") = 0x20;
+    asm volatile("int 0x80");
+}
+
+void add_window_event_handler(void *window, void *window_handler){
+    register void *handler_val asm("ecx") = window_handler;
+    register void *window_val asm("ebx") = window;
+    register uint32_t syscall asm("eax") = 0x21;
     asm volatile ("int 0x80");
 }

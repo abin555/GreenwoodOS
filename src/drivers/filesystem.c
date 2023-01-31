@@ -46,6 +46,7 @@ void FS_read(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *b
 void FS_write(uint32_t drive, uint32_t sector, uint32_t countSectors, uint32_t *buffer){
     //printk("[FS] Writing Drive %2x Sector %x from %x\n", drive, sector, (uint32_t) buffer);
     if(drive < numFS){
+        if(!FileSystems[drive]->write) return;
         FileSystems[drive]->write(
             FileSystems[drive]->portData,
             sector,

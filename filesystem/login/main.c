@@ -16,7 +16,7 @@ int main(){
     key_index_prev = get_ascii_key_index();
     print("Starting Login!\n");
     toggle_console();
-    toggle_window(0);
+    toggle_window();
     set_backbuffer(1);
     clear_screen(0x00FF8C);
     swap_buffers();    
@@ -94,7 +94,7 @@ int main(){
     set_backbuffer(0);
     clear_screen(0);
     toggle_console();
-    toggle_window(1);
+    toggle_window();
 }
 
 void load_image(FILE* file, unsigned char *target_buffer){

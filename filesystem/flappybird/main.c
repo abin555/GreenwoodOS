@@ -39,7 +39,7 @@ int main(){
     Display = get_display();
 
     toggle_console();
-    toggle_window(0);
+    toggle_window();
     set_backbuffer(1);
     clear_screen(0x71C5CF);
     swap_buffers();
@@ -68,7 +68,7 @@ int main(){
     unsigned int phys_timer = 0;
     unsigned int pipe_timer = 0;
     unsigned int back_timer = 0;
-    unsigned int delay = 100;
+    unsigned int delay = 5;
     draw_image(bird_X,bird_Y);
     while(run){
         clock = get_timer_ticks();
@@ -144,7 +144,7 @@ int main(){
     fclose(bird);
     set_backbuffer(0);
     clear_screen(0);
-    toggle_window(1);
+    toggle_window();
     toggle_console();
     print("Program Done!\n");
     printval("Ticks %x\n", get_timer_ticks());

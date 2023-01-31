@@ -15,7 +15,7 @@ typedef enum {
     CDI_AUDIO_PLAY = 1
 } audio_status_t;
 
-
+#ifndef AUDIO_STRUCTS
 typedef enum {
     // 16 bit signed integer
     CDI_AUDIO_16SI = 0,
@@ -25,11 +25,6 @@ typedef enum {
     CDI_AUDIO_32SI
 } audio_sample_format_t;
 
-struct audio_device_hw{
-    void* device;
-    int record;//0 = playback, 1 = recording.
-    struct audio_stream* stream;//Generous buffer of two pointers to possible audio streams.
-};
 
 struct audio_stream{
     struct audio_device_hw* device;
@@ -38,6 +33,14 @@ struct audio_stream{
     int fixed_sample_rate;
     audio_sample_format_t sample_format;
 };
+
+struct audio_device_hw{
+    void* device;
+    int record;//0 = playback, 1 = recording.
+    void* stream;//Generous buffer of two pointers to possible audio streams.
+};
+#endif
+
 
 enum sample_format {
     SR_48_KHZ               = 0,

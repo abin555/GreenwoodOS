@@ -59,5 +59,14 @@ struct mouse_state get_mouse_data();
 
 extern int key_index_prev;
 
-void toggle_window(bool enable);
+void toggle_window();
+
+void *open_window(uint32_t width, uint32_t height, uint32_t *buf);
+void close_window(void *window);
+
+typedef enum{
+    close = 1
+} WINDOW_EVENT;
+
+void add_window_event_handler(void *window, void *window_handler);
 #endif

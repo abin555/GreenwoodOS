@@ -3,8 +3,8 @@
 void init_pci(){
     printk("[PCI] Initializing\n");
     pci_device_num = pci_driver_num = 0;
-    pci_devices = (struct pci_device**) malloc(32 * sizeof(struct pci_device*));
-    pci_drivers = (struct pci_driver**) malloc(32 * sizeof(struct pci_driver*));
+    pci_devices = (struct pci_device**) malloc(32 * sizeof(struct pci_device));
+    pci_drivers = (struct pci_driver**) malloc(32 * sizeof(struct pci_driver));
     pci_probe();
 }
 

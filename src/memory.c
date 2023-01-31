@@ -49,7 +49,6 @@ void* malloc(unsigned int size){
             a->status = 1;//mark region as in use.;
             memset((uint32_t *) mem + sizeof(alloc_t), 0, size); //clear requested & available region.
             MEMORY_USED += size; //Increase counter of used memory
-            //printHeap();
             return (void *)((uint32_t) mem + sizeof(alloc_t));
             //last_alloc = (uint32_t) mem;
         } 
@@ -60,7 +59,7 @@ void* malloc(unsigned int size){
 
     if(last_alloc+size+sizeof(alloc_t) >= HEAP_END){//Check if the location of the last allocated block plus the size requested would be past the heap end
         char error[] = "Out of HEAP memory";
-        fb_write_xy(error, sizeof(error), 0, 0, 0xFFFFFF, 0);
+        fb_write_xy(error, sizeof(error), 0, 0, 0xFF0000, 0);
         return 0;
     }
 
@@ -72,11 +71,13 @@ void* malloc(unsigned int size){
     //increase the location of the last alloc
     last_alloc += size;
     last_alloc += sizeof(alloc_t);
-    last_alloc += 4;
+    //last_alloc += 4;
     //increase memory labeled as used
     MEMORY_USED += size + sizeof(alloc_t);
+
     //set memory in block
 	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
+
     //printHeap();
     //return pointer
 	return (void *)((uint32_t)alloc + sizeof(alloc_t));
@@ -106,4 +107,16 @@ void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
     HEAP_END = HEAP_BEGIN + heap_size;
     memset((char *) HEAP_BEGIN, 0, heap_size);
     fb_write_xy("HEAP READY", 10, 0, 0, 0xFFFFFF, 0);
+}
+
+void mem_dump(){
+    uint32_t mem = (uint32_t) HEAP_BEGIN;
+    printk("Kernel Heap Dump:\n");
+    printk("_____MEM | _Address | ____Size | __Status\n");
+    while(mem < last_alloc){
+        alloc_t *a = (alloc_t *) mem;
+        //if(a->size == 0) break;
+        printk("%x   %x   %x   %x\n", mem, mem + sizeof(alloc_t), a->size, a->status);
+        mem = mem + a->size + sizeof(alloc_t);
+    }
 }

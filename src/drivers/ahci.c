@@ -67,14 +67,14 @@ void addSATA_Drive(HBA_PORT *port, int portno){
     devicePortNums[driveNUM] = portno;
     driveNUM++;
 }
-
+/*
 void addSATAPI_Drive(HBA_PORT *port, int portno){
-	//addFileSystemDevice(FS_SATAPI_Device, "SATAPI DEVICE_____", (uint32_t *) port, SATAPI_read, SATAPI_write);
+	addFileSystemDevice(FS_SATAPI_Device, "SATAPI DEVICE_____", (uint32_t *) port, SATAPI_read, 0);
     Drive_PORTS[driveNUM] = port;
     devicePortNums[driveNUM] = portno;
     driveNUM++;
 }
-
+*/
 void probe_port(HBA_MEM *abar)
 {
 	// Search disk in implemented ports
@@ -416,10 +416,7 @@ int find_cmdslot(HBA_PORT *port)
 	return -1;
 }
 /*
-void SATAPI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf){
+bool SATAPI_read(uint16_t port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf){
 	
-}
-void SATAPI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf){
-
 }
 */

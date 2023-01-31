@@ -86,12 +86,24 @@ void interrupts_install_idt()
 
 struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
+bool override_state_return = false;
+
 void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, __attribute__((unused)) unsigned int interrupt, __attribute__((unused)) struct stack_state stack){
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
 
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
+		if(override_state_return == true){
+			stack = most_recent_int_stack_state;
+			cpu = most_recent_int_cpu_state;
+			printk("Changing EIP to %x\n", stack.eip);
+			printk("Changing ESP %x EBP %x\n", cpu.esp, cpu.ebp);
+			override_state_return = false;
+		}
+	}
+	else if(interrupt == 0xD){
+		printk("General Protection Fault @ 0x%x\n", stack.eip);
 	}
 	else{
 		printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);

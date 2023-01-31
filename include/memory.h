@@ -25,5 +25,5 @@ unsigned int mgetSize(void *mem);
 void* malloc(unsigned int size);
 void free(void *memory);
 void initialize_heap(uint32_t heap_begin, uint32_t heap_size);
-
+void mem_dump();
 #endif

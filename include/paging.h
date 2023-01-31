@@ -36,4 +36,6 @@ static inline void __native_flush_tlb_single(unsigned long addr) {
 uint32_t get_physical(uint32_t address);
 
 void set_PAT();
+
+void dump_page_map();
 #endif

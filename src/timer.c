@@ -1,4 +1,5 @@
 #include "timer.h"
+#include "interrupts.h"
 #include "serial.h"
 
 uint32_t timer_ticks = 0;

@@ -19,10 +19,10 @@ int_handler_%1:
 
 common_interrupt_handler:
 	;save registers
+	push ebp
 	push esp
 	push edi
 	push esi
-	push ebp
 	push edx
 	push ecx
 	push ebx
@@ -36,10 +36,10 @@ common_interrupt_handler:
 	pop ebx
 	pop ecx
 	pop edx
-	pop ebp
 	pop esi
 	pop edi
 	pop esp
+	pop ebp
 
 	;restore stack pointer
 	add esp, 8

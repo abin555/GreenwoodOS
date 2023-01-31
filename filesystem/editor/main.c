@@ -22,8 +22,8 @@ int main(){
 
     get_keycode_next();
     get_key();
+    toggle_window();
     toggle_console();
-    toggle_window(0);
     set_backbuffer(1);
     clear_screen(0);
     swap_buffers();
@@ -102,7 +102,7 @@ int main(){
 
     setPrintColor(0);
     set_backbuffer(0);
-    toggle_window(1);
+    toggle_window();
     toggle_console();
     free(file_contents);
     fclose(open_file);

@@ -374,7 +374,6 @@ bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count,
 bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf);
 int find_cmdslot(HBA_PORT *port);
 
-void SATAPI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
-void SATAPI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
+bool SATAPI_read(uint16_t port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
 
 #endif

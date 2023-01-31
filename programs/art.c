@@ -1,7 +1,11 @@
 #include "art.h"
 #define window_size 240
+
+uint32_t art_window_buf[window_size*window_size*sizeof(uint32_t)];
+
 void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
-    struct window* art_window = create_window(window_size,window_size);
+    struct window* art_window = create_window(window_size,window_size, art_window_buf);
+    struct window* art_window2 = create_window(window_size,window_size, art_window_buf);
     uint32_t key_index = 0;
 
     fb_clear(0);
@@ -76,7 +80,8 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
                     }
                     break;
                 case 0x39://Space Bar
-                    fb_clear(0);
+                    //fb_clear(0);
+                    memset(art_window_buf, 0, sizeof(art_window_buf));
                     break;
                 case 0x1D://Left Control
                     pause = 1;
@@ -94,5 +99,6 @@ void Art(uint8_t process, uint32_t args[10]__attribute__((unused))){
     //console_clear();
     //fb_clear(0);
     close_window(art_window);
+    close_window(art_window2);
     kill_process(process);
 }

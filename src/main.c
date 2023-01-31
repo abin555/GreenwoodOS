@@ -25,6 +25,7 @@
 #include "drivers/audio/pcspk.h"
 #include "drivers/audio/sb16.h"
 #include "window_manager.h"
+#include "multitasking.h"
 
 uint32_t last_keycode_index;
 void sys_timer_callback(){
@@ -42,6 +43,19 @@ void sys_timer_callback(){
                 }
                 break;
         }
+    }
+}
+
+void test_task1(){
+    while(1){
+        delay(500);
+        printk("Task 1\n");
+    }
+}
+void test_task2(){
+    while(1){
+        delay(100);
+        printk("Task 2\n");
     }
 }
 
@@ -75,10 +89,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     interrupts_install_idt();
     init_paging();
     fb_setChar(1,1, 'R', 0x00FFFF, 0);
-    initialize_heap(0x04000000, 0x800000);
-    init_backbuffer();
+    initialize_heap(0x06000000, 0xC00000);
+    //init_backbuffer();
     initialize_console(fb_terminal_w,fb_terminal_h);
     
+    //mem_dump();
+    //init_backbuffer();
+    //mem_dump();
+    //return 0;
     //init_ps2();
     init_timer(1000);
 
@@ -106,26 +124,26 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_mouse();
     
     timer_attach(100, sys_timer_callback);
-    //process_scheduler();
+    init_program_memory();
 
-    printk("Press T for old style terminal, no window manager\nPress W for window manager\n");
-    for(int i = 0; i < 10000; i++){
-        if(keyboard_ASCIIBuffer[keyboard_ascii_index-1] == 'T'){
-            use_window = false;
-            break;
-        }
-        else if(keyboard_ASCIIBuffer[keyboard_ascii_index-1] == 'W'){
-            use_window = true;
-            break;
-        }
-        delay(1);
-    }
+    
+    //start_task((uint32_t) &test_task1, -1, 0, "TestTask1");
+    //start_task((uint32_t) &test_task2, -1, 0, "TestTask2");
+    //multitask_init();
+    //while(1){}
+    
+
+    //delay(2000);
+    use_window = true;
     if(use_window){
         init_window_manager(10);
         console_addWindow();
         printk("Window Manager Init!\n");
         timer_attach(10, draw_screen);
     }
+    //mem_dump();
+    //multitask_init();
+    //while(1){}
     process_scheduler();
 
     asm("hlt");
