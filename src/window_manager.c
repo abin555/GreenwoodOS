@@ -138,7 +138,8 @@ void draw_screen(){
     set_backbuffer(1);
     interaction();
     
-    fb_clear(0x4ACCDB);
+    //fb_clear(0x4ACCDB);
+    fb_clear(0x383838);
     for(int i = max_windows-1; i >= 0; i--){
         if(windows[i] != 0){
             //fill_rect(windows[i]->screen_x, windows[i]->screen_y-10, windows[i]->width, 10);

@@ -335,12 +335,13 @@ void terminal_parse(){
         }
     }
 }
-
+bool redraw_line_needed = true;
 void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10]__attribute__((unused))){
     char ascii;
     uint8_t keycode;
     int directory_namesize = 0;
     if(keyboard_ascii_index != terminal_last_char){
+        redraw_line_needed = true;
         ascii = keyboard_ASCIIBuffer[keyboard_ascii_index-1];
         terminal_last_char = keyboard_ascii_index;
         //memcpy(terminal_buffer+terminal_buffer_index, terminal_buffer+terminal_buffer_index+1, fb_terminal_w-terminal_buffer_index-1);
@@ -353,6 +354,7 @@ void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10
     if(keyboard_KEYBUFFER_index != terminal_last_key){
         keycode = keyboard_KEYBUFFER[keyboard_KEYBUFFER_index-1];
         terminal_last_key = keyboard_KEYBUFFER_index;
+        redraw_line_needed = true;
         switch(keycode){
             case 0x0E:
                 if(terminal_buffer_index > 0){
@@ -388,19 +390,24 @@ void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10
         }
     }
     directory_namesize=0;
-    while(FS_entries[active_directory].name[directory_namesize]){
-        buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
-        directory_namesize++;
-    }
-    buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
+    if(redraw_line_needed){
+        while(FS_entries[active_directory].name[directory_namesize]) directory_namesize++;
+        for(uint32_t i = 0; i < console_width; i++){
+            //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
+            if(i == terminal_buffer_index){
+                buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
+            }
+            else{
+                buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
+            }
+        }
+        directory_namesize = 0;
+        while(FS_entries[active_directory].name[directory_namesize]){
+            buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
+            directory_namesize++;
+        }
+        buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
 
-    for(uint32_t i = 0; i < console_width; i++){
-        //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
-        if(i == terminal_buffer_index){
-            buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
-        }
-        else{
-            buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
-        }
+        redraw_line_needed = false;
     }
 }

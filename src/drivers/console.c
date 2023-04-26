@@ -338,13 +338,16 @@ void console_clear(){
     console_last_line = 0;
 }
 
+#define ConsoleWindowWidth 80
+#define ConsoleWindowHeight 60
+
 struct window* console_window;
-uint32_t console_window_buf[8*60*8*60*sizeof(uint32_t)];
+uint32_t console_window_buf[8*ConsoleWindowWidth*8*ConsoleWindowHeight*sizeof(uint32_t)];
 
 void console_addWindow(){
     console_clear();
-    console_width = 80;
-    console_height = 60;
+    console_width = ConsoleWindowWidth;
+    console_height = ConsoleWindowHeight;
     console_window = create_window(console_width*8, console_height*8, console_window_buf);
     console_fb = console_window->window_buf;
 }
