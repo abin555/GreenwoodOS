@@ -25,6 +25,7 @@ void image_load_buffer(unsigned int width, unsigned int height, unsigned char* b
 void draw_image(unsigned int x, unsigned int y);
 void print(char *str);
 void printval(char *str, int val);
+void printvalf(char *str, float val);
 unsigned char *malloc(unsigned int size);
 void free(unsigned char *buf);
 void toggle_console();

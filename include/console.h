@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "memory.h"
+#include "math.h"
 #include <stdarg.h>
 
 char* consoleArray;
@@ -24,7 +25,7 @@ void console_putScreen();
 void console_putLine(uint32_t places);
 void shiftConsole();
 int calculateNumberLength(unsigned int data, int base);
-int printDecimal(unsigned int data, int setlength);
+int printDecimal(int data, int offset);
 int printHex(unsigned int data, int setlength);
 int printBinary(unsigned int data, int setlength);
 void printk(char* msg, ...);

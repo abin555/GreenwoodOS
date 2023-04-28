@@ -133,7 +133,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     //while(1){}
     
 
-    delay(2000);
+    //delay(2000);
     use_window = true;
     if(use_window){
         init_window_manager(10);
@@ -141,9 +141,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         printk("Window Manager Init!\n");
         timer_attach(10, draw_screen);
     }
-    //mem_dump();
-    //multitask_init();
-    //while(1){}
+    
     process_scheduler();
 
     asm("hlt");

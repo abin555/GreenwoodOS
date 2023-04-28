@@ -106,8 +106,24 @@ int calculateNumberLength(unsigned int data, int base){
     return 8;
 }
 
-int printDecimal(unsigned int data, int setlength){
-    return data % setlength;
+int printDecimal(int data, int offset){
+    int idx = 0;
+    int pow = 1;
+    if(data < 0){
+        consoleArray[consoleLine*console_width + consoleLinePlace + idx + offset] = '-';
+        idx++;
+        data *= -1;
+    }
+    while(pow * 10 <= data)
+        pow *= 10;
+    while(pow != 0){
+        int d = data / pow;
+        consoleArray[consoleLine*console_width + consoleLinePlace + idx + offset] = (char)((int)'0' + d);
+        data = data - d * pow;
+        pow /= 10;
+        idx++;
+    }
+    return idx;
 }
 
 int printHex(unsigned int data, int setlength){
@@ -127,6 +143,19 @@ int printBinary(unsigned int data, int setlength){
         }
     }
     return 32;
+}
+
+int printFloat(double data){
+    int i = (int)data;
+    int sizePart1 = printDecimal(i, 0);
+    data = (data-i)*1000000;
+    i = abs((int)data);
+    if(fabs(data) - i >= 0.5){
+        i++;
+    }
+    consoleArray[consoleLine*console_width + consoleLinePlace + sizePart1] = '.';
+    int sizePart2 = printDecimal(i, sizePart1 + 1);
+    return sizePart1 + sizePart2 + 1;
 }
 
 void printk(char* msg, ...){
@@ -155,7 +184,11 @@ void printk(char* msg, ...){
                 break;
                 case 'd'://Decimal
                 case 'D':
-                    consoleLinePlace += printDecimal(va_arg(listptd, unsigned int), setlength);
+                    consoleLinePlace += printDecimal(va_arg(listptd, int), 0);
+                break;
+                case 'f'://float
+                case 'F':
+                    consoleLinePlace += printFloat(va_arg(listptd, double));
                 break;
                 case 'c':
                 case 'C':
@@ -349,6 +382,7 @@ void console_addWindow(){
     console_width = ConsoleWindowWidth;
     console_height = ConsoleWindowHeight;
     console_window = create_window(console_width*8, console_height*8, console_window_buf);
+    console_window->screen_x = fb_width-((console_width + 2)*8);
     console_fb = console_window->window_buf;
 }
 

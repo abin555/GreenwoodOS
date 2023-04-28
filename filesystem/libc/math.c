@@ -45,6 +45,40 @@ double sin(double x){
     return cos(x - M_PI_2);
 }
 
+double acos(double x) {
+   return (-0.69813170079773212 * x * x - 0.87266462599716477) * x + 1.5707963267948966;
+}
+
 double remainder(double a, double b){
     return a - ((int)(a/b)) * b;
+}
+
+float Q_sqrt(float number){
+    long i;
+	float x2, y;
+	const float threehalfs = 1.5F;
+
+	x2 = number * 0.5F;
+	y  = number;
+	i  = * ( long * ) &y;                       // evil floating point bit level hacking
+	i  = 0x5f3759df - ( i >> 1 );               // what the fuck? 
+	y  = * ( float * ) &i;
+	y  = y * ( threehalfs - ( x2 * y * y ) );   // 1st iteration
+//	y  = y * ( threehalfs - ( x2 * y * y ) );   // 2nd iteration, this can be removed
+
+	return 1 / y;
+}
+
+double sqrt(double a) {
+    
+  double i = 0;
+  double j = a / 2;
+
+  while (j != i) {
+    i = j;
+    j = (a / i + i) / 2;
+  }
+  
+  return j;
+  
 }

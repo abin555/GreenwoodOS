@@ -13,6 +13,21 @@ void printval(char *str, int val){
     asm volatile("int 0x80");
 }
 
+void printvalf(char *str, float val){
+    float data = val;
+    char *valData = (char *) &data;
+
+    unsigned int convertedData = (unsigned int) data;
+    char *convertDataPtr = (char *) &convertedData;
+
+    //convertDataPtr[0] = valData[0];
+    //convertDataPtr[1] = valData[1];
+    //convertDataPtr[2] = valData[2];
+    //convertDataPtr[3] = valData[3];
+
+    printval(str, convertedData);
+}
+
 FILE* fopen(char* filename){
     register int syscall_num asm("eax") = 0x11;
     register char* filename_val asm("ebx") = filename;

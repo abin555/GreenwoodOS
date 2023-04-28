@@ -5,7 +5,8 @@ LDFLAGS = -T ../libc/link.ld -melf_i386
 all:
 	$(CC) $(CFLAGS) gravity.c -o gravity.o
 	$(CC) $(CFLAGS) ../libc/libc.c -o libc.o
-	ld $(LDFLAGS) gravity.o libc.o -o grav.elf
+	$(CC) $(CFLAGS) ../libc/math.c -o math.o
+	ld $(LDFLAGS) gravity.o libc.o math.o -o grav.elf
 	objcopy -O binary --only-section=.text grav.elf grav.exe
 	rm gravity.o
 	rm libc.o

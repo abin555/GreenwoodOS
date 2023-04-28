@@ -43,7 +43,8 @@ OBJECTS = \
 		src/drivers/usb/USB.o \
 		src/drivers/usb/ehci.o \
 		src/window_manager.o \
-		src/multitasking.o
+		src/multitasking.o \
+		src/math.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -c
