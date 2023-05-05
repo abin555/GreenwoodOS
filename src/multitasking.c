@@ -4,7 +4,7 @@ void multitask_init(){
     printk("[TASK] Init Multitasking\n");
     timer_attach(2000, task_callback);
 }
-
+#define TASK_STACK_SIZE sizeof(uint32_t) * 0x100
 void start_task(uint32_t address, int8_t program_slot, uint32_t arg, char* name __attribute__((unused))){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
@@ -18,15 +18,21 @@ void start_task(uint32_t address, int8_t program_slot, uint32_t arg, char* name 
             tasks[i].registers.edi = edi;
             tasks[i].registers.esi = esi;
             if(program_slot == -1){
-                tasks[i].stack_region = (uint32_t) malloc(0x100);
-                uint32_t *idx = (uint32_t *) tasks[i].stack_region;
-                *idx = (uint32_t) &task_end;
-                tasks[i].registers.ebp = tasks[i].stack_region;
-                tasks[i].registers.esp = tasks[i].stack_region+1;
+                //tasks[i].stack_region = (uint32_t) malloc(TASK_STACK_SIZE);
+                //tasks[i].registers.ebp = tasks[i].stack_region+TASK_STACK_SIZE-(3*4);
+                //tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(12*4);
+
+                tasks[i].stack_region = (uint32_t) &task_stack_array[i];
+                tasks[i].registers.ebp = (uint32_t) &task_stack_array[i]+TASK_STACK_SIZE-(3*4);
+                tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
+
+                uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
+                return_instruction[1] = tasks[i].registers.ebp;
+                return_instruction[-3] = (uint32_t) &task_end;
             }
             else{
                 tasks[i].registers.ebp = 0x400000;
-                tasks[i].registers.esp = 0x400000-1;
+                tasks[i].registers.esp = 0x400000;
 
             }
             tasks[i].program_slot = program_slot;
@@ -48,7 +54,7 @@ void stop_task(int8_t task_idx){
 
 void task_end(){
     tasks[task_running_idx].slot_active = 0;
-    printk("Task Ended\n");
+    printk("Task %d Ended\n", task_running_idx);
     while(1){}
 }
 
@@ -60,8 +66,8 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
     old_task->registers.ecx = most_recent_int_cpu_state.ecx;
     old_task->registers.edx = most_recent_int_cpu_state.edx;
     old_task->registers.ebp = most_recent_int_cpu_state.ebp;
-    //old_task->registers.esi = most_recent_int_cpu_state.esi;
-    //old_task->registers.edi = most_recent_int_cpu_state.edi;
+    old_task->registers.esi = most_recent_int_cpu_state.esi;
+    old_task->registers.edi = most_recent_int_cpu_state.edi;
     old_task->registers.esp = most_recent_int_cpu_state.esp;
 
     //Load next task's state
@@ -75,8 +81,8 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
     most_recent_int_cpu_state.ecx = new_task->registers.ecx;
     most_recent_int_cpu_state.edx = new_task->registers.edx;
     most_recent_int_cpu_state.ebp = new_task->registers.ebp;
-    //most_recent_int_cpu_state.esi = new_task->registers.esi;
-    //most_recent_int_cpu_state.edi = new_task->registers.edi;
+    most_recent_int_cpu_state.esi = new_task->registers.esi;
+    most_recent_int_cpu_state.edi = new_task->registers.edi;
     most_recent_int_cpu_state.esp = new_task->registers.esp;
 }
 
@@ -98,7 +104,24 @@ void task_callback(){
         }
     }
     if(!task_available) return;
-
+    /*
+    printk("Task end is at 0x%x\n", (uint32_t) &task_end);
+    printk("Dumping Task #%d's Top of Stack:\n", task_running_idx);
+    for(unsigned int i = 0; i < (tasks[task_running_idx].stack_region + TASK_STACK_SIZE - tasks[task_running_idx].registers.esp)/4; i++){
+        uint32_t *stack = (uint32_t *) tasks[task_running_idx].registers.esp;
+        printk("0x%x ", stack+i);
+        if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.ebp){
+            printk("EBP ");
+        }
+        else if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.esp){
+            printk("ESP ");
+        }
+        else{
+            printk("    ");
+        }
+        printk("%d 0x%x\n", i, stack[i]);
+    }
+    */
     int8_t next_idx = running_idx + 1;
     while(1){
         if(next_idx == MAX_TASKS){

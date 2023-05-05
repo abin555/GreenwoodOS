@@ -28,7 +28,10 @@ struct task_state{
     uint32_t stack_region;
 };
 
-#define MAX_TASKS 16
+#define MAX_TASKS 10
+#define TASK_STACK_SIZE sizeof(uint32_t) * 0x100
+uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (4)));
+
 int8_t task_running_idx;
 struct task_state tasks[MAX_TASKS];
 

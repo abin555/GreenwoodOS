@@ -46,17 +46,30 @@ void sys_timer_callback(){
     }
 }
 
-void test_task1(){
-    while(1){
+void subfunction(int task, int val){
+    for(int i = 0; i < val; i++){
         delay(500);
-        printk("Task 1\n");
+        printk("Task %d Subfunction %d\n", task, i);
     }
 }
-void test_task2(){
-    while(1){
-        delay(100);
-        printk("Task 2\n");
+
+void test_task1(){
+    subfunction(1,5);
+    for(int i = 0; i < 10; i++){
+        delay(250);
+        printk("Task 1 %d\n", i);
     }
+    printk("Task 1: This should, God willing End\n");
+}
+
+void test_task2(){
+    for(int i = 0; i < 5; i++){
+        delay(250);
+        printk("Task 2 %d\n", i);
+    }
+    subfunction(2, 5);
+    printk("Task 2 End?\n");
+    task_end();
 }
 
 int kmain(unsigned long magic, unsigned long magic_addr){    
@@ -97,7 +110,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     //init_backbuffer();
     //mem_dump();
     //return 0;
-    //init_ps2();
+    init_ps2();
     init_timer(1000);
 
     initialize_ps2_keyboard(0);
@@ -127,10 +140,10 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_program_memory();
 
     
-    //start_task((uint32_t) &test_task1, -1, 0, "TestTask1");
-    //start_task((uint32_t) &test_task2, -1, 0, "TestTask2");
-    //multitask_init();
-    //while(1){}
+    start_task((uint32_t) &test_task1, -1, 0, "TestTask1");
+    start_task((uint32_t) &test_task2, -1, 0, "TestTask2");
+    multitask_init();
+    while(1){}
     
 
     //delay(2000);

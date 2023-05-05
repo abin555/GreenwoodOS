@@ -5,6 +5,7 @@ extern interrupt_handler
 %macro no_err_int 1
 global int_handler_%1
 int_handler_%1:
+	cli
 	push dword 0 	;Give a 0 for an errorless interrupt, prevents kernel panics
 	push dword %1	;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
@@ -13,14 +14,15 @@ int_handler_%1:
 %macro err_int_handler 1
 global int_handler_%1
 int_handler_%1:
+	cli
 	push dword %1 ;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
 
 common_interrupt_handler:
 	;save registers
-	push ebp
 	push esp
+	push ebp
 	push edi
 	push esi
 	push edx
@@ -38,12 +40,12 @@ common_interrupt_handler:
 	pop edx
 	pop esi
 	pop edi
-	pop esp
 	pop ebp
+	pop esp
 
 	;restore stack pointer
 	add esp, 8
-
+	sti
 	;return the system
 	iret
 
@@ -60,14 +62,14 @@ no_err_int 9
 err_int_handler 10
 err_int_handler 11
 err_int_handler 12
-err_int_handler 13
+err_int_handler 13 ; General Protection Fault
 err_int_handler 14
 no_err_int 15
 no_err_int 16
 no_err_int 17
 no_err_int 18
 
-no_err_int 32
+no_err_int 32 ; handler for timer interrupt.
 no_err_int 33 ; handler for interrupt 1 (keyboard)
 no_err_int 34 ; kernel interrupt handler
 no_err_int 35

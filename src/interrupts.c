@@ -95,15 +95,44 @@ void interrupt_handler(__attribute__((unused)) struct cpu_state cpu, __attribute
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
 		if(override_state_return == true){
+			//printk("Interrupt: %2x\n", interrupt);
+			//printk("EFLAG: 0x%x\nCS: 0x%x\nEIP: 0x%x\nERRCODE: 0x%x\nINT: 0x%2x\n", stack.eflags, stack.cs, stack.eip, stack.error_code, interrupt);
+
+			//printk("EIP Original: %x\n", stack.eip);
+			//printk("ESP: %x EBP %x\n", cpu.esp, cpu.ebp);
+			/*
+			printk("Stack Dump:\n");
+			for(unsigned int i = 0; i < 15; i++){
+				uint32_t *stack = (uint32_t *) cpu.esp;
+				printk("%d - 0x%x\n", i, stack[i]);
+			}
+			*/
 			stack = most_recent_int_stack_state;
 			cpu = most_recent_int_cpu_state;
-			printk("Changing EIP to %x\n", stack.eip);
-			printk("Changing ESP %x EBP %x\n", cpu.esp, cpu.ebp);
+			//printk("EFLAG: 0x%x\nCS: 0x%x\nEIP: 0x%x\nERRCODE: 0x%x\nINT: 0x%2x\n", stack.eflags, stack.cs, stack.eip, stack.error_code, interrupt);
+			//printk("Changing EIP to %x\n", stack.eip);
+			//printk("Changing ESP %x EBP %x\n", cpu.esp, cpu.ebp);
+			uint32_t *fix_the_dang_stack = (uint32_t *) cpu.esp;
+			fix_the_dang_stack[0] = interrupt;
+			fix_the_dang_stack[1] = stack.error_code;
+			fix_the_dang_stack[2] = stack.eip;
+			fix_the_dang_stack[3] = stack.cs;
+			fix_the_dang_stack[4] = stack.eflags;
+			/*
+			printk("New Stack Dump:\n");
+			for(unsigned int i = 0; i < 15; i++){
+				uint32_t *stack = (uint32_t *) cpu.esp;
+				printk("%d - 0x%x\n", i, stack[i]);
+			}
+			*/
 			override_state_return = false;
+			return;
 		}
 	}
 	else if(interrupt == 0xD){
 		printk("General Protection Fault @ 0x%x\n", stack.eip);
+		printk("ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
+		asm volatile ("hlt");
 	}
 	else{
 		printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
