@@ -90,7 +90,7 @@ typedef enum{
     AsyncSchedSts = 0x8000//Asyncronous Schedule Status
 } EHCI_USBSTS;
 
-uint32_t EHCI_get_USBSTS(struct EHCI_controller* controller, EHCI_USBCMD field);
+uint32_t EHCI_get_USBSTS(struct EHCI_controller* controller, EHCI_USBSTS field);
 
 #define EHCI_USBINTR_OFFSET 0x08
 

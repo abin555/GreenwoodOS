@@ -120,7 +120,8 @@ void init_terminal(){
     memset(terminal_block_index, 0, sizeof(terminal_block_index));
     printk("Terminal Buffer Address: %x\n", terminal_buffer);
     //timer_attach(2, terminal_callback);
-    add_process(terminal_callback, 0);
+    //add_process(terminal_callback, 0);
+    start_task(terminal_callback, -1, 0, "Terminal Task");
     //printk("[Terminal Program] Initialized\n");
 }
 
@@ -154,23 +155,13 @@ void terminal_parse(){
         add_process(Editor, 2, atoi(1), atoi(2));
     }
     else if(strcmp(terminal_buffer, "art", 0) == 0){
-        add_process(Art, 0);
+        //add_process(Art, 0);
+        start_task(Art, -1, 0, "Art Program");
     }
     else if(strcmp(terminal_buffer, "clear", 0) == 0){
         console_wipebuf();
         memset(consoleArray, 0, console_width*console_height);
         consoleLine = 0;
-    }    
-    else if(strcmp(terminal_buffer, "run", 0) == 0){
-        add_process(exec_user_program, 0);
-    }
-    else if(strcmp(terminal_buffer, "load", 0) == 0){
-        uint32_t drive = atoi(1);
-        uint32_t sector = atoi(2);
-        FS_read(drive, sector, 1, (uint32_t *) filesystem_default_read_buffer);
-        memcpy(filesystem_default_read_buffer, (void *) 0, 512);
-        //FS_read(drive, sector+1, 1, (uint32_t *) filesystem_default_read_buffer);
-        //memcpy(filesystem_default_read_buffer, (void *) 512, 512);
     }
     else if(strcmp(terminal_buffer, "lspci", 0) == 0){
         printk("Listing PCI Devices:\n");
@@ -180,16 +171,6 @@ void terminal_parse(){
     }
     else if(strcmp(terminal_buffer, "echo", 0) == 0){
         printk("%s\n", terminal_buffer + terminal_block_index[0] + 1);
-    }
-    else if(strcmp(terminal_buffer, "save", 0) == 0){
-        uint32_t address = atoi(1);
-        uint32_t size = atoi(2);
-        uint32_t drive = atoi(3);
-        uint32_t sector = atoi(4);
-        printk("Saving from memory at %x of size %x to drive #%1x sector %x for %x sectors\n", address, size, drive, sector, size);
-        for(uint32_t i = 0; i < size; i++){
-            FS_write(drive, sector+i, size, (uint32_t*) address);
-        }
     }
     else if(strcmp(terminal_buffer, "dump", 0) == 0){
         uint8_t *address = (uint8_t *) atoi(1);
@@ -280,7 +261,7 @@ void terminal_parse(){
         printk("Used Memory: %x\nRemaining Memory: %x\n", MEMORY_USED, (HEAP_END-HEAP_BEGIN)-MEMORY_USED);
     }
     else if(strcmp(terminal_buffer, "display?", 0) == 0){
-        printk("Display %xx%x\n", fb_width, fb_height);
+        printk("Display %dx%d\n", fb_width, fb_height);
     }
     else if(strcmp(terminal_buffer, "beep", 0) == 0){
         audio_beep();
@@ -296,6 +277,9 @@ void terminal_parse(){
     }
     else if(strcmp(terminal_buffer, "free", 0) == 0){
         free((void*) atoi(1));
+    }
+    else if(strcmp(terminal_buffer, "lstask", 0) == 0){
+        list_tasks();
     }
     else{
         int select_program = -1;
@@ -317,97 +301,93 @@ void terminal_parse(){
             printk("Command Does not Exist\n");
         }
         else{
-            uint8_t *data_buf = (uint8_t*) 0;
             struct FS_Item_Entry* file = &FS_entries[select_program];
 
-            for(uint32_t sector = 0; sector < file->sector_count; sector++){
-                uint8_t* read_buf = ISO_read_sector(file->drive, file->sector+sector);
-                for(int index = 0; index < 0x800; index++){
-                    data_buf[sector*0x800 + index] = read_buf[index];
-                    if(sector * 0x800 + index >= file->size){
-                        break;
-                    }
-                }    
-            }
+            int slot = reserveProgramSlot();
+
+            load_program(slot, file);
             
-            add_process(exec_user_program, 1, terminal_arg_buffer);
+            //add_process(exec_user_program, 1, terminal_arg_buffer);
+            start_task((void *) 0, slot, 0, "User Program");
             //exec_user_program(0, 0);
         }
     }
 }
 bool redraw_line_needed = true;
-void terminal_callback(uint8_t process __attribute__((unused)), uint32_t args[10]__attribute__((unused))){
-    char ascii;
-    uint8_t keycode;
-    int directory_namesize = 0;
-    if(keyboard_ascii_index != terminal_last_char){
-        redraw_line_needed = true;
-        ascii = keyboard_ASCIIBuffer[keyboard_ascii_index-1];
-        terminal_last_char = keyboard_ascii_index;
-        //memcpy(terminal_buffer+terminal_buffer_index, terminal_buffer+terminal_buffer_index+1, fb_terminal_w-terminal_buffer_index-1);
-        for(uint32_t index = fb_terminal_w-1; index > terminal_buffer_index-1; index--){
-            terminal_buffer[index+1] = terminal_buffer[index];
-        }
-        terminal_buffer[terminal_buffer_index] = ascii;
-        terminal_buffer_index++;
-    }
-    if(keyboard_KEYBUFFER_index != terminal_last_key){
-        keycode = keyboard_KEYBUFFER[keyboard_KEYBUFFER_index-1];
-        terminal_last_key = keyboard_KEYBUFFER_index;
-        redraw_line_needed = true;
-        switch(keycode){
-            case 0x0E:
-                if(terminal_buffer_index > 0){
-                    memcpy(terminal_buffer+terminal_buffer_index, terminal_buffer+terminal_buffer_index-1, fb_terminal_w-terminal_buffer_index);
-                    terminal_buffer_index--;
-                }
-                break;
-            case 0x4B:
-                if(kbd_flags.arrow){
-                    terminal_buffer_index--;
-                }
-                break;
-            case 0x4D:
-                if(kbd_flags.arrow){
-                    terminal_buffer_index++;
-                }
-                break;
-            case 0x9C:
-                printk("> ");
-                printk(terminal_buffer);
-                printk("\n");
-
-                for(uint32_t i = 0; i < fb_terminal_w; i++){
-                    terminal_arg_buffer[i] = terminal_buffer[i];
-                }
-
-                terminal_locate_blocks();
-                terminal_parse();
-
-                memset(terminal_buffer, 0, fb_terminal_w);
-                terminal_buffer_index = 0;
-                break;
-        }
-    }
-    directory_namesize=0;
-    if(redraw_line_needed){
-        while(FS_entries[active_directory].name[directory_namesize]) directory_namesize++;
-        for(uint32_t i = 0; i < console_width; i++){
-            //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
-            if(i == terminal_buffer_index){
-                buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
+void terminal_callback(){
+    while(1){
+        char ascii;
+        uint8_t keycode;
+        int directory_namesize = 0;
+        if(keyboard_ascii_index != terminal_last_char){
+            redraw_line_needed = true;
+            ascii = keyboard_ASCIIBuffer[keyboard_ascii_index-1];
+            terminal_last_char = keyboard_ascii_index;
+            //memcpy(terminal_buffer+terminal_buffer_index, terminal_buffer+terminal_buffer_index+1, fb_terminal_w-terminal_buffer_index-1);
+            for(uint32_t index = fb_terminal_w-1; index > terminal_buffer_index-1; index--){
+                terminal_buffer[index+1] = terminal_buffer[index];
             }
-            else{
-                buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
+            terminal_buffer[terminal_buffer_index] = ascii;
+            terminal_buffer_index++;
+        }
+        if(keyboard_KEYBUFFER_index != terminal_last_key){
+            keycode = keyboard_KEYBUFFER[keyboard_KEYBUFFER_index-1];
+            terminal_last_key = keyboard_KEYBUFFER_index;
+            redraw_line_needed = true;
+            switch(keycode){
+                case 0x0E:
+                    if(terminal_buffer_index > 0){
+                        memcpy(terminal_buffer+terminal_buffer_index, terminal_buffer+terminal_buffer_index-1, fb_terminal_w-terminal_buffer_index);
+                        terminal_buffer_index--;
+                    }
+                    break;
+                case 0x4B:
+                    if(kbd_flags.arrow){
+                        terminal_buffer_index--;
+                    }
+                    break;
+                case 0x4D:
+                    if(kbd_flags.arrow){
+                        terminal_buffer_index++;
+                    }
+                    break;
+                case 0x9C:
+                    printk("> ");
+                    printk(terminal_buffer);
+                    printk("\n");
+
+                    for(uint32_t i = 0; i < fb_terminal_w; i++){
+                        terminal_arg_buffer[i] = terminal_buffer[i];
+                    }
+
+                    terminal_locate_blocks();
+                    terminal_parse();
+
+                    memset(terminal_buffer, 0, fb_terminal_w);
+                    terminal_buffer_index = 0;
+                    break;
             }
         }
-        directory_namesize = 0;
-        while(FS_entries[active_directory].name[directory_namesize]){
-            buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
-            directory_namesize++;
-        }
-        buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
+        directory_namesize=0;
+        if(redraw_line_needed){
+            while(FS_entries[active_directory].name[directory_namesize]) directory_namesize++;
+            for(uint32_t i = 0; i < console_width; i++){
+                //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
+                if(i == terminal_buffer_index){
+                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
+                }
+                else{
+                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
+                }
+            }
+            directory_namesize = 0;
+            while(FS_entries[active_directory].name[directory_namesize]){
+                buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
+                directory_namesize++;
+            }
+            buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
 
-        redraw_line_needed = false;
+            redraw_line_needed = false;
+        }
     }
 }

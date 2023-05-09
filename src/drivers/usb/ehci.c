@@ -294,7 +294,7 @@ uint32_t EHCI_set_USBCMD(struct EHCI_controller* controller, EHCI_USBCMD field, 
     return USBCMD;
 }
 
-uint32_t EHCI_get_USBSTS(struct EHCI_controller* controller, EHCI_USBCMD field){
+uint32_t EHCI_get_USBSTS(struct EHCI_controller* controller, EHCI_USBSTS field){
     uint32_t USBSTS = get_32_offset(controller->mmio+controller->operationalRegs_offset, EHCI_USBSTS_OFFSET);
     return get_bitfield(USBSTS, field);
 }

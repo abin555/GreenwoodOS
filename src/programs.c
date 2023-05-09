@@ -32,11 +32,51 @@ void init_program_memory(){
 
 
 
-/*
-void load_program(uint8_t program_slot, struct FS_Item_Entry* file){
 
+void load_program(uint8_t program_slot, struct FS_Item_Entry* file){
+            uint8_t *data_buf = (uint8_t*) (0x02000000 + 0x400000*program_slot);
+
+            for(uint32_t sector = 0; sector < file->sector_count; sector++){
+                uint8_t* read_buf = ISO_read_sector(file->drive, file->sector+sector);
+                for(int index = 0; index < 0x800; index++){
+                    data_buf[sector*0x800 + index] = read_buf[index];
+                    if(sector * 0x800 + index >= file->size){
+                        break;
+                    }
+                }    
+            }
 }
-*/
+
+
+bool program_slot_status[10] = {
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+};
+
+int reserveProgramSlot(){
+    for(int i = 0; i < 10; i++){
+        if(program_slot_status[i] == false){
+            program_slot_status[i] = true;
+            printk("[PGRM] Reserved Slot %d\n", i);
+            return i;
+        }
+    }
+    return -1;
+}
+
+void freeProgramSlot(int slot){
+    program_slot_status[slot] = false;
+    printk("[PGRM] Freed Slot %d\n", slot);
+}
+
 void select_program(uint8_t program_slot){
     create_page_entry(0x02000000 + 0x400000*program_active_slot, 0x02000000 + 0x400000*program_active_slot, 0x83);
     create_page_entry(0x02000000 + 0x400000*program_slot, 0, 0x83);

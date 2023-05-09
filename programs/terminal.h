@@ -17,6 +17,7 @@
 #include "audio.h"
 #include "pcspk.h"
 #include "window_manager.h"
+#include "multitasking.h"
 
 char* terminal_buffer;
 char* terminal_arg_buffer;
@@ -35,6 +36,6 @@ void init_terminal();
 void terminal_locate_blocks();
 void terminal_parse();
 
-void terminal_callback(uint8_t process_id, uint32_t args[10]);
+void terminal_callback();
 
 #endif

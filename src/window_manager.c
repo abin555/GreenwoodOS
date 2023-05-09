@@ -12,6 +12,7 @@ void init_window_manager(uint32_t max){
     use_window = true;
     window_init = true;
     printk("[WINDOW MGR] Done Init\n");
+    start_task(draw_screen, -1, 0, "Window Manager");
 }
 
 void draw_rect(uint32_t x1, uint32_t y1, uint32_t x2, uint32_t y2, uint32_t color){
@@ -132,24 +133,26 @@ void render_bar(int window_idx){
 }
 
 void draw_screen(){
-    if(use_window == false){
-        return;
-    };
-    set_backbuffer(1);
-    interaction();
-    
-    //fb_clear(0x4ACCDB);
-    fb_clear(0x383838);
-    for(int i = max_windows-1; i >= 0; i--){
-        if(windows[i] != 0){
-            //fill_rect(windows[i]->screen_x, windows[i]->screen_y-10, windows[i]->width, 10);
-            render_bar(i);
-            redraw_window(windows[i]);
+    while(1){
+        if(use_window == false){
+            continue;
+        };
+        set_backbuffer(1);
+        interaction();
+        
+        //fb_clear(0x4ACCDB);
+        fb_clear(0x383838);
+        for(int i = max_windows-1; i >= 0; i--){
+            if(windows[i] != 0){
+                //fill_rect(windows[i]->screen_x, windows[i]->screen_y-10, windows[i]->width, 10);
+                render_bar(i);
+                redraw_window(windows[i]);
+            }
         }
-    }
 
-    mouse_draw();
-    swap_buffers();
+        mouse_draw();
+        swap_buffers();
+    }
 }
 
 void add_window(struct window *window){

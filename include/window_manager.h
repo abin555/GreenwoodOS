@@ -8,6 +8,7 @@
 #include "filesystem.h"
 #include "memory.h"
 #include "console.h"
+#include "multitasking.h"
 
 struct key_event{
     char ascii;

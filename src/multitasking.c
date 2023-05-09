@@ -1,46 +1,37 @@
 #include "multitasking.h"
 
 void multitask_init(){
+    console_clear();
+    fb_clear(0);
     printk("[TASK] Init Multitasking\n");
-    timer_attach(2000, task_callback);
+    timer_attach(10, task_callback);
 }
-#define TASK_STACK_SIZE sizeof(uint32_t) * 0x100
-void start_task(uint32_t address, int8_t program_slot, uint32_t arg, char* name __attribute__((unused))){
+void start_task(void *address, int8_t program_slot, uint32_t arg, char* name __attribute__((unused))){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
             tasks[i].registers.eax = arg;
             tasks[i].registers.ebx = 0;
             tasks[i].registers.ecx = 0;
             tasks[i].registers.edx = 0;
-            tasks[i].registers.eip = address;
+            tasks[i].registers.eip = (uint32_t) address;
             register uint32_t esi asm("esi");
             register uint32_t edi asm("edi");
             tasks[i].registers.edi = edi;
             tasks[i].registers.esi = esi;
-            if(program_slot == -1){
-                //tasks[i].stack_region = (uint32_t) malloc(TASK_STACK_SIZE);
-                //tasks[i].registers.ebp = tasks[i].stack_region+TASK_STACK_SIZE-(3*4);
-                //tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(12*4);
+            
+            tasks[i].stack_region = (uint32_t) &task_stack_array[i];
+            tasks[i].registers.ebp = (uint32_t) &task_stack_array[i]+TASK_STACK_SIZE-(3*4);
+            tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
 
-                tasks[i].stack_region = (uint32_t) &task_stack_array[i];
-                tasks[i].registers.ebp = (uint32_t) &task_stack_array[i]+TASK_STACK_SIZE-(3*4);
-                tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
+            uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
+            return_instruction[1] = tasks[i].registers.ebp;
+            return_instruction[-3] = (uint32_t) &task_end;
 
-                uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
-                return_instruction[1] = tasks[i].registers.ebp;
-                return_instruction[-3] = (uint32_t) &task_end;
-            }
-            else{
-                tasks[i].registers.ebp = 0x400000;
-                tasks[i].registers.esp = 0x400000;
 
-            }
             tasks[i].program_slot = program_slot;
-            /*
-            for(uint32_t i = 0; i < sizeof(tasks[i].task_name) && name[i] != 0; i++){
-                tasks[i].task_name[i] = name[i];
-            }
-            */
+    
+            tasks[i].task_name = name;
+
             printk("[TASK] Added to queue idx %2x\n", i);
             tasks[i].slot_active = 1;
             break;
@@ -54,7 +45,11 @@ void stop_task(int8_t task_idx){
 
 void task_end(){
     tasks[task_running_idx].slot_active = 0;
-    printk("Task %d Ended\n", task_running_idx);
+    printk("[TASK] Task %d Ended\n", task_running_idx);
+    if(tasks[task_running_idx].program_slot == -1)
+        free((void *) tasks[task_running_idx].stack_region);
+    else 
+        freeProgramSlot(tasks[task_running_idx].program_slot);
     while(1){}
 }
 
@@ -87,7 +82,7 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
 }
 
 void task_callback(){
-    printk("[TASK] Callback\n");
+    //printk("[TASK] Callback\n");
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){
@@ -99,7 +94,7 @@ void task_callback(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active && i != running_idx){
             task_available = true;
-            printk("Task is available\n");
+            //printk("Task is available\n");
             break;
         }
     }
@@ -138,8 +133,16 @@ void task_callback(){
             tasks[next_idx].slot_running = 1;
             running_idx = next_idx;
             task_running_idx = running_idx;
-            printk("Switched to task %2x\n", running_idx);
+            //printk("Switched to task %2x\n", running_idx);
             break;
+        }
+    }
+}
+
+void list_tasks(){
+    for(int i = 0; i < MAX_TASKS; i++){
+        if(tasks[i].slot_active){
+            printk("Task #%d Is Called %s\n", i, tasks[i].task_name);
         }
     }
 }

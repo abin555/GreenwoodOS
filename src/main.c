@@ -48,7 +48,7 @@ void sys_timer_callback(){
 
 void subfunction(int task, int val){
     for(int i = 0; i < val; i++){
-        delay(500);
+        delay(50);
         printk("Task %d Subfunction %d\n", task, i);
     }
 }
@@ -56,7 +56,7 @@ void subfunction(int task, int val){
 void test_task1(){
     subfunction(1,5);
     for(int i = 0; i < 10; i++){
-        delay(250);
+        delay(10);
         printk("Task 1 %d\n", i);
     }
     printk("Task 1: This should, God willing End\n");
@@ -64,12 +64,11 @@ void test_task1(){
 
 void test_task2(){
     for(int i = 0; i < 5; i++){
-        delay(250);
+        delay(10);
         printk("Task 2 %d\n", i);
     }
     subfunction(2, 5);
     printk("Task 2 End?\n");
-    task_end();
 }
 
 int kmain(unsigned long magic, unsigned long magic_addr){    
@@ -131,8 +130,6 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     
     ready_filesystem();
     
-    
-    init_terminal();
     audio_init();
     init_mouse();
     
@@ -140,11 +137,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_program_memory();
 
     
-    start_task((uint32_t) &test_task1, -1, 0, "TestTask1");
-    start_task((uint32_t) &test_task2, -1, 0, "TestTask2");
-    multitask_init();
-    while(1){}
     
+      
 
     //delay(2000);
     use_window = true;
@@ -152,10 +146,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         init_window_manager(10);
         console_addWindow();
         printk("Window Manager Init!\n");
-        timer_attach(10, draw_screen);
+        //timer_attach(10, draw_screen);
     }
-    
-    process_scheduler();
+
+    start_task(test_task1, -1, 0, "TestTask1");
+    start_task(test_task2, -1, 0, "TestTask2");
+    init_terminal();
+    multitask_init();  
+    while(1){}
 
     asm("hlt");
     return 0;

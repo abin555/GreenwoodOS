@@ -31,7 +31,7 @@ void paging_error(){
     asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
     console_initialized = 1;
     use_window = 0;
-    fb_clear(0);
+    fb_clear(0x1111FF);
     console_fb = framebuffer;
     console_width = fb_terminal_w;
     console_height = fb_terminal_h;
@@ -55,7 +55,7 @@ void create_page_entry(
 ){
     uint32_t *page_table = (uint32_t*) &boot_page_directory;
     page_table[get_page_index_from_addr(target_address)] = ((base_address & 0xFFC00000) | flag);
-    printk("[Paging] Mapped Addr: %x at Index: %x To Addr: %x Set Value: %x\n", base_address, get_page_index_from_addr(target_address), target_address, ((base_address & 0xFFC00000) | 0x83));
+    //printk("[Paging] Mapped Addr: %x at Index: %x To Addr: %x Set Value: %x\n", base_address, get_page_index_from_addr(target_address), target_address, ((base_address & 0xFFC00000) | 0x83));
     __native_flush_tlb_single(target_address);
 }
 
