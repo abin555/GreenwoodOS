@@ -15,6 +15,7 @@ void init_paging(){
     //page_table[get_page_index_from_addr(0xffffb6b2)] = (0xffffb6b2 & 0xFFFF0000) | 0x83;
     create_page_entry((uint32_t) real_framebuffer, (uint32_t) real_framebuffer, 0x93);
     create_page_entry((uint32_t) real_framebuffer+0x400000, (uint32_t) real_framebuffer+0x400000, 0x93);
+
     for(int i = 0; i < 1024; i++){
         if(page_table[i]){
             printk("[Page Table] index %x = %x\n", i, page_table[i]);

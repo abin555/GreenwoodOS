@@ -10,8 +10,8 @@ uint32_t fb_width, fb_height, fb_real_w, fb_real_h;
 
 uint32_t* framebuffer;
 uint32_t* real_framebuffer;
-uint32_t back_buffer[1920*1080];
-//uint32_t *back_buffer;
+//uint32_t back_buffer[1920*1080];
+uint32_t *back_buffer;
 
 uint32_t fb_terminal_w, fb_terminal_h;
 uint8_t use_backbuffer = 0;

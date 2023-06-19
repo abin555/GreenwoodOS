@@ -4,6 +4,7 @@
 #include "stdint.h"
 #include "memory.h"
 #include "math.h"
+#include "serial.h"
 #include <stdarg.h>
 
 char* consoleArray;

@@ -330,12 +330,12 @@ uint32_t EHCI_set_operReg(struct EHCI_controller* controller, EHCI_OperationalRe
     return EHCI_get_operReg(controller, offset);
 }
 
-uint32_t EHCI_get_portSC(struct EHCI_controller* controller, uint32_t port, uint32_t field){
+uint32_t EHCI_get_portSC(struct EHCI_controller* controller, uint32_t port, EHCI_PORTSC field){
     uint32_t PORTSC = get_32_offset(controller->mmio + controller->operationalRegs_offset, PORTSC_BASE+ (4*port));
     //return get_bitfield(PORTSC, field);
     return PORTSC & field;
 }
-uint32_t EHCI_set_portSC(struct EHCI_controller* controller, uint32_t port, uint32_t field, uint32_t value){
+uint32_t EHCI_set_portSC(struct EHCI_controller* controller, uint32_t port, EHCI_PORTSC field, uint32_t value){
     uint32_t PORTSC = get_32_offset(controller->mmio + controller->operationalRegs_offset, PORTSC_BASE+ (4*port));
     PORTSC &= ~field;
     PORTSC |= (value << calculate_shift(field));

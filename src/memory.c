@@ -17,9 +17,9 @@ void memcpy(void* source, void* target, uint32_t size){
 }
 
 void memset(void* target, uint32_t val, uint32_t size){
-    unsigned char* place = target;
+    print_serial("Memset: %x %x\n", (uint32_t) target, size);
     while(size--){
-        *place++ = (unsigned char) val;
+        *(char *)(target++) = (unsigned char) val;
     }
 }
 
@@ -84,13 +84,7 @@ void* malloc(unsigned int size){
 }
 
 void free(void* memory){
-    alloc_t* alloc = (memory - sizeof(alloc_t));
-    MEMORY_USED -= alloc->size;
-
-    alloc->status = 0;
-    if((uint32_t) memory == last_alloc){
-        last_alloc -= (uint32_t) memory + sizeof(alloc_t);
-    }
+    
 }
 
 unsigned int mgetSize(void *mem){
@@ -99,14 +93,16 @@ unsigned int mgetSize(void *mem){
 }
 
 void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
+    fb_write_xy("HEAP START!", 11, 0, 0, 0xFFFFFF, 0);
     for(uint32_t i = 0; i < (heap_size / 0x400000); i++){
         create_page_entry(heap_begin+(i*0x400000), heap_begin+(i*0x400000), 0x83);
     }
+    fb_write_xy("HEAP PAGE! ", 11, 0, 0, 0xFFFFFF, 0);
     last_alloc = heap_begin;
     HEAP_BEGIN = heap_begin;
     HEAP_END = HEAP_BEGIN + heap_size;
     memset((char *) HEAP_BEGIN, 0, heap_size);
-    fb_write_xy("HEAP READY", 10, 0, 0, 0xFFFFFF, 0);
+    fb_write_xy("HEAP READY ", 11, 0, 0, 0xFFFFFF, 0);
 }
 
 void mem_dump(){

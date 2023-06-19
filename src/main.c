@@ -101,12 +101,16 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     interrupts_install_idt();
     init_paging();
     fb_setChar(1,1, 'R', 0x00FFFF, 0);
-    initialize_heap(0x06000000, 0xC00000);
+    fb_setChar(1,2, '?', 0, 0xFFFFFF);
+    initialize_heap(0x06000000, 0x400000);
     //init_backbuffer();
     initialize_console(fb_terminal_w,fb_terminal_h);
-    
+    printk("Work?\n");
+    return 0;
+
     //mem_dump();
-    //init_backbuffer();
+    init_backbuffer();
+    dump_page_map();
     //mem_dump();
     //return 0;
     init_ps2();
@@ -136,8 +140,8 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     timer_attach(100, sys_timer_callback);
     init_program_memory();
 
-    
-    
+    //asm("cli");
+    //asm("hlt");
       
 
     //delay(2000);
@@ -153,6 +157,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     start_task(test_task2, -1, 0, "TestTask2");
     init_terminal();
     multitask_init();  
+
     while(1){}
 
     asm("hlt");

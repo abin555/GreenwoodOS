@@ -61,6 +61,9 @@ FB_PN equ (FB_VB >> 22)
 AHCI_VB equ 0xfe800000
 AHCI_PN equ (AHCI_VB >> 22)
 
+BACKBUF_VB equ 0x12000000
+BACKBUF_PN equ (BACKBUF_VB >> 22)
+
 align 0x1000
 
 global boot_page_directory
@@ -75,10 +78,9 @@ boot_page_directory:
 	dd 0x01000083
 	dd 0x01400083
 	dd 0x01800083
-	times (AHCI_PN - KERNEL_PAGE_NUMBER - 7) dd 0
-	;dd 0xfe800083
-	dd 0
-	times (1024 - AHCI_PN - 1) dd 0
+	dd 0x01C00083
+	dd 0x02000083
+	times (1024 - KERNEL_PAGE_NUMBER - 9) dd 0
 
 
 KERNEL_STACK_SIZE equ 0x2000

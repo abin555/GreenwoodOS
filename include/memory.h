@@ -5,6 +5,7 @@
 #include "stdint.h"
 #include "framebuffer.h"
 #include "paging.h"
+#include "serial.h"
 
 #define HEAP_SIZE 0x100000
 

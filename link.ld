@@ -7,7 +7,7 @@ SECTIONS {
 	{
 		*(program)
 	}
-	. = 0xC0100000;
+	. = 0xC0000000;
 	kernel_start = .;
 	kernel_physical_start = . - 0xC0000000;
 	.text ALIGN (0x2000) : AT(ADDR(.text)-0xC0000000)

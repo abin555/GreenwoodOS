@@ -56,10 +56,11 @@ all: kernel.elf transfer-compiled make_fs
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+	#~/copy_bin/ln $(LDFLAGS) $(OBJECTS) -o kernel.elf
 	cd ..
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	grub-mkrescue -o GreenwoodOS.img iso
+	grub-mkrescue -o GreenwoodOS.iso iso
 run: os.iso transfer-compiled emulate
 
 DEBUG_EMU = 
@@ -69,7 +70,7 @@ emulate:
 	-device ich9-intel-hda \
 	-audiodev pa,id=snd0 \
 	-device hda-output,audiodev=snd0 \
-	-drive id=disk,file=GreenwoodOS.img,if=none,format=raw \
+	-drive id=disk,file=GreenwoodOS.iso,if=none,format=raw \
 	-drive id=disk2,file=filesystem.iso,if=none,format=raw \
 	-device ahci,id=ahci \
 	-device ide-hd,drive=disk2,bus=ahci.0,bootindex=2 \

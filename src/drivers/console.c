@@ -2,9 +2,10 @@
 #include "window_manager.h"
 
 void initialize_console(uint32_t width, uint32_t height){
+    print_serial("Console Init! %x x %x\n", width, height);
     consoleArray = (char *) malloc(width * height);
     consoleSize = width*height;
-    memset(consoleArray, 0, consoleSize);
+    //memset(consoleArray, 0, consoleSize);
     consoleLine = 0;
     consoleStart = 0;
     consoleLinePlace = 0;
@@ -15,6 +16,7 @@ void initialize_console(uint32_t width, uint32_t height){
     console_color_fg = 0xFFFFFF;
     console_color_bg = 0;
     console_fb = framebuffer;
+    print_serial("Console Init Finished!\n");
 }
 
 void console_putScreen(){
