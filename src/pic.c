@@ -1,5 +1,6 @@
 #include "io.h"
 #include "pic.h"
+#include "serial.h"
 
 void pic_acknowledge(unsigned int interrupt){
 
@@ -21,7 +22,6 @@ void pic_acknowledge(unsigned int interrupt){
 }
 void pic_remap(int offset1, int offset2)
 {
-
     /*
 	outb(PIC_1_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);	// starts the initialization sequence (in cascade mode)
 	outb(PIC_2_COMMAND, PIC_ICW1_INIT | PIC_ICW1_ICW4);
@@ -50,6 +50,7 @@ void pic_remap(int offset1, int offset2)
 	outb(0x21, 0xFF);
 	outb(0xA1, 0xFF);
     asm("sti");
+    
 }
 
 void IRQ_set_mask(unsigned char IRQline) {
@@ -67,6 +68,7 @@ void IRQ_set_mask(unsigned char IRQline) {
 }
  
 void IRQ_clear_mask(unsigned char IRQline) {
+    print_serial("IRQ Clear Mask %x\n", IRQline);
     uint16_t port;
     uint8_t value;
  
@@ -76,6 +78,8 @@ void IRQ_clear_mask(unsigned char IRQline) {
         port = PIC_2_DATA;
         IRQline -= 8;
     }
-    value = inb(port) & ~(1 << IRQline);
+    uint8_t currentmask = inb(port);
+    print_serial("Current Mask %x\n", currentmask);
+    value = currentmask & ~(1 << IRQline);
     outb(port, value);        
 }

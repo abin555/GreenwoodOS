@@ -9,7 +9,6 @@
 #include "processes.h"
 #include "programs/image.h"
 #include "mouse.h"
-#include "window_manager.h"
 
 void init_syscalls();
 extern uint32_t syscall_fb_color;

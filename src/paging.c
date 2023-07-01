@@ -21,17 +21,16 @@ void init_paging(){
             printk("[Page Table] index %x = %x\n", i, page_table[i]);
         }
     }
-    printk("%x\n", ((uint32_t) program & 0xFFFF0000) | 0x83);
     update_page();
     printk("[Paging] Initialized\n");
 }
-#include "window_manager.h"
+
 void paging_error(){
     asm volatile("cli");
     uint32_t faulting_address;
     asm volatile("mov %%cr2, %0" : "=r" (faulting_address));
+    print_serial("Page Fault at 0x%x\n", faulting_address);
     console_initialized = 1;
-    use_window = 0;
     fb_clear(0x1111FF);
     console_fb = framebuffer;
     console_width = fb_terminal_w;
@@ -39,7 +38,6 @@ void paging_error(){
     console_clear();
     console_fullPut();
     printk("Page Fault at 0x%x\n", faulting_address);
-    print_serial("Page Fault at 0x%x\n", faulting_address);
     printk("Saved EIP: 0x%x\n", most_recent_int_stack_state.eip);
     printk("[KERNEL PANIC]\n");
     swap_buffers();
@@ -73,12 +71,52 @@ uint32_t get_physical(uint32_t address){
 void set_PAT(){
     if(getCPUFeatures(CPUID_FEAT_EDX_PAT)){
         uint32_t IA32_PAT_low = getMTRR_low(0x277);
-        IA32_PAT_low = 0b00000000000000010000010000000110;
+        /*
+        PAT 0 - Write Back
+        PAT 1 - Write Through
+        PAT 2 - Write Combining
+        PAT 3 - Uncacheable
+        PAT 4+- Uncacheable
+        */
+
+        /*
+        Page Flags
+
+        PAT PCD PWT = ENT
+         0   0   0    PAT 0 (Write Back)
+         0   0   1    PAT 1 (Write Through)
+         0   1   0    PAT 2 (Write Combining)
+         0   1   1    PAT 3 (Uncacheable)
+         1   0   0    PAT 4
+         1   0   1    PAT 5
+         1   1   0    PAT 6
+         1   1   1    PAT 7
+
+        Flags for 4MB Directory Entry
+        Bit Flag
+         0  Present (1)
+         1  Read/Write (1)
+         2  User/Supervisor (0) **ENTIRE OS IS KERNAL MODE**
+         3  PWT
+         4  PCD
+         5  Accessed
+         6  Available
+         7  Page Size (1)
+
+        Flag Defaults
+        PAT 0 - 0x83 WB
+        PAT 1 - 0x8B WT
+        PAT 2 - 0x93 WC
+        PAT 3 - 0x9B UC
+        */
+
+        IA32_PAT_low = 0x00010406;
         setMTRR_low(0x277, IA32_PAT_low);
         IA32_PAT_low = getMTRR_low(0x277);
+        printk("Set PAT\n");
     }
     else{
-        printk("Unable to set PAT");
+        printk("Unable to set PAT\n");
     }
 }
 
@@ -88,7 +126,7 @@ void dump_page_map(){
     printk("IDX |  Virtual -> Physical\n");
     for(uint32_t i = 0; i < 1024; i++){
         if(page_table[i]){
-            printk("%3x | %x -> %x\n", i, i << 22, page_table[i] & 0xFFC00000);
+            printk("%3x | %x -> %x | %2x\n", i, i << 22, page_table[i] & 0xFFC00000, page_table[i] & 0x9F);
         }
     }
 }

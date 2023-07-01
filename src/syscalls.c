@@ -106,20 +106,6 @@ struct cpu_state syscalls_callback(struct cpu_state cpu, struct stack_state stac
             cpu_state.edx = mouse_y;
             break;
         }
-        case 0x1E:
-            if(window_init) use_window = !use_window;
-            //if(window_init) 
-            //use_window = !use_window;
-            break;
-        case 0x1F:
-            cpu_state.ebx = (uint32_t) create_window(cpu.ebx, cpu.ecx, (uint32_t *) cpu.edx);
-            break;
-        case 0x20:
-            close_window((struct window*) cpu.ebx);
-            break;
-        case 0x21:
-            add_window_event((struct window*) cpu.ebx, (void (*)(WINDOW_EVENT window_event)) cpu.ecx);
-            break;
     }
     return cpu_state;
 }

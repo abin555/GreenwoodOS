@@ -20,12 +20,13 @@ loader:					;Kernal Load entry point.
 	mov ecx, boot_page_directory_physical 
 	mov cr3, ecx
 
+	;ENABLE PSE for 4MB Pages
 	mov ecx, cr4
 	or ecx, 0x00000010
 	mov cr4, ecx
 
 	mov ecx, cr0
-	or ecx, 0x80000000
+	or ecx, 0x80000001
 	mov cr0, ecx
 
 	lea ecx, [higher_half]
@@ -80,11 +81,12 @@ boot_page_directory:
 	dd 0x01800083
 	dd 0x01C00083
 	dd 0x02000083
-	times (1024 - KERNEL_PAGE_NUMBER - 9) dd 0
+	dd 0x02400083
+	times (1024 - KERNEL_PAGE_NUMBER - 10) dd 0
 
 
-KERNEL_STACK_SIZE equ 0x2000
-section .bss
+KERNEL_STACK_SIZE equ 0x4000
+SECTION .bss
 align 4
 kernel_stack:
 	resb KERNEL_STACK_SIZE

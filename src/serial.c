@@ -9,7 +9,7 @@ int ser_printDecimal(unsigned int data, int setlength){
 }
 
 int ser_printHex(unsigned int data, int setlength){
-    for(int i = 0; i < (setlength ? setlength : 8); i++){
+    for(int i = (setlength ? setlength : 7); i >= 0; i--){
         write_serial(quadToHex((data >> 4*i) & 0xF));
     }
     return (setlength ? setlength : 8);

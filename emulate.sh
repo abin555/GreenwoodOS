@@ -1,0 +1,14 @@
+qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
+-device ich9-intel-hda \
+-device hda-output,audiodev=snd0 \
+-audiodev alsa,id=snd0,out.frequency=48000,out.channels=2,out.format=s32 \
+-audio driver=alsa,model=ac97,id=ac97dev \
+-audiodev alsa,id=pcspeaker -machine pcspk-audiodev=pcspeaker \
+-drive if=none,id=usbstick,format=raw,file=GreenwoodOS.iso \
+-drive id=disk,file=GreenwoodOS.iso,if=none,format=raw \
+-drive id=disk2,file=filesystem.iso,if=none,format=raw \
+-device ahci,id=ahci \
+-device ide-hd,drive=disk2,bus=ahci.0,bootindex=2 \
+-device ide-hd,drive=disk,bus=ahci.1,bootindex=1 \
+-usb \
+-device usb-ehci,id=ehci

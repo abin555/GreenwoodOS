@@ -39,6 +39,7 @@ void initialize_ps2_keyboard(int device){
     ps2_expect_ack();
     interrupt_add_handle(33, &keyboard_handler);
     IRQ_clear_mask(1);
+    printk("[KEYBOARD] Enabled!\n");
     IRQ_RES;
 }
 
@@ -77,6 +78,13 @@ struct cpu_state keyboard_handler(struct cpu_state cpu __attribute__((unused)), 
                 case 0xF0:
                 if(kbd_flags.arrow && scancode & 0x80){
                     kbd_flags.arrow = false;
+                }
+                break;
+                case 0x4F:
+                printk("End?\n");
+                if(kbd_flags.arrow){
+                    printk("End!\n");
+                    reboot();
                 }
                 break;
             }

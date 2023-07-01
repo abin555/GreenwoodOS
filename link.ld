@@ -21,11 +21,11 @@ SECTIONS {
 	}
 	.data ALIGN (0x2000) : AT(ADDR(.data)-0xC0000000)
 	{
+		*(COMMON)
 		*(.data)
 	}
 	.bss ALIGN (0x2000) : AT(ADDR(.bss)-0xC0000000)
 	{
-		*(COMMON)
 		*(.bss)
 	}
 	kernel_end = .;

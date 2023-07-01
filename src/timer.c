@@ -12,6 +12,7 @@ void delay(uint32_t msec){
 }
 
 void init_timer(uint32_t frequency){
+    IRQ_OFF;
     uint32_t divisor = 1193180 / frequency;
     uint8_t l = (uint8_t)(divisor & 0xFF);
     uint8_t h = (uint8_t)((divisor >> 8) & 0xFF);
@@ -21,7 +22,9 @@ void init_timer(uint32_t frequency){
     timer_freq = frequency;
     interrupt_add_handle(32, &timer_callback);
     IRQ_clear_mask(0);
-    printk("[Timer] Initialized at %xhz\n", frequency);
+    print_serial("[Timer] Initialized at %x hz\n", frequency);
+    printk("[Timer] Initialized at %d hz\n", frequency);
+    IRQ_RES;
 }
 
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){

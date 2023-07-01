@@ -1,5 +1,4 @@
 #include "console.h"
-#include "window_manager.h"
 
 void initialize_console(uint32_t width, uint32_t height){
     print_serial("Console Init! %x x %x\n", width, height);
@@ -36,7 +35,6 @@ void console_putScreen(){
         }
     }
     console_last_line = consoleLine-1;
-    if(use_window) request_redraw();
 }
 
 void console_fullPut(){
@@ -378,15 +376,6 @@ void console_clear(){
 
 struct window* console_window;
 uint32_t console_window_buf[8*ConsoleWindowWidth*8*ConsoleWindowHeight*sizeof(uint32_t)];
-
-void console_addWindow(){
-    console_clear();
-    console_width = ConsoleWindowWidth;
-    console_height = ConsoleWindowHeight;
-    console_window = create_window(console_width*8, console_height*8, console_window_buf);
-    console_window->screen_x = fb_width-((console_width + 2)*8);
-    console_fb = console_window->window_buf;
-}
 
 void console_wipebuf(){
     memset(console_fb, 0, sizeof(uint32_t) * (8*console_width)*(8*console_height));

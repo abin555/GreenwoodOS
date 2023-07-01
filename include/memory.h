@@ -7,7 +7,7 @@
 #include "paging.h"
 #include "serial.h"
 
-#define HEAP_SIZE 0x100000
+#define HEAP_NUMBER_OF_BLOCKS 0x1000
 
 uint32_t MEMORY_USED;
 uint32_t HEAP_BEGIN;
@@ -18,9 +18,11 @@ typedef struct alloc_t{
     uint8_t status;
 } alloc_t;
 
+uint8_t HEAP_ALLOC_TABLE[HEAP_NUMBER_OF_BLOCKS / 8];
+
 void memcpy(void* source, void* target, uint32_t size);
 
-void memset(void* target, uint32_t val, uint32_t size);
+void memset(void* target, int value, uint32_t size);
 unsigned int mgetSize(void *mem);
 
 void* malloc(unsigned int size);

@@ -1,8 +1,8 @@
 #include "multitasking.h"
 
 void multitask_init(){
-    console_clear();
-    fb_clear(0);
+    //console_clear();
+    //fb_clear(0);
     printk("[TASK] Init Multitasking\n");
     timer_attach(10, task_callback);
 }

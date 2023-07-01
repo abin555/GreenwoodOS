@@ -1,9 +1,9 @@
 #include "memory.h"
 
-uint32_t last_alloc = 0;
 uint32_t HEAP_BEGIN = 0;
 uint32_t HEAP_END = 0;
 uint32_t MEMORY_USED = 0;
+uint32_t HEAP_BLOCK_SIZE = 0x1;
 
 void memcpy(void* source, void* target, uint32_t size){
     asm volatile ("rep movsb"
@@ -16,75 +16,62 @@ void memcpy(void* source, void* target, uint32_t size){
     : "memory");
 }
 
-void memset(void* target, uint32_t val, uint32_t size){
-    print_serial("Memset: %x %x\n", (uint32_t) target, size);
-    while(size--){
-        *(char *)(target++) = (unsigned char) val;
+void memset(void* target, int value, uint32_t size){
+    uint8_t val = (uint8_t)(value & 0xFF);
+    uint8_t *dest = (uint8_t*)target;
+
+    uint32_t i = 0;
+    while(i < size){
+        dest[i] = val;
+        i++;
     }
 }
 
 void* malloc(unsigned int size){
-    if(!size) return 0;
-    
-    uint32_t mem = (uint32_t) HEAP_BEGIN;
+    uint32_t required_blocks = (size / HEAP_BLOCK_SIZE) + 1;
+    print_serial("Malloc for size 0x%x requiring 0x%x blocks\n", size, required_blocks);
 
-    while((uint32_t) mem < HEAP_END){
-        alloc_t *a = (alloc_t *) mem;
+    uint32_t count_consecutive_unused = 0;
+    uint32_t start_block_idx = 0;
+    bool start_set = false;
+    for(int block_idx = 0; block_idx < HEAP_NUMBER_OF_BLOCKS; block_idx++){
+        uint8_t block_entry_byte = HEAP_ALLOC_TABLE[block_idx / 8];
+        uint8_t block_entry = (block_entry_byte >> (block_idx % 8)) & 0b1;
+        if(block_entry == 0){
+            if(!start_set){
+                start_block_idx = block_idx;
+                start_set = true;
+            }
+            count_consecutive_unused++;
+        }
+        else if(block_entry == 1){
+            count_consecutive_unused = 0;
+            start_set = false;
+        }
 
-        if(!a->size && !a->status){//If there is not an allocation at this location, goto the not allocated label
-            goto notallocated;
+        if(count_consecutive_unused == required_blocks){
+            print_serial("Found consecutive blocks starting at idx 0x%x\n", start_block_idx);
+            break; 
         }
-        if(a->status){//If status is defined, the allocation segment is in use.
-            mem += a->size;//move up to the size of the segment
-            mem += sizeof(alloc_t);//add the size of the info table
-            //mem += 4;//add four?
-            continue; //move on to next try
-        }
-        
-        //In order to get to this point, there need to be an existing allocation region defined at *mem
-        //However, it cannot have the status flag enabled.
-        //Based on this, when a region is set and the region is not used, the region is reallocated.
-        
-        if(a->size == size){//Check if the available allocation region contains 
-            a->status = 1;//mark region as in use.;
-            memset((uint32_t *) mem + sizeof(alloc_t), 0, size); //clear requested & available region.
-            MEMORY_USED += size; //Increase counter of used memory
-            return (void *)((uint32_t) mem + sizeof(alloc_t));
-            //last_alloc = (uint32_t) mem;
-        } 
-        mem += a->size + sizeof(alloc_t);
-        continue;
     }
-    notallocated:;//Label for unallocated memory
-
-    if(last_alloc+size+sizeof(alloc_t) >= HEAP_END){//Check if the location of the last allocated block plus the size requested would be past the heap end
-        char error[] = "Out of HEAP memory";
-        fb_write_xy(error, sizeof(error), 0, 0, 0xFF0000, 0);
-        return 0;
+    for(uint32_t block_idx = start_block_idx; block_idx < start_block_idx+required_blocks; block_idx++){
+        uint8_t block_entry_byte = HEAP_ALLOC_TABLE[block_idx / 8];
+        //uint8_t block_entry_byte = 0x12;
+        block_entry_byte = (1 << (block_idx % 8)) | block_entry_byte;
+        HEAP_ALLOC_TABLE[(block_idx / 8)] = block_entry_byte;
+        //HEAP_ALLOC_TABLE[0] = 0xFF;
+        print_serial("Setting Table byte 0x%x at 0x%x to 0x%x 0x%x 0x%x\n", block_idx / 8, block_idx, block_entry_byte, (1 << (block_idx % 8)), HEAP_ALLOC_TABLE[block_idx / 8]);
     }
 
-    alloc_t *lalloc = (alloc_t *) last_alloc;//get data from last allocation
-    alloc_t *alloc = (alloc_t *) last_alloc + ((lalloc->status) ? (lalloc->size + sizeof(alloc_t)) : 0);//create new allocation pointer based on last alloc
-    alloc->status = 1;//Set alloc to be used
-    alloc->size = size;//set size of allocation
+    uint32_t address = (start_block_idx * HEAP_BLOCK_SIZE) + HEAP_BEGIN;
+    print_serial("Malloc address is 0x%x\n", address);
 
-    //increase the location of the last alloc
-    last_alloc += size;
-    last_alloc += sizeof(alloc_t);
-    //last_alloc += 4;
-    //increase memory labeled as used
-    MEMORY_USED += size + sizeof(alloc_t);
-
-    //set memory in block
-	memset((void *)((uint32_t)alloc + sizeof(alloc_t)), 0, size);
-
-    //printHeap();
-    //return pointer
-	return (void *)((uint32_t)alloc + sizeof(alloc_t));
+    return (void*) address;
 }
 
 void free(void* memory){
-    
+    print_serial("Freeing Memory 0x%x\n", (uint32_t) memory);
+    memory++;
 }
 
 unsigned int mgetSize(void *mem){
@@ -98,21 +85,18 @@ void initialize_heap(uint32_t heap_begin, uint32_t heap_size){
         create_page_entry(heap_begin+(i*0x400000), heap_begin+(i*0x400000), 0x83);
     }
     fb_write_xy("HEAP PAGE! ", 11, 0, 0, 0xFFFFFF, 0);
-    last_alloc = heap_begin;
     HEAP_BEGIN = heap_begin;
     HEAP_END = HEAP_BEGIN + heap_size;
+    HEAP_BLOCK_SIZE = heap_size / HEAP_NUMBER_OF_BLOCKS;
+    print_serial("Heap block size is 0x%x with 0x%x blocks and 0x%x available memory\nMalloc Block table is 0x%x bytes at 0x%x\n", HEAP_BLOCK_SIZE, HEAP_NUMBER_OF_BLOCKS, heap_size, sizeof(HEAP_ALLOC_TABLE), &HEAP_ALLOC_TABLE);
     memset((char *) HEAP_BEGIN, 0, heap_size);
+    memset(HEAP_ALLOC_TABLE, 0, (HEAP_NUMBER_OF_BLOCKS / 8));
     fb_write_xy("HEAP READY ", 11, 0, 0, 0xFFFFFF, 0);
 }
 
 void mem_dump(){
-    uint32_t mem = (uint32_t) HEAP_BEGIN;
+    //uint32_t mem = (uint32_t) HEAP_BEGIN;
     printk("Kernel Heap Dump:\n");
     printk("_____MEM | _Address | ____Size | __Status\n");
-    while(mem < last_alloc){
-        alloc_t *a = (alloc_t *) mem;
-        //if(a->size == 0) break;
-        printk("%x   %x   %x   %x\n", mem, mem + sizeof(alloc_t), a->size, a->status);
-        mem = mem + a->size + sizeof(alloc_t);
-    }
+
 }

@@ -9,14 +9,12 @@
 #include "filesystem.h"
 #include "processes.h"
 #include "programs/editor.h"
-#include "programs/art.h"
 #include "programs/hex.h"
 #include "programs.h"
 #include "ISO9660.h"
 #include "utilities.h"
 #include "audio.h"
 #include "pcspk.h"
-#include "window_manager.h"
 #include "multitasking.h"
 
 char* terminal_buffer;

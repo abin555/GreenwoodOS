@@ -154,10 +154,6 @@ void terminal_parse(){
     else if(strcmp(terminal_buffer, "ed", 0) == 0){
         add_process(Editor, 2, atoi(1), atoi(2));
     }
-    else if(strcmp(terminal_buffer, "art", 0) == 0){
-        //add_process(Art, 0);
-        start_task(Art, -1, 0, "Art Program");
-    }
     else if(strcmp(terminal_buffer, "clear", 0) == 0){
         console_wipebuf();
         memset(consoleArray, 0, console_width*console_height);
@@ -374,18 +370,18 @@ void terminal_callback(){
             for(uint32_t i = 0; i < console_width; i++){
                 //fb_setChar(i, fb_terminal_h-1, terminal_buffer[i], 0xFFFFFF, 0);
                 if(i == terminal_buffer_index){
-                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0, 0xFFFFFF);
+                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-2, terminal_buffer[i], 0, 0xFFFFFF);
                 }
                 else{
-                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-1, terminal_buffer[i], 0xFFFFFF, 0);
+                    buf_setChar(console_fb, console_width, directory_namesize+i+1, console_height-2, terminal_buffer[i], 0xFFFFFF, 0);
                 }
             }
             directory_namesize = 0;
             while(FS_entries[active_directory].name[directory_namesize]){
-                buf_setChar(console_fb, console_width, directory_namesize, console_height-1, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
+                buf_setChar(console_fb, console_width, directory_namesize, console_height-2, FS_entries[active_directory].name[directory_namesize], 0xFFFFFF, 0);
                 directory_namesize++;
             }
-            buf_setChar(console_fb, console_width, directory_namesize, console_height-1, '>', 0xFFFFFF, 0);
+            buf_setChar(console_fb, console_width, directory_namesize, console_height-2, '>', 0xFFFFFF, 0);
 
             redraw_line_needed = false;
         }

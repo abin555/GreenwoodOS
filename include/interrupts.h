@@ -6,6 +6,7 @@
 #include "framebuffer.h"
 #include "pic.h"
 #include "console.h"
+#include "serial.h"
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 

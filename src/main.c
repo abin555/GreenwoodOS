@@ -24,51 +24,13 @@
 #include "drivers/audio/audio.h"
 #include "drivers/audio/pcspk.h"
 #include "drivers/audio/sb16.h"
-#include "window_manager.h"
 #include "multitasking.h"
+#include "window.h"
 
-uint32_t last_keycode_index;
-void sys_timer_callback(){
-    if(keyboard_KEYBUFFER_index != last_keycode_index){
-        last_keycode_index = keyboard_KEYBUFFER_index;
-        switch(keyboard_KEYBUFFER[keyboard_KEYBUFFER_index-1]){
-            case 0xC3:
-                audio_setEnable(!audio_muted);
-                break;
-            case 0xD8:
-                if(!audio_muted){
-                    play_sound(1000);
-                    for(int i = 0; i < 40000000; i++){}
-                    mute();
-                }
-                break;
-        }
-    }
-}
-
-void subfunction(int task, int val){
-    for(int i = 0; i < val; i++){
-        delay(50);
-        printk("Task %d Subfunction %d\n", task, i);
-    }
-}
-
-void test_task1(){
-    subfunction(1,5);
-    for(int i = 0; i < 10; i++){
-        delay(10);
-        printk("Task 1 %d\n", i);
-    }
-    printk("Task 1: This should, God willing End\n");
-}
-
-void test_task2(){
-    for(int i = 0; i < 5; i++){
-        delay(10);
-        printk("Task 2 %d\n", i);
-    }
-    subfunction(2, 5);
-    printk("Task 2 End?\n");
+void test_window(){
+    char window_name[16] = "Test Window\0";
+    struct window *win = create_window(window_name);
+    memset(win->buffer, 0xAAFFAA, WINDOW_ALLOC_WIDTH*WINDOW_ALLOC_HEIGHT);
 }
 
 int kmain(unsigned long magic, unsigned long magic_addr){    
@@ -90,7 +52,7 @@ int kmain(unsigned long magic, unsigned long magic_addr){
         case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
         {
             struct multiboot_tag_framebuffer *tagfb = (struct multiboot_tag_framebuffer *)tag;
-            print_serial("Multiboot Address: 0x%x \nFramebuffer Address: 0x%x\0", (unsigned int) magic_addr, tagfb->common.framebuffer_addr);
+            print_serial("Multiboot Address: 0x%x \nFramebuffer Address: 0x%x\n", (unsigned int) magic_addr, tagfb->common.framebuffer_addr);
             init_framebuffer(tagfb);
             break;
         }
@@ -102,24 +64,19 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     init_paging();
     fb_setChar(1,1, 'R', 0x00FFFF, 0);
     fb_setChar(1,2, '?', 0, 0xFFFFFF);
-    initialize_heap(0x06000000, 0x400000);
-    //init_backbuffer();
+    initialize_heap(0x06000000, 0xC00000);
+    
     initialize_console(fb_terminal_w,fb_terminal_h);
-    printk("Work?\n");
-    return 0;
 
     //mem_dump();
     init_backbuffer();
     dump_page_map();
-    //mem_dump();
-    //return 0;
-    init_ps2();
-    init_timer(1000);
 
+    //init_ps2();
+    init_timer(1000);
+    //return 0;
     initialize_ps2_keyboard(0);
     initialize_ps2_mouse(0);
-    
-    
     
     init_filesystem();
 
@@ -134,28 +91,14 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     
     ready_filesystem();
     
-    audio_init();
+    //audio_init();
     init_mouse();
-    
-    timer_attach(100, sys_timer_callback);
+
     init_program_memory();
 
-    //asm("cli");
-    //asm("hlt");
-      
-
-    //delay(2000);
-    use_window = true;
-    if(use_window){
-        init_window_manager(10);
-        console_addWindow();
-        printk("Window Manager Init!\n");
-        //timer_attach(10, draw_screen);
-    }
-
-    start_task(test_task1, -1, 0, "TestTask1");
-    start_task(test_task2, -1, 0, "TestTask2");
     init_terminal();
+    start_window_mgr();
+    start_task(test_window, -1, 0, "TestWin");
     multitask_init();  
 
     while(1){}

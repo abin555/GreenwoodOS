@@ -18,7 +18,6 @@ OBJECTS = \
 		programs/terminal.o \
 		src/processes.o \
 		programs/editor.o \
-		programs/art.o \
 		src/paging.o \
 		src/paging_asm.o \
 		src/program_region.o \
@@ -42,12 +41,12 @@ OBJECTS = \
 		src/drivers/audio/sb16.o \
 		src/drivers/usb/USB.o \
 		src/drivers/usb/ehci.o \
-		src/window_manager.o \
 		src/multitasking.o \
-		src/math.o
+		src/math.o \
+		src/window.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -O0 -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
@@ -83,7 +82,7 @@ emulate:
 clean:8535
 	rm -rf src/*.o src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
 cleanup:
-	rm -rf src/*.o src/*.i src/main.s *\~
+	rm -rf src/*.o src/*.i src/main.s *\~ src/*/*.o ./*/*.o
 build: os.iso transfer-compiled debug make_fs
 debug: build
 	objcopy --only-keep-debug kernel.elf kernel.sym

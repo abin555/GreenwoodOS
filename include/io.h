@@ -39,4 +39,6 @@ extern void normal_setds();
 void set_program_segment();
 void set_kernel_segment();
 
+void reboot();
+
 #endif
