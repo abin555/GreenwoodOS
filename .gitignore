@@ -15,3 +15,4 @@ GreenwoodOS.img
 serial.log
 *.o
 *.o
+kernel.elf
