@@ -102,7 +102,5 @@ int kmain(unsigned long magic, unsigned long magic_addr){
     multitask_init();  
 
     while(1){}
-
-    asm("hlt");
     return 0;
 }
