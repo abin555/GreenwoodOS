@@ -2,48 +2,7 @@ OBJECTS = \
 		src/boot.o \
 		src/main.o \
 		src/framebuffer.o \
-		src/interrupts.o \
-		src/pic.o \
-		src/io.o \
-		src/memory.o \
-		src/drivers/console.o \
-		src/drivers/ps2.o \
-		src/drivers/keyboard.o \
-		src/drivers/pci.o \
-		src/timer.o \
-		src/drivers/ahci.o \
-		src/drivers/filesystem.o \
-		src/drivers/drivers.o \
-		src/syscalls.o \
-		programs/terminal.o \
-		src/processes.o \
-		programs/editor.o \
-		src/paging.o \
-		src/paging_asm.o \
-		src/program_region.o \
-		src/programs.o \
-		src/processes_asm.o \
-		programs/hex.o \
-		src/multiboot.o \
-		src/gdt.o \
-		src/interrupts_asm.o \
-		src/io_asm.o \
-		src/serial.o \
-		programs/image.o \
-		src/drivers/FAT.o \
-		src/drivers/ISO9660.o \
-		src/drivers/cpu.o \
-		src/utilities.o \
-		src/drivers/mouse.o \
-		src/drivers/audio/intel_hda.o \
-		src/drivers/audio/audio.o \
-		src/drivers/audio/pcspk.o \
-		src/drivers/audio/sb16.o \
-		src/drivers/usb/USB.o \
-		src/drivers/usb/ehci.o \
-		src/multitasking.o \
-		src/math.o \
-		src/window.o
+		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -O0 -c
