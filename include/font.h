@@ -2,6 +2,9 @@
 #define FONT_H
 #include "stdint.h"
 
+#define CHAR_H 8
+#define CHAR_W 8
+
 // 8x8 font for ASCII 0..127
 static const uint8_t FONT[128][8] = {
     { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},   // U+0000 (nul)

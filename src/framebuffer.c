@@ -16,3 +16,11 @@ void fb_init(struct multiboot_tag_framebuffer* tagfb){
 void fb_setPixel(uint32_t idx, uint32_t color){
 	fb_frontbuffer[idx] = color;
 }
+
+void fb_putChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
+	for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            fb_frontbuffer[fb_width *(y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}
