@@ -34,9 +34,5 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 	fb_init(fb);
 	//fb_setPixel(10, 0xFFFFFF);
 
-	for(uint32_t i = 0; i < fb_width * fb_height; i+=6){
-		fb_setPixel(i, 0xFFFFFF);
-	}
-
 	return 0;
 }
