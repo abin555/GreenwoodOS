@@ -1,7 +1,15 @@
 OBJECTS = \
+		src/multiboot.o \
 		src/boot.o \
 		src/main.o \
 		src/framebuffer.o \
+		src/serial.o \
+		src/io.o \
+		src/io_asm.o \
+		src/cpu.o \
+		src/gdt.o \
+		src/paging_asm.o \
+		src/paging.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
