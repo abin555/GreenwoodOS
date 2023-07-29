@@ -24,3 +24,11 @@ void fb_putChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
         }
     }
 }
+
+void fb_print(uint32_t x, uint32_t y, char *str){
+    int i = 0;
+    while(str[i] != '\0'){
+        fb_putChar(x + i*CHAR_W, y, str[i], 0xFFFFFF, 0);
+        i++;
+    }
+}

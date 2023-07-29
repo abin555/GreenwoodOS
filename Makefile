@@ -9,7 +9,9 @@ OBJECTS = \
 		src/cpu.o \
 		src/gdt.o \
 		src/paging_asm.o \
-		src/paging.o
+		src/paging.o \
+		src/interrupts.o \
+		src/interrupt_asm.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

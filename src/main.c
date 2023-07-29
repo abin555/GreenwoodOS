@@ -2,6 +2,7 @@
 #include "framebuffer.h"
 #include "serial.h"
 #include "paging.h"
+#include "interrupts.h"
 
 int kmain(unsigned int magic, unsigned long magic_addr){
 	init_serial();
@@ -30,13 +31,15 @@ int kmain(unsigned int magic, unsigned long magic_addr){
         }
     }
 	load_gdt();
+    interrupts_install_idt();
 	page_init();
 	fb_init(fb);
 
-    //fb_putChar(0, 1, 'A', 0xFFFFFF, 0);
-    //fb_putChar(8, 1, 'B', 0xFFFFFF, 0);
-    for(int i = 0; i < 128; i++){
-        fb_putChar(i*8, 1, i, 0xFFFFFF, 0);
+    fb_print(0, 0, "Bootup Start");
+    fb_print(0,CHAR_H, "Interrupts Loaded");
+
+    while(1){
+
     }
 	//fb_setPixel(10, 0xFFFFFF);
 
