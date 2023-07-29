@@ -6,6 +6,21 @@ struct IDT idt;
 unsigned int BUFFER_COUNT;
 struct cpu_state (*interrupt_handlers[0xFF])(struct cpu_state, struct stack_state);
 
+
+void pic_remap(int offset1, int offset2){
+    outb(0x20, 0x11);
+	outb(0xA0, 0x11);
+	outb(0x21, offset1);
+	outb(0xA1, offset2);
+	outb(0x21, 0x04);
+	outb(0xA1, 0x02);
+	outb(0x21, 0x01);
+	outb(0xA1, 0x01);
+	outb(0x21, 0xFF);
+	outb(0xA1, 0xFF);
+    asm("sti");    
+}
+
 void interrupt_add_handle(uint8_t interrupt, void* handler){
 	interrupt_handlers[interrupt] = handler;
 }
@@ -34,7 +49,7 @@ void interrupts_init_descriptor(int index, unsigned int address)
 void interrupts_install_idt()
 {
 	IRQ_OFF;
-	//pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
+	pic_remap(PIC_1_OFFSET, PIC_2_OFFSET);
 
 	interrupts_init_descriptor(0, (unsigned int) int_handler_0);
 	interrupts_init_descriptor(1, (unsigned int) int_handler_1);
@@ -76,9 +91,9 @@ void interrupts_install_idt()
 
 	interrupts_init_descriptor(128, (unsigned int) int_handler_128);
 
-	idt.address = (int) &idt_descriptors;
+	idt.address = (uint32_t) &idt_descriptors;
 	idt.size = sizeof(struct IDTDescriptor) * INTERRUPT_DESCRIPTOR_COUNT;
-
+	print_serial("Loading IDT at 0x%x of size %x\n", idt.address, idt.size);
 	load_idt((uint32_t) &idt);
 
 	IRQ_RES;

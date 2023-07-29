@@ -31,11 +31,11 @@ int kmain(unsigned int magic, unsigned long magic_addr){
         }
     }
 	load_gdt();
-    interrupts_install_idt();
 	page_init();
 	fb_init(fb);
 
     fb_print(0, 0, "Bootup Start");
+    interrupts_install_idt();
     fb_print(0,CHAR_H, "Interrupts Loaded");
 
     while(1){

@@ -7,6 +7,8 @@
 #include "serial.h"
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
+#define PIC_1_OFFSET 0x20
+#define PIC_2_OFFSET 0x28
 
 struct IDT{
     uint16_t size;
@@ -42,6 +44,7 @@ struct stack_state {
 	unsigned int eflags;
 } __attribute__((packed));
 
+void pic_remap(int offset1, int offset2);
 void irq_remap();
 void interrupts_init_desciptor(uint32_t index, uint32_t address);
 void interrupts_install_idt();
