@@ -25,6 +25,10 @@ uint32_t get_physical(uint32_t address){
     return value;
 }
 
+uint32_t get_virtual(uint32_t address){
+    return page_directory[get_page_index_from_addr(address)] & 0xFFC00000;
+}
+
 void create_page_entry(
 	uint32_t base_address,
 	uint32_t target_address,

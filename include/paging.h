@@ -6,6 +6,8 @@
 #include "io.h"
 #include "cpu.h"
 
+#define PAGE_SIZE 0x400000
+
 extern void update_page();
 extern uint32_t boot_page_directory; 
 uint32_t get_page_index_from_addr(uint32_t address); 
@@ -23,6 +25,7 @@ static inline void __native_flush_tlb_single(unsigned long addr) {
 }
 
 uint32_t get_physical(uint32_t address);
+uint32_t get_virtual(uint32_t address);
 
 void set_PAT();
 

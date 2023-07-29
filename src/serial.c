@@ -94,6 +94,14 @@ int ser_printBinary(unsigned int data, int setlength){
     return 32;
 }
 
+void ser_printStr(char *str){
+  int i = 0;
+  while(str[i] != '\0'){
+    write_serial(str[i]);
+    i++;
+  }
+}
+
 int init_serial(){
     outb(PORT + 1, 0x00);    // Disable all interrupts
     outb(PORT + 3, 0x80);    // Enable DLAB (set baud rate divisor)
@@ -147,11 +155,14 @@ void print_serial(char str[], ...){
                 case 'x':
                     ser_printHex(va_arg(listpd, unsigned int), 0);
                     break;
+                case 's':
+                    ser_printStr(va_arg(listpd, char*));
+                    break;
             }
         }
         else{
-            write_serial(str[i]);
             if(str[i] == 0) break;
+            write_serial(str[i]);
         }
         i++;
     }

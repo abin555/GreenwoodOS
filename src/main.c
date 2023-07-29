@@ -3,40 +3,28 @@
 #include "serial.h"
 #include "paging.h"
 #include "interrupts.h"
+#include "grub.h"
+#include "memory.h"
 
 int kmain(unsigned int magic, unsigned long magic_addr){
 	init_serial();
-	struct multiboot_tag *tag;
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
+        print_serial("WTF, not multiboot?!?!\nHow did we get here...\n:(\n");
         return 0xFF;
     }
-	struct multiboot_tag_framebuffer *fb;
+	parse_multiboot2(magic_addr);
     // size = *(unsigned *) magic_addr;
-    for (
-        tag = (struct multiboot_tag *)(magic_addr + 8);
-        tag->type != MULTIBOOT_TAG_TYPE_END;
-        tag = (struct multiboot_tag *)((multiboot_uint8_t *)tag + ((tag->size + 7) & ~7)))
-    {
-        switch (tag->type)
-        {
-        case MULTIBOOT_TAG_TYPE_FRAMEBUFFER:
-        {
-            struct multiboot_tag_framebuffer *tagfb = (struct multiboot_tag_framebuffer *)tag;
-            print_serial("Multiboot Address: 0x%x \nFramebuffer Address: 0x%x\n", (unsigned int) magic_addr, tagfb->common.framebuffer_addr);
-            //init_framebuffer(tagfb);
-			fb = tagfb;
-            break;
-        }
-        }
-    }
+    
 	load_gdt();
 	page_init();
-	fb_init(fb);
+	fb_init(GRUB_tagfb);
 
     fb_print(0, 0, "Bootup Start");
     interrupts_install_idt();
     fb_print(0,CHAR_H, "Interrupts Loaded");
+
+    MEM_populateRegion();
 
     while(1){
 
