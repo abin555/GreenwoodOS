@@ -1,10 +1,10 @@
 ;SECTION FOR I/O ASM INTERFACE
-global outb			;Make OUTB function global to C kernal
-outb:
-	mov al, [esp+8] ;Load contents of stack into lower A register | OUTPUT PORT
-	mov dx, [esp+4] ;Load contents of stack into lower B register | OUTPUT DATA
-	out dx, al 		;Send OUTPUT
-	ret				;Return to caller
+;global outb			;Make OUTB function global to C kernal
+;outb:
+;	mov al, [esp+8] ;Load contents of stack into lower A register | OUTPUT PORT
+;	mov dx, [esp+4] ;Load contents of stack into lower B register | OUTPUT DATA
+;	out dx, al 		;Send OUTPUT
+;	ret				;Return to caller
 
 global inb			;Make INB function global to C kernal
 inb:

@@ -44,6 +44,7 @@ higher_half:
 .loop:
 	jmp .loop
 
+
 section .data
 KERNEL_VIRTUAL_BASE equ 0xC0000000                  ; 3GB
 KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; Page directory index of kernel's 4MB PTE.

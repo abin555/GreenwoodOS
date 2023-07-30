@@ -10,3 +10,7 @@ uint32_t inportl(uint16_t portid)
 	asm volatile("in eax, dx":"=a"(ret):"d"(portid));
 	return ret;
 }
+
+void outb(uint16_t portid, uint8_t value){
+	asm volatile("out dx, al": :"d" (portid), "a" (value & 0xFF));
+}

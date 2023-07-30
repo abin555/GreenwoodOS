@@ -1,4 +1,4 @@
-qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
+qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -device ich9-intel-hda \
 -device hda-output,audiodev=snd0 \
 -audiodev alsa,id=snd0,out.frequency=48000,out.channels=2,out.format=s32 \

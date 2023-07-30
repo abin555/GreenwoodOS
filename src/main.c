@@ -7,6 +7,7 @@
 #include "memory.h"
 #include "allocator.h"
 #include "pci.h"
+#include "timer.h"
 
 int kmain(unsigned int magic, unsigned long magic_addr){
 	init_serial();
@@ -21,9 +22,11 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     
 	load_gdt();
     interrupts_install_idt();
+    getCPUVendorString();
+    enableSSE();
+    //asm("int 0x80");
 	page_init();
 
-    getCPUVendorString();
 
     set_PAT();
 
@@ -38,6 +41,14 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     MEM_printRegions();
 
     PCI_init();
+    timer_init(50);
+    print_serial("Did you make it???\n");
+    IDT_dump();
+    asm("int 0x80");
+
+    while(1){
+
+    }
 
 	return 0;
 }

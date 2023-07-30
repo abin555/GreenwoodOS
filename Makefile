@@ -15,7 +15,9 @@ OBJECTS = \
 		src/memory.o \
 		src/allocator.o \
 		src/grub.o \
-		src/pci.o
+		src/pci.o \
+		src/timer.o \
+		src/cpu_asm.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

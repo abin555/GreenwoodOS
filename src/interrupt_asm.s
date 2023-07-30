@@ -22,13 +22,14 @@ int_handler_%1:
 common_interrupt_handler:
 	;save registers
 	push esp
-	push ebp
 	push edi
 	push esi
+	push ebp
 	push edx
 	push ecx
 	push ebx
 	push eax
+
 
 	;Call C function handler
 	call interrupt_handler
@@ -38,39 +39,39 @@ common_interrupt_handler:
 	pop ebx
 	pop ecx
 	pop edx
+	pop ebp
 	pop esi
 	pop edi
-	pop ebp
 	pop esp
+
 
 	;restore stack pointer
 	add esp, 8
-	sti
 	;return the system
 	iret
 
-no_err_int 0
-no_err_int 1
-no_err_int 2
-no_err_int 3
-no_err_int 4
-no_err_int 5
-no_err_int 6
-no_err_int 7
+err_int_handler 0
+err_int_handler 1
+err_int_handler 2
+err_int_handler 3
+err_int_handler 4
+err_int_handler 5
+err_int_handler 6
+err_int_handler 7
 err_int_handler 8
-no_err_int 9
+err_int_handler 9
 err_int_handler 10
 err_int_handler 11
 err_int_handler 12
 err_int_handler 13 ; General Protection Fault
 err_int_handler 14
 no_err_int 15
-no_err_int 16
-no_err_int 17
-no_err_int 18
-no_err_int 19
-no_err_int 20
-no_err_int 21
+err_int_handler 16
+err_int_handler 17
+err_int_handler 18
+err_int_handler 19
+err_int_handler 20
+err_int_handler 21
 no_err_int 22
 no_err_int 23
 no_err_int 24

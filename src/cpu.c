@@ -48,3 +48,13 @@ void setMTRR_high(uint32_t register_address, uint32_t value){
     asm volatile("WRMSR");
 }
 
+void enableSSE(){
+    if(getCPUFeatures(CPUID_FEAT_EDX_SSE)/*SSE Feature*/){
+        print_serial("CPU Supports SSE!\n");
+        enableSSE_ASM();
+    }
+    else{
+        print_serial("CPU does not support SSE!\n");
+        asm("hlt");
+    }
+}
