@@ -25,5 +25,11 @@ struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), st
 	pic_acknowledge(32);
 	timer_ticks++;
 	//print_serial("[Timer] Tick\n");
+	if(timer_ticks % 2){
+		fb_putChar(5,5, '0', 0xAA0000, 0);
+	}
+	else{
+		fb_putChar(5,5, '*', 0x0000AA, 0);
+	}
 	return cpu;
 }

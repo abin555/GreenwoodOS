@@ -5,6 +5,7 @@
 #include "io.h"
 #include "interrupts.h"
 #include "serial.h"
+#include "framebuffer.h"
 
 struct timer_function{
     void (*attached_function)(void);

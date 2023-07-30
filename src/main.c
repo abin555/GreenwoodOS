@@ -41,7 +41,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     MEM_printRegions();
 
     PCI_init();
-    timer_init(50);
+    timer_init(0xFFFFFF);
     print_serial("Did you make it???\n");
     IDT_dump();
     asm("int 0x80");

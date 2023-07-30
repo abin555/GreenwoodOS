@@ -158,8 +158,6 @@ bool override_state_return = false;
 void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack){
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
-	print_serial("Interrupt 0x%x\n", interrupt);
-	//return;
 
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
