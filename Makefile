@@ -52,7 +52,7 @@ emulate:
 	$(CC) $(CFLAGS) $< -o $@
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
-clean:8535
+clean:
 	rm -rf src/*.o src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
 cleanup:
 	rm -rf src/*.o src/*.i src/main.s *\~ src/*/*.o ./*/*.o

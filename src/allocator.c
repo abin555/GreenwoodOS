@@ -12,7 +12,7 @@ void alloc_init(){
 }
 
 void *malloc(uint32_t size){
-	print_serial("[MALLOC] Alloc for size %x\n", size);
+	//print_serial("[MALLOC] Alloc for size %x\n", size);
 	struct ALLOC_TABLE *alloc_table = (struct ALLOC_TABLE *) alloc_base;
 	//Building initial head block
 	if(first_alloc){

@@ -13,6 +13,7 @@ void getCPUVendorString(){
     vendorString[1] = edx;
     vendorString[2] = ecx;
     //printk("CPUID: %s\n", vendorIDString);
+    print_serial("CPUID: %s\n", vendorIDString);
 }
 
 uint8_t getCPUFeatures(uint32_t feature){

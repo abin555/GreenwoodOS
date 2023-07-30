@@ -60,8 +60,6 @@ void interrupt_handler(
     unsigned int interrupt, 
     struct stack_state stack);  //add the number of the interrupt as an argument.
 
-void interrupt_add_handler(uint8_t interrupt, void* handler);
-
 extern void int_handler_0();
 extern void int_handler_1();
 extern void int_handler_2();

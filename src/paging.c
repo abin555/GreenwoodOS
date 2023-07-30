@@ -7,13 +7,16 @@ void page_init(){
 
 	//uint32_t *page_table = (uint32_t *) &boot_page_directory;
 	page_directory = (uint32_t *) &boot_page_directory;
+    interrupt_add_handle(14, page_error);
 
 	update_page();
+
 	print_serial("[Paging] Init Finished\n");
 }
 
 void page_error(){
-
+    print_serial("\nERROR: PAGE FAULT!\n");
+    asm("hlt");
 }
 
 uint32_t get_physical(uint32_t address){
