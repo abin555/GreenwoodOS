@@ -26,7 +26,13 @@ uint32_t get_physical(uint32_t address){
 }
 
 uint32_t get_virtual(uint32_t address){
-    return page_directory[get_page_index_from_addr(address)] & 0xFFC00000;
+    //return page_directory[get_page_index_from_addr(address)] & 0xFFC00000;
+    for(int i = 0; i < NUM_PAGES; i++){
+        if((page_directory[i] & 0xFFC00000) == address){
+            return (i << 22) | (address & ~0xFFC00000);
+        }
+    }
+    return 0;
 }
 
 void create_page_entry(
@@ -34,6 +40,7 @@ void create_page_entry(
 	uint32_t target_address,
 	uint16_t flag
 ){
+    print_serial("[Paging] Base: 0x%x Target 0x%x\n", base_address, target_address);
     page_directory[get_page_index_from_addr(target_address)] = ((base_address & 0xFFC00000) | flag);
 }
 

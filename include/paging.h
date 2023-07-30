@@ -7,6 +7,9 @@
 #include "cpu.h"
 
 #define PAGE_SIZE 0x400000
+#define NUM_PAGES 0x100000000 / PAGE_SIZE
+
+extern uint32_t *page_directory;
 
 extern void update_page();
 extern uint32_t boot_page_directory; 

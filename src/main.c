@@ -5,6 +5,7 @@
 #include "interrupts.h"
 #include "grub.h"
 #include "memory.h"
+#include "allocator.h"
 
 int kmain(unsigned int magic, unsigned long magic_addr){
 	init_serial();
@@ -18,13 +19,19 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     
 	load_gdt();
 	page_init();
+
+    MEM_populateRegions();
+
 	fb_init(GRUB_tagfb);
 
     fb_print(0, 0, "Bootup Start");
     interrupts_install_idt();
     fb_print(0,CHAR_H, "Interrupts Loaded");
 
-    MEM_populateRegion();
+    alloc_init();
+
+    MEM_printRegions();
+
 
     while(1){
 

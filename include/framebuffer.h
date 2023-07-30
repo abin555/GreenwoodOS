@@ -2,6 +2,7 @@
 #define FRAMEBUFFER_H
 
 #include "stdint.h"
+#include "memory.h"
 #include "paging.h"
 #include "multiboot.h"
 #include "font.h"

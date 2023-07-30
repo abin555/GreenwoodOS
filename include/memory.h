@@ -17,21 +17,26 @@ typedef enum {
 	SYSTEM = 4,
 	OTHER = 5,
 	PROGRAM = 6,
-	UNDEFINED = 7
+	UNDEFINED = 7,
+	FRAMEBUFFER = 8,
+	AVAILABLE = 9
 } MEMORY_REGION_TYPE;
 
 struct memory_region{
-	uint8_t exists : 1;
-	uint8_t available : 1;
+	uint8_t exists;
+	uint8_t available;
 	MEMORY_REGION_TYPE type;
 	uint32_t physical_addr;
 	uint32_t virtual_addr;
-	int region_group_parent_idx;
-	uint32_t region_group_size;
 };
 
-struct memory_region MEMORY_REGIONS[MEMORY_NUM_REGIONS];
+void memset(void *address, uint8_t value, uint32_t size);
+int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type);
+void MEM_populateRegions();
 
-void MEM_populateRegion();
+int MEM_findRegionIdx(uint32_t size);
+void MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type);
+
+void MEM_printRegions();
 
 #endif

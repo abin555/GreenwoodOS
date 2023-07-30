@@ -51,7 +51,7 @@ void parse_multiboot2(unsigned long magic_addr){
 				break;
 			}
 			default:
-				print_serial("Undefined Tag %x\n", tag->type);
+				print_serial("Tag ID: %x\n", tag->type);
 				break;
         }
     }
