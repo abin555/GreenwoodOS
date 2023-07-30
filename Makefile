@@ -14,7 +14,8 @@ OBJECTS = \
 		src/interrupt_asm.o \
 		src/memory.o \
 		src/allocator.o \
-		src/grub.o
+		src/grub.o \
+		src/pci.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
