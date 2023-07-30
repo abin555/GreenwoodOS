@@ -32,11 +32,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     MEM_printRegions();
 
-
-    while(1){
-
-    }
-	//fb_setPixel(10, 0xFFFFFF);
+    
 
 	return 0;
 }

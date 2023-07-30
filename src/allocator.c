@@ -12,15 +12,40 @@ void alloc_init(){
 }
 
 void *malloc(uint32_t size){
+	print_serial("[MALLOC] Alloc for size %x\n", size);
 	struct ALLOC_TABLE *alloc_table = (struct ALLOC_TABLE *) alloc_base;
+	//Building initial head block
 	if(first_alloc){
 		alloc_table->size = size;
 		alloc_table->next = NULL;
 		alloc_table->prev = NULL;
 		alloc_table->used = 1;
 		first_alloc = 0;
+		total_alloc += alloc_table->size + sizeof(struct ALLOC_TABLE);
 		return (void *) alloc_table + sizeof(struct ALLOC_TABLE);
 	}
-
-
+	//Going through previously occupied blocks.
+	while(alloc_table->next != NULL){
+		if(!alloc_table->next->used && alloc_table->next->size <= size){
+			alloc_table->next->used = 1;
+			total_alloc += alloc_table->size + sizeof(struct ALLOC_TABLE);
+			return (void *) alloc_table + sizeof(struct ALLOC_TABLE);
+		}
+		alloc_table = alloc_table->next;
+	}
+	//New Block Region
+	struct ALLOC_TABLE *new_alloc_table = (struct ALLOC_TABLE *) ((uint32_t) alloc_table + alloc_table->size + sizeof(struct ALLOC_TABLE));
+	if(
+		(uint32_t) new_alloc_table >= ((uint32_t) alloc_base + alloc_table_size) 
+		|| ((uint32_t) new_alloc_table + size + sizeof(struct ALLOC_TABLE)) >= ((uint32_t) alloc_base + alloc_table_size)
+	){
+		return NULL;
+	}
+	alloc_table->next = new_alloc_table;
+	new_alloc_table->size = size;
+	new_alloc_table->used = 1;
+	new_alloc_table->prev = alloc_table;
+	new_alloc_table->next = NULL;
+	total_alloc += new_alloc_table->size + sizeof(struct ALLOC_TABLE);
+	return (void *) (new_alloc_table + sizeof(struct ALLOC_TABLE));
 }

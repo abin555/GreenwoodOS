@@ -9,8 +9,8 @@
 
 struct ALLOC_TABLE{
 	uint32_t size;//Not including table header...
-	void *next;//Points to header of next block, NULL if end
-	void *prev;//Points to header of previous block, NULL if beginning
+	struct ALLOC_TABLE *next;//Points to header of next block, NULL if end
+	struct ALLOC_TABLE *prev;//Points to header of previous block, NULL if beginning
 	uint8_t used;
 };
 
