@@ -9,6 +9,7 @@
 #include "pci.h"
 #include "timer.h"
 
+
 int kmain(unsigned int magic, unsigned long magic_addr){
 	init_serial();
     print_serial("\n\nGreenwood OS Boot Start!\n");
@@ -41,10 +42,9 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     MEM_printRegions();
 
     PCI_init();
-    timer_init(0xFFFFFF);
-    print_serial("Did you make it???\n");
-    IDT_dump();
-    asm("int 0x80");
+    timer_init(0xFFF);
+
+    
 
     while(1){
 

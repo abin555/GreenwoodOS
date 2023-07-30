@@ -25,11 +25,16 @@ struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), st
 	pic_acknowledge(32);
 	timer_ticks++;
 	//print_serial("[Timer] Tick\n");
-	if(timer_ticks % 2){
-		fb_putChar(5,5, '0', 0xAA0000, 0);
-	}
-	else{
-		fb_putChar(5,5, '*', 0x0000AA, 0);
+	for(uint32_t i = 0; i < timer_attached_functions_num; i++){
+		if(timer_ticks % timer_attached_functions[i].divisor == 0){
+			timer_attached_functions[i].attached_function();
+		}
 	}
 	return cpu;
+}
+
+void timer_attach(int divisor, void *callback){
+	timer_attached_functions[timer_attached_functions_num].attached_function = callback;
+	timer_attached_functions[timer_attached_functions_num].divisor = divisor;
+	timer_attached_functions_num++;
 }
