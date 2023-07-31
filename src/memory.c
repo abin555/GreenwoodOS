@@ -100,7 +100,37 @@ void MEM_populateRegions(){
 void MEM_printRegions(){
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
 		if(MEMORY_REGIONS[i].exists && !MEMORY_REGIONS[i].available){
-			print_serial("[MEM] Region %x is type %x at PHYS: 0x%x VIRT: 0x%x\n", i, MEMORY_REGIONS[i].type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			char *type;
+			switch(MEMORY_REGIONS[i].type){
+				case KERNEL:
+					type = "KERNEL";
+					break;
+				case DRIVER:
+					type = "DRIVER";
+					break;
+				case ALLOC:
+					type = "ALLOC";
+					break;
+				case SYSTEM:
+					type = "SYSTEM";
+					break;
+				case OTHER:
+					type = "OTHER";
+					break;
+				case PROGRAM:
+					type = "PROGRAM";
+					break;
+				case UNDEFINED:
+					type = "UNDEFINED";
+					break;
+				case FRAMEBUFFER:
+					type = "FRAMEBUFFER";
+					break;
+				case AVAILABLE:
+					type = "AVAILABLE";
+					break;
+			}
+			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
 }

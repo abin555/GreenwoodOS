@@ -17,11 +17,14 @@ OBJECTS = \
 		src/grub.o \
 		src/pci.o \
 		src/timer.o \
-		src/cpu_asm.o
+		src/cpu_asm.o \
+		src/ps2.o \
+		src/interfaces/keyboard.o \
+		src/multitasking.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/drivers -I./src/drivers/audio -I./src/drivers/usb -I. -masm=intel -g -O0 -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I. -masm=intel -g -O0 -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
@@ -64,9 +67,7 @@ debug: build
 	objcopy --strip-debug kernel.elf
 transfer-compiled:
 	rm -rf src/*.o
-	rm -rf src/drivers/*.o
-	rm -rf src/drivers/usb/*.o
-	rm -rf src/drivers/audio/*.o
+	rm -rf src/interfaces/*.o
 	rm -rf programs/*.o
 make_fs:
 	mkisofs -o ./filesystem.iso ./filesystem/
