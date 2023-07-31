@@ -62,6 +62,8 @@ struct PCI_driver{
 
 extern struct PCI_device *PCI_devices[50];
 extern struct PCI_driver *PCI_drivers[50];
+extern int PCI_numDevices;
+extern int PCI_numDrivers;
 
 void PCI_init();
 void PCI_probe();

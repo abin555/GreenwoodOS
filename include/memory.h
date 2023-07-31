@@ -35,7 +35,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 void MEM_populateRegions();
 
 int MEM_findRegionIdx(uint32_t size);
-void MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type);
+uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type);
 
 void MEM_printRegions();
 

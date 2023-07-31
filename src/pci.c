@@ -44,6 +44,8 @@ void PCI_probe(){
 	}
 }
 
+void initialize_AHCI(struct PCI_driver *driver);
+
 void PCI_initDevice(struct PCI_device *pdev){
 	print_serial("[PCI] Initializing Device %x:%x -> %x\n", pdev->vendorID, pdev->deviceID, pdev->class_code);
 	struct PCI_driver *pdriver;
@@ -59,7 +61,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 			print_serial("[PCI Device] AHCI Device Identified\n");
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "AHCI Device";
-			pdriver->init_driver = NULL;
+			pdriver->init_driver = initialize_AHCI;
 			goto generic_installation;
 			break;
 	}

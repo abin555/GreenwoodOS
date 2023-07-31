@@ -20,7 +20,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 			flag = 0x83;
 		break;
 	}
-	if(!MEMORY_REGIONS[idx].available && !MEMORY_REGIONS[idx].exists && type != FRAMEBUFFER) return -1;
+	//if(!MEMORY_REGIONS[idx].available && !MEMORY_REGIONS[idx].exists && type != FRAMEBUFFER) return -1;
 	MEMORY_REGIONS[idx].exists = 1;
 	MEMORY_REGIONS[idx].available = 0;
 	MEMORY_REGIONS[idx].type = type;
@@ -103,31 +103,31 @@ void MEM_printRegions(){
 			char *type;
 			switch(MEMORY_REGIONS[i].type){
 				case KERNEL:
-					type = "KERNEL";
+					type = "  KERNEL   ";
 					break;
 				case DRIVER:
-					type = "DRIVER";
+					type = "  DRIVER   ";
 					break;
 				case ALLOC:
-					type = "ALLOC";
+					type = "  ALLOC    ";
 					break;
 				case SYSTEM:
-					type = "SYSTEM";
+					type = "  SYSTEM   ";
 					break;
 				case OTHER:
-					type = "OTHER";
+					type = "  OTHER    ";
 					break;
 				case PROGRAM:
-					type = "PROGRAM";
+					type = "  PROGRAM  ";
 					break;
 				case UNDEFINED:
-					type = "UNDEFINED";
+					type = " UNDEFINED ";
 					break;
 				case FRAMEBUFFER:
 					type = "FRAMEBUFFER";
 					break;
 				case AVAILABLE:
-					type = "AVAILABLE";
+					type = " AVAILABLE ";
 					break;
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
@@ -165,10 +165,12 @@ int MEM_findRegionIdx(uint32_t size){
 	return -1;
 }
 
-void MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type){
+uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type){
 	uint32_t start_physical = idx * PAGE_SIZE;
 	int needed_blocks = calculateBlocks(size);
+	if(virtual_base == 0) virtual_base = start_physical;
 	for(int i = 0; i < needed_blocks; i++){
 		MEM_reserveRegion(start_physical + i * PAGE_SIZE, virtual_base + i * PAGE_SIZE, type);
 	}
+	return start_physical;
 }

@@ -11,6 +11,7 @@
 #include "ps2.h"
 #include "keyboard.h"
 #include "multitasking.h"
+#include "ahci.h"
 
 void kbd_test(){
     fb_putChar(8*CHAR_W, 8*CHAR_H, kbd_getChar(), 0xFFFFFF, 0);
@@ -44,6 +45,23 @@ int task_test2(){
     }
     print_serial("Exit Test Task 2\n");
     return 0;
+}
+
+void kernal_task(){
+    print_serial("Kernel Continuing Boot\n");
+
+    print_serial("[Driver] Initializing Drivers\n");
+    for(int i = 0; i < PCI_numDrivers; i++){
+        if(PCI_drivers[i]->init_driver != NULL){
+            print_serial("[Driver] Init #%x\n", i);
+            PCI_drivers[i]->init_driver(PCI_drivers[i]);
+        }
+    }
+    MEM_printRegions();
+
+    while(1){
+
+    }
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
@@ -86,9 +104,10 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     timer_init(1000);
     timer_attach(10, kbd_test);
 
-    char *task_args[1] = {"Test"};
-    start_task(task_test, -1, 1, task_args, "Test");
-    start_task(task_test2, -1, 1, task_args, "Test");
+    //char *task_args[1] = {"Test"};
+    //start_task(task_test, -1, 1, task_args, "Test");
+    //start_task(task_test2, -1, 1, task_args, "Test");
+    start_task(kernal_task, -1, 0, NULL, "Kernel");
     multitask_init();
 
     while(1){

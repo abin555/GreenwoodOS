@@ -158,6 +158,9 @@ void print_serial(char str[], ...){
                 case 's':
                     ser_printStr(va_arg(listpd, char*));
                     break;
+                case 'c':
+                    write_serial(va_arg(listpd, int));
+                    break;
             }
         }
         else{

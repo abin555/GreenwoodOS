@@ -20,7 +20,8 @@ OBJECTS = \
 		src/cpu_asm.o \
 		src/ps2.o \
 		src/interfaces/keyboard.o \
-		src/multitasking.o
+		src/multitasking.o \
+		src/drivers/ahci.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
@@ -68,6 +69,7 @@ debug: build
 transfer-compiled:
 	rm -rf src/*.o
 	rm -rf src/interfaces/*.o
+	rm -rf src/drivers/*.o
 	rm -rf programs/*.o
 make_fs:
 	mkisofs -o ./filesystem.iso ./filesystem/

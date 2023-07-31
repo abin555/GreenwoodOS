@@ -8,6 +8,7 @@
 #include "font.h"
 
 extern uint32_t *fb_frontbuffer;
+extern uint32_t *fb_backbuffer;
 extern uint32_t fb_width;
 extern uint32_t fb_height;
 
