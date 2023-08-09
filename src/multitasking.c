@@ -6,6 +6,12 @@ void multitask_init(){
 }
 
 void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
+    if(name != NULL){
+        print_serial("[TASK] Added Task %s to queue\n", name);
+    }
+    else{
+        print_serial("[TASK] Added new Task to queue\n");
+    }
 	for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
             tasks[i].registers.eax = argc;
@@ -31,7 +37,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
     
             tasks[i].task_name = name;
 
-            print_serial("[TASK] Added to queue idx %2x\n", i);
+            print_serial("[TASK] Added to queue idx %x\n", i);
             tasks[i].slot_active = 1;
             break;
         }

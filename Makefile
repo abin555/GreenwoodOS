@@ -21,11 +21,11 @@ OBJECTS = \
 		src/ps2.o \
 		src/interfaces/keyboard.o \
 		src/multitasking.o \
-		src/drivers/ahci.o
-		
+		src/drivers/ahci.o \
+		src/drivers/drive.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I. -masm=intel -g -O0 -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -O0 -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf

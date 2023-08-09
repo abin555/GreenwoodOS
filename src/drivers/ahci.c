@@ -20,7 +20,7 @@
 #define HBA_PxCMD_FR    0x4000
 #define HBA_PxCMD_CR    0x8000
 
-#define AHCI_IRQ 10
+#define AHCI_IRQ 3
 
 int devicePortNums[32] = {0};
 
@@ -66,13 +66,14 @@ void initialize_AHCI(struct PCI_driver *driver){
 	));
     //interrupts_init_descriptor(driver->interrupt,(unsigned int) AHCI_Interrupt_Handler);
 	interrupt_add_handle(32+AHCI_IRQ, &AHCI_Interrupt_Handler);
+	IRQ_clear_mask(AHCI_IRQ);
 }
 
 void addSATA_Drive(HBA_PORT *port, int portno){
-	//addFileSystemDevice(FS_SATA_Device, "SATA DEVICE_____", (uint32_t *) port, AHCI_read, AHCI_write);
     Drive_PORTS[driveNUM] = port;
     devicePortNums[driveNUM] = portno;
     driveNUM++;
+	port->drive = drive_add(Drive_AHCI, (void *) port);
 }
 /*
 void addSATAPI_Drive(HBA_PORT *port, int portno){
