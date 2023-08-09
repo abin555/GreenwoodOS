@@ -73,7 +73,7 @@ void addSATA_Drive(HBA_PORT *port, int portno){
     Drive_PORTS[driveNUM] = port;
     devicePortNums[driveNUM] = portno;
     driveNUM++;
-	port->drive = drive_add(Drive_AHCI, (void *) port);
+	drive_add(Drive_AHCI, (void *) port);
 }
 /*
 void addSATAPI_Drive(HBA_PORT *port, int portno){
@@ -115,7 +115,7 @@ void probe_port(HBA_MEM *abar)
 			}
 			else
 			{
-				//print_serial("[AHCI Driver] No drive found at port %2h\n", i);
+				//print_serial("[AHCI Driver] No drive found at port %x\n", i);
 			}
 		}
  

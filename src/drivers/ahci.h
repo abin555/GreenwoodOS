@@ -272,8 +272,6 @@ typedef volatile struct tagHBA_PORT
 	uint32_t fbs;		// 0x40, FIS-based switch control
 	uint32_t rsv1[11];	// 0x44 ~ 0x6F, Reserved
 	uint32_t vendor[4];	// 0x70 ~ 0x7F, vendor specific
-
-	struct DRIVE *drive;
 } HBA_PORT;
 
 struct tagHBAMEM;
