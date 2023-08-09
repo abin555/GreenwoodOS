@@ -51,7 +51,8 @@ void kernal_task(){
         }
     }
     MEM_printRegions();
-    AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
+    //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
+    drive_read(drive_get('A'), (char *) fb_frontbuffer, 0, 1);
     while(1){
 
     }
