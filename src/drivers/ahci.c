@@ -31,10 +31,10 @@ void initialize_AHCI(struct PCI_driver *driver){
 	//create_page_entry(AHCI_BASE, AHCI_BASE, 0x83);
 	//create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000, 0x83);
 	//create_page_entry((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], 0x83);
-	int blockIDX = MEM_findRegionIdx(0x800000);
+	int blockIDX = MEM_findRegionIdx(0x400000);
 	//MEM_reserveRegion(AHCI_BASE, AHCI_BASE, DRIVER);
 	//MEM_reserveRegion(AHCI_BASE+0x400000, AHCI_BASE+0x400000, DRIVER);
-	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x800000, 0, DRIVER);//Identity Map AHCI_BASE
+	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x400000, 0, DRIVER);//Identity Map AHCI_BASE
 	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
 
     print_serial("[AHCI Driver] AHCI Driver 0x%x BAR: 0x%x INT: 0x%x\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);

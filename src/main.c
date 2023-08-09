@@ -15,7 +15,7 @@
 #include "drive.h"
 
 void kbd_test(){
-    fb_putChar(8*CHAR_W, 8*CHAR_H, kbd_getChar(), 0xFFFFFF, 0);
+    fb_putChar(fb_width-CHAR_W, CHAR_H, kbd_getChar(), 0xFFFFFF, 0);
 }
 
 
@@ -30,11 +30,12 @@ int task_test(){
             test_switch = 1;
             fb_putChar(fb_width-CHAR_W, 0, 'X', 0xFFFFFF, 0);
         }
-        for(int i = 0; i < 10000; i++){
+        for(int i = 0; i < 0xFFFFF; i++){
             asm("nop");
             asm("nop");
             asm("nop");
         }
+        kbd_test();
     }
 }
 
@@ -99,7 +100,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     start_task(task_test, -1, 0, NULL, "Debug");
     start_task(kernal_task, -1, 0, NULL, "Kernel");
-    print_serial("[Are we here?]\n");
     multitask_init();
 
     while(1){
