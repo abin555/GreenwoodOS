@@ -3,6 +3,7 @@
 
 //#include "stdlib.h"
 #include "allocator.h"
+#include "serial.h"
 #include "ahci.h"
 
 

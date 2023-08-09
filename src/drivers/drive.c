@@ -31,6 +31,7 @@ int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_s
 	if(drive == NULL || buf == NULL)
 		return -1;
 	
+	if(drive->locked) print_serial("[DRIVE] Drive %c is locked\n", drive->identity);
 	while(drive->locked || !drive->ready);
 
 	drive->locked = 1;
@@ -40,8 +41,11 @@ int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_s
 	switch(drive->type){
 		case Drive_AHCI:
 			err = AHCI_read((volatile HBA_PORT *) drive->driver.ahci, (sector && 0xFFFFFFFF), (sector >> 32), count_sectors, (uint16_t *) buf);
+			while(((volatile HBA_PORT *) drive->driver.ahci)->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)){}
 		break;
 	}
+
+
 
 	drive->locked = 0;
 	return err;
