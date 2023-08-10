@@ -15,28 +15,9 @@
 #include "drive.h"
 
 void kbd_test(){
-    fb_putChar(fb_width-CHAR_W, CHAR_H, kbd_getChar(), 0xFFFFFF, 0);
-}
-
-
-int test_switch = 1;
-int task_test(){
-    while(1){
-        if(test_switch){
-            test_switch = 0;
-            fb_putChar(fb_width-CHAR_W, 0, '@', 0xFFFFFF, 0);
-        }
-        else{
-            test_switch = 1;
-            fb_putChar(fb_width-CHAR_W, 0, 'X', 0xFFFFFF, 0);
-        }
-        for(int i = 0; i < 0xFFFFF; i++){
-            asm("nop");
-            asm("nop");
-            asm("nop");
-        }
-        kbd_test();
-    }
+    char c = kbd_getChar();
+    if(!c) return;
+    fb_putChar(fb_width-CHAR_W, CHAR_H, c, 0xFFFFFF, 0);
 }
 
 void kernal_task(){
@@ -52,11 +33,10 @@ void kernal_task(){
         }
     }
     MEM_printRegions();
+    drive_enumerate();
     //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
-    for(int i = (0x10 * 2000); i < (0x20 * 2000); i++){
-        drive_read(drive_get('A'), ((char *) fb_frontbuffer) + (512 * (i - (0x10 * 2000))), i, 1);
-        //for(int i = 0; i < 0xFFFF; i++){}
-    }
+    
+
     while(1){
 
     }
@@ -101,7 +81,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     timer_init(1000);
 
-    start_task(task_test, -1, 0, NULL, "Debug");
     start_task(kernal_task, -1, 0, NULL, "Kernel");
     multitask_init();
 

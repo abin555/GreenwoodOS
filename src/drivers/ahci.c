@@ -16,6 +16,7 @@ void initialize_AHCI(struct PCI_driver *driver){
 	//MEM_reserveRegion(AHCI_BASE+0x400000, AHCI_BASE+0x400000, DRIVER);
 	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x400000, 0, DRIVER);//Identity Map AHCI_BASE
 	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
+	MEM_reserveRegion((uint32_t) driver->BAR[5]+0x400000, (uint32_t) driver->BAR[5]+0x400000, DRIVER);
 
     print_serial("[AHCI Driver] AHCI Driver 0x%x BAR: 0x%x INT: 0x%x\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
     ABAR = (volatile HBA_MEM *)driver->BAR[5];

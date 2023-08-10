@@ -5,6 +5,7 @@
 #include "allocator.h"
 #include "serial.h"
 #include "ahci.h"
+#include "FAT32.h"
 
 
 #define DRIVE_NUM 20
@@ -17,6 +18,17 @@ struct DRIVE{
 		struct HBA_PORT *ahci;
 	} driver;
 
+	enum{
+		FAT32,
+		FAT16,
+		FAT12,
+		exFAT,
+		ISO9660,
+		RAW
+	} format;
+	union{
+		struct FAT32 *fat32;
+	} format_info;
 	bool locked;
 	bool ready;
 	char identity;
@@ -24,8 +36,12 @@ struct DRIVE{
 
 extern struct DRIVE **drives;
 extern int drive_count;
+extern char *drive_sector_buf;
 
 void init_drive_system();
+void drive_enumerate();
+
+void drive_get_format(struct DRIVE *drive);
 
 struct DRIVE *drive_add(int type, void *driver);
 

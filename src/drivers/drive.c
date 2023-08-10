@@ -2,9 +2,12 @@
 
 int drive_count;
 struct DRIVE **drives;
+char *drive_sector_buf;
 
 void init_drive_system(){
+	print_serial("[DRIVE SYS] INIT\n");
 	drives = malloc(sizeof(struct DRIVE **) * DRIVE_NUM);
+	drive_sector_buf = malloc(512);
 	drive_count = 0;
 }
 
@@ -31,7 +34,7 @@ int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_s
 	if(drive == NULL || buf == NULL)
 		return -1;
 	
-	if(drive->locked) print_serial("[DRIVE] Drive %c is locked\n", drive->identity);
+	if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
 	while(drive->locked || !drive->ready);
 
 	drive->locked = 1;
@@ -58,4 +61,22 @@ struct DRIVE *drive_get(char identity){
 		if(drive->identity == identity) return drive;
 	}
 	return NULL;
+}
+
+void drive_get_format(struct DRIVE *drive){
+	print_serial("[DRIVE SYS] Checking Format\n");
+	if(FAT_check_format(drive)){
+		drive->format = FAT32;
+		return;
+	}
+
+	drive->format = RAW;
+	return;
+}
+
+void drive_enumerate(){
+	print_serial("[DRIVE SYS] Enumerating Drives\n");
+	for(int i = 0; i < drive_count; i++){
+		drive_get_format(drives[i]);
+	}
 }
