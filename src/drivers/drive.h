@@ -6,6 +6,7 @@
 #include "serial.h"
 #include "ahci.h"
 #include "FAT32.h"
+#include "ISO9660.h"
 
 
 #define DRIVE_NUM 20
@@ -28,6 +29,7 @@ struct DRIVE{
 	} format;
 	union{
 		struct FAT32 *fat32;
+		struct ISO9660 *ISO;
 	} format_info;
 	bool locked;
 	bool ready;

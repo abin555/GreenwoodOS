@@ -23,7 +23,8 @@ OBJECTS = \
 		src/multitasking.o \
 		src/drivers/ahci.o \
 		src/drivers/drive.o \
-		src/drivers/FAT32.o
+		src/drivers/FAT32.o \
+		src/drivers/ISO9660.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -O0 -c
@@ -64,7 +65,7 @@ clean:
 cleanup:
 	rm -rf src/*.o src/*.i src/main.s *\~ src/*/*.o ./*/*.o
 build: os.iso transfer-compiled debug #make_fs
-debug: build
+debug: build make_fs
 	objcopy --only-keep-debug kernel.elf kernel.sym
 	objcopy --strip-debug kernel.elf
 transfer-compiled:
@@ -73,8 +74,8 @@ transfer-compiled:
 	rm -rf src/drivers/*.o
 	rm -rf programs/*.o
 make_fs:
-	#mkisofs -o ./filesystem.iso ./filesystem/
-	dd if=/dev/zero of=filesystem.iso bs=1024 count=1024000
-	mkfs.vfat filesystem.iso
-	mcopy -i ./filesystem.iso ./filesystem/* ::.
+	mkisofs -o ./filesystem.iso ./filesystem/
+	#dd if=/dev/zero of=filesystem.iso bs=1024 count=1024000
+	#mkfs.vfat filesystem.iso
+	#mcopy -v ./filesystem/* ./filesystem.iso
 

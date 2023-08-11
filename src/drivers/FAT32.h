@@ -3,6 +3,7 @@
 
 #include "drive.h"
 #include "allocator.h"
+#include "serial.h"
 
 struct DRIVE;
 
@@ -75,7 +76,23 @@ struct FAT32{
 	uint32_t first_fat_sector;
 	uint32_t data_sectors;
 	uint32_t total_clusters;
+	uint32_t first_root_dir_sector_num;
 };
+
+struct FAT32_dir_ent{
+	char name[11];
+	uint8_t attributes;
+	uint8_t NTRes;
+	uint8_t time_created_tenth;
+	uint16_t time_created;
+	uint16_t date_created;
+	uint16_t date_last_access;
+	uint16_t first_cluster_high;
+	uint16_t time_write;
+	uint16_t date_write;
+	uint16_t first_cluster_low;
+	uint32_t file_size;
+}__attribute__((packed));
 
 struct FAT_dir{
 	uint32_t sector;
@@ -85,7 +102,7 @@ struct FAT_dir{
 	uint32_t start_sector;
 	uint32_t size;
 
-	struct FAT32_t *volume;
+	struct FAT32 *volume;
 };
 
 struct FAT_file{
@@ -96,9 +113,10 @@ struct FAT_file{
 	uint32_t start_sector;
 	uint32_t global_offset;
 	
-	struct FAT32_t *volume;
+	struct FAT32 *volume;
 };
 
 int FAT_check_format(struct DRIVE *drive);
+void fat32_print_dir_sector_info(struct DRIVE *drive, uint32_t sector);
 
 #endif

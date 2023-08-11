@@ -43,7 +43,8 @@ int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_s
 
 	switch(drive->type){
 		case Drive_AHCI:
-			err = AHCI_read((volatile HBA_PORT *) drive->driver.ahci, (sector && 0xFFFFFFFF), (sector >> 32), count_sectors, (uint16_t *) buf);
+			//print_serial("[DRIVE SYS] Reading Drive %c at sector %d for %d sectors\n", drive->identity, sector, count_sectors);
+			err = AHCI_read((volatile HBA_PORT *) drive->driver.ahci, sector, 0, count_sectors, (uint16_t *) buf);
 			while(((volatile HBA_PORT *) drive->driver.ahci)->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)){}
 		break;
 	}
@@ -67,6 +68,10 @@ void drive_get_format(struct DRIVE *drive){
 	print_serial("[DRIVE SYS] Checking Format\n");
 	if(FAT_check_format(drive)){
 		drive->format = FAT32;
+		return;
+	}
+	else if(ISO9660_check_format(drive)){
+		drive->format = ISO9660;
 		return;
 	}
 

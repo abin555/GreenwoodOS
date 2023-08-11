@@ -22,6 +22,7 @@ void kbd_test(){
 
 void kernal_task(){
     print_serial("Kernel Continuing Boot\n");
+    fb_print(0, 8, "Kernal Tasking!");
 
     init_drive_system();
 
@@ -34,8 +35,8 @@ void kernal_task(){
     }
     MEM_printRegions();
     drive_enumerate();
-    //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
     
+    //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
 
     while(1){
 

@@ -12,9 +12,16 @@ void alloc_init(){
 }
 
 void *malloc(uint32_t size){
-	//print_serial("[MALLOC] Alloc for size %x\n", size);
+	size += 10;
+	print_serial("[MALLOC] Alloc for size %x Total Remaining: %x\n", size, alloc_table_size - total_alloc);
 	struct ALLOC_TABLE *alloc_table = (struct ALLOC_TABLE *) alloc_base;
 	//Building initial head block
+
+	if(total_alloc + size >= alloc_table_size){
+		print_serial("ERROR: Alloc Table Size is larger than available!\n");
+		return NULL;
+	}
+
 	if(first_alloc){
 		alloc_table->size = size;
 		alloc_table->next = NULL;
@@ -25,6 +32,7 @@ void *malloc(uint32_t size){
 		return (void *) alloc_table + sizeof(struct ALLOC_TABLE);
 	}
 	//Going through previously occupied blocks.
+	/*
 	while(alloc_table->next != NULL){
 		if(!alloc_table->next->used && alloc_table->next->size <= size){
 			alloc_table->next->used = 1;
@@ -33,8 +41,10 @@ void *malloc(uint32_t size){
 		}
 		alloc_table = alloc_table->next;
 	}
+	*/
 	//New Block Region
-	struct ALLOC_TABLE *new_alloc_table = (struct ALLOC_TABLE *) ((uint32_t) alloc_table + alloc_table->size + sizeof(struct ALLOC_TABLE));
+	//struct ALLOC_TABLE *new_alloc_table = (struct ALLOC_TABLE *) ((uint32_t) alloc_table + alloc_table->size + sizeof(struct ALLOC_TABLE));
+	struct ALLOC_TABLE *new_alloc_table = (struct ALLOC_TABLE *) ((uint32_t) alloc_table + total_alloc);
 	if(
 		(uint32_t) new_alloc_table >= ((uint32_t) alloc_base + alloc_table_size) 
 		|| ((uint32_t) new_alloc_table + size + sizeof(struct ALLOC_TABLE)) >= ((uint32_t) alloc_base + alloc_table_size)

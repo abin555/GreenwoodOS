@@ -71,8 +71,24 @@ char quadToHex(uint8_t quad){
   return 'x';
 }
 
-int ser_printDecimal(unsigned int data, int setlength){
-    return data % setlength;
+int ser_printDecimal(int data){
+    int idx = 0;
+    int pow = 1;
+    if(data < 0){
+        write_serial('-');
+        idx++;
+        data *= -1;
+    }
+    while(pow * 10 <= data)
+        pow *= 10;
+    while(pow != 0){
+        int d = data / pow;
+        write_serial((char)((int)'0' + d));
+        data = data - d * pow;
+        pow /= 10;
+        idx++;
+    }
+    return idx;
 }
 
 int ser_printHex(unsigned int data, int setlength){
@@ -161,6 +177,8 @@ void print_serial(char str[], ...){
                 case 'c':
                     write_serial(va_arg(listpd, int));
                     break;
+                case 'd':
+                  ser_printDecimal(va_arg(listpd, int));
             }
         }
         else{
