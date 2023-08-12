@@ -113,7 +113,8 @@ struct ISO9660_FS_Entry{
 struct ISO9660{
 	struct DRIVE *drive;
 	char *buf;
-	struct ISO9660_FS_Entry root;
+	//struct ISO9660_FS_Entry root;
+    uint32_t root_directory_sector;
 };
 
 
@@ -122,4 +123,10 @@ uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector);
 int ISO9660_check_format(struct DRIVE *drive);
 void ISO9660_read_volume(struct ISO9660 *iso);
 void ISO9660_print_tree(struct ISO9660_FS_Entry *fs);
+uint32_t ISO9660_getDirectorySector(struct ISO9660 *iso, uint32_t dir_sector, char *folder);
+struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path);
+void ISO9660_printTree(struct ISO9660 *iso);
+int ISO9660_openFileName(struct ISO9660 *iso, char *name, char *buf, int buf_size);
+int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int buf_size);
+
 #endif

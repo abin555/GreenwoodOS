@@ -74,7 +74,7 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
 
     //Load next task's state
     if(new_task->program_slot != -1){
-        //select_program(new_task->program_slot);
+        select_program(new_task->program_slot);
     }
     override_state_return = true;
     most_recent_int_stack_state.eip = new_task->registers.eip;

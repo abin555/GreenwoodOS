@@ -41,115 +41,10 @@ int ISO9660_check_format(struct DRIVE *drive){
     }
 }
 
-void ISO9660_load_directory_table(struct ISO9660 *iso, struct ISO9660_FS_Entry *directory, uint32_t sector){
-	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, sector);
-
-	int count_children = 0;
-	struct ISO_Directory_Entry *walker = dir;
-	while(walker->length){
-		count_children++;
-		walker = (struct ISO_Directory_Entry *) (((uint8_t *) walker) + dir->length);
-		//print_serial("%x\n", 0x00000000 | walker->length);
-	}
-	//print_serial("[ISO] Directory %s has %d children Parent is 0x%x\n", directory->name, count_children, (uint32_t) directory);
-	
-	directory->num_children = count_children;
-	directory->children = malloc(sizeof(struct ISO9660_FS_Entry) * count_children);
-
-	int child_idx = 0;
-	while(dir->length != 0){
-		struct ISO9660_FS_Entry *new_entry = &directory->children[child_idx];
-		memset(new_entry, 0, sizeof(struct ISO9660_FS_Entry));
-		new_entry->parent = directory;
-		//print_serial("[ISO] Drive %c Directory Entry has length %d and name len %d\n", iso->drive->identity, dir->length, dir->name_len);
-		//print_serial("[ISO] LBA: %x Data Length: %x Flags: %x\n", *((uint32_t *) &dir->sector.le), dir->length, dir->flags);
-		if(dir->name_len == 1){
-			if(dir->name[0] == 0){
-				new_entry->type = Special;
-				//print_serial(".  (Current Dir)\n");
-				goto finish;
-			}
-			else if(dir->name[0] == 1){
-				new_entry->type = Special;
-				//print_serial(".. (Previous Dir)\n");
-				goto finish;
-			}
-		}/*
-		else{
-			for(int i = 0; i < dir->name_len; i++){
-				print_serial("%c", dir->name[i]);
-			}
-			print_serial(" - At Sector %d With Size %d\n", getLe32(dir->sector), getLe32(dir->size));
-		}*/
-		if(dir->flags == 2){//Create Folder
-			//print_serial("[ISO] Opening Directory\n");
-			memcpy(new_entry->name, dir->name, dir->name_len);
-			new_entry->type = Folder;
-			new_entry->sector = 0;
-			new_entry->size = 0;
-			new_entry->sector_count = 0;
-			new_entry->parent = directory;
-			ISO9660_load_directory_table(iso, new_entry, *((uint32_t *) &dir->sector.le));
-			ISO_read_sector(iso->drive, iso->buf, sector);
-			new_entry->type = Folder;
-			new_entry->parent = directory;
-			//print_serial("Parent is 0x%x\n", (uint32_t) new_entry->parent);
-			child_idx++;
-		}
-		else{//Create File
-			memcpy(new_entry->name, dir->name, dir->name_len-2);
-			print_serial("[ISO] Added: %s\n", new_entry->name);
-			new_entry->sector = getLe32(dir->sector);
-			new_entry->size = getLe32(dir->size);
-			new_entry->sector_count = (getLe32(dir->size) / (512 * 4)) + (getLe32(dir->size) % (512 * 4) == 0 ? 0 : 1);
-			new_entry->parent = directory;
-			new_entry->type = File;
-			child_idx++;
-		}
-		//print_serial("Added Type %d\n", directory->children[child_idx-1].type);
-		//directory->children[child_idx] = new_entry;
-		directory->num_children = child_idx;
-		new_entry->parent = directory;
-		finish:
-		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
-	}
-	//print_serial("[ISO] Exiting Directory\n");
-	return;
-}
-
 void ISO9660_read_volume(struct ISO9660 *iso){
 	print_serial("[ISO] Loading ISO9660 File Table from Drive %c\n", iso->drive->identity);
 	struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) ISO_read_sector(iso->drive, iso->buf, 0x10);
-	iso->root.name[0] = iso->drive->identity;
-	iso->root.name[1] = 0;
-	iso->root.type = Root;
-	iso->root.sector = getLe32(primary_vol->root_dir_ent.sector);
-	iso->root.size = 0;
-	iso->root.sector_count = 0;
-	iso->root.parent = NULL;
-	ISO9660_load_directory_table(iso, &iso->root, getLe32(primary_vol->root_dir_ent.sector));
-}
-
-void ISO9660_print_tree(struct ISO9660_FS_Entry *fs){
-	if(fs->type == Special || fs == NULL){
-		return;
-	}
-	//print_serial("Trying 0x%x\n", (uint32_t) fs);
-	struct ISO9660_FS_Entry *parent = fs->parent;
-	while(parent != NULL && (uint32_t) parent > 0xA0000000){
-		print_serial("	");
-		parent = parent->parent;
-	}
-	print_serial("%s @ 0x%x %d", fs->name, (uint32_t) fs, fs->type);
-	if(fs->type == File || fs->type == 106496){
-		print_serial(" Sector: %d Size: %d Sectors: %d", fs->sector, fs->size, fs->sector_count);
-	}
-	print_serial("\n");
-	if(!(fs->type == Root || (fs->type == Folder || fs->sector == 0))) return;
-	for(int i = 0; i < fs->num_children; i++){
-		ISO9660_print_tree(&fs->children[i]);
-	}
-	
+	iso->root_directory_sector = getLe32(primary_vol->root_dir_ent.sector);
 }
 
 int strcmp(const char *s1, const char *s2){
@@ -160,43 +55,177 @@ int strcmp(const char *s1, const char *s2){
 	return *(const unsigned char *)s1 - *(const unsigned char*)s2;
 }
 
-/*
-struct File ISO9660_OpenFile(char *path){
+void strprnt(char *s, int size){
+	for(int i = 0; i < size; i++){
+		print_serial("%c", s[i]);
+	}
+}
+
+//Returns Directory Entry sector that matches Input String
+uint32_t ISO9660_getDirectorySector(struct ISO9660 *iso, uint32_t dir_sector, char *folder){
+	if(dir_sector == 0){
+		return 0;
+	}
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, dir_sector);
+	print_serial("[ISO] Looking For %s\n", folder);
+	char tempbuf[20];
+	while(dir->length != 0){
+		memset(tempbuf, 0, sizeof(tempbuf));
+		if(dir->name_len == 1 && dir->name[0] == 0){
+			tempbuf[0] = '.';
+		}
+		else if(dir->name_len == 1 && dir->name[0] == 1){
+			tempbuf[0] = '.';
+			tempbuf[1] = '.';
+		}
+		else{
+			memcpy(tempbuf, dir->name, dir->name_len);
+		}		
+
+		print_serial("Entry: %s\n", tempbuf);
+
+		if(!(strcmp(tempbuf, folder))){
+			return getLe32(dir->sector);
+		}
+
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
+	}
+	return 0;
+}
+
+struct File_Info ISO9660_getFile(struct ISO9660 *iso, uint32_t dir_sector, char *file){
+	struct File_Info retFile = {0};
+	if(dir_sector == 0){
+		return retFile;
+	}
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, dir_sector);
+	char namebuf[20];
+	memset(namebuf, 0, sizeof(namebuf));
+	char tempbuf[20];
+	int namebuf_idx = 0;
+	while(file[namebuf_idx] != 0){
+		namebuf[namebuf_idx] = file[namebuf_idx];
+		namebuf_idx++;
+	}
+	namebuf[namebuf_idx] = ';';
+	namebuf[namebuf_idx+1] = '1';
+	print_serial("[ISO] Looking For %s\n", namebuf);
+	while(dir->length != 0){
+		memset(tempbuf, 0, sizeof(tempbuf));
+		if(dir->name_len == 1 && dir->name[0] == 0){
+			tempbuf[0] = '.';
+		}
+		else if(dir->name_len == 1 && dir->name[0] == 1){
+			tempbuf[0] = '.';
+			tempbuf[1] = '.';
+		}
+		else{
+			memcpy(tempbuf, dir->name, dir->name_len);
+		}	
+
+		if(!strcmp(tempbuf, namebuf)){
+			print_serial("Found %s\n", tempbuf);
+			goto foundFile;
+		}
+
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
+	}
+	return retFile;
+	foundFile:
+	retFile.drive = iso->drive;
+	retFile.sector = getLe32(dir->sector);
+	retFile.size = getLe32(dir->size);
+
+	return retFile;
+}
+
+
+struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path){
+	print_serial("[ISO] Opening %s\n", path);
+	struct File_Info retFile = {0};
 	char work_buf[20];
 	memset(work_buf, 0, 20);
-	struct Drive *drive;
+	struct DRIVE *drive = iso->drive;
 	int idx = 0;
 	int work_idx = 0;
-	//Determine which drive.
-	while(path[idx] != '\0' && path[idx] != '/'){
-		work_buf[work_idx] = path[idx];
-	}
-	work_idx = 0;
-	for(int i = 0; i < drive_count, i++){
-		if(work_buf[1] == 0 && work_buf[0] == drives[i]->identity){
-			drive = drives[i];
-			break;
-		}
-	}
+	print_serial("[ISO] Looking for %s on Drive %c\n", path, drive->identity);
 
-	bool foundFile = 0;
-	struct ISO9660_FS_Entry *walker = &drive->format_info.ISO->root;
-	while(!foundFile){
+	bool isFile = 0;
+	uint32_t dirSector = iso->root_directory_sector;
+	while(!isFile){
 		memset(work_buf, 0, 20);
 		while(path[idx] != '\0' && path[idx] != '/'){
 			work_buf[work_idx] = path[idx];
-		}
-		work_idx = 0;
-
-		for(int i = 0; i < walker->num_children; i++){
-			if(!strcmp(work_buf, walker->children[i].name)){
-				walker = &walker->children[i];
-				break;
+			idx++;
+			work_idx++;
+			if(path[idx] == '\0'){//Last entry on path should be a file, and thus the string is null terminated;
+				isFile = 1;
+				idx++;
+				//print_serial("This is a file %s\n", work_buf);
+				goto OpenFile;
 			}
 		}
-		continue;
-		finish_dirty:
-		return NULL;
+		idx++;
+		work_idx = 0;
+		print_serial("[ISO] Opening Folder %s\n", work_buf);
+		dirSector = ISO9660_getDirectorySector(iso, dirSector, work_buf);
+	}
+	OpenFile:
+	print_serial("[ISO] Looking for File %s\n", work_buf);
+	retFile = ISO9660_getFile(iso, dirSector, work_buf);
+	if(retFile.drive == NULL){
+		print_serial("[ISO] Error finding %s\n", path);
+		return retFile;
+	}
+	print_serial("Sector %x Size %d\n", retFile.sector, retFile.size);
+	return retFile;
+}
+
+void ISO9660_printTree_Recur(struct ISO9660 *iso, uint32_t directory_sector, int layer){
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, directory_sector);
+	char tempbuf[20];
+	while(dir->length != 0){
+		if(dir->name_len == 1 && (dir->name[0] == 0 || dir->name[0] == 1)){
+			goto skip;
+		}
+		for(int i = 0; i < layer; i++){
+			print_serial(" ");
+		}
+		memset(tempbuf, 0, sizeof(tempbuf));
+		memcpy(tempbuf, dir->name, dir->name_len);
+		print_serial("%s\n", tempbuf);
+		if(tempbuf[dir->name_len - 1] != '1' && tempbuf[dir->name_len - 2] != ';'){
+			ISO9660_printTree_Recur(iso, getLe32(dir->sector), layer+1);
+			ISO_read_sector(iso->drive, iso->buf, directory_sector);
+		}
+		skip:
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
 	}
 }
-*/
+
+void ISO9660_printTree(struct ISO9660 *iso){
+	print_serial("ISO9660 File Tree for Drive %c\n", iso->drive->identity);
+	print_serial("%c:\n", iso->drive->identity);
+	ISO9660_printTree_Recur(iso, iso->root_directory_sector, 1);
+}
+
+int ISO9660_openFileName(struct ISO9660 *iso, char *name, char *buf, int buf_size){
+	struct File_Info file = ISO9660_GetFile(iso, name);
+	if(file.drive == NULL || iso == NULL || buf == NULL){
+		return 0;
+	}
+	ISO_read_sector(iso->drive, iso->buf, file.sector);
+	for(uint32_t i = 0; i < file.size && i < (uint32_t) buf_size; i++){
+		buf[i] = iso->buf[i];
+	}
+	return 1;
+}
+
+int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int buf_size){
+	if(iso == NULL || file.drive == NULL) return 0;
+	ISO_read_sector(iso->drive, iso->buf, file.sector);
+	for(uint32_t i = 0; i < file.size && i < (uint32_t) buf_size; i++){
+		buf[i] = iso->buf[i];
+	}
+	return 1;
+}

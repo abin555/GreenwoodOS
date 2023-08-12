@@ -8,6 +8,7 @@
 #include "timer.h"
 #include "io.h"
 #include "serial.h"
+#include "program.h"
 
 struct task_registers{
     uint32_t esp;

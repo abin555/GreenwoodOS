@@ -13,6 +13,7 @@
 #include "multitasking.h"
 #include "ahci.h"
 #include "drive.h"
+#include "program.h"
 
 void kbd_test(){
     char c = kbd_getChar();
@@ -23,6 +24,8 @@ void kbd_test(){
 void kernal_task(){
     print_serial("Kernel Continuing Boot\n");
     fb_print(0, 8, "Kernal Tasking!");
+
+    program_init();
 
     init_drive_system();
 
@@ -38,8 +41,22 @@ void kernal_task(){
     
     //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
     
-    ISO9660_print_tree(&drive_get('A')->format_info.ISO->root);
-    //ISO9660_print_tree(&drive_get('A')->format_info.ISO->root);
+    ISO9660_printTree(drive_get('A')->format_info.ISO);
+    ISO9660_printTree(drive_get('B')->format_info.ISO);
+
+    print_serial("Testing File Open\n");
+    //struct File_Info test = ISO9660_GetFile(drive_get('A')->format_info.ISO, "CHILD/TEST/../../CHILD_CO/OTHER.TXT");
+    //char *buf = (char *) malloc(test.size);
+    //ISO9660_openFile(drive_get('A')->format_info.ISO, test, buf, test.size);
+    //print_serial("File Contents: %s\n", buf);
+
+    struct FILE* file = fopen("A/CHILD/TEST/TEST.TXT");
+    //print_serial("First Char: %c\n", fgetc(file));
+    char *buf = malloc(fsize(file));
+    fcopy(file, buf, fsize(file));
+    print_serial("%s\n", buf);
+    fclose(file);
+
     while(1){
 
     }

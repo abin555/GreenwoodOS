@@ -36,11 +36,19 @@ struct DRIVE{
 	char identity;
 };
 
-struct File{
+struct File_Info{
 	struct DRIVE *drive;
 	uint32_t sector;
 	uint32_t size;
 };
+
+struct FILE{
+	struct File_Info info;
+	int head;
+};
+
+#define NUM_FILES 50
+extern struct FILE files[NUM_FILES];
 
 extern struct DRIVE **drives;
 extern int drive_count;
@@ -57,4 +65,9 @@ struct DRIVE *drive_get(char identity);
 
 int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors);
 
+struct FILE *fopen(char *path);
+void fclose(struct FILE *file);
+char fgetc(struct FILE *file);
+int fsize(struct FILE *file);
+int fcopy(struct FILE *file, char *buf, int buf_size);
 #endif

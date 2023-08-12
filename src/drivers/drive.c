@@ -85,3 +85,63 @@ void drive_enumerate(){
 		drive_get_format(drives[i]);
 	}
 }
+
+struct FILE files[NUM_FILES] = {0};
+
+struct FILE *fopen(char *path){
+	struct FILE *file = NULL;
+	for(int i = 0; i < NUM_FILES; i++){
+		if(files[i].info.drive == NULL){
+			file = &files[i];
+			break;
+		}
+	}
+	if(file == NULL) return NULL;
+	if(path == NULL) return NULL;
+	if(path[0] == '\0') return NULL;
+	
+	char drive_letter = path[0];
+	path+=2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive == NULL) return file;
+	if(drive->format == ISO9660){
+		file->info = ISO9660_GetFile(drive->format_info.ISO, path);
+		file->head = 0;
+		return file;
+	}
+
+	return NULL;
+}
+
+void fclose(struct FILE *file){
+	//memset(file, 0, sizeof(struct FILE));
+	file->info.drive = NULL;
+}
+
+char fgetc(struct FILE *file){
+	char *buf;
+	if(file->info.drive->format == ISO9660){
+		buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
+		return buf[file->head++];
+	}
+	return 0;
+}
+
+int fsize(struct FILE *file){
+	return file->info.size;
+}
+
+int fcopy(struct FILE *file, char *buf, int buf_size){
+	if(file->info.drive->format == ISO9660){
+		char *iso_buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
+		if(iso_buf == NULL) return 1;
+		int idx = 0;
+		while(file->head < 512*4 && idx < buf_size){
+			buf[idx] = iso_buf[file->head];
+			file->head++;
+			idx++;
+		}
+		return 0;
+	}
+	return 0;
+}
