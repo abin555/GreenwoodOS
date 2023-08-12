@@ -208,7 +208,7 @@ struct cpu_state AHCI_Interrupt_Handler(struct cpu_state cpu __attribute__((unus
  
 bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)
 {
-	//print_serial("[AHCI Driver] Reading Sector %x%x for %d sectors\n", starth, startl, count);
+	//print_serial("[AHCI Driver] Reading Sector %x%x (%d) for %d sectors\n", starth, startl, startl, count);
 	//uint32_t phy_buf = ((uint32_t) buf) - 0xC0000000;
 	uint32_t phy_buf = get_physical((uint32_t) buf);
 	port->is = (uint32_t) -1;		// Clear pending interrupt bits

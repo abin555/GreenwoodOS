@@ -31,6 +31,8 @@ struct memory_region{
 };
 
 void memset(void *address, uint8_t value, uint32_t size);
+void memcpy(void *dest, void* src, int size);
+
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type);
 void MEM_populateRegions();
 

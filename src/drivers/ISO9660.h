@@ -97,20 +97,23 @@ union ISO_Volume_Descriptor{
 struct ISO9660_FS_Entry{
 	char name[20];
 	enum{
-		File,
-		Folder
+		File = 1,
+		Folder = 2,
+        Root = 3,
+        Special = 4
 	} type;
 	uint32_t sector;
 	uint32_t size;
 	uint32_t sector_count;
-	struct ISO9660_FS_Entry *parent;//IF ROOT, PARENT = NULL
-	struct ISO9660_FS_Entry **children;
+    int num_children;
+    struct ISO9660_FS_Entry *parent;
+	struct ISO9660_FS_Entry *children;
 };
 
 struct ISO9660{
 	struct DRIVE *drive;
 	char *buf;
-	struct ISO9660_FS_Entry *root;
+	struct ISO9660_FS_Entry root;
 };
 
 
@@ -118,4 +121,5 @@ uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector);
 
 int ISO9660_check_format(struct DRIVE *drive);
 void ISO9660_read_volume(struct ISO9660 *iso);
+void ISO9660_print_tree(struct ISO9660_FS_Entry *fs);
 #endif

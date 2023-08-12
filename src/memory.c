@@ -9,6 +9,12 @@ void memset(void *address, uint8_t value, uint32_t size){
 	}
 }
 
+void memcpy(void *dest, void* src, int size){
+	for(int i = 0; i < size; i++){
+		((uint8_t *) dest)[i] = ((uint8_t *)src)[i];
+	}
+}
+
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type){
 	uint32_t idx = physical >> 22;
 	uint32_t flag;

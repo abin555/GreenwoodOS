@@ -30,7 +30,7 @@ struct DRIVE *drive_add(int type, void *driver){
 }
 
 
-int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_sectors){
+int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors){
 	if(drive == NULL || buf == NULL)
 		return -1;
 	

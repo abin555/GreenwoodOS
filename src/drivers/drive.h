@@ -36,6 +36,12 @@ struct DRIVE{
 	char identity;
 };
 
+struct File{
+	struct DRIVE *drive;
+	uint32_t sector;
+	uint32_t size;
+};
+
 extern struct DRIVE **drives;
 extern int drive_count;
 extern char *drive_sector_buf;
@@ -49,6 +55,6 @@ struct DRIVE *drive_add(int type, void *driver);
 
 struct DRIVE *drive_get(char identity);
 
-int drive_read(struct DRIVE *drive, char *buf, uint64_t sector, uint32_t count_sectors);
+int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors);
 
 #endif

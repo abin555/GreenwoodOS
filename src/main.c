@@ -37,7 +37,9 @@ void kernal_task(){
     drive_enumerate();
     
     //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
-
+    
+    ISO9660_print_tree(&drive_get('A')->format_info.ISO->root);
+    //ISO9660_print_tree(&drive_get('A')->format_info.ISO->root);
     while(1){
 
     }

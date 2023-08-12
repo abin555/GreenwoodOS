@@ -14,9 +14,10 @@ void page_init(){
 	print_serial("[Paging] Init Finished\n");
 }
 
-void page_error(){
-    print_serial("\nERROR: PAGE FAULT!\n");
+struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+    print_serial("\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
     asm("hlt");
+    return cpu;
 }
 
 uint32_t get_physical(uint32_t address){
