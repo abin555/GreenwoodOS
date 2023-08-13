@@ -19,12 +19,8 @@ int main(){
     eax = 0x04;
     asm("int 0x80");
     eax = 0x03;
-    asm("int0x80");
-    while(1){
-        
-    }
-    ebx = (unsigned int) win;
-    eax = 0x02;
     asm("int 0x80");
-    
+    while(1){
+
+    }    
 }

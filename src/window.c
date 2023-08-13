@@ -9,11 +9,11 @@ void window_timer_callback();
 
 
 void window_init(){
-	window_bar_size = fb_width * CHAR_H;
+	window_bar_size = (fb_width * CHAR_H) * sizeof(uint32_t);
 	uint32_t window_region_size = MAX_WINDOWS * fb_width * fb_height * sizeof(uint32_t);
 	int blk = MEM_findRegionIdx(window_region_size);
 	MEM_reserveRegionBlock(blk, window_region_size, WINDOW_BACKBUFFER_VIRT_BASE, FRAMEBUFFER);
-	window_buf_size = fb_width * fb_height - window_bar_size;
+	window_buf_size = (fb_width * fb_height * sizeof(uint32_t)) - window_bar_size;
 	for(int i = 0; i < MAX_WINDOWS; i++){
 		windows[i].backbuffer = (uint32_t *) (WINDOW_BACKBUFFER_VIRT_BASE + (i*window_buf_size));
 		windows[i].name = NULL;
@@ -52,7 +52,7 @@ void window_copy_buffer(struct WINDOW *window){
 
 void window_timer_callback(){
 	if(!windows[window_selected].copyOnPromptOnly && windows[window_selected].active){
-		window_copy_buffer(&windows[window_selected]);
+		//window_copy_buffer(&windows[window_selected]);
 	}
 	window_render_bar();
 }
