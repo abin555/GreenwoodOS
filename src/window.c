@@ -44,7 +44,7 @@ void window_render_bar(){
 }
 
 void window_copy_buffer(struct WINDOW *window){
-	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size*sizeof(uint32_t));
+	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
 	//for(uint32_t i = 0; i < window_buf_size; i++){
 	//	fb_frontbuffer[i] = window->backbuffer[i];
 	//}
