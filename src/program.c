@@ -1,6 +1,6 @@
 #include "program.h"
 
-bool program_slot_status[10] = {
+bool program_slot_status[PROGRAM_MAX] = {
     false,
     false,
     false,
@@ -30,12 +30,13 @@ void select_program(uint8_t program_slot){
     program_active_slot = program_slot;
 }
 
-void exec(char *filename){
+void exec(char *filename, int argc, char **argv){
 	int slot = -1;
 	for(int i = 0; i < PROGRAM_MAX; i++){
-		if(program_slot_status[i] == true){
+		if(program_slot_status[i] == false){
 			slot = i;
 			program_slot_status[i] = true;
+			break;
 		}
 	}
 	if(slot == -1) return;
@@ -44,5 +45,5 @@ void exec(char *filename){
 	struct FILE *file = fopen(filename);
 	fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));	
 	fclose(file);
-	start_task(0, slot, 0, NULL, filename);
+	start_task(0, slot, argc, argv, filename);
 }

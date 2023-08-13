@@ -9,10 +9,10 @@
 #include "drive.h"
 #include "memory.h"
 
-extern char programs[PROGRAM_MAX];
+extern bool program_slot_status[PROGRAM_MAX];
 
 void program_init();
 void select_program(uint8_t program_slot);
-void exec(char *filename);
+void exec(char *filename, int argc, char **argv);
 
 #endif

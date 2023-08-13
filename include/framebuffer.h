@@ -18,4 +18,6 @@ void fb_setPixel(uint32_t idx, uint32_t color);
 void fb_putChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg);
 void fb_print(uint32_t x, uint32_t y, char *str);
 
+void buf_putChar(uint32_t *buf, uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg);
+
 #endif

@@ -15,6 +15,17 @@ void memcpy(void *dest, void* src, int size){
 	}
 }
 
+void memfcpy(void* target, void* source, uint32_t size){
+    asm volatile ("rep movsb"
+    : "=D" (target),
+    "=S" (source),
+    "=c" (size)
+    : "0" (target),
+    "1" (source),
+    "2" (size)
+    : "memory");
+}
+
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type){
 	uint32_t idx = physical >> 22;
 	uint32_t flag;

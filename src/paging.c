@@ -44,8 +44,9 @@ void create_page_entry(
 	uint32_t target_address,
 	uint16_t flag
 ){
-    print_serial("[Paging] Base: 0x%x Target 0x%x\n", base_address, target_address);
+    //print_serial("[Paging] Base: 0x%x Target 0x%x\n", base_address, target_address);
     page_directory[get_page_index_from_addr(target_address)] = ((base_address & 0xFFC00000) | flag);
+    update_page();
 }
 
 uint32_t get_page_index_from_addr(uint32_t address){

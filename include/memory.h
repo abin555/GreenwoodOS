@@ -9,6 +9,7 @@
 
 #define MAX_MEMORY_SIZE 0x100000000 //4GB
 #define MEMORY_NUM_REGIONS MAX_MEMORY_SIZE / PAGE_SIZE
+#define WINDOW_BACKBUFFER_VIRT_BASE 0xB0400000
 
 typedef enum {
 	KERNEL = 1,
@@ -32,6 +33,7 @@ struct memory_region{
 
 void memset(void *address, uint8_t value, uint32_t size);
 void memcpy(void *dest, void* src, int size);
+void memfcpy(void* target, void* source, uint32_t size);
 
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type);
 void MEM_populateRegions();

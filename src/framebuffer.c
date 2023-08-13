@@ -44,3 +44,11 @@ void fb_print(uint32_t x, uint32_t y, char *str){
         i++;
     }
 }
+
+void buf_putChar(uint32_t *buf, uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg){
+	for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            buf[fb_width *(y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}

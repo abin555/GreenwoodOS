@@ -30,6 +30,8 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
 
             uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
             return_instruction[1] = tasks[i].registers.ebp;
+            return_instruction[-1] = (uint32_t) argv;
+            return_instruction[-2] = (uint32_t) argc;
             return_instruction[-3] = (uint32_t) &task_end;
 
 
@@ -57,6 +59,9 @@ void task_end(){
     else 
         freeProgramSlot(tasks[task_running_idx].program_slot);
     */
+    if(tasks[task_running_idx].program_slot != -1){
+        program_slot_status[tasks[task_running_idx].program_slot] = false;
+    }
 	while(1){}
 }
 
