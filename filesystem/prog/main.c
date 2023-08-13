@@ -1,25 +1,30 @@
 int main(){
 	register unsigned int eax asm("eax");
+    register unsigned int ebx asm("ebx");
+    register unsigned int ecx asm("ecx");
+    register unsigned int edx asm("edx");
 	unsigned int offset = eax;
 	unsigned int *fb = (unsigned int *) 0xFD000000;
 	for(int i = 0; i < 10000; i++){
 		fb[i+offset] = 0xFFFFFF - i;
-		for(int x = 0; x < 100000; x++){
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-        }
 	}
+    
+    ebx = (unsigned int) "Program";
+    eax = 0x01;
+    asm("int 0x80");
+    void *win = (void *) eax;
+    edx = 'A';
+    ecx = 0x0;
+    ebx = 0x0;
+    eax = 0x04;
+    asm("int 0x80");
+    eax = 0x03;
+    asm("int0x80");
+    while(1){
+        
+    }
+    ebx = (unsigned int) win;
+    eax = 0x02;
+    asm("int 0x80");
+    
 }

@@ -16,6 +16,7 @@ struct CONSOLE{
 	uint32_t buf_size;
 	char *buf;
 	bool active;
+	int last_cursor;
 	int cursor;
 };
 

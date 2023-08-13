@@ -30,6 +30,8 @@ struct task_state{
     uint8_t slot_active;
     uint8_t slot_running;
     uint32_t stack_region;
+    struct WINDOW *window;
+    struct CONSOLE *console;
 };
 
 #define MAX_TASKS 10

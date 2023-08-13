@@ -27,6 +27,7 @@ struct CONSOLE *console_open(struct WINDOW *window){
 	memset(console->buf, 0, console->buf_size);
 	console->active = true;
 	console->cursor = 0;
+	console->last_cursor = 0;
 	console->window = window;
 	return console;
 }
@@ -67,7 +68,11 @@ void render_console(struct CONSOLE *console){
 			x = 0;
 		}
 		else{
-			buf_putChar(console->window->backbuffer, x*CHAR_W, y*CHAR_H, console->buf[cursor], 0xFFFFFFFF, 0);
+			if((uint32_t) x >= console->width){
+				x = 0;
+				y++;
+			}
+			if(cursor >= (uint32_t) console->last_cursor) buf_putChar(console->window->backbuffer, x*CHAR_W, y*CHAR_H, console->buf[cursor], 0xFFFFFFFF, 0);
 			x++;
 		}
 		cursor++;
@@ -76,6 +81,7 @@ void render_console(struct CONSOLE *console){
 }
 
 void print_console(struct CONSOLE *console, char *msg, ...){
+	console->last_cursor = console->cursor;
 	while(*msg != '\0'){
 		console->buf[console->cursor] = *msg;
 		console->cursor++;

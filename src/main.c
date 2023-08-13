@@ -16,6 +16,7 @@
 #include "program.h"
 #include "window.h"
 #include "console.h"
+#include "system_calls.h"
 
 void kbd_test(){
     char c = kbd_getChar();
@@ -28,6 +29,7 @@ void kernal_task(int argc, char **argv){
     fb_print(0, 8, "Kernal Tasking!");
 
     program_init();
+    init_syscalls();
     window_init();
     console_init();
     init_drive_system();
@@ -64,14 +66,16 @@ void kernal_task(int argc, char **argv){
     struct CONSOLE *kernal_console = console_open(kernal_win);
     print_console(kernal_console, "TEST!\nTEST2\n");
     
-    exec("A/PROG/TEST.EXE", 0, NULL);
-    exec("A/PROG/TEST.EXE", 0x10000, NULL);
+    //exec("A/PROG/TEST.EXE", 0, NULL);
 
     print_console(kernal_console, "IS THIS WORKING?\nSure Seems So...\nLets try some more things! ");
     print_console(kernal_console, "MAYBE THIS ONE?\n");
-    for(int i = 0; i < 20; i++){
+    for(int i = 0; i < 25; i++){
         print_console(kernal_console, "TEST\n");
     }
+    print_serial(kernal_console->buf);
+
+    exec("A/PROG/TEST.EXE", 0x10000, NULL);
 
     char c = '@';
     while(1){
