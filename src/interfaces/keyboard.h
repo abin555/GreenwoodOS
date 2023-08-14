@@ -5,6 +5,8 @@
 #include "allocator.h"
 #include "serial.h"
 #include "framebuffer.h"
+#include "window.h"
+#include "multitasking.h"
 
 uint32_t keyboard_buffer_size;
 uint8_t *keyboard_KEYBuffer;
@@ -19,6 +21,7 @@ struct KBD_flags{
 	uint8_t shift;
 	uint8_t ctrl;
 	uint8_t arrow;
+	uint8_t backspace;
 };
 
 struct KBD_flags KBD_flags;
@@ -31,5 +34,5 @@ void kbd_init(uint32_t buffer_size);
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source);
 uint32_t KBD_last_key_idx;
 char kbd_getChar();
-
+char getc_blk();
 #endif

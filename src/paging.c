@@ -2,6 +2,9 @@
 
 uint32_t *page_directory;
 
+extern int8_t task_running_idx;
+extern void stop_task(int8_t);
+
 void page_init(){
 	print_serial("[Paging] Init\n");
 
@@ -16,7 +19,8 @@ void page_init(){
 
 struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
     print_serial("\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
-    asm("hlt");
+    //asm("hlt");
+    stop_task(task_running_idx);
     return cpu;
 }
 

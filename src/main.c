@@ -64,19 +64,16 @@ void kernal_task(int argc, char **argv){
 
     struct WINDOW *kernal_win = window_open("KERNEL", true);
     struct CONSOLE *kernal_console = console_open(kernal_win);
+    tasks[task_running_idx].console = kernal_console;
     print_console(kernal_console, "TEST!\nTEST2\n");
     
     //exec("A/PROG/TEST.EXE", 0, NULL);
 
-    print_console(kernal_console, "IS THIS WORKING?\nSure Seems So...\nLets try some more things! ");
-    print_console(kernal_console, "MAYBE THIS ONE?\n");
-    for(int i = 0; i < 25; i++){
-        print_console(kernal_console, "TEST\n");
-    }
-    print_serial(kernal_console->buf);
+    exec("A/PROG/TEST.EXE", 'A', NULL);
+    //exec("A/PROG/TEST.EXE", 'B', NULL);
+    exec("A/OS/TERM/TERM.EXE", 0, NULL);
 
-    exec("A/PROG/TEST.EXE", 0x10000, NULL);
-
+    //set_schedule(ONFOCUS);
     char c = '@';
     while(1){
         if(c == '@') c = 'X';

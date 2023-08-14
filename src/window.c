@@ -16,7 +16,8 @@ void window_init(){
 	window_buf_size = (fb_width * fb_height * sizeof(uint32_t)) - window_bar_size;
 	for(int i = 0; i < MAX_WINDOWS; i++){
 		windows[i].backbuffer = (uint32_t *) (WINDOW_BACKBUFFER_VIRT_BASE + (i*window_buf_size));
-		windows[i].name = NULL;
+		//windows[i].name = 0;
+		memset(windows[i].name, 0, sizeof(windows[i].name));
 		windows[i].width = fb_width;
 		windows[i].height = fb_height;
 		windows[i].active = false;
@@ -41,6 +42,7 @@ void window_render_bar(){
 			fb_putChar((CHAR_W+2)*i, y, '1'+i, 0xFFFFFFFF, 0x0000AA);
 		}
 	}
+	fb_print(CHAR_W*12, y, windows[window_selected].name);
 }
 
 void window_copy_buffer(struct WINDOW *window){
@@ -52,7 +54,7 @@ void window_copy_buffer(struct WINDOW *window){
 
 void window_timer_callback(){
 	if(!windows[window_selected].copyOnPromptOnly && windows[window_selected].active){
-		//window_copy_buffer(&windows[window_selected]);
+		window_copy_buffer(&windows[window_selected]);
 	}
 	window_render_bar();
 }
@@ -69,12 +71,15 @@ struct WINDOW *window_open(char *name, bool copyPromptOnly){
 	if(window == NULL) return NULL;
 	window->copyOnPromptOnly = copyPromptOnly;
 	window->active = 1;
-	window->name = name;
+	//window->name = name;
+	for(unsigned int i = 0; i < sizeof(window->name) && name[i] != 0; i++){
+		window->name[i] = name[i];
+	}
 	window_selected = i;
 	return window;
 }
 
 void window_close(struct WINDOW *window){
 	window->active = false;
-	window->name = NULL;
+	memset(window->name, 0, sizeof(windows->name));
 }

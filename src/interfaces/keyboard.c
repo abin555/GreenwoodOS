@@ -17,7 +17,19 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	if(source != PS2_KBD) return;
 	if(scancode){
 		if(kbd_US[scancode] != 0){
-			if(KBD_flags.shift){
+			if(KBD_flags.ctrl && !KBD_flags.shift){
+				print_serial("Check if Window Switch %c\n", kbd_US[scancode]);
+				if(kbd_US[scancode] >= '1' && kbd_US[scancode] <= '9'){
+					print_serial("Is Window Switch\n");
+					int new_window = kbd_US[scancode] - '1';
+					print_serial("Window %d\n", new_window);
+					if(windows[new_window].active){
+						window_selected = new_window;
+						window_copy_buffer(&windows[window_selected]);
+					}
+				}
+			}
+			else if(KBD_flags.shift){
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US_shift[scancode];
 			}
 			else{
@@ -51,8 +63,18 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 				case 0x4F:
 					if(KBD_flags.arrow){
 						print_serial("End!\n");
+						for(int i = 0; i < MAX_TASKS; i++){
+							if(tasks[i].window == &windows[window_selected]){
+								stop_task(i);
+							}
+						}
 						//reboot();
 					}
+					break;
+				case 0x0E:
+					keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 8;
+					KBD_ascii_buffer_idx++;
+					keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 					break;
 			}
 		}
@@ -80,4 +102,12 @@ char kbd_getChar(){
 		KBD_last_key_idx = KBD_ascii_buffer_idx;
 	}
 	return retVal;
+}
+
+char getc_blk(){
+	char c = 0;
+	while(c == 0 || tasks[task_running_idx].window != &windows[window_selected]){
+		c = kbd_getChar();
+	}
+	return c;
 }

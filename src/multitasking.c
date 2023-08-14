@@ -36,8 +36,9 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
 
 
             tasks[i].program_slot = program_slot;
-    
+            tasks[i].schedule_type = ALWAYS;
             tasks[i].task_name = name;
+            tasks[i].console = tasks[task_running_idx].console;
 
             print_serial("[TASK] Added to queue idx %x\n", i);
             tasks[i].slot_active = 1;
@@ -46,13 +47,30 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
     }
 }
 
+void set_schedule(ScheduleType type){
+    print_serial("[TASK] Set Task %d schedule type to %d\n", task_running_idx, type);
+    tasks[task_running_idx].schedule_type = type;
+}
+
 void stop_task(int8_t task_idx){
     tasks[task_idx].slot_active = 0;
+    if(tasks[task_idx].program_slot != -1){
+        program_slot_status[tasks[task_idx].program_slot] = false;
+        if(tasks[task_idx].window != NULL){
+            window_close(tasks[task_idx].window);
+            tasks[task_idx].window = NULL;
+        }
+        if(tasks[task_idx].console != NULL){
+            console_close(tasks[task_idx].console);
+            tasks[task_idx].console = NULL;
+        }
+    }
+    print_serial("[TASK] Killed Task %d\n", task_idx);
 }
 
 void task_end(){
     tasks[task_running_idx].slot_active = 0;
-    print_serial("[TASK] Task %d Ended\n", task_running_idx);
+    print_serial("[TASK] Task %d:%s Ended\n", task_running_idx, tasks[task_running_idx].task_name);
 	/*
     if(tasks[task_running_idx].program_slot == -1)
         free((void *) tasks[task_running_idx].stack_region);
@@ -61,6 +79,14 @@ void task_end(){
     */
     if(tasks[task_running_idx].program_slot != -1){
         program_slot_status[tasks[task_running_idx].program_slot] = false;
+        if(tasks[task_running_idx].window != NULL){
+            window_close(tasks[task_running_idx].window);
+            tasks[task_running_idx].window = NULL;
+        }
+        if(tasks[task_running_idx].console != NULL){
+            console_close(tasks[task_running_idx].console);
+            tasks[task_running_idx].console = NULL;
+        }
     }
 	while(1){}
 }
@@ -139,7 +165,10 @@ void task_callback(){
             next_idx++;
             continue;
         }
-        if(tasks[next_idx].slot_active){
+        if(tasks[next_idx].slot_active 
+            && (tasks[next_idx].schedule_type == ALWAYS 
+            || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
+        ){
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx]);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;
@@ -147,6 +176,10 @@ void task_callback(){
             task_running_idx = running_idx;
             //printk("Switched to task %2x\n", running_idx);
             break;
+        }
+        else{
+            next_idx++;
+            continue;
         }
     }
 }

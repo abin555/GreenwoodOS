@@ -10,6 +10,9 @@
 #include "serial.h"
 #include "program.h"
 
+#include "window.h"
+#include "console.h"
+
 struct task_registers{
     uint32_t esp;
     uint32_t edi;
@@ -23,6 +26,12 @@ struct task_registers{
     uint32_t eip;
 };
 
+typedef enum {
+    ALWAYS = 1,
+    ONFOCUS = 2,
+    NOCHILD = 3
+} ScheduleType;
+
 struct task_state{
     struct task_registers registers;
     int8_t program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
@@ -30,6 +39,7 @@ struct task_state{
     uint8_t slot_active;
     uint8_t slot_running;
     uint32_t stack_region;
+    ScheduleType schedule_type;
     struct WINDOW *window;
     struct CONSOLE *console;
 };
@@ -54,5 +64,6 @@ void task_callback();
 void multitask_init();
 
 void list_tasks();
+void set_schedule(ScheduleType type);
 
 #endif

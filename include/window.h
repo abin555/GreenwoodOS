@@ -8,7 +8,7 @@
 
 struct WINDOW{
 	uint32_t *backbuffer;
-	char *name;
+	char name[21];
 	bool active;
 	uint32_t width;
 	uint32_t height;
