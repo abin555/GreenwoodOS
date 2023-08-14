@@ -18,11 +18,11 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	if(scancode){
 		if(kbd_US[scancode] != 0){
 			if(KBD_flags.ctrl && !KBD_flags.shift){
-				print_serial("Check if Window Switch %c\n", kbd_US[scancode]);
+				//print_serial("Check if Window Switch %c\n", kbd_US[scancode]);
 				if(kbd_US[scancode] >= '1' && kbd_US[scancode] <= '9'){
-					print_serial("Is Window Switch\n");
+					//print_serial("Is Window Switch\n");
 					int new_window = kbd_US[scancode] - '1';
-					print_serial("Window %d\n", new_window);
+					//print_serial("Window %d\n", new_window);
 					if(windows[new_window].active){
 						window_selected = new_window;
 						window_copy_buffer(&windows[window_selected]);

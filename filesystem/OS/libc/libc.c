@@ -85,3 +85,15 @@ void print(char *str){
 	eax = 0x08;
 	asm("int 0x80");
 }
+
+void console_open(){
+	register uint32_t eax asm("eax");
+	eax = 0x09;
+	asm("int 0x80");
+}
+
+void console_close(){
+	register uint32_t eax asm("eax");
+	eax = 0x0A;
+	asm("int 0x80");
+}

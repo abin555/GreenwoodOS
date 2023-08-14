@@ -14,6 +14,8 @@ int main(int argc, char **argv){
 	term_width = window->width / 8;
 	term_height = window->height / 8;
 	print("Terminal!\n");
+	console_open();
+	print("\n\nTerminal Console\n");
 	char string[] = "This is a terminal!";
 	for(int i = 0; i < sizeof(string); i++){
 		drawChar(i*8, 0, string[i]);

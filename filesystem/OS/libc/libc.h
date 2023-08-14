@@ -21,5 +21,7 @@ char getc();
 void exec(char *filename, int argc, char **argv);
 void set_schedule(int type);
 void print(char *str);
+void console_open();
+void console_close();
 
 #endif

@@ -24,6 +24,12 @@ void kbd_test(){
     fb_putChar(fb_width-CHAR_W, CHAR_H, c, 0xFFFFFF, 0);
 }
 
+void idle_task(){
+    while(1){
+
+    }
+}
+
 void kernal_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     fb_print(0, 8, "Kernal Tasking!");
@@ -67,10 +73,8 @@ void kernal_task(int argc, char **argv){
     tasks[task_running_idx].console = kernal_console;
     print_console(kernal_console, "TEST!\nTEST2\n");
     
-    //exec("A/PROG/TEST.EXE", 0, NULL);
+    start_task(idle_task, -1, 0, NULL, "IDLE");
 
-    exec("A/PROG/TEST.EXE", 'A', NULL);
-    //exec("A/PROG/TEST.EXE", 'B', NULL);
     exec("A/OS/TERM/TERM.EXE", 0, NULL);
 
     //set_schedule(ONFOCUS);
@@ -78,7 +82,7 @@ void kernal_task(int argc, char **argv){
     while(1){
         if(c == '@') c = 'X';
         else c = '@';
-        fb_putChar(0,CHAR_H*5, c, 0xFFFFFFFF, 0);
+        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
         for(int i = 0; i < 100000; i++){
             asm("nop");
             asm("nop");

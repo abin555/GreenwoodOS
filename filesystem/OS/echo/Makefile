@@ -3,9 +3,9 @@ ASFLAGS = -f elf
 LDFLAGS = -T ../libc/link.ld -melf_i386
 
 FILES = main.c
-OBJ = term.o
+OBJ = echo.o
 LIBS = ../libc/libc.o
-PROG = term
+PROG = echo
 
 all:
 	make -C ../libc
@@ -13,4 +13,4 @@ all:
 	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
 	rm $(OBJ)
-	#rm $(PROG).elf
+	rm $(PROG).elf

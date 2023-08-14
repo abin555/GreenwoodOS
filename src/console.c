@@ -88,4 +88,6 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 		msg++;
 	}
 	render_console(console);
+	print_serial(console->buf);
+	print_serial("Cursor is at %d\n", console->cursor);
 }
