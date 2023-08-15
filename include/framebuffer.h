@@ -19,5 +19,5 @@ void fb_putChar(uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg);
 void fb_print(uint32_t x, uint32_t y, char *str);
 
 void buf_putChar(uint32_t *buf, uint32_t x, uint32_t y, char c, uint32_t fg, uint32_t bg);
-
+void buf_write_cell(uint32_t *buf, uint32_t w, uint32_t index, char c, uint32_t fg, uint32_t bg);
 #endif

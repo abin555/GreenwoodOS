@@ -17,22 +17,37 @@
 #include "window.h"
 #include "console.h"
 #include "system_calls.h"
-
-void kbd_test(){
-    char c = kbd_getChar();
-    if(!c) return;
-    fb_putChar(fb_width-CHAR_W, CHAR_H, c, 0xFFFFFF, 0);
-}
+#include "console_old.h"
 
 void idle_task(){
+    char c = '@';
     while(1){
-
+        if(c == '@') c = 'X';
+        else c = '@';
+        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
+        for(int i = 0; i < 100000; i++){
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+            asm("nop");
+        }
     }
 }
 
 void kernal_task(int argc, char **argv){
-    print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
-    fb_print(0, 8, "Kernal Tasking!");
+    printk("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
+    //fb_print(0, 8, "Kernal Tasking!");
 
     program_init();
     init_syscalls();
@@ -40,27 +55,30 @@ void kernal_task(int argc, char **argv){
     console_init();
     init_drive_system();
 
-    print_serial("[Driver] Initializing Drivers\n");
+    printk("[Driver] Initializing Drivers\n");
     for(int i = 0; i < PCI_numDrivers; i++){
         if(PCI_drivers[i]->init_driver != NULL){
-            print_serial("[Driver] Init #%x\n", i);
+            printk("[Driver] Init #%x\n", i);
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
     MEM_printRegions();
+
     drive_enumerate();
     
     //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
     
     ISO9660_printTree(drive_get('A')->format_info.ISO);
-    ISO9660_printTree(drive_get('B')->format_info.ISO);
 
-    print_serial("Testing File Open\n");
+    printk("Testing File Open\n");
     //struct File_Info test = ISO9660_GetFile(drive_get('A')->format_info.ISO, "CHILD/TEST/../../CHILD_CO/OTHER.TXT");
     //char *buf = (char *) malloc(test.size);
     //ISO9660_openFile(drive_get('A')->format_info.ISO, test, buf, test.size);
     //print_serial("File Contents: %s\n", buf);
-
+    start_task(idle_task, -1, 0, NULL, "IDLE");
+    while(1){
+        
+    }
     struct FILE* file = fopen("A/CHILD/TEST/TEST.TXT");
     //print_serial("First Char: %c\n", fgetc(file));
     char *buf = malloc(fsize(file));
@@ -73,16 +91,15 @@ void kernal_task(int argc, char **argv){
     tasks[task_running_idx].console = kernal_console;
     print_console(kernal_console, "TEST!\nTEST2\n");
     
-    start_task(idle_task, -1, 0, NULL, "IDLE");
 
     exec("A/OS/TERM/TERM.EXE", 0, NULL);
 
     //set_schedule(ONFOCUS);
-    char c = '@';
+    char c = '#';
     while(1){
-        if(c == '@') c = 'X';
-        else c = '@';
-        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
+        if(c == '#') c = '*';
+        else c = '#';
+        fb_putChar(fb_width-2*CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
         for(int i = 0; i < 100000; i++){
             asm("nop");
             asm("nop");
@@ -114,7 +131,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
 	parse_multiboot2(magic_addr);
     // size = *(unsigned *) magic_addr;
-    
 	load_gdt();
     interrupts_install_idt();
     getCPUVendorString();
@@ -126,23 +142,29 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     set_PAT();
 
     MEM_populateRegions();
+    
 
 	fb_init(GRUB_tagfb);
 
-    fb_print(0, 0, "Bootup Start");
-
+    initialize_console(fb_width/8,fb_height/8);
+    for(int i = 0; i < 8; i++){
+        fb_putChar(i*8, 4*8, '1'+i, 0xFFFFFFFF, 0);
+    }
+    printk("Bootup Start\n");
+    MEM_printRegions();
     alloc_init();
+    printk("Alloc Success\n");
 
     MEM_printRegions();
 
+    printk("Init PCI\n");
     PCI_init();
-
+    printk("Init Keyboard\n");
     kbd_init(0xFF);
     ps2_init();
 
-
     timer_init(1000);
-
+    printk("Starting Kernal Task");
     start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 

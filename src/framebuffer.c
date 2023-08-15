@@ -12,7 +12,7 @@ void fb_init(struct multiboot_tag_framebuffer* tagfb){
     fb_backbuffer = (uint32_t *) 0xB0000000;
 
     print_serial("[Framebuffer] Initializing\n");
-    print_serial("[Framebuffer] Width: 0x%x Height 0x%x\n", fb_width, fb_height);
+    print_serial("[Framebuffer] Width: %d Height %d\n", fb_width, fb_height);
 
     //create_page_entry((uint32_t) fb_frontbuffer, (uint32_t) fb_frontbuffer, 0x93);
     //create_page_entry((uint32_t) fb_frontbuffer+0x400000, (uint32_t) fb_frontbuffer+0x400000, 0x93);
@@ -49,6 +49,17 @@ void buf_putChar(uint32_t *buf, uint32_t x, uint32_t y, char c, uint32_t fg, uin
 	for(int layer = 0; layer < CHAR_H; layer++){
         for(int pixel = 0; pixel < CHAR_W; pixel++){
             buf[fb_width *(y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
+        }
+    }
+}
+
+void buf_write_cell(uint32_t *buf, uint32_t w, uint32_t index, char c, uint32_t fg, uint32_t bg){
+    uint32_t x = (index % (w/CHAR_W))*CHAR_W;
+    uint32_t y = (index / (w/CHAR_W))*CHAR_H;
+    if(!(c >= 32 && c <= 126)) c = ' ';
+    for(int layer = 0; layer < CHAR_H; layer++){
+        for(int pixel = 0; pixel < CHAR_W; pixel++){
+            buf[w * (y+layer) + x+pixel] = ((FONT[(int)c][layer] >> pixel) & 1) ? fg : bg;
         }
     }
 }

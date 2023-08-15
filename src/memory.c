@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "console_old.h"
 
 struct memory_region MEMORY_REGIONS[MEMORY_NUM_REGIONS];
 
@@ -51,6 +52,21 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 
 void MEM_populateRegions(){
 	print_serial("Loading Memory Map into Memory Region Table\n");
+	for(int i = 0; i < 10; i++){
+        MEMORY_REGIONS[i].exists = 1;
+		MEMORY_REGIONS[i].available = 0;
+        MEMORY_REGIONS[i].type = KERNEL;
+        MEMORY_REGIONS[i].physical_addr = i*0x400000;
+        MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
+    }
+	for(int i = 15; i < 0x300; i++){
+		MEMORY_REGIONS[i].exists = 1;
+		MEMORY_REGIONS[i].available = 1;
+        MEMORY_REGIONS[i].type = AVAILABLE;
+        MEMORY_REGIONS[i].physical_addr = i*0x400000;
+        MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
+	}
+	return;
 	int num_blocks = (GRUB_MMAP->size) / GRUB_MMAP->entry_size;
 	print_serial("Total Size: 0x%x\nEntry Size: 0x%x\nNum Blocks: 0x%x\n", GRUB_MMAP->size, GRUB_MMAP->entry_size, num_blocks);
 	for(int i = 0; i < num_blocks; i++){
@@ -148,6 +164,7 @@ void MEM_printRegions(){
 					break;
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			//printk("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
 }
@@ -161,6 +178,7 @@ int calculateBlocks(uint32_t size){
 int MEM_findRegionIdx(uint32_t size){
 	int needed_blocks = calculateBlocks(size);
 	print_serial("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
+	printk("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
 	int check_idx = -1;
 	int check_count = -1;
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){

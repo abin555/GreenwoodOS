@@ -16,6 +16,7 @@ void window_init(){
 	window_buf_size = (fb_width * fb_height * sizeof(uint32_t)) - window_bar_size;
 	for(int i = 0; i < MAX_WINDOWS; i++){
 		windows[i].backbuffer = (uint32_t *) (WINDOW_BACKBUFFER_VIRT_BASE + (i*window_buf_size));
+		memset(windows[i].backbuffer, 0, window_buf_size);
 		//windows[i].name = 0;
 		memset(windows[i].name, 0, sizeof(windows[i].name));
 		windows[i].width = fb_width;

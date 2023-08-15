@@ -1,4 +1,5 @@
 #include "allocator.h"
+#include "console_old.h"
 
 void *alloc_base;
 const uint32_t alloc_table_size = 0x800000;
@@ -6,8 +7,9 @@ uint32_t total_alloc = 0;
 uint8_t first_alloc = 1;
 
 void alloc_init(){
+	printk("Inside Alloc\n");
 	int region_idx = MEM_findRegionIdx(alloc_table_size);
-	alloc_base = (void *) 0xA0000000;
+	alloc_base = (void *) 0x90000000;
 	MEM_reserveRegionBlock(region_idx, alloc_table_size, (uint32_t) alloc_base, ALLOC);
 }
 

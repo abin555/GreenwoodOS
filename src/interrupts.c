@@ -1,4 +1,5 @@
 #include "interrupts.h"
+#include "console_old.h"
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
@@ -178,6 +179,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	}
 	else if(interrupt == 0x6){
 		print_serial("Invalid Opcode @ 0x%x\n", stack.eip);
+		printk("Invalid Opcode @ 0x%x\n", stack.eip);
 		asm volatile("hlt");
 	}
 	else if(interrupt == 0xD){
@@ -187,6 +189,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	}
 	else{
 		print_serial("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
+		printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
 }
 
