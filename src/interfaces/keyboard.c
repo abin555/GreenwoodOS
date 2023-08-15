@@ -1,4 +1,5 @@
 #include "keyboard.h"
+#include "console_old.h"
 
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;
@@ -14,9 +15,12 @@ void kbd_init(uint32_t buffer_size){
 
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
+	printk("KEY %x\n", scancode);
+	char justRelease = 0;
+	char justSpecial = 0;
 	if(source != PS2_KBD) return;
 	if(scancode){
-		if(kbd_US[scancode] != 0){
+		if(kbd_US[scancode] != 0 && !KBD_flags.release && !KBD_flags.special){
 			if(KBD_flags.ctrl && !KBD_flags.shift){
 				//print_serial("Check if Window Switch %c\n", kbd_US[scancode]);
 				if(kbd_US[scancode] >= '1' && kbd_US[scancode] <= '9'){
@@ -31,37 +35,43 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 			}
 			else if(KBD_flags.shift){
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US_shift[scancode];
+				KBD_flags.key = kbd_US_shift[scancode];
 			}
 			else{
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US[scancode];
+				KBD_flags.key = kbd_US[scancode];
 			}
 			KBD_ascii_buffer_idx++;
 			keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 		}
 		else{
 			switch(scancode){
-				case 0x2a:
-					KBD_flags.shift = true;
-					break;
-				case 0xaa:
-					KBD_flags.shift = false;
-					break;
-				case 0x1D:
-					KBD_flags.ctrl = true;
-					break;
-				case 0x9D:
-					KBD_flags.ctrl = false;
-					break;
 				case 0xE0:
-					KBD_flags.arrow = true;
+					KBD_flags.special = true;
+					justSpecial = 1;
 					break;
 				case 0xF0:
-					if(KBD_flags.arrow && scancode & 0x80){
-						KBD_flags.arrow = false;
+					KBD_flags.release = true;
+					justRelease = 1;
+					break;
+				case 0x12:
+					if(!KBD_flags.release){
+						KBD_flags.shift = true;
+					}
+					else{
+						KBD_flags.shift = false;
 					}
 					break;
-				case 0x4F:
-					if(KBD_flags.arrow){
+				case 0x14:
+					if(!KBD_flags.release){
+						KBD_flags.ctrl = true;
+					}
+					else{
+						KBD_flags.ctrl = false;
+					}
+					break;
+				case 0x69:
+					if(KBD_flags.special){
 						print_serial("End!\n");
 						for(int i = 0; i < MAX_TASKS; i++){
 							if(tasks[i].window == &windows[window_selected]){
@@ -71,11 +81,13 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						//reboot();
 					}
 					break;
-				case 0x0E:
-					keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 8;
-					KBD_ascii_buffer_idx++;
-					keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-					break;
+			}
+			if(KBD_flags.release && !justRelease){
+				KBD_flags.release = false;
+				KBD_flags.key = 0;
+			}
+			if(KBD_flags.special && !justSpecial){
+				KBD_flags.special = false;
 			}
 		}
 		keyboard_KEYBuffer[KBD_scancode_buffer_idx] = scancode;
@@ -91,23 +103,19 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 }
 
 char kbd_getChar(){
-	char retVal = '\0';
-	if(KBD_last_key_idx != KBD_ascii_buffer_idx){
-		int check_idx = ((int) KBD_ascii_buffer_idx) - 1;
-		if(check_idx < 0){
-			check_idx = keyboard_buffer_size - check_idx;
-		}
-
-		retVal = keyboard_ASCIIBuffer[check_idx];
-		KBD_last_key_idx = KBD_ascii_buffer_idx;
-	}
-	return retVal;
+	char c = KBD_flags.key;
+	KBD_flags.key = 0;
+	return c;
 }
 
 char getc_blk(){
-	char c = 0;
-	while(c == 0 || tasks[task_running_idx].window != &windows[window_selected]){
+	printk("GetCBLK\n");
+	uint32_t c = 0;
+	while(c == 0){
+		if(tasks[task_running_idx].window != &windows[window_selected]){
+			continue;
+		}
 		c = kbd_getChar();
 	}
-	return c;
+	return (char) (c);
 }

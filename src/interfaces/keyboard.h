@@ -22,6 +22,9 @@ struct KBD_flags{
 	uint8_t ctrl;
 	uint8_t arrow;
 	uint8_t backspace;
+	uint8_t release;
+	uint8_t special;
+	char key;
 };
 
 struct KBD_flags KBD_flags;
