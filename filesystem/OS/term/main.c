@@ -25,6 +25,7 @@ int main(int argc, char **argv){
 	int idx = 0;
 	while(1){
 		char c = getc();
+		if(c == '0') continue;
 		if(c == 8){
 			idx--;
 			termbuf[idx] = 0;
