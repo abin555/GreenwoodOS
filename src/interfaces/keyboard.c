@@ -15,7 +15,6 @@ void kbd_init(uint32_t buffer_size){
 
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
-	printk("KEY %x\n", scancode);
 	char justRelease = 0;
 	char justSpecial = 0;
 	if(source != PS2_KBD) return;
@@ -109,7 +108,6 @@ char kbd_getChar(){
 }
 
 char getc_blk(){
-	printk("GetCBLK\n");
 	uint32_t c = 0;
 	while(c == 0){
 		if(tasks[task_running_idx].window != &windows[window_selected]){
