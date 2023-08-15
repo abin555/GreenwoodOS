@@ -4,13 +4,18 @@
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;
 	keyboard_KEYBuffer = (uint8_t *) malloc(keyboard_buffer_size);
+	memset(keyboard_KEYBuffer, 0, keyboard_buffer_size);
 	keyboard_ASCIIBuffer = (char *) malloc(keyboard_buffer_size);
+	memset(keyboard_ASCIIBuffer, 0, keyboard_buffer_size);
 	KBD_scancode_buffer_idx = 0;
 	KBD_ascii_buffer_idx = 0;
 	KBD_last_key_idx = 0;
 	KBD_flags.shift = 0;
 	KBD_flags.ctrl = 0;
 	KBD_flags.arrow = 0;
+	KBD_flags.release = 0;
+	KBD_flags.backspace = 0;
+	KBD_flags.special = 0;
 }
 
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
@@ -102,18 +107,19 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 }
 
 char kbd_getChar(){
-	char c = KBD_flags.key;
-	KBD_flags.key = 0;
-	return c;
+	return keyboard_ASCIIBuffer[KBD_ascii_buffer_idx-1];
 }
 
 char getc_blk(){
 	uint32_t c = 0;
-	while(c == 0){
+	uint32_t current_ascii_idx = KBD_ascii_buffer_idx;
+	while(1){
 		if(tasks[task_running_idx].window != &windows[window_selected]){
 			continue;
 		}
-		c = kbd_getChar();
+		if(current_ascii_idx != KBD_ascii_buffer_idx){
+			return keyboard_ASCIIBuffer[KBD_ascii_buffer_idx-1];
+		}
 	}
 	return (char) (c);
 }

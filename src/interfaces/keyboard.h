@@ -3,6 +3,7 @@
 
 #include "KBD_US_SC2.h"
 #include "allocator.h"
+#include "memory.h"
 #include "serial.h"
 #include "framebuffer.h"
 #include "window.h"
