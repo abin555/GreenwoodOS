@@ -18,6 +18,16 @@ struct CONSOLE{
 	bool active;
 	int last_cursor;
 	int cursor;
+
+	uint32_t Line;
+	uint32_t Start;
+	uint32_t LinePlace
+	uint32_t LastLine;
+	struct{
+		uint32_t fg;
+		uint32_t bg;
+	} color;
+
 };
 
 extern struct CONSOLE consoles[MAX_CONSOLE];

@@ -5,14 +5,158 @@ struct CONSOLE consoles[MAX_CONSOLE] = {0};
 void console_init(){
 	print_serial("[CONSOLE] Initialization\n");
 	for(int i = 0; i < MAX_CONSOLE; i++){
-		consoles[i].window = NULL;
-		consoles[i].width = fb_width / CHAR_W;
-		consoles[i].height = fb_height / CHAR_H - CHAR_H;
-		consoles[i].buf_size = consoles[i].width * consoles[i].height;
-		consoles[i].buf = malloc(consoles[i].buf_size);
-		consoles[i].active = false;
-		consoles[i].cursor = 0;
+		struct CONSOLE *console = &consoles[i];
+		console->window = NULL;
+		console->width = fb_width / CHAR_W;
+		console->height = fb_height / CHAR_H - CHAR_H;
+		console->buf_size = consoles[i].width * consoles[i].height;
+		console->buf = malloc(consoles[i].buf_size);
+		console->active = false;
+		console->cursor = 0;
 	}	
+}
+
+void console_drawFull(struct CONSOLE *console){
+	if(console == NULL) return;
+
+	for(uint32_t indexY = console->LastLine; indexY < console->Line+1; indexY++){
+		char clearLine = 0;
+		for(uint32_t indexX = 0; indexX < console->width; indexX++){
+			char sym = console->buf[indexX + indexY * console->width];
+			if(sym != '\0' && sym != '\n' && !clearLine){
+				buf_write_cell(
+					console->window->backbuffer, 
+					console->width*8, 
+					indexX + indexY * console->width, 
+					sym, 
+					console->color.fg, 
+					console->color.bg
+				);
+			}
+			else{
+				clearLine = 1;
+			}
+		}
+	}
+	console->LastLine = console->Line-1;
+}
+
+void console_putLine(struct CONSOLE *console, uint32_t places){
+	for(uint32_t index = 0; index < places; index++){
+		buf_write_cell(
+			console->window->backbuffer,
+			console->width*8,
+			console->Line*console->width + index,
+			consoleArray[consoleLine*console_width + index],
+			console->color.fg, 
+			console->color.bg
+		);
+	}
+}
+
+void shiftConsoleUp(struct CONSOLE *console){
+	console_last_line = 0;
+	for(uint32_t places = 0; places < console_width; places++){
+		for(uint32_t i = 0; i < console_height*console_width-1; i++){
+			consoleArray[i] = consoleArray[i+1];
+		}
+	}
+}
+
+int calculateNumberLength(unsigned int data, int base){
+	switch(base){
+		case(16):
+			if(data > 0x0FFFFFFF){
+				return 8;
+			}
+			else if(data > 0x00FFFFFF){
+				return 8;
+			}
+			else if(data > 0x000FFFFF){
+				return 8;
+			}
+			else if(data > 0x0000FFFF){
+				return 8;
+			}
+			else if(data > 0x00000FFF){
+				return 4;
+			}
+			else if(data > 0x000000FF){
+				return 4;
+			}
+			else if(data > 0x0000000F){
+				return 2;
+			}
+			return 1;
+		break;
+		case(10):
+			return 8;
+		break;
+		case(2):
+		return sizeof(unsigned int);
+	}
+	return 8;
+}
+
+int printDecimal(struct CONSOLE *console, int data, int offset){
+	int idx = 0;
+	int pow = 1;
+	if(data < 0){
+		console->buf[console->Line*console->width + console->LinePlace + idx + offset] = '-';
+		idx++;
+		data *= -1;
+	}
+	while(pow * 10 <= data)
+		pow *= 10;
+	while(pow != 0){
+		int d = data / pow;
+		console->buf[console->Line*console->width + console->LinePlace + idx + offset] = (char)((int)'0' + d);
+		data = data - d * pow;
+		pow /= 10;
+		idx++;
+	}
+	return idx;
+}
+
+int printHex(struct CONSOLE *console, unsigned int data, int setlength){
+	for(int i = 0; i < (setlength ? setlength : 8); i++){
+		console->buf[console->Line*console->width + console->LinePlace + (setlength ? setlength : 8) - 1 - i] = quadToHex((data >> 4*i) & 0xF);
+	}
+	return (setlength ? setlength : 8);
+}
+
+int printBinary(struct CONSOLE *console, unsigned int data, int setlength){
+	for(int i = 0; i < (setlength ? setlength : 32); i++){
+		if((data >> i) & 1){
+			console->buf[console->Line*console->width + console->LinePlace + i] = '1';
+		}
+		else{
+			console->buf[console->Line*console->width + console->LinePlace + i] = '0';
+		}
+	}
+	return 32;
+}
+
+float fabs(float x){
+	if(x < 0) return -1 * x;
+	return x;
+}
+int abs(int x){
+	if(x < 0) return -1 * x;
+	return x;
+}
+
+int printFloat(struct CONSOLE *console, double data){
+	int i = (int)data;
+	int sizePart1 = printDecimal(i, 0);
+	data = (data-i)*1000000;
+	i = abs((int)data);
+	if(fabs(data) - i >= 0.5){
+		i++;
+	}
+	console->buf[console->Line*console->width + console->LinePlace + sizePart1] = '.';
+	int sizePart2 = printDecimal(i, sizePart1 + 1);
+	return sizePart1 + sizePart2 + 1;
 }
 
 struct CONSOLE *console_open(struct WINDOW *window){
@@ -29,6 +173,13 @@ struct CONSOLE *console_open(struct WINDOW *window){
 	console->cursor = 0;
 	console->last_cursor = 0;
 	console->window = window;
+
+	console->Line = 0;
+	console->Start = 0;
+	console->LinePlace = 0;
+	console->LastLine = 0;
+	console->color.fg = 0xFFFFFF;
+	console->color.bg = 0;
 	return console;
 }
 
@@ -37,47 +188,13 @@ void console_close(struct CONSOLE *console){
 	console->active = false;
 }
 
-void render_console(struct CONSOLE *console){
-	uint32_t count_lines = 1;
-	uint32_t cursor = 0;
-	//Calculate Number of Lines.
-	while(console->buf[cursor]){
-		if(console->buf[cursor] == '\n') count_lines++;
-		cursor++;
-	}
-	cursor = 0;
-	//If more lines than available, shift up one line.
-	if(count_lines >= console->height){
-		int count_remove = 0;
-		while(console->buf[count_remove] != '\n' && console->buf[count_remove] != '\0'){
-			count_remove++;
-		}
-		//memcpy(console->buf, console->buf + count_remove, count_remove);
-		for(uint32_t i = 0; i < console->buf_size - count_remove; i++){
-			console->buf[i] = console->buf[count_remove + i];
-		}
-		console->cursor -= count_remove;
-		memset(console->buf + console->cursor, 0, console->buf_size - console->cursor);
-	}
-
-	int x = 0;
-	int y = 0;
-	while(console->buf[cursor] != '\0' && cursor < console->buf_size){
-		if(console->buf[cursor] == '\n'){
-			y++;
-			x = 0;
-		}
-		else{
-			if((uint32_t) x >= console->width){
-				x = 0;
-				y++;
-			}
-			if(cursor >= (uint32_t) console->last_cursor) buf_putChar(console->window->backbuffer, x*CHAR_W, y*CHAR_H, console->buf[cursor], 0xFFFFFFFF, 0);
-			x++;
-		}
-		cursor++;
-	}
-	window_copy_buffer(console->window);
+void console_clear(struct CONSOLE *console){
+	if(console == NULL) return;
+	memset(console->buf, 0, console->buf_size);
+	console->Line = 0;
+	console->Start = 0;
+	console->LinePlace = 0;
+	console->LastLine = 0;
 }
 
 void print_console(struct CONSOLE *console, char *msg, ...){
@@ -87,7 +204,73 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 		console->cursor++;
 		msg++;
 	}
-	render_console(console);
-	print_serial(console->buf);
-	print_serial("Cursor is at %d\n", console->cursor);
+}
+
+char quadToHex(uint8_t quad){
+	switch(quad){
+	case 0x00:
+		return '0';
+		break;
+	case 0x01:
+	case 0x10:
+		return '1';
+		break;
+	case 0x02:
+	case 0x20:
+		return '2';
+		break;
+	case 0x03:
+	case 0x30:
+		return '3';
+		break;
+	case 0x04:
+	case 0x40:
+		return '4';
+		break;
+	case 0x05:
+	case 0x50:
+		return '5';
+		break;
+	case 0x06:
+	case 0x60:
+		return '6';
+		break;
+	case 0x07:
+	case 0x70:
+		return '7';
+		break;
+	case 0x08:
+	case 0x80:
+		return '8';
+		break;
+	case 0x09:
+	case 0x90:
+		return '9';
+		break;
+	case 0x0a:
+	case 0xa0:
+		return 'A';
+		break;
+	case 0x0b:
+	case 0xb0:
+		return 'B';
+		break;
+	case 0x0c:
+	case 0xc0:
+		return 'C';
+		break;
+	case 0x0d:
+	case 0xd0:
+		return 'D';
+		break;
+	case 0x0e:
+	case 0xe0:
+		return 'E';
+		break;
+	case 0x0f:
+	case 0xf0:
+		return 'F';
+		break;
+	}
+	return 'x';
 }
