@@ -38,7 +38,8 @@ int main(int argc, char **argv){
 		for(int i = 0; i < term_width; i++){
 			drawChar(8*i,(term_height-2)*8, termbuf[i]);
 		}
-		if(c == '='){
+		if(c == 10){
+			print(termbuf);
 			termbuf[idx-1] = 0;
 			exec(termbuf, 0, 0);
 			//memset(termbuf, 0, term_width);
