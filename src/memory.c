@@ -1,5 +1,5 @@
 #include "memory.h"
-#include "console_old.h"
+
 
 struct memory_region MEMORY_REGIONS[MEMORY_NUM_REGIONS];
 
@@ -164,7 +164,7 @@ void MEM_printRegions(){
 					break;
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
-			//printk("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			////printk("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
 }
@@ -178,7 +178,7 @@ int calculateBlocks(uint32_t size){
 int MEM_findRegionIdx(uint32_t size){
 	int needed_blocks = calculateBlocks(size);
 	print_serial("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
-	printk("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
+	//printk("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
 	int check_idx = -1;
 	int check_count = -1;
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){

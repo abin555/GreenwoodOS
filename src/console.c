@@ -47,7 +47,7 @@ void console_putLine(struct CONSOLE *console, uint32_t places){
 			console->window->backbuffer,
 			console->width*8,
 			console->Line*console->width + index,
-			consoleArray[consoleLine*console_width + index],
+			console->buf[console->Line*console->width + index],
 			console->color.fg, 
 			console->color.bg
 		);
@@ -55,10 +55,10 @@ void console_putLine(struct CONSOLE *console, uint32_t places){
 }
 
 void shiftConsoleUp(struct CONSOLE *console){
-	console_last_line = 0;
-	for(uint32_t places = 0; places < console_width; places++){
-		for(uint32_t i = 0; i < console_height*console_width-1; i++){
-			consoleArray[i] = consoleArray[i+1];
+	console->LastLine = 0;
+	for(uint32_t places = 0; places < console->width; places++){
+		for(uint32_t i = 0; i < console->height*console->width-1; i++){
+			console->buf[i] = console->buf[i+1];
 		}
 	}
 }
@@ -148,14 +148,14 @@ int abs(int x){
 
 int printFloat(struct CONSOLE *console, double data){
 	int i = (int)data;
-	int sizePart1 = printDecimal(i, 0);
+	int sizePart1 = printDecimal(console, i, 0);
 	data = (data-i)*1000000;
 	i = abs((int)data);
 	if(fabs(data) - i >= 0.5){
 		i++;
 	}
 	console->buf[console->Line*console->width + console->LinePlace + sizePart1] = '.';
-	int sizePart2 = printDecimal(i, sizePart1 + 1);
+	int sizePart2 = printDecimal(console, i, sizePart1 + 1);
 	return sizePart1 + sizePart2 + 1;
 }
 
@@ -198,12 +198,137 @@ void console_clear(struct CONSOLE *console){
 }
 
 void print_console(struct CONSOLE *console, char *msg, ...){
-	console->last_cursor = console->cursor;
-	while(*msg != '\0'){
-		console->buf[console->cursor] = *msg;
-		console->cursor++;
-		msg++;
+	if(console == NULL) return;
+	uint32_t p = 0;
+	char allowed = 1;
+	va_list listptd;
+	va_start(listptd, msg);
+	//printChar(p, consoleLine-consoleStart, msg[p]);
+	//memset(console->buf + consoleStart*fb_terminal_w - consoleLine*fb_terminal_w, 0, fb_terminal_w);
+	while(p < (unsigned int)console->width){
+		int setlength = 0;
+		if(msg[p] == '%'){
+			parseaftermodify:;
+			p++;
+			switch(msg[p]){
+				case 'h'://Hexadecimal
+				case 'H':
+				case 'x':
+				case 'X':
+					console->LinePlace += printHex(console, va_arg(listptd, unsigned int), setlength);
+				break;
+				case 'b'://Binary
+				case 'B':
+					console->LinePlace += printBinary(console, va_arg(listptd, unsigned int), setlength);
+				break;
+				case 'd'://Decimal
+				case 'D':
+					console->LinePlace += printDecimal(console, va_arg(listptd, int), 0);
+				break;
+				case 'f'://float
+				case 'F':
+					console->LinePlace += printFloat(console, va_arg(listptd, double));
+				break;
+				case 'c':
+				case 'C':
+					//console->LinePlace += va_arg(listptd, char);
+					console->buf[console->Line*console->width + console->LinePlace] = (char) va_arg(listptd, unsigned int);
+					console->LinePlace += 1;
+					break;
+				case 's':
+				case 'S': {
+					char *str = (char *) va_arg(listptd, unsigned int);
+					while(*str != '\0'){
+						console->buf[console->Line*console->width + console->LinePlace] = *str;
+						console->LinePlace += 1;
+						str++;
+					}
+				}
+				break;
+				default:
+				if(msg[p] == '1' && msg[p+1] == '6'){
+					setlength = 16;
+					p++;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '3' && msg[p+1] == '2'){
+					setlength = 32;
+					p++;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '1'){
+					setlength = 1;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '2'){
+					setlength = 2;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '3'){
+					setlength = 3;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '4'){
+					setlength = 4;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '5'){
+					setlength = 5;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '6'){
+					setlength = 6;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '7'){
+					setlength = 7;
+					goto parseaftermodify;
+				}
+				else if(msg[p] == '8'){
+					setlength = 8;
+					goto parseaftermodify;
+				}
+			}
+		}
+		else if(msg[p] != '\0' && allowed){
+			
+			console->buf[console->Line*console->width + console->LinePlace] = msg[p];
+			if(msg[p] == '\n'){
+				console->LinePlace = 0;          
+				if(console->Line == (unsigned int) console->height-2){
+					shiftConsoleUp(console);
+					//memset(console->buf, 0, console_width*console_height);
+					//consoleLine = 0;
+				}
+				else{
+					console->Line++;  
+				}
+			}
+			else{
+				console->LinePlace++;
+			}
+		}
+		else if(msg[p] == '\0'){
+			//console->buf[consoleLine*fb_terminal_w + cp] = msg[p];
+			allowed = 0;
+			break;
+		}
+		else{
+			//console->buf[consoleLine*fb_terminal_w + cp] = 0;
+		}
+		p++;
 	}
+
+	console_drawFull(console);
+	//console_putLine(p);
+	//fb_setChar(0, consoleLine, '*', 0xFFFFFF, 0);
+	va_end(listptd);
+	/*
+	for(int loop1 = 0; loop1 < 0xFFFF; loop1++){
+		for(int loop2 = 0; loop2 < 0x6FF; loop2++){
+
+		}
+	}*/
 }
 
 char quadToHex(uint8_t quad){

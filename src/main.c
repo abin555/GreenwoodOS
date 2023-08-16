@@ -17,7 +17,7 @@
 #include "window.h"
 #include "console.h"
 #include "system_calls.h"
-#include "console_old.h"
+
 
 void idle_task(){
     char c = '@';
@@ -46,7 +46,7 @@ void idle_task(){
 }
 
 void kernal_task(int argc, char **argv){
-    printk("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
+    print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     //fb_print(0, 8, "Kernal Tasking!");
 
     program_init();
@@ -55,10 +55,10 @@ void kernal_task(int argc, char **argv){
     console_init();
     init_drive_system();
 
-    printk("[Driver] Initializing Drivers\n");
+    //printk("[Driver] Initializing Drivers\n");
     for(int i = 0; i < PCI_numDrivers; i++){
         if(PCI_drivers[i]->init_driver != NULL){
-            printk("[Driver] Init #%x\n", i);
+            //printk("[Driver] Init #%x\n", i);
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
@@ -70,7 +70,7 @@ void kernal_task(int argc, char **argv){
     
     ISO9660_printTree(drive_get('A')->format_info.ISO);
 
-    printk("Testing File Open\n");
+    //printk("Testing File Open\n");
     //struct File_Info test = ISO9660_GetFile(drive_get('A')->format_info.ISO, "CHILD/TEST/../../CHILD_CO/OTHER.TXT");
     //char *buf = (char *) malloc(test.size);
     //ISO9660_openFile(drive_get('A')->format_info.ISO, test, buf, test.size);
@@ -87,7 +87,7 @@ void kernal_task(int argc, char **argv){
     while(1){
         char c = 0;
         c = getc_blk();
-        printk("%x\n", c);
+        //printk("%x\n", c);
     }
     */
     struct WINDOW *kernal_win = window_open("KERNEL", true);
@@ -150,25 +150,24 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
 	fb_init(GRUB_tagfb);
 
-    initialize_console(fb_width/8,fb_height/8);
     for(int i = 0; i < 8; i++){
         fb_putChar(i*8, 4*8, '1'+i, 0xFFFFFFFF, 0);
     }
-    printk("Bootup Start\n");
+    //printk("Bootup Start\n");
     MEM_printRegions();
     alloc_init();
-    printk("Alloc Success\n");
+    //printk("Alloc Success\n");
 
     MEM_printRegions();
 
-    printk("Init PCI\n");
+    //printk("Init PCI\n");
     PCI_init();
-    printk("Init Keyboard\n");
+    //printk("Init Keyboard\n");
     kbd_init(0xFF);
     ps2_init();
 
     timer_init(1000);
-    printk("Starting Kernal Task");
+    //printk("Starting Kernal Task");
     start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 

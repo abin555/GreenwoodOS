@@ -12,14 +12,14 @@ void getCPUVendorString(){
     vendorString[0] = ebx;
     vendorString[1] = edx;
     vendorString[2] = ecx;
-    //printk("CPUID: %s\n", vendorIDString);
+    ////printk("CPUID: %s\n", vendorIDString);
     print_serial("CPUID: %s\n", vendorIDString);
 }
 
 uint8_t getCPUFeatures(uint32_t feature){
     uint32_t eax, unused, edx;
     __get_cpuid(1, &eax, &unused, &unused, &edx);
-    //printk("CPU Feature:\n%b\n%b\n%b\n", feature, edx, edx & feature);
+    ////printk("CPU Feature:\n%b\n%b\n%b\n", feature, edx, edx & feature);
     return (edx & feature) != 0;
 }
 

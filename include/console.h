@@ -21,7 +21,7 @@ struct CONSOLE{
 
 	uint32_t Line;
 	uint32_t Start;
-	uint32_t LinePlace
+	uint32_t LinePlace;
 	uint32_t LastLine;
 	struct{
 		uint32_t fg;
@@ -38,5 +38,15 @@ struct CONSOLE *console_open(struct WINDOW *window);
 void console_close(struct CONSOLE *console);
 
 void print_console(struct CONSOLE *console, char *msg, ...);
+char quadToHex(uint8_t quad);
+void console_clear(struct CONSOLE *console);
+int printFloat(struct CONSOLE *console, double data);
+int printBinary(struct CONSOLE *console, unsigned int data, int setlength);
+int printHex(struct CONSOLE *console, unsigned int data, int setlength);
+int printDecimal(struct CONSOLE *console, int data, int offset);
+int calculateNumberLength(unsigned int data, int base);
+void shiftConsoleUp(struct CONSOLE *console);
+void console_putLine(struct CONSOLE *console, uint32_t places);
+void console_drawFull(struct CONSOLE *console);
 
 #endif

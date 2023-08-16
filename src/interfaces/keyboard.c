@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "console_old.h"
+
 
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;

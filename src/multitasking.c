@@ -120,7 +120,7 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
 }
 
 void task_callback(){
-    //printk("[TASK] Callback\n");
+    ////printk("[TASK] Callback\n");
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){
@@ -132,27 +132,27 @@ void task_callback(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active && i != running_idx){
             task_available = true;
-            //printk("Task is available\n");
+            ////printk("Task is available\n");
             break;
         }
     }
     if(!task_available) return;
     /*
-    printk("Task end is at 0x%x\n", (uint32_t) &task_end);
-    printk("Dumping Task #%d's Top of Stack:\n", task_running_idx);
+    //printk("Task end is at 0x%x\n", (uint32_t) &task_end);
+    //printk("Dumping Task #%d's Top of Stack:\n", task_running_idx);
     for(unsigned int i = 0; i < (tasks[task_running_idx].stack_region + TASK_STACK_SIZE - tasks[task_running_idx].registers.esp)/4; i++){
         uint32_t *stack = (uint32_t *) tasks[task_running_idx].registers.esp;
-        printk("0x%x ", stack+i);
+        //printk("0x%x ", stack+i);
         if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.ebp){
-            printk("EBP ");
+            //printk("EBP ");
         }
         else if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.esp){
-            printk("ESP ");
+            //printk("ESP ");
         }
         else{
-            printk("    ");
+            //printk("    ");
         }
-        printk("%d 0x%x\n", i, stack[i]);
+        //printk("%d 0x%x\n", i, stack[i]);
     }
     */
     int8_t next_idx = running_idx + 1;
@@ -174,7 +174,7 @@ void task_callback(){
             tasks[next_idx].slot_running = 1;
             running_idx = next_idx;
             task_running_idx = running_idx;
-            //printk("Switched to task %2x\n", running_idx);
+            ////printk("Switched to task %2x\n", running_idx);
             break;
         }
         else{
