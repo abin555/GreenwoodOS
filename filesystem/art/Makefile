@@ -5,7 +5,7 @@ LDFLAGS = -T ../OS/libc/link.ld -melf_i386
 FILES = main.c
 OBJ = art.o
 LIBS = ../OS/libc/libc.o
-PROG = aart
+PROG = art
 
 all:
 	make -C ../OS/libc

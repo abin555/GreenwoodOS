@@ -20,7 +20,7 @@ void window_init(){
 		//windows[i].name = 0;
 		memset(windows[i].name, 0, sizeof(windows[i].name));
 		windows[i].width = fb_width;
-		windows[i].height = fb_height;
+		windows[i].height = fb_height-8;
 		windows[i].active = false;
 		windows[i].copyOnPromptOnly = false;
 	}

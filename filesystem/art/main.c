@@ -41,7 +41,7 @@ int main(int argc, char **argv){
             dy = -dy;
             y = win->height - 1;
         }
-        if(i > 1000){
+        if(i > 5000){
             window_update();
             i = 0;
         }
