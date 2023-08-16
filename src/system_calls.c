@@ -15,6 +15,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			print_serial("Name address is: 0x%x\n", cpu.ebx);
 			cpu_state.eax = (uint32_t) window;
 			task->window = window;
+			task->own_window = true;
 			print_serial("[SYS] Open Window %s\n", window->name);
 			break;
 		}
@@ -23,6 +24,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) cpu.ebx)->name);
 			window_close((struct WINDOW *) cpu_state.ebx);
 			task->window = NULL;
+			task->own_console = false;
 			break;
 		}
 		//Copy Buffer
@@ -43,6 +45,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Execute Program
 		case 0x06:{
+			print_console(task->console, "Executing %s %d: ", (char *) cpu.ebx, cpu.ecx);
+			for(uint32_t i = 0; i < cpu.ecx; i++){
+				print_console(task->console, " %s", ((char **) cpu.edx)[i]);
+			}
 			exec((char *)cpu.ebx, cpu.ecx, (char **) cpu.edx);
 			break;
 		}
@@ -62,6 +68,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			if(task->window == NULL) break;
 			struct CONSOLE *console = console_open(task->window);
 			task->console = console;
+			task->own_console = true;
 			break;
 		}
 		//Close Console
@@ -69,6 +76,12 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			if(task->console == NULL) break;
 			console_close(task->console);
 			task->console = NULL;
+			task->own_console = false;
+			break;
+		}
+		//Malloc
+		case 0x0B:{
+			cpu_state.eax = (uint32_t) malloc(cpu.ebx);
 			break;
 		}
 	}

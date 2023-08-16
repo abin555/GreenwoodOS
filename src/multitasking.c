@@ -38,7 +38,10 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].program_slot = program_slot;
             tasks[i].schedule_type = ALWAYS;
             tasks[i].task_name = name;
+            tasks[i].window = tasks[task_running_idx].window;
+            tasks[i].own_window = false;
             tasks[i].console = tasks[task_running_idx].console;
+            tasks[i].own_console = false;
 
             print_serial("[TASK] Added to queue idx %x\n", i);
             tasks[i].slot_active = 1;
@@ -56,20 +59,39 @@ void stop_task(int8_t task_idx){
     tasks[task_idx].slot_active = 0;
     if(tasks[task_idx].program_slot != -1){
         program_slot_status[tasks[task_idx].program_slot] = false;
-        if(tasks[task_idx].window != NULL){
+        if(tasks[task_idx].window != NULL && tasks[task_idx].own_window == true){
             window_close(tasks[task_idx].window);
-            tasks[task_idx].window = NULL;
+            print_serial("[TASK] %d %s Closed Window\n", task_idx, tasks[task_idx].task_name);
         }
-        if(tasks[task_idx].console != NULL){
+        tasks[task_idx].window = NULL;
+        tasks[task_idx].own_window = false;
+        if(tasks[task_idx].console != NULL && tasks[task_idx].own_console == true){
             console_close(tasks[task_idx].console);
-            tasks[task_idx].console = NULL;
+            print_serial("[TASK] %d %s Closed Console\n", task_idx, tasks[task_idx].task_name);
         }
+        tasks[task_idx].console = NULL;
+        tasks[task_idx].own_console = false;
     }
-    print_serial("[TASK] Killed Task %d\n", task_idx);
+    print_serial("[TASK] Killed Task %d %s\n", task_idx, tasks[task_idx].task_name);
 }
 
 void task_end(){
     tasks[task_running_idx].slot_active = 0;
+    if(tasks[task_running_idx].program_slot != -1){
+        program_slot_status[tasks[task_running_idx].program_slot] = false;
+        if(tasks[task_running_idx].window != NULL && tasks[task_running_idx].own_window == true){
+            window_close(tasks[task_running_idx].window);
+            print_serial("[TASK] %d %s Closed Window\n", task_running_idx, tasks[task_running_idx].task_name);
+        }
+        tasks[task_running_idx].window = NULL;
+        tasks[task_running_idx].own_window = false;
+        if(tasks[task_running_idx].console != NULL && tasks[task_running_idx].own_console == true){
+            console_close(tasks[task_running_idx].console);
+            print_serial("[TASK] %d %s Closed Console\n", task_running_idx, tasks[task_running_idx].task_name);
+        }
+        tasks[task_running_idx].console = NULL;
+        tasks[task_running_idx].own_console = false;
+    }
     print_serial("[TASK] Task %d:%s Ended\n", task_running_idx, tasks[task_running_idx].task_name);
 	/*
     if(tasks[task_running_idx].program_slot == -1)
@@ -77,17 +99,7 @@ void task_end(){
     else 
         freeProgramSlot(tasks[task_running_idx].program_slot);
     */
-    if(tasks[task_running_idx].program_slot != -1){
-        program_slot_status[tasks[task_running_idx].program_slot] = false;
-        if(tasks[task_running_idx].window != NULL){
-            window_close(tasks[task_running_idx].window);
-            tasks[task_running_idx].window = NULL;
-        }
-        if(tasks[task_running_idx].console != NULL){
-            console_close(tasks[task_running_idx].console);
-            tasks[task_running_idx].console = NULL;
-        }
-    }
+    
 	while(1){}
 }
 

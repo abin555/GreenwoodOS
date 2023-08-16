@@ -82,5 +82,6 @@ struct WINDOW *window_open(char *name, bool copyPromptOnly){
 
 void window_close(struct WINDOW *window){
 	window->active = false;
+	memset(window->backbuffer, 0, window_buf_size);
 	memset(window->name, 0, sizeof(windows->name));
 }

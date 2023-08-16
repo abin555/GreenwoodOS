@@ -97,3 +97,10 @@ void console_close(){
 	eax = 0x0A;
 	asm("int 0x80");
 }
+
+void *kmalloc(uint32_t size){
+	register uint32_t eax asm("eax");
+	eax = 0x0B;
+	asm("int 0x80");
+	return (void *) eax;
+}

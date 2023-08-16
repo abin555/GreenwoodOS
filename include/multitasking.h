@@ -42,6 +42,8 @@ struct task_state{
     ScheduleType schedule_type;
     struct WINDOW *window;
     struct CONSOLE *console;
+    bool own_window;
+    bool own_console;
 };
 
 #define MAX_TASKS 10

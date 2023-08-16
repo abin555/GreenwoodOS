@@ -23,5 +23,6 @@ void set_schedule(int type);
 void print(char *str);
 void console_open();
 void console_close();
+void *kmalloc(uint32_t size);
 
 #endif
