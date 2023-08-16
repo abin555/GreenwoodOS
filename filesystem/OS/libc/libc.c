@@ -86,10 +86,22 @@ void print(char *str){
 	asm("int 0x80");
 }
 
-void console_open(){
+void print_arg(char *str, uint32_t arg){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) arg;
+	ebx = (uint32_t) str;
+	eax = 0x0C;
+	asm("int 0x80");
+}
+
+struct CONSOLE *console_open(){
 	register uint32_t eax asm("eax");
 	eax = 0x09;
 	asm("int 0x80");
+	struct CONSOLE *console = (struct CONSOLE *) eax;
+	return console;
 }
 
 void console_close(){

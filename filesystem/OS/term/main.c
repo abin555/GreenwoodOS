@@ -12,14 +12,17 @@ int term_height;
 
 void run_command(char *string);
 
+struct WINDOW *window;
+struct CONSOLE *console;
+
 int main(int argc, char **argv){
 	char *window_name = "TERMINAL";
-	struct WINDOW *window = window_open(window_name);
+	window = window_open(window_name);
 	set_schedule(2);
 	term_width = window->width / 8;
 	term_height = window->height / 8;
 	print("Terminal!\n");
-	console_open();
+	console = console_open();
 	print("Greenwood OS Terminal\n");
 	window_update();
 	char *termbuf = alloc(term_width);
@@ -78,18 +81,17 @@ void run_command(char *cmd){
 	}
 	args = (char **) kmalloc(sizeof(char *) * argc);
 	int idx = 0;
-	for(int i = 0; i < argc && *cmd != 0; i++){
+	for(int i = 0; i < argc && cmd[idx] != 0; i++){
 		int size = 0;
 		for(int j = 0; cmd[j] != ' '; j++){
 			size++;
 		}
 		args[i] = (char *) kmalloc(size);
 		mcpy(args[i], cmd+idx, size);
-		i = i + size + 1;
+		idx = idx + size + 1;
 	}
 	for(int i = 0; i < fullsize; i++){
 		if(cmd[i] == ' ') cmd[i] = 0;
 	}
-
-	exec(command, argc, args);
+	exec(args[0], argc, args);
 }

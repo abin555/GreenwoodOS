@@ -45,10 +45,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Execute Program
 		case 0x06:{
-			print_console(task->console, "Executing %s %d: ", (char *) cpu.ebx, cpu.ecx);
-			for(uint32_t i = 0; i < cpu.ecx; i++){
-				print_console(task->console, " %s", ((char **) cpu.edx)[i]);
-			}
 			exec((char *)cpu.ebx, cpu.ecx, (char **) cpu.edx);
 			break;
 		}
@@ -67,6 +63,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x09:{
 			if(task->window == NULL) break;
 			struct CONSOLE *console = console_open(task->window);
+			cpu_state.eax = (uint32_t) console;
 			task->console = console;
 			task->own_console = true;
 			break;
@@ -82,6 +79,12 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		//Malloc
 		case 0x0B:{
 			cpu_state.eax = (uint32_t) malloc(cpu.ebx);
+			break;
+		}
+		//Print to console w/t args=
+		case 0x0C:{
+			if(task->console != NULL)
+				print_console(task->console, (char*) cpu.ebx, cpu.ecx);
 			break;
 		}
 	}

@@ -136,11 +136,19 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 		char *iso_buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
 		if(iso_buf == NULL) return 1;
 		int idx = 0;
+		int sector_offset = 0;
 		while(file->head < 512*4 && idx < buf_size){
 			buf[idx] = iso_buf[file->head];
 			file->head++;
 			idx++;
+			if(file->head == 512*4){
+				sector_offset++;
+				print_serial("[DRIVE] Sector Offset %d\n", sector_offset);
+				iso_buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector+sector_offset);
+				file->head = 0;
+			}
 		}
+
 		return 0;
 	}
 	return 0;
