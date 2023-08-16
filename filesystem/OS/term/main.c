@@ -15,6 +15,8 @@ void run_command(char *string);
 struct WINDOW *window;
 struct CONSOLE *console;
 
+void draw_cursor(int idx);
+
 int main(int argc, char **argv){
 	char *window_name = "TERMINAL";
 	window = window_open(window_name);
@@ -53,6 +55,7 @@ int main(int argc, char **argv){
 			}
 			idx = 0;
 		}
+		draw_cursor(idx);
 		window_update();
 	}
 }
@@ -94,4 +97,11 @@ void run_command(char *cmd){
 		if(cmd[i] == ' ') cmd[i] = 0;
 	}
 	exec(args[0], argc, args);
+}
+
+void draw_cursor(int i){
+	uint32_t *buf = window->backbuffer;
+	for(int x = 0; x < 8; x++){
+		buf[window->width * ((term_height - 1) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+	}
 }

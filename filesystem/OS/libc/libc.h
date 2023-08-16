@@ -13,6 +13,12 @@ struct WINDOW {
 	bool copyOnPromptOnly;
 };	
 
+typedef enum {
+    ALWAYS = 1,
+    ONFOCUS = 2,
+    NOCHILD = 3
+} ScheduleType;
+
 struct CONSOLE{
 	struct WINDOW *window;
 	uint32_t width;
@@ -40,7 +46,7 @@ void window_update();
 void drawChar(uint32_t x, uint32_t y, char c);
 char getc();
 void exec(char *filename, int argc, char **argv);
-void set_schedule(int type);
+void set_schedule(ScheduleType type);
 void print(char *str);
 void print_arg(char *str, uint32_t arg);
 struct CONSOLE *console_open();

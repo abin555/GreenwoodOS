@@ -70,11 +70,6 @@ void kernal_task(int argc, char **argv){
     
     ISO9660_printTree(drive_get('A')->format_info.ISO);
 
-    //printk("Testing File Open\n");
-    //struct File_Info test = ISO9660_GetFile(drive_get('A')->format_info.ISO, "CHILD/TEST/../../CHILD_CO/OTHER.TXT");
-    //char *buf = (char *) malloc(test.size);
-    //ISO9660_openFile(drive_get('A')->format_info.ISO, test, buf, test.size);
-    //print_serial("File Contents: %s\n", buf);
     start_task(idle_task, -1, 0, NULL, "IDLE");
     struct FILE* file = fopen("A/CHILD/TEST/TEST.TXT");
     //print_serial("First Char: %c\n", fgetc(file));
@@ -83,15 +78,8 @@ void kernal_task(int argc, char **argv){
     print_serial("%s\n", buf);
     fclose(file);
 
-    /*
-    while(1){
-        char c = 0;
-        c = getc_blk();
-        //printk("%x\n", c);
-    }
-    */
     struct WINDOW *kernal_win = window_open("KERNEL", true);
-    struct CONSOLE *kernal_console = console_open(kernal_win);
+    kernal_console = console_open(kernal_win);
     tasks[task_running_idx].console = kernal_console;
     print_console(kernal_console, "TEST!\nTEST2\n");
     

@@ -1,5 +1,8 @@
 #include "paging.h"
 
+#include "console.h"
+#include "multitasking.h"
+
 uint32_t *page_directory;
 
 extern int8_t task_running_idx;
@@ -19,8 +22,11 @@ void page_init(){
 
 struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
     print_serial("\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
+    print_console(kernal_console, "\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
     //asm("hlt");
     stop_task(task_running_idx);
+    switch_to_task(&tasks[task_running_idx], &tasks[0]);
+    print_console(kernal_console, "Returning to KERNAL Task\n");
     return cpu;
 }
 

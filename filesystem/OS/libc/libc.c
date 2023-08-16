@@ -70,7 +70,7 @@ void exec(char *filename, int argc, char **argv){
 	eax = 0x06;
 	asm("int 0x80");
 }
-void set_schedule(int type){
+void set_schedule(ScheduleType type){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	ebx = type;
