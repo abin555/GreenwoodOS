@@ -29,7 +29,7 @@ int main(int argc, char **argv){
     heap = (char *) 0x4000;
     
     
-    set_schedule(ONFOCUS);
+    //set_schedule(ONFOCUS);
     print_arg("Opening Image %s\n", (uint32_t) argv[1]);
     struct FILE *image = fopen(argv[1]);
     if(image == NULL){
