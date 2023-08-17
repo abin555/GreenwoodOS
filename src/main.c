@@ -85,11 +85,6 @@ void kernal_task(int argc, char **argv){
     
 
     exec("A/OS/TERM/TERM.EXE", 0, NULL);
-    char *argv_image[] = {
-        "A/IMAGE/IMAGE.EXE",
-        "A/IMAGE/TAP.TGA"
-    };
-    exec("A/IMAGE/IMAGE.EXE", 2, argv_image);
 
     //set_schedule(ONFOCUS);
     char c = '#';

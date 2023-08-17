@@ -36,6 +36,10 @@ struct DRIVE{
 	char identity;
 };
 
+struct DIRECTORY{
+	char path[100];
+};
+
 struct File_Info{
 	struct DRIVE *drive;
 	uint32_t sector;
@@ -64,6 +68,8 @@ struct DRIVE *drive_add(int type, void *driver);
 struct DRIVE *drive_get(char identity);
 
 int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors);
+
+struct FILE *fopen_rel(struct DIRECTORY *dir, char *path);
 
 struct FILE *fopen(char *path);
 void fclose(struct FILE *file);

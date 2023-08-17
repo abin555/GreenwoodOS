@@ -12,6 +12,7 @@
 
 #include "window.h"
 #include "console.h"
+#include "drive.h"
 
 struct task_registers{
     uint32_t esp;
@@ -42,6 +43,7 @@ struct task_state{
     ScheduleType schedule_type;
     struct WINDOW *window;
     struct CONSOLE *console;
+    struct DIRECTORY currentDirectory;
     bool own_window;
     bool own_console;
 };

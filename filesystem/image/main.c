@@ -26,10 +26,8 @@ int main(int argc, char **argv){
         return 1;
     }
     print("Opening Image Viewer\n");
-    heap = (char *) 0x4000;
+    heap = (char *) 0x4000;    
     
-    
-    //set_schedule(ONFOCUS);
     print_arg("Opening Image %s\n", (uint32_t) argv[1]);
     struct FILE *image = fopen(argv[1]);
     if(image == NULL){
@@ -50,12 +48,13 @@ int main(int argc, char **argv){
 
     uint32_t *image_buf = (uint32_t *) (file_buf + sizeof(tga_header_t));
     int i = 0;
-    for(int y = 0; y <= header->h; y++){
-        for(int x = 0; x <= header->w; x++){
+    for(int y = 0; y < header->h; y++){
+        for(int x = 0; x < header->w; x++){
             buffer[y*window->width + x] = image_buf[x+y*header->w];
         }
     }
     window_update();
+    set_schedule(ONFOCUS);
     while(1){
 
     }

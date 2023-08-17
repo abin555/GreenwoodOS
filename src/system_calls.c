@@ -121,6 +121,30 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			cpu_state.eax = status;
 			break;
 		}
+		//Change Directory
+		case 0x12:{
+			/*
+			Manipulates the task currentDirectory string.
+			Everything is appended to the string except for:
+			./ is ignored, and removed.
+			../ removed until the previous / and continues
+			- Note, ensure that ../ to idx 0 is covered.
+			*/
+
+			break;
+		}
+		//Get Directory
+		case 0x13:{
+			//return currentDirectory string
+			
+			break;
+		}
+		//List Directory
+		case 0x14:{
+			//Return string of files and folders in current directory.
+
+			break;
+		}
 	}
 	return cpu_state;
 }

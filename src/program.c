@@ -43,6 +43,7 @@ void exec(char *filename, int argc, char **argv){
 	print_serial("Loading Program %s to slot %d\n", filename, slot);
 
 	struct FILE *file = fopen(filename);
+	if(file == NULL) return;
 	fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));	
 	fclose(file);
 	start_task(0, slot, argc, argv, filename);

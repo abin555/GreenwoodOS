@@ -106,6 +106,7 @@ struct FILE *fopen(char *path){
 	if(drive == NULL) return file;
 	if(drive->format == ISO9660){
 		file->info = ISO9660_GetFile(drive->format_info.ISO, path);
+		if(file->info.drive == NULL || file->info.sector == 0 || file->info.size == 0) return NULL;
 		file->head = 0;
 		return file;
 	}

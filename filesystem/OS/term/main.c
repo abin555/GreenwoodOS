@@ -16,6 +16,7 @@ struct WINDOW *window;
 struct CONSOLE *console;
 
 void draw_cursor(int idx);
+void memset(void *dest, char v, int size);
 
 int main(int argc, char **argv){
 	char *window_name = "TERMINAL";
@@ -28,6 +29,8 @@ int main(int argc, char **argv){
 	print("Greenwood OS Terminal\n");
 	window_update();
 	char *termbuf = alloc(term_width);
+	memset(termbuf, 0, term_width);
+
 	int idx = 0;
 	while(1){
 		char c = getc();
@@ -45,11 +48,12 @@ int main(int argc, char **argv){
 			drawChar(8*i,(term_height-2)*8, termbuf[i]);
 		}
 		if(c == 10){
+			print("Entered:\n");
 			print(termbuf);
 			termbuf[idx-1] = 0;
 			//exec(termbuf, 0, 0);
 			run_command(termbuf);
-			//memset(termbuf, 0, term_width);
+			memset(termbuf, 0, term_width);
 			for(int i = 0; i < term_width; i++){
 				termbuf[i] = 0;
 			}
@@ -79,6 +83,7 @@ void run_command(char *cmd){
 	}
 	fullsize++;
 	print_arg("Fullsize is %d\n", fullsize);
+	window_update();
 	char *command;
 	int argc = 1;
 	for(int i = 0; cmd[i] != 0; i++){
@@ -89,24 +94,34 @@ void run_command(char *cmd){
 	for(int i = 0; i < argc && cmd[idx] != 0; i++){
 		int size = 0;
 		for(int j = 0; cmd[j] != ' ' && cmd[j] != 0; j++){
-			size++;
+			size++;2
 		}
 		print_arg("Arg %d Size is ", i);
+		window_update();
 		print_arg("%d ", size);
+		window_update();
 		args[i] = (char *) kmalloc(size+1);
+		memset(args[i], 0, size+1);
 		mcpy(args[i], cmd+idx, size);
 		print_arg("%s\n", (uint32_t) args[i]);
+		window_update();
 		idx = idx + size + 1;
 	}
 	for(int i = 0; i < fullsize; i++){
 		if(cmd[i] == ' ') cmd[i] = 0;
 	}
 	exec(args[0], argc, args);
+	window_update();
 }
 
 void draw_cursor(int i){
 	uint32_t *buf = window->backbuffer;
 	for(int x = 0; x < 8; x++){
 		buf[window->width * ((term_height - 1) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+	}
+}
+void memset(void *dest, char v, int size){
+	for(int i = 0; i < size; i++){
+		((char *)dest)[i] = v;
 	}
 }
