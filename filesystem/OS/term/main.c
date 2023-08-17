@@ -77,6 +77,8 @@ void run_command(char *cmd){
 	while(cmd[fullsize] != 0){
 		fullsize++;
 	}
+	fullsize++;
+	print_arg("Fullsize is %d\n", fullsize);
 	char *command;
 	int argc = 1;
 	for(int i = 0; cmd[i] != 0; i++){
@@ -86,11 +88,14 @@ void run_command(char *cmd){
 	int idx = 0;
 	for(int i = 0; i < argc && cmd[idx] != 0; i++){
 		int size = 0;
-		for(int j = 0; cmd[j] != ' '; j++){
+		for(int j = 0; cmd[j] != ' ' && cmd[j] != 0; j++){
 			size++;
 		}
-		args[i] = (char *) kmalloc(size);
+		print_arg("Arg %d Size is ", i);
+		print_arg("%d ", size);
+		args[i] = (char *) kmalloc(size+1);
 		mcpy(args[i], cmd+idx, size);
+		print_arg("%s\n", (uint32_t) args[i]);
 		idx = idx + size + 1;
 	}
 	for(int i = 0; i < fullsize; i++){

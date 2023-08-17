@@ -3,6 +3,7 @@
 
 typedef unsigned int uint32_t;
 typedef char bool;
+#define NULL 0
 
 struct WINDOW {
 	uint32_t *backbuffer;
@@ -37,8 +38,9 @@ struct CONSOLE{
 		uint32_t fg;
 		uint32_t bg;
 	} color;
-
 };
+
+struct FILE;
 
 struct WINDOW *window_open(char *name);
 void window_close(struct WINDOW *window);
@@ -52,5 +54,10 @@ void print_arg(char *str, uint32_t arg);
 struct CONSOLE *console_open();
 void console_close();
 void *kmalloc(uint32_t size);
+struct FILE *fopen(char *file);
+void fclose(struct FILE *file);
+char fgetc(struct FILE *file);
+int fsize(struct FILE *file);
+int fcopy(struct FILE *file, char *buf, int buf_size);
 
 #endif

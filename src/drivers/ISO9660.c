@@ -143,7 +143,7 @@ struct File_Info ISO9660_getFile(struct ISO9660 *iso, uint32_t dir_sector, char 
 struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path){
 	print_serial("[ISO] Opening %s\n", path);
 	struct File_Info retFile = {0};
-	char work_buf[20];
+	char work_buf[100];
 	memset(work_buf, 0, 20);
 	struct DRIVE *drive = iso->drive;
 	int idx = 0;

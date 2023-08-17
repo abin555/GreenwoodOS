@@ -116,3 +116,51 @@ void *kmalloc(uint32_t size){
 	asm("int 0x80");
 	return (void *) eax;
 }
+
+struct FILE *fopen(char *file){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) file;
+	eax = 0x0D;
+	asm("int 0x80");
+	struct FILE *f = (struct FILE *) eax;
+	return f;
+}
+
+void fclose(struct FILE *file){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) file;
+	eax = 0x0E;
+	asm("int 0x80");
+}
+
+char fgetc(struct FILE *file){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) file;
+	eax = 0x0F;
+	asm("int 0x80");
+	return (char) eax;
+}
+
+int fsize(struct FILE *file){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) file;
+	eax = 0x10;
+	asm("int 0x80");
+	return (int) eax;
+}
+
+int fcopy(struct FILE *file, char *buf, int buf_size){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	register uint32_t edx asm("edx");
+	edx = buf_size;
+	ecx = (uint32_t) buf;
+	ebx = (uint32_t) file;
+	eax = 0x11;
+	asm("int 0x80");
+}

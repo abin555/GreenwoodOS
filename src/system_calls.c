@@ -45,6 +45,11 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Execute Program
 		case 0x06:{
+			print_console(task->console, "%s : Argc %d: ", (char *) cpu.ebx, cpu.ecx);
+			for(uint32_t i = 0; i < cpu.ecx; i++){
+				print_console(task->console, "%s ", ((char **) cpu.edx)[i]);
+			}
+			print_console(task->console, "\n");
 			exec((char *)cpu.ebx, cpu.ecx, (char **) cpu.edx);
 			break;
 		}
@@ -85,6 +90,35 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x0C:{
 			if(task->console != NULL)
 				print_console(task->console, (char*) cpu.ebx, cpu.ecx);
+			break;
+		}
+		//File Open
+		case 0x0D:{
+			struct FILE *file = fopen((char *) cpu.ebx);
+			cpu_state.eax = (uint32_t) file;
+			break;
+		}
+		//File Close
+		case 0x0E:{
+			fclose((struct FILE *) cpu.ebx);
+			break;
+		}
+		//File GetC
+		case 0x0F:{
+			char c = fgetc((struct FILE *) cpu.ebx);
+			cpu_state.eax = c;
+			break;
+		}
+		//File Get Size
+		case 0x10:{
+			int size = fsize((struct FILE *) cpu.ebx);
+			cpu_state.eax = size;
+			break;
+		}
+		//File Copy
+		case 0x11:{
+			int status = fcopy((struct FILE *) cpu.ebx, (char *) cpu.ecx, cpu.edx);
+			cpu_state.eax = status;
 			break;
 		}
 	}
