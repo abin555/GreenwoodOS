@@ -42,6 +42,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].own_window = false;
             tasks[i].console = tasks[task_running_idx].console;
             tasks[i].own_console = false;
+            memcpy(tasks[i].currentDirectory.path, tasks[task_running_idx].currentDirectory.path, sizeof(tasks[i].currentDirectory.path));
             print_serial("[TASK] Added to queue idx %x\n", i);
             tasks[i].slot_active = 1;
             break;

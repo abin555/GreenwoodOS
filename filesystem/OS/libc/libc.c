@@ -1,5 +1,13 @@
 #include "libc.h"
 
+int strcmp(const char *s1, const char *s2){
+	while(*s1 && (*s1 == *s2)){
+		s1++;
+		s2++;
+	}
+	return *(const unsigned char *)s1 - *(const unsigned char*)s2;
+}
+
 struct WINDOW *window_open(char *name){
 	register unsigned int eax asm("eax");
     register unsigned int ebx asm("ebx");
@@ -163,4 +171,20 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 	ebx = (uint32_t) file;
 	eax = 0x11;
 	asm("int 0x80");
+}
+
+int changeDirectory(char *change){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) change;
+	eax = 0x12;
+	asm("int 0x80");
+	return eax;
+}
+
+char *getDirectory(){
+	register uint32_t eax asm("eax");
+	eax = 0x13;
+	asm("int 0x80");
+	return (char *) eax;
 }

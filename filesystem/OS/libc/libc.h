@@ -42,6 +42,7 @@ struct CONSOLE{
 
 struct FILE;
 
+int strcmp(const char *s1, const char *s2);
 struct WINDOW *window_open(char *name);
 void window_close(struct WINDOW *window);
 void window_update();
@@ -59,5 +60,6 @@ void fclose(struct FILE *file);
 char fgetc(struct FILE *file);
 int fsize(struct FILE *file);
 int fcopy(struct FILE *file, char *buf, int buf_size);
-
+int changeDirectory(char *change);
+char *getDirectory();
 #endif

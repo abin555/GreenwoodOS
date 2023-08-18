@@ -80,11 +80,14 @@ void kernal_task(int argc, char **argv){
 
     struct WINDOW *kernal_win = window_open("KERNEL", true);
     kernal_console = console_open(kernal_win);
-    tasks[task_running_idx].console = kernal_console;
+    struct task_state *kernal_task = &tasks[task_running_idx];
+    kernal_task->console = kernal_console;
+    char kernal_path[] = "A/";
+    memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
+    memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
     print_console(kernal_console, "TEST!\nTEST2\n");
-    
 
-    exec("A/OS/TERM/TERM.EXE", 0, NULL);
+    exec("OS/TERM/TERM.EXE", 0, NULL);
 
     //set_schedule(ONFOCUS);
     char c = '#';

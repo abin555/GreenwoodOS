@@ -33,6 +33,16 @@ int main(int argc, char **argv){
 
 	int idx = 0;
 	while(1){
+		char *path = getDirectory();
+		int i;
+		for(i = 0; path[i] != 0; i++){
+			drawChar(8*i,(term_height-2)*8, path[i]);
+		}
+		drawChar(8*i,(term_height-2)*8,'>');
+		for(i++; i < term_width; i++){
+			drawChar(8*i,(term_height-2)*8,' ');
+		}
+		window_update();
 		char c = getc();
 		if(c == '0') continue;
 		if(c == 8){
@@ -45,11 +55,10 @@ int main(int argc, char **argv){
 			
 		}
 		for(int i = 0; i < term_width; i++){
-			drawChar(8*i,(term_height-2)*8, termbuf[i]);
+			drawChar(8*i,(term_height-1)*8, termbuf[i]);
 		}
 		if(c == 10){
-			print("Entered:\n");
-			print(termbuf);
+			print_arg("$ %s\n", (uint32_t) termbuf);
 			termbuf[idx-1] = 0;
 			//exec(termbuf, 0, 0);
 			run_command(termbuf);
@@ -58,6 +67,9 @@ int main(int argc, char **argv){
 				termbuf[i] = 0;
 			}
 			idx = 0;
+			for(int i = 0; i < term_width; i++){
+				drawChar(8*i,(term_height-1)*8, termbuf[i]);
+			}
 		}
 		draw_cursor(idx);
 		window_update();
@@ -82,7 +94,6 @@ void run_command(char *cmd){
 		fullsize++;
 	}
 	fullsize++;
-	print_arg("Fullsize is %d\n", fullsize);
 	window_update();
 	char *command;
 	int argc = 1;
@@ -93,31 +104,29 @@ void run_command(char *cmd){
 	int idx = 0;
 	for(int i = 0; i < argc && cmd[idx] != 0; i++){
 		int size = 0;
-		for(int j = 0; cmd[j] != ' ' && cmd[j] != 0; j++){
-			size++;2
+		for(int j = 0; cmd[idx+j] != ' ' && cmd[idx+j] != 0; j++){
+			size++;
 		}
-		print_arg("Arg %d Size is ", i);
-		window_update();
-		print_arg("%d ", size);
-		window_update();
 		args[i] = (char *) kmalloc(size+1);
 		memset(args[i], 0, size+1);
 		mcpy(args[i], cmd+idx, size);
-		print_arg("%s\n", (uint32_t) args[i]);
-		window_update();
 		idx = idx + size + 1;
 	}
 	for(int i = 0; i < fullsize; i++){
 		if(cmd[i] == ' ') cmd[i] = 0;
 	}
-	exec(args[0], argc, args);
-	window_update();
+	if(!strcmp(args[0], "cd")){
+		changeDirectory(args[1]);
+	}
+	else{
+		exec(args[0], argc, args);
+	}
 }
 
 void draw_cursor(int i){
 	uint32_t *buf = window->backbuffer;
 	for(int x = 0; x < 8; x++){
-		buf[window->width * ((term_height - 1) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+		buf[window->width * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
 	}
 }
 void memset(void *dest, char v, int size){

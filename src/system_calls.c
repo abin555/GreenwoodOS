@@ -45,11 +45,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Execute Program
 		case 0x06:{
-			print_console(task->console, "%s : Argc %d: ", (char *) cpu.ebx, cpu.ecx);
-			for(uint32_t i = 0; i < cpu.ecx; i++){
-				print_console(task->console, "%s ", ((char **) cpu.edx)[i]);
-			}
-			print_console(task->console, "\n");
 			exec((char *)cpu.ebx, cpu.ecx, (char **) cpu.edx);
 			break;
 		}
@@ -94,7 +89,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//File Open
 		case 0x0D:{
-			struct FILE *file = fopen((char *) cpu.ebx);
+			struct FILE *file = fopen_rel(&task->currentDirectory, (char *) cpu.ebx);
 			cpu_state.eax = (uint32_t) file;
 			break;
 		}
@@ -123,26 +118,26 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Change Directory
 		case 0x12:{
-			/*
-			Manipulates the task currentDirectory string.
-			Everything is appended to the string except for:
-			./ is ignored, and removed.
-			../ removed until the previous / and continues
-			- Note, ensure that ../ to idx 0 is covered.
-			*/
-
+			char *change = (char *) cpu.ebx;
+			print_serial("Task %s Changing Directory to %s\n", task->task_name, change);
+			cpu_state.eax = changeDirectory(&task->currentDirectory, change);
 			break;
 		}
 		//Get Directory
 		case 0x13:{
 			//return currentDirectory string
-			
+			cpu_state.eax = (uint32_t) task->currentDirectory.path;
 			break;
 		}
 		//List Directory
 		case 0x14:{
 			//Return string of files and folders in current directory.
 
+			break;
+		}
+		//File Exists
+		case 0x15:{
+			
 			break;
 		}
 	}

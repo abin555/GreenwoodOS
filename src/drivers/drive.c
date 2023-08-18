@@ -88,6 +88,35 @@ void drive_enumerate(){
 
 struct FILE files[NUM_FILES] = {0};
 
+void expandPath(char *dest, int dest_size, struct DIRECTORY *dir, char *path){
+	memset(dest, 0, dest_size);
+	int idx = 0;
+	int path_idx = 0;
+	if(path[0] == '/'){
+		while(path[idx+1] != 0){
+			dest[idx] = path[idx+1];
+			idx++;
+		}
+		return;
+	}
+	while(dir->path[idx] != 0){
+		dest[idx] = dir->path[idx];
+		idx++;
+	}
+	while(path[path_idx] != 0){
+		dest[idx+path_idx] = path[path_idx];
+		path_idx++;
+	}
+}
+
+struct FILE *fopen_rel(struct DIRECTORY *dir, char *path){
+	char big_path[200];
+	memset(big_path, 0, sizeof(big_path));
+	expandPath(big_path, sizeof(big_path), dir, path);
+	print_serial("[Drive] Opening %s\n", big_path);
+	return fopen(big_path);
+}
+
 struct FILE *fopen(char *path){
 	struct FILE *file = NULL;
 	for(int i = 0; i < NUM_FILES; i++){
@@ -154,3 +183,55 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 	}
 	return 0;
 }
+
+int fexists(char *path){
+	char drive_letter = path[0];
+	path+=2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive == NULL) return 0;
+	if(drive->format == ISO9660){
+		return ISO9660_checkExists(drive->format_info.ISO, path);
+	}
+	return 0;
+}
+
+int changeDirectory(struct DIRECTORY *dir, char *path){
+	/*
+	Manipulates the task currentDirectory string.
+	Everything is appended to the string except for:
+	./ is ignored, and removed.
+	../ removed until the previous / and continues
+	- Note, ensure that ../ to idx 0 is covered.
+	*/
+	int path_size = 0;
+	while(path[path_size] != 0){
+		path_size++;
+	}
+	if(path[0] == '/'){//Absolute Directory
+		if(fexists(path+1)){
+			memset(dir->path, 0 , sizeof(dir->path));
+			memcpy(dir->path, path+1, path_size-1);
+			if(dir->path[path_size-2] != '/') dir->path[path_size-1] = '/';
+			print_serial("Path is now %s\n", dir->path);
+			return 0;
+		}
+		else{
+			return 1;
+		}
+	}
+	else{//Relative Directory
+	}
+	return 1;
+}
+
+/*
+void listFiles(struct CONSOLE *console, char *path){
+	char drive_letter = path[0];
+	path+=2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive->format == ISO9660){
+		ISO9660_printFileList(console, drive->format_info.ISO, path);
+	}
+}
+
+*/

@@ -144,7 +144,7 @@ struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path){
 	print_serial("[ISO] Opening %s\n", path);
 	struct File_Info retFile = {0};
 	char work_buf[100];
-	memset(work_buf, 0, 20);
+	memset(work_buf, 0, 100);
 	struct DRIVE *drive = iso->drive;
 	int idx = 0;
 	int work_idx = 0;
@@ -152,8 +152,8 @@ struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path){
 
 	bool isFile = 0;
 	uint32_t dirSector = iso->root_directory_sector;
-	while(!isFile){
-		memset(work_buf, 0, 20);
+	while(!isFile && dirSector != 0){
+		memset(work_buf, 0, 100);
 		while(path[idx] != '\0' && path[idx] != '/'){
 			work_buf[work_idx] = path[idx];
 			idx++;
@@ -229,3 +229,54 @@ int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int 
 	}
 	return 1;
 }
+
+int ISO9660_checkExists(struct ISO9660 *iso, char *path){
+	print_serial("[ISO] %c Checking if %s exists\n", iso->drive->identity, path);
+	char work_buf[20];
+	memset(work_buf, 0, sizeof(work_buf));
+	int idx = 0;
+	int work_idx = 0;
+	
+	uint32_t dirSector = iso->root_directory_sector;
+	uint32_t dirSector_back = 0;
+	while(path[idx] != '\0'){
+		dirSector_back = dirSector;
+		memset(work_buf, 0, sizeof(work_buf));
+		while(path[idx] != '\0' && path[idx] != '/'){
+			work_buf[work_idx] = path[idx];
+			idx++;
+			work_idx++;
+		}
+		print_serial("Checking if folder: %s\n", work_buf);
+		if(path[idx] != 0){idx++;}
+		dirSector = ISO9660_getDirectorySector(iso, dirSector_back, work_buf);
+		if(dirSector != 0){
+			print_serial("Folder exists\n");
+		}
+		if(dirSector == 0){//Check if file
+			print_serial("Checking if file %s\n", work_buf);
+			struct File_Info fileinfo = ISO9660_getFile(iso, dirSector_back, work_buf);
+			if(fileinfo.drive != NULL){
+				print_serial("File Exists!\n");
+				return 1;
+			}
+			else{
+				return 0;
+			}
+		}
+		print_serial("Dir Sector: %d\n", dirSector);
+		work_idx = 0;
+	}
+	if(dirSector == 0) return 0;
+	return 1;
+}
+
+/*
+void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path){
+	int idx = 0;
+	int dirSector = iso->root_directory_sector;
+	while(path[idx] != '0'){
+
+	}
+}
+*/

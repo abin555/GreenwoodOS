@@ -4,6 +4,7 @@
 #include "drive.h"
 #include "allocator.h"
 #include "serial.h"
+#include "console.h"
 
 struct DRIVE;
 
@@ -128,5 +129,7 @@ struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path);
 void ISO9660_printTree(struct ISO9660 *iso);
 int ISO9660_openFileName(struct ISO9660 *iso, char *name, char *buf, int buf_size);
 int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int buf_size);
+int ISO9660_checkExists(struct ISO9660 *iso, char *path);
+void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path);
 
 #endif
