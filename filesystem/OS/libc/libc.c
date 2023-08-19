@@ -188,3 +188,11 @@ char *getDirectory(){
 	asm("int 0x80");
 	return (char *) eax;
 }
+
+void printDirectoryContents(char *path){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) path;
+	eax = 0x14;
+	asm("int 0x80");
+}

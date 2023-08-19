@@ -7,7 +7,7 @@
 #include "ahci.h"
 #include "FAT32.h"
 #include "ISO9660.h"
-
+#include "console.h"
 
 #define DRIVE_NUM 20
 
@@ -77,4 +77,6 @@ int fsize(struct FILE *file);
 int fcopy(struct FILE *file, char *buf, int buf_size);
 int fexists(char *path);
 int changeDirectory(struct DIRECTORY *dir, char *path);
+void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path);
+
 #endif

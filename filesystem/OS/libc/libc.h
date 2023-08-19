@@ -62,4 +62,5 @@ int fsize(struct FILE *file);
 int fcopy(struct FILE *file, char *buf, int buf_size);
 int changeDirectory(char *change);
 char *getDirectory();
+void printDirectoryContents(char *path);
 #endif

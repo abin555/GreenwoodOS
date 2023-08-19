@@ -118,6 +118,14 @@ void run_command(char *cmd){
 	if(!strcmp(args[0], "cd")){
 		changeDirectory(args[1]);
 	}
+	else if(!strcmp(args[0], "ls")){
+		if(argc == 1){
+			printDirectoryContents(".");
+		}
+		else{
+			printDirectoryContents(args[1]);
+		}
+	}
 	else{
 		exec(args[0], argc, args);
 	}

@@ -271,12 +271,50 @@ int ISO9660_checkExists(struct ISO9660 *iso, char *path){
 	return 1;
 }
 
-/*
-void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path){
-	int idx = 0;
-	int dirSector = iso->root_directory_sector;
-	while(path[idx] != '0'){
 
+void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path){
+	print_serial("[ISO] Printing Directory Contents: %c/%s\n", iso->drive->identity, path);
+	char work_buf[20];
+	memset(work_buf, 0, sizeof(work_buf));
+	int idx = 0;
+	int work_idx = 0;
+	
+	uint32_t dirSector = iso->root_directory_sector;
+	while(path[idx] != '\0'){
+		memset(work_buf, 0, sizeof(work_buf));
+		while(path[idx] != '\0' && path[idx] != '/'){
+			work_buf[work_idx] = path[idx];
+			idx++;
+			work_idx++;
+		}
+		if(path[idx] != 0){idx++;}
+		dirSector = ISO9660_getDirectorySector(iso, dirSector, work_buf);
+		print_serial("[ISO] Dir Sector: %d\n", dirSector);
+		work_idx = 0;
+	}
+	if(dirSector == 0) return;
+
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, dirSector);
+	memset(work_buf, 0, sizeof(work_buf));	
+	while(dir->length != 0){
+		if(dir->name_len == 1){
+			if(dir->name[0] == 0){
+				print_console(console, ".\n");
+				goto finish;
+			}
+			else if(dir->name[0] == 1){
+				print_console(console, "..\n");
+				goto finish;
+			}
+			goto finish;
+		}
+		
+		if(dir->name[dir->name_len-2] == ';' && dir->name[dir->name_len-1] == '1') dir->name[dir->name_len-2] = 0;
+		memset(work_buf, 0, sizeof(work_buf));
+		memcpy(work_buf, dir->name, dir->name_len);
+		print_console(console, "%s\n", work_buf);
+
+		finish:
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
 	}
 }
-*/

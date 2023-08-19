@@ -224,14 +224,14 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
 	return 1;
 }
 
-/*
-void listFiles(struct CONSOLE *console, char *path){
-	char drive_letter = path[0];
-	path+=2;
+void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path){
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	char drive_letter = big_path[0];
+	path = big_path + 2;
 	struct DRIVE *drive = drive_get(drive_letter);
+	print_serial("[DRIVE] Directory Listing %s\n", big_path);
 	if(drive->format == ISO9660){
 		ISO9660_printFileList(console, drive->format_info.ISO, path);
 	}
 }
-
-*/

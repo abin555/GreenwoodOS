@@ -132,7 +132,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		//List Directory
 		case 0x14:{
 			//Return string of files and folders in current directory.
-
+			listFiles(task->console, &task->currentDirectory, (char *) cpu.ebx);
 			break;
 		}
 		//File Exists
