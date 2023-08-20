@@ -297,10 +297,11 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 			if(msg[p] == '\n'){
 				console->LinePlace = 0;          
 				if(console->Line == (unsigned int) console->height-2){
-					shiftConsoleUp(console);
-					memset(console->window->backbuffer, 0, console->window->width * console->window->height);
-					//memset(console->buf, 0, console_width*console_height);
-					//consoleLine = 0;
+					memset(console->window->backbuffer, 0, console->window->width * console->window->height * sizeof(uint32_t));
+					shiftConsoleUp(console);					
+					//memset(console->buf, 0, console->window->width*console->window->height);
+					//console->Line = 0;
+					//console->LastLine = 0;
 				}
 				else{
 					console->Line++;  
