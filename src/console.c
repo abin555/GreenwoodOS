@@ -298,6 +298,7 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 				console->LinePlace = 0;          
 				if(console->Line == (unsigned int) console->height-2){
 					shiftConsoleUp(console);
+					memset(console->window->backbuffer, 0, console->window->width * console->window->height);
 					//memset(console->buf, 0, console_width*console_height);
 					//consoleLine = 0;
 				}
