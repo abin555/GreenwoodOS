@@ -1,3 +1,6 @@
 [submodule "filesystem/Greenwood-LISP"]
 	path = filesystem/LISP
 	url = ssh://git@192.168.2.2:10022/aboisvert/Greenwood-LISP.git
+[submodule "filesystem/LISP"]
+	path = filesystem/LISP
+	url = ssh://git@192.168.2.2:10022/aboisvert/Greenwood-LISP.git
