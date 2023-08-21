@@ -91,6 +91,7 @@ void kernal_task(int argc, char **argv){
 
     //set_schedule(ONFOCUS);
     char c = '#';
+    char OpenedConsole = 0;
     while(1){
         if(c == '#') c = '*';
         else c = '#';
@@ -111,6 +112,15 @@ void kernal_task(int argc, char **argv){
             asm("nop");
             asm("nop");
             asm("nop");
+        }
+        if(&windows[window_selected] == kernal_win){
+            if(kbd_getChar() == 10 && !OpenedConsole){
+                OpenedConsole = 1;
+                exec("OS/TERM/TERM.EXE", 0, NULL);
+            }
+            if(!(KBD_flags.key == 10)){
+                OpenedConsole = 0;
+            }
         }
     }
     window_close(kernal_win);
