@@ -162,6 +162,7 @@ int fsize(struct FILE *file){
 }
 
 int fcopy(struct FILE *file, char *buf, int buf_size){
+	print_serial("[DRIVE] Copying file to 0x%x\n", (uint32_t) buf);
 	if(file->info.drive->format == ISO9660){
 		char *iso_buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
 		if(iso_buf == NULL) return 1;

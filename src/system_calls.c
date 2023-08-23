@@ -6,6 +6,7 @@ void init_syscalls(){
 }
 
 struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+	IRQ_OFF;
 	struct cpu_state cpu_state = cpu;
 	struct task_state *task = &tasks[task_running_idx];
 	switch(cpu.eax){
@@ -140,6 +141,12 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			
 			break;
 		}
+		//Print Serial
+		case 0x16:{
+			print_serial((char *) cpu.ebx);
+			break;
+		}
 	}
+	IRQ_RES;
 	return cpu_state;
 }
