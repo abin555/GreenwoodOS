@@ -129,7 +129,7 @@ void MEM_populateRegions(){
 		//MEMORY_REGIONS[i] = region;
 	}
 }
-
+#include "console.h"
 void MEM_printRegions(){
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
 		if(MEMORY_REGIONS[i].exists && !MEMORY_REGIONS[i].available){
@@ -164,7 +164,7 @@ void MEM_printRegions(){
 					break;
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
-			////printk("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			print_console(kernal_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
 }

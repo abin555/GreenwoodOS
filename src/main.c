@@ -86,7 +86,7 @@ void kernal_task(int argc, char **argv){
     memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
     memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
     print_console(kernal_console, "TEST!\nTEST2\n");
-
+    MEM_printRegions();
     exec("OS/TERM/TERM.EXE", 0, NULL);
 
     //set_schedule(ONFOCUS);

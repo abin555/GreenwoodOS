@@ -14,7 +14,8 @@ void console_init(){
 		console->buf = malloc(consoles[i].buf_size);
 		console->active = false;
 		console->cursor = 0;
-	}	
+	}
+	kernal_console = NULL;	
 }
 
 void console_drawFull(struct CONSOLE *console){
