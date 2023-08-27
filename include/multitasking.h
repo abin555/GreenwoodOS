@@ -49,8 +49,8 @@ struct task_state{
 };
 
 #define MAX_TASKS 10
-#define TASK_STACK_SIZE sizeof(uint32_t) * 0x200
-uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (4)));
+#define TASK_STACK_SIZE sizeof(uint32_t) * 0x400
+uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8)));
 
 int8_t task_running_idx;
 struct task_state tasks[MAX_TASKS];
