@@ -71,23 +71,26 @@ void kernal_task(int argc, char **argv){
     ISO9660_printTree(drive_get('A')->format_info.ISO);
 
     start_task(idle_task, -1, 0, NULL, "IDLE");
-    struct FILE* file = fopen("A/CHILD/TEST/TEST.TXT");
-    //print_serial("First Char: %c\n", fgetc(file));
-    char *buf = malloc(fsize(file));
-    fcopy(file, buf, fsize(file));
-    print_serial("%s\n", buf);
-    fclose(file);
 
     struct WINDOW *kernal_win = window_open("KERNEL", true);
     kernal_console = console_open(kernal_win);
     struct task_state *kernal_task = &tasks[task_running_idx];
     kernal_task->console = kernal_console;
     char kernal_path[] = "A/";
+
+
     memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
     memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
-    print_console(kernal_console, "TEST!\nTEST2\n");
-    MEM_printRegions();
-    exec("OS/TERM/TERM.EXE", 0, NULL);
+    
+
+    print_console(kernal_console, "Kernal Window & Console Opened.\n");
+    print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
+
+    char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
+
+    print_console(kernal_console, "Starting Initial Program: %s\n", boot_program_path);
+
+    exec(boot_program_path, 0, NULL);
 
     //set_schedule(ONFOCUS);
     char c = '#';

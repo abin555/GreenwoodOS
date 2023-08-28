@@ -29,7 +29,6 @@ struct DRIVE *drive_add(int type, void *driver){
 	return new_drive;
 }
 
-
 int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors){
 	if(drive == NULL || buf == NULL)
 		return -1;
@@ -50,6 +49,27 @@ int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_s
 	}
 
 
+
+	drive->locked = 0;
+	return err;
+}
+
+int drive_write(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors){
+	if(drive == NULL || buf == NULL)
+		return -1;
+
+	if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
+	while(drive->locked || !drive->ready);
+
+	drive->locked = 1;
+	int err = -1;
+
+	switch(drive->type){
+		case Drive_AHCI:
+			err = AHCI_write((volatile HBA_PORT *) drive->driver.ahci, sector, 0, count_sectors, (uint32_t *) buf);
+			while(((volatile HBA_PORT *) drive->driver.ahci)->tfd & (ATA_DEV_BUSY | ATA_DEV_DRQ)){}
+		break;
+	}
 
 	drive->locked = 0;
 	return err;
@@ -157,8 +177,22 @@ char fgetc(struct FILE *file){
 	return 0;
 }
 
+void fputs(struct FILE *file, char c){
+	char *buf;
+	if(file->info.drive->format == ISO9660){
+		buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
+		buf[file->head] = c;
+		ISO_write_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
+	}
+}
+
 int fsize(struct FILE *file){
 	return file->info.size;
+}
+
+int fseek(struct FILE *file, int idx){
+	file->head = idx;
+	return file->head;
 }
 
 int fcopy(struct FILE *file, char *buf, int buf_size){

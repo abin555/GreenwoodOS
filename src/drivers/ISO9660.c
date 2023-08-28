@@ -8,6 +8,10 @@ uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector){
 	return (uint8_t *) buf;
 }
 
+void ISO_write_sector(struct DRIVE *drive, char *buf, int sector){
+	drive_write(drive, (char *) buf, sector*4, 4);
+}
+
 int ISO9660_check_format(struct DRIVE *drive){
 	print_serial("[ISO] Checking format on drive %c\n", drive->identity);
 	struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) (ISO_read_sector(drive, (char *) ISO9660_sector_buffer, 0x10));

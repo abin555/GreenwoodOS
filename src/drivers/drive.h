@@ -68,12 +68,15 @@ struct DRIVE *drive_add(int type, void *driver);
 struct DRIVE *drive_get(char identity);
 
 int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors);
+int drive_write(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_sectors);
 
 struct FILE *fopen_rel(struct DIRECTORY *dir, char *path);
 struct FILE *fopen(char *path);
 void fclose(struct FILE *file);
 char fgetc(struct FILE *file);
+void fputs(struct FILE *file, char c);
 int fsize(struct FILE *file);
+int fseek(struct FILE *file, int idx);
 int fcopy(struct FILE *file, char *buf, int buf_size);
 int fexists(char *path);
 int changeDirectory(struct DIRECTORY *dir, char *path);

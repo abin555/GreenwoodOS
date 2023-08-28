@@ -120,6 +120,7 @@ struct ISO9660{
 
 
 uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector);
+void ISO_write_sector(struct DRIVE *drive, char *buf, int sector);
 
 int ISO9660_check_format(struct DRIVE *drive);
 void ISO9660_read_volume(struct ISO9660 *iso);
