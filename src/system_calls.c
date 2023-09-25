@@ -138,12 +138,29 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//File Exists
 		case 0x15:{
-			
+			cpu_state.eax = fexists((char *) cpu_state.ebx);
 			break;
 		}
 		//Print Serial
 		case 0x16:{
 			print_serial((char *) cpu.ebx);
+			break;
+		}
+		//Get Raw Kernel Feature
+		//Arguments:
+		// EBX = Feature
+		//Returns:
+		// EAX = Pointer
+		// EBX = Size
+		case 0x17:{
+			switch(cpu.ebx){
+				//Font Memory
+				case 0x01:{
+					cpu_state.eax = (uint32_t) FONT;
+					cpu_state.ebx = (uint32_t) sizeof(FONT);
+					break;
+				};
+			}
 			break;
 		}
 	}

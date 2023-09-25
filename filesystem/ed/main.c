@@ -81,6 +81,10 @@ void render_file(char *buf, int line){
 			y++;
 			continue;
 		}
+		else if(buf[idx] == '\t'){
+			x+=2;
+			continue;
+		}
 		if(x >= window->width / 8){
 			x = 0;
 			y++;

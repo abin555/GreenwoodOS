@@ -196,3 +196,28 @@ void printDirectoryContents(char *path){
 	eax = 0x14;
 	asm("int 0x80");
 }
+
+int fexists(char *path){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) path;
+	eax = 0x15;
+	asm("int 0x80");
+	return eax;
+}
+
+struct FEATURE_INFO getKernelFeature(KERNEL_FEATURE feature){
+	void *addr;
+	uint32_t size;
+	struct FEATURE_INFO info;
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) feature;
+	eax = 0x17;
+	asm("int 0x80");
+	addr = (void *) eax;
+	size = ebx;
+	info.addr = addr;
+	info.size = size;
+	return info;
+}

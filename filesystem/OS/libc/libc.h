@@ -63,4 +63,18 @@ int fcopy(struct FILE *file, char *buf, int buf_size);
 int changeDirectory(char *change);
 char *getDirectory();
 void printDirectoryContents(char *path);
+int fexists(char *path);
+
+typedef enum {
+	FEAT_FONT = 0x01
+} KERNEL_FEATURE;
+
+struct FEATURE_INFO{
+	void *addr;
+	uint32_t size;
+};
+
+struct FEATURE_INFO getKernelFeature(KERNEL_FEATURE feature);
+
+
 #endif

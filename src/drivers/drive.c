@@ -239,6 +239,7 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
 	- Note, ensure that ../ to idx 0 is covered.
 	*/
 	int path_size = 0;
+	//char workbuf[100];
 	while(path[path_size] != 0){
 		path_size++;
 	}
@@ -255,6 +256,7 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
 		}
 	}
 	else{//Relative Directory
+		
 	}
 	return 1;
 }
