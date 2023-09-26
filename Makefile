@@ -2,7 +2,6 @@ OBJECTS = \
 		src/multiboot.o \
 		src/boot.o \
 		src/main.o \
-		src/font.o \
 		src/framebuffer.o \
 		src/serial.o \
 		src/io.o \
@@ -29,7 +28,8 @@ OBJECTS = \
 		src/program.o \
 		src/window.o \
 		src/console.o \
-		src/system_calls.o 
+		src/system_calls.o \
+		src/font.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -O0 -c
