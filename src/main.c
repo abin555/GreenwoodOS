@@ -91,6 +91,7 @@ void kernal_task(int argc, char **argv){
     print_console(kernal_console, "Starting Initial Program: %s\n", boot_program_path);
 
     exec(boot_program_path, 0, NULL);
+    ISO9660_createDirectory(drive_get('A')->format_info.ISO, "OS/ECHO/TEST");
 
     //set_schedule(ONFOCUS);
     char c = '#';

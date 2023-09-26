@@ -197,7 +197,7 @@ void ISO9660_printTree_Recur(struct ISO9660 *iso, uint32_t directory_sector, int
 		}
 		memset(tempbuf, 0, sizeof(tempbuf));
 		memcpy(tempbuf, dir->name, dir->name_len);
-		print_serial("%s\n", tempbuf);
+		print_serial("%s @ %d\n", tempbuf, directory_sector);
 		if(tempbuf[dir->name_len - 1] != '1' && tempbuf[dir->name_len - 2] != ';'){
 			ISO9660_printTree_Recur(iso, getLe32(dir->sector), layer+1);
 			ISO_read_sector(iso->drive, iso->buf, directory_sector);
@@ -322,3 +322,68 @@ void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *p
 		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
 	}
 }
+
+int ISO9660_createDirectory(struct ISO9660 *iso, char *path){
+	char *newDirName;
+	int path_size = 0;
+	int i;
+	for(i = 0; path[i] != 0; i++){
+		path_size++;
+	}
+	i = path_size;
+	print_serial("Path %s Size is %d\n", path, path_size);
+	while(path[i] != '/' && i != 0){
+		i--;
+	}
+	newDirName = &path[i+1];
+	path[i] = 0;
+	print_serial("Creating Directory %s at parent %s for Drive %c\n", newDirName, path, iso->drive->identity);
+	
+	char work_buf[100];
+	bool isDone = 0;
+	uint32_t parentSector = iso->root_directory_sector;
+	int idx = 0;
+	int work_idx = 0;
+
+	while(!isDone && parentSector != 0){
+		memset(work_buf, 0, 100);
+		while(path[idx] != '\0' && path[idx] != '/'){
+			work_buf[work_idx] = path[idx];
+			idx++;
+			work_idx++;
+			if(path+idx+1 >= newDirName){//Pointers will match when this is completed
+				isDone = 1;
+				idx++;
+				break;
+			}
+		}
+		idx++;
+		work_idx = 0;
+		parentSector = ISO9660_getDirectorySector(iso, parentSector, work_buf);
+	}
+	print_serial("Found Parent Directory at Sector %d\n", parentSector);
+	if(parentSector == 0) return 1;
+
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, parentSector);
+	while(dir->length != 0){
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
+	}
+	//Search for available sector for new directory table.
+
+
+	//Create Directory Entry & Save.
+	print_serial("New directory %s name size is %d\n", newDirName, path_size - (newDirName - path));
+	dir->name_len = path_size - (newDirName - path);
+	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
+	*((uint16_t *) &dir->sector.le) = parentSector & 0xFFFF;
+	*((uint16_t *) &dir->sector.be) = parentSector & 0xFFFF0000 >> 16;
+	memcpy(dir->name, newDirName, dir->name_len);
+	ISO_write_sector(iso->drive, iso->buf, parentSector);
+	
+	return 0;
+}
+/*
+int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
+
+}
+*/
