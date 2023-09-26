@@ -93,6 +93,9 @@ void run_command(char *cmd){
 	while(cmd[fullsize] != 0){
 		fullsize++;
 	}
+	if(fullsize == 0){
+		return;
+	}
 	fullsize++;
 	window_update();
 	char *command;

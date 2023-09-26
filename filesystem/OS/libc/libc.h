@@ -76,5 +76,7 @@ struct FEATURE_INFO{
 
 struct FEATURE_INFO getKernelFeature(KERNEL_FEATURE feature);
 
+void fseek(struct FILE *file, int idx);
+void fputc(struct FILE *file, char c);
 
 #endif

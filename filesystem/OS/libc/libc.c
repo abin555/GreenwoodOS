@@ -221,3 +221,23 @@ struct FEATURE_INFO getKernelFeature(KERNEL_FEATURE feature){
 	info.size = size;
 	return info;
 }
+
+void fseek(struct FILE *file, int idx){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) idx;
+	ebx = (uint32_t) file;
+	eax = 0x18;
+	asm("int 0x80");
+}
+
+void fputc(struct FILE *file, char c){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) c;
+	ebx = (uint32_t) file;
+	eax = 0x19;
+	asm("int 0x80");	
+}

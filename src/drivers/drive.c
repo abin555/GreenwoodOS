@@ -177,7 +177,7 @@ char fgetc(struct FILE *file){
 	return 0;
 }
 
-void fputs(struct FILE *file, char c){
+void fputc(struct FILE *file, char c){
 	char *buf;
 	if(file->info.drive->format == ISO9660){
 		buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);

@@ -47,6 +47,10 @@ int main(int argc, char **argv){
 		else if(c == 's'){
 			line++;
 		}
+		else{
+			fseek(text, 0);
+			fputc(text, c);
+		}
 	}
 	
 

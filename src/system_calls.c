@@ -163,6 +163,16 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			}
 			break;
 		}
+		//File Seek
+		case 0x18:{
+			fseek((struct FILE *) cpu.ebx, cpu.ecx);
+			break;
+		}
+		//File Put Character
+		case 0x19:{
+			fputc((struct FILE *) cpu.ebx, (char) cpu.ecx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;
