@@ -2,6 +2,7 @@ OBJECTS = \
 		src/multiboot.o \
 		src/boot.o \
 		src/main.o \
+		src/font.o \
 		src/framebuffer.o \
 		src/serial.o \
 		src/io.o \
