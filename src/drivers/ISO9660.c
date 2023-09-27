@@ -4,6 +4,7 @@
 #define getLe16(x) *((uint16_t *) &x.le)
 
 uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector){
+	if(sector < 0) return NULL;
 	drive_read(drive, (char *) buf, sector*4, 4);
 	return (uint8_t *) buf;
 }
@@ -49,6 +50,8 @@ void ISO9660_read_volume(struct ISO9660 *iso){
 	print_serial("[ISO] Loading ISO9660 File Table from Drive %c\n", iso->drive->identity);
 	struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) ISO_read_sector(iso->drive, iso->buf, 0x10);
 	iso->root_directory_sector = getLe32(primary_vol->root_dir_ent.sector);
+	iso->nextTableSector = iso->root_directory_sector;
+	ISO9660_printTree(iso);
 }
 
 int strcmp(const char *s1, const char *s2){
@@ -199,6 +202,7 @@ void ISO9660_printTree_Recur(struct ISO9660 *iso, uint32_t directory_sector, int
 		memcpy(tempbuf, dir->name, dir->name_len);
 		print_serial("%s @ %d\n", tempbuf, directory_sector);
 		if(tempbuf[dir->name_len - 1] != '1' && tempbuf[dir->name_len - 2] != ';'){
+			if(getLe32(dir->sector) > iso->nextTableSector) iso->nextTableSector = getLe32(dir->sector) + 1;
 			ISO9660_printTree_Recur(iso, getLe32(dir->sector), layer+1);
 			ISO_read_sector(iso->drive, iso->buf, directory_sector);
 		}
@@ -324,6 +328,9 @@ void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *p
 }
 
 int ISO9660_createDirectory(struct ISO9660 *iso, char *path){
+	if(ISO9660_checkExists(iso, path)){
+		return 1;
+	}
 	char *newDirName;
 	int path_size = 0;
 	int i;
@@ -369,17 +376,33 @@ int ISO9660_createDirectory(struct ISO9660 *iso, char *path){
 		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
 	}
 	//Search for available sector for new directory table.
-
+	print_serial("New table sector is %d\n", iso->nextTableSector);
+	uint32_t newTableSector = iso->nextTableSector;
+	iso->nextTableSector++;
 
 	//Create Directory Entry & Save.
 	print_serial("New directory %s name size is %d\n", newDirName, path_size - (newDirName - path));
 	dir->name_len = path_size - (newDirName - path);
 	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
-	*((uint16_t *) &dir->sector.le) = parentSector & 0xFFFF;
-	*((uint16_t *) &dir->sector.be) = parentSector & 0xFFFF0000 >> 16;
+	*((uint16_t *) &dir->sector.le) = newTableSector & 0xFFFF;
+	*((uint16_t *) &dir->sector.be) = newTableSector & 0xFFFF0000 >> 16;
 	memcpy(dir->name, newDirName, dir->name_len);
 	ISO_write_sector(iso->drive, iso->buf, parentSector);
 	
+	//Create . & .. directories
+	dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, newTableSector);
+	dir->name_len = 1;
+	dir->name[0] = 0;
+	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
+	*((uint16_t *) &dir->sector.le) = newTableSector & 0xFFFF;
+	*((uint16_t *) &dir->sector.be) = newTableSector & 0xFFFF0000 >> 16;
+	dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
+	dir->name_len = 1;
+	dir->name[0] = 1;
+	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
+	*((uint16_t *) &dir->sector.le) = parentSector & 0xFFFF;
+	*((uint16_t *) &dir->sector.be) = parentSector & 0xFFFF0000 >> 16;
+	ISO_write_sector(iso->drive, iso->buf, newTableSector);
 	return 0;
 }
 /*

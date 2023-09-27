@@ -272,3 +272,15 @@ void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path){
 		ISO9660_printFileList(console, drive->format_info.ISO, path);
 	}
 }
+
+int fmkdir(char *path){
+	print_serial("[Drive] Mkdir %s\n", path);
+	char drive_letter = path[0];
+	path+=2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive == NULL) return 1;
+	if(drive->format == ISO9660){
+		return ISO9660_createDirectory(drive->format_info.ISO, path);
+	}
+	return 1;
+}

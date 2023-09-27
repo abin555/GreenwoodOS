@@ -241,3 +241,11 @@ void fputc(struct FILE *file, char c){
 	eax = 0x19;
 	asm("int 0x80");	
 }
+
+void fmkdir(char *path){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) path;
+	eax = 0x1A;
+	asm("int 0x80");
+}

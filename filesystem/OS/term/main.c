@@ -129,6 +129,12 @@ void run_command(char *cmd){
 			printDirectoryContents(args[1]);
 		}
 	}
+	else if(!strcmp(args[0], "mkdir")){
+		print_arg("Making dir %s\n", (uint32_t) args[1]);
+		if(argc >= 1){
+			fmkdir(args[1]);
+		}
+	}
 	else{
 		exec(args[0], argc, args);
 	}

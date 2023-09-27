@@ -67,8 +67,6 @@ void kernal_task(int argc, char **argv){
     drive_enumerate();
     
     //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
-    
-    ISO9660_printTree(drive_get('A')->format_info.ISO);
 
     start_task(idle_task, -1, 0, NULL, "IDLE");
 
@@ -92,7 +90,7 @@ void kernal_task(int argc, char **argv){
 
     exec(boot_program_path, 0, NULL);
     ISO9660_createDirectory(drive_get('A')->format_info.ISO, "OS/ECHO/TEST");
-
+    fmkdir("A/OS/WORK");
     //set_schedule(ONFOCUS);
     char c = '#';
     char OpenedConsole = 0;
