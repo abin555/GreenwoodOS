@@ -45,7 +45,6 @@ kernel.elf: $(OBJECTS)
 	cd ..
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	cp -r ./filesystem/* iso/
 	grub-mkrescue -o GreenwoodOS.iso iso
 run: os.iso transfer-compiled emulate
 
