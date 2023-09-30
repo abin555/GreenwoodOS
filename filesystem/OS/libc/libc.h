@@ -66,7 +66,8 @@ void printDirectoryContents(char *path);
 int fexists(char *path);
 
 typedef enum {
-	FEAT_FONT = 0x01
+	FEAT_FONT = 0x01,
+	FEAT_KEYBOARD = 0x02
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{

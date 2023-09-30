@@ -7,6 +7,8 @@ struct WINDOW *window;
 int size;
 char *file_buf;
 
+int scan;
+
 void *alloc(int size);
 
 void render_file();
@@ -37,19 +39,30 @@ int main(int argc, char **argv){
 	set_schedule(ONFOCUS);
 
 	int line = 0;
+	scan = 0;
+	char replace = 0;
 	while(1){
 		render_file(file_buf, line);
 		window_update();
 		char c = getc();
-		if(c == 'w' && line > 0){
-			line--;
-		}
-		else if(c == 's'){
-			line++;
+		if(replace){
+			file_buf[scan] = c;
+			fseek(text, scan);
+			fputc(text, c);
+			replace = 0;
 		}
 		else{
-			fseek(text, 0);
-			fputc(text, c);
+			if(c == 'w' && line > 0){
+				line--;
+			}
+			else if(c == 's'){
+				line++;
+			}
+			else if(c == 'a') scan--;
+			else if(c == 'd') scan++;
+			else if(c == 'r'){
+				replace = 1;
+			}
 		}
 	}
 	
@@ -94,6 +107,11 @@ void render_file(char *buf, int line){
 			y++;
 		}
 		drawChar(x*8, y*8, buf[idx]);
+		if(idx == scan){
+			for(int i = 0; i < 8; i++){
+				win_buf[x*8+i + (y*8+7)*window->width] = 0xFF0000;
+			}
+		}
 		x++;
 	}
 }

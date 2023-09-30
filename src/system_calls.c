@@ -160,6 +160,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 					cpu_state.ebx = (uint32_t) sizeof(FONT);
 					break;
 				};
+				case 0x02:{
+					
+					break;
+				};
 			}
 			break;
 		}
