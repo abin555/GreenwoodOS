@@ -16,3 +16,4 @@ serial.log
 kernel.elf
 *.elf
 *.sym
+iso/*
