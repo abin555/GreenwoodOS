@@ -54,9 +54,17 @@ int main(int argc, char **argv){
 		else{
 			if(c == 'w' && line > 0){
 				line--;
+				while(file_buf[scan] != '\n'){
+					scan--;
+				}
+				scan--;
 			}
 			else if(c == 's'){
 				line++;
+				while(file_buf[scan] != '\n'){
+					scan++;
+				}
+				scan++;
 			}
 			else if(c == 'a') scan--;
 			else if(c == 'd') scan++;
@@ -96,6 +104,11 @@ void render_file(char *buf, int line){
 		if(buf[idx] == '\n'){
 			x = 0;
 			y++;
+			if(idx == scan){
+				for(int i = 0; i < 8; i++){
+					win_buf[x*8+i + (y*8+7)*window->width] = 0xFF0000;
+				}
+			}
 			continue;
 		}
 		else if(buf[idx] == '\t'){
@@ -107,11 +120,13 @@ void render_file(char *buf, int line){
 			y++;
 		}
 		drawChar(x*8, y*8, buf[idx]);
+
 		if(idx == scan){
 			for(int i = 0; i < 8; i++){
 				win_buf[x*8+i + (y*8+7)*window->width] = 0xFF0000;
 			}
 		}
+
 		x++;
 	}
 }
