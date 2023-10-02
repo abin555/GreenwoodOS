@@ -135,6 +135,12 @@ void run_command(char *cmd){
 			fmkdir(args[1]);
 		}
 	}
+	else if(!strcmp(args[0], "mkfile")){
+		print_arg("Making file %s\n", (uint32_t) args[1]);
+		if(argc >= 1){
+			fmkfile(args[1], 100);
+		}
+	}
 	else{
 		exec(args[0], argc, args);
 	}

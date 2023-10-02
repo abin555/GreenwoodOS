@@ -117,6 +117,7 @@ struct ISO9660{
 	//struct ISO9660_FS_Entry root;
     uint32_t root_directory_sector;
     uint32_t nextTableSector;
+    uint32_t nextFileSector;
 };
 
 
@@ -134,4 +135,5 @@ int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int 
 int ISO9660_checkExists(struct ISO9660 *iso, char *path);
 void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path);
 int ISO9660_createDirectory(struct ISO9660 *iso, char *path);
+int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size);
 #endif

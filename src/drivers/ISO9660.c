@@ -206,6 +206,9 @@ void ISO9660_printTree_Recur(struct ISO9660 *iso, uint32_t directory_sector, int
 			ISO9660_printTree_Recur(iso, getLe32(dir->sector), layer+1);
 			ISO_read_sector(iso->drive, iso->buf, directory_sector);
 		}
+		else{
+			if(getLe32(dir->sector) > iso->nextFileSector) iso->nextFileSector = getLe32(dir->sector) + (getLe32(dir->size) / 2048) + 1;
+		}
 		skip:
 		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
 	}
@@ -405,8 +408,69 @@ int ISO9660_createDirectory(struct ISO9660 *iso, char *path){
 	ISO_write_sector(iso->drive, iso->buf, newTableSector);
 	return 0;
 }
-/*
-int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 
+int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
+	if(ISO9660_checkExists(iso, path)){
+		return 1;
+	}
+	char *newDirName;
+	int path_size = 0;
+	int i;
+	for(i = 0; path[i] != 0; i++){
+		path_size++;
+	}
+	i = path_size;
+	print_serial("Path %s Size is %d\n", path, path_size);
+	while(path[i] != '/' && i != 0){
+		i--;
+	}
+	newDirName = &path[i+1];
+	path[i] = 0;
+	print_serial("Creating File %s at parent %s for Drive %c\n", newDirName, path, iso->drive->identity);
+	char work_buf[100];
+	bool isDone = 0;
+	uint32_t parentSector = iso->root_directory_sector;
+	int idx = 0;
+	int work_idx = 0;
+
+	while(!isDone && parentSector != 0){
+		memset(work_buf, 0, 100);
+		while(path[idx] != '\0' && path[idx] != '/'){
+			work_buf[work_idx] = path[idx];
+			idx++;
+			work_idx++;
+			if(path+idx+1 >= newDirName){//Pointers will match when this is completed
+				isDone = 1;
+				idx++;
+				break;
+			}
+		}
+		idx++;
+		work_idx = 0;
+		parentSector = ISO9660_getDirectorySector(iso, parentSector, work_buf);
+	}
+	print_serial("Found Parent Directory at Sector %d\n", parentSector);
+	if(parentSector == 0) return 1;
+
+	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, parentSector);
+	while(dir->length != 0){
+		dir = (struct ISO_Directory_Entry *) (((uint8_t *) dir) + dir->length + (dir->length % 2 == 0 ? 0 : 1));
+	}
+
+	print_serial("Next file sector is %d\n", iso->nextFileSector);
+	int numsectors = size / 2048 + 2;
+	int realsize = numsectors * 2048;
+	uint32_t newTableSector = iso->nextFileSector;
+	iso->nextFileSector += numsectors;
+	dir->name_len = path_size - (newDirName - path) + 2;
+	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
+	*((uint16_t *) &dir->sector.le) = newTableSector & 0xFFFF;
+	*((uint16_t *) &dir->sector.be) = newTableSector & 0xFFFF0000 >> 16;
+	*((uint16_t *) &dir->size.le) = realsize & 0xFFFF;
+	*((uint16_t *) &dir->size.be) = realsize & 0xFFFF0000 >> 16;
+	memcpy(dir->name, newDirName, dir->name_len-2);
+	dir->name[dir->name_len - 2] = ';';
+	dir->name[dir->name_len - 1] = '1';
+	ISO_write_sector(iso->drive, iso->buf, parentSector);
+	return 0;
 }
-*/

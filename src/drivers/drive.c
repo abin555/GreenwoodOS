@@ -284,3 +284,15 @@ int fmkdir(char *path){
 	}
 	return 1;
 }
+
+int fmkfile(char *path, int size){
+	print_serial("[Drive] Make File %s\n", path);
+	char drive_letter = path[0];
+	path+=2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive == NULL) return 1;
+	if(drive->format == ISO9660){
+		return ISO9660_createFile(drive->format_info.ISO, path, size);
+	}
+	return 1;
+}

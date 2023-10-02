@@ -181,6 +181,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			fmkdir((char *) cpu.ebx);
 			break;
 		}
+		case 0x1B:{
+			fmkfile((char *) cpu.ebx, (uint32_t) cpu.ecx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

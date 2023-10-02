@@ -249,3 +249,13 @@ void fmkdir(char *path){
 	eax = 0x1A;
 	asm("int 0x80");
 }
+
+void fmkfile(char *path, int size){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) size;
+	ebx = (uint32_t) path;
+	eax = (uint32_t) 0x1B;
+	asm("int 0x80");
+}
