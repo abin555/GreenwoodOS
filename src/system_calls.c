@@ -185,6 +185,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			fmkfile((char *) cpu.ebx, (uint32_t) cpu.ecx);
 			break;
 		}
+		case 0x1C:{
+			cpu_state.eax = getArrow();
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

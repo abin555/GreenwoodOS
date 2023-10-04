@@ -85,10 +85,53 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						//reboot();
 					}
 					break;
+				case 0x6B://Left Arrow
+					if(KBD_flags.special){
+						KBD_flags.arrow = LEFT;
+						//print_serial("Left Arrow\n");
+						//KBD_flags.key = 0x11;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x11;
+						KBD_ascii_buffer_idx++;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+					}
+					break;
+				case 0x74://Right Arrow
+					if(KBD_flags.special){
+						KBD_flags.arrow = RIGHT;
+						//print_serial("Right Arrow\n");
+						//KBD_flags.key = 0x12;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x12;
+						KBD_ascii_buffer_idx++;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+					}
+					break;
+				case 0x75://Up Arrow
+					if(KBD_flags.special){
+						KBD_flags.arrow = UP;
+						//print_serial("Up Arrow\n");
+						//KBD_flags.key = 0x13;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x13;
+						KBD_ascii_buffer_idx++;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+					}
+					break;
+				case 0x72://Down Arrow
+					if(KBD_flags.special){
+						KBD_flags.arrow = DOWN;
+						//print_serial("Down Arrow\n");
+						//KBD_flags.key = 0x14;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x14;
+						KBD_ascii_buffer_idx++;
+						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+					}
+					break;
 			}
 			if(KBD_flags.release && !justRelease){
 				KBD_flags.release = false;
 				KBD_flags.key = 0;
+				if(KBD_flags.arrow != 0){
+					KBD_flags.arrow = 0;
+				}
 			}
 			if(KBD_flags.special && !justSpecial){
 				KBD_flags.special = false;
@@ -122,4 +165,8 @@ char getc_blk(){
 		}
 	}
 	return (char) (c);
+}
+
+int getArrow(){
+	return KBD_flags.arrow;
 }

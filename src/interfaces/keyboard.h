@@ -18,10 +18,17 @@ typedef enum{
 	USB_KBD = 2
 } KBD_SOURCE;
 
+typedef enum{
+	UP = 1,
+	DOWN = 2,
+	LEFT = 3,
+	RIGHT = 4
+} KBD_ARROW;
+
 struct KBD_flags{
 	uint8_t shift;
 	uint8_t ctrl;
-	uint8_t arrow;
+	KBD_ARROW arrow;
 	uint8_t backspace;
 	uint8_t release;
 	uint8_t special;
@@ -39,4 +46,5 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source);
 uint32_t KBD_last_key_idx;
 char kbd_getChar();
 char getc_blk();
+int getArrow();
 #endif

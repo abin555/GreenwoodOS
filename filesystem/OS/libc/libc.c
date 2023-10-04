@@ -259,3 +259,10 @@ void fmkfile(char *path, int size){
 	eax = (uint32_t) 0x1B;
 	asm("int 0x80");
 }
+
+int getArrowKey(){
+	register uint32_t eax asm("eax");
+	eax = 0x1C;
+	asm("int 0x80");
+	return eax;
+}

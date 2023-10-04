@@ -44,32 +44,36 @@ int main(int argc, char **argv){
 		}
 		window_update();
 		char c = getc();
-		if(c == '0') continue;
-		if(c == 8){
-			idx--;
-			termbuf[idx] = 0;
-		}
+		if(c == 0x11) idx-=2;
+		else if(c == 0x12) idx++;
 		else{
-			termbuf[idx++] = c;
-			if(idx > term_width) idx = 0;
-			
+			if(c == 0) continue;
+			if(c == 8){
+				idx--;
+				termbuf[idx] = 0;
+			}
+			else{
+				termbuf[idx++] = c;
+				if(idx > term_width) idx = 0;
+				
+			}
+			if(c == 10){
+				print_arg("$ %s\n", (uint32_t) termbuf);
+				termbuf[idx-1] = 0;
+				//exec(termbuf, 0, 0);
+				run_command(termbuf);
+				memset(termbuf, 0, term_width);
+				for(int i = 0; i < term_width; i++){
+					termbuf[i] = 0;
+				}
+				idx = 0;
+				for(int i = 0; i < term_width; i++){
+					drawChar(8*i,(term_height-1)*8, termbuf[i]);
+				}
+			}
 		}
 		for(int i = 0; i < term_width; i++){
 			drawChar(8*i,(term_height-1)*8, termbuf[i]);
-		}
-		if(c == 10){
-			print_arg("$ %s\n", (uint32_t) termbuf);
-			termbuf[idx-1] = 0;
-			//exec(termbuf, 0, 0);
-			run_command(termbuf);
-			memset(termbuf, 0, term_width);
-			for(int i = 0; i < term_width; i++){
-				termbuf[i] = 0;
-			}
-			idx = 0;
-			for(int i = 0; i < term_width; i++){
-				drawChar(8*i,(term_height-1)*8, termbuf[i]);
-			}
 		}
 		draw_cursor(idx);
 		window_update();
@@ -149,7 +153,7 @@ void run_command(char *cmd){
 void draw_cursor(int i){
 	uint32_t *buf = window->backbuffer;
 	for(int x = 0; x < 8; x++){
-		buf[window->width * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+		buf[window->width * ((term_height) * 8 - 1) + (i*8) + x] = 0xFF7FFF;
 	}
 }
 void memset(void *dest, char v, int size){

@@ -81,5 +81,5 @@ void fseek(struct FILE *file, int idx);
 void fputc(struct FILE *file, char c);
 void fmkdir(char *path);
 void fmkfile(char *path, int size);
-
+int getArrowKey();
 #endif

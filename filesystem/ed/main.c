@@ -45,32 +45,28 @@ int main(int argc, char **argv){
 		render_file(file_buf, line);
 		window_update();
 		char c = getc();
-		if(replace){
+		if(c == 0x13 && line > 0){
+			line--;
+			while(file_buf[scan] != '\n'){
+				scan--;
+			}
+			scan--;
+		}
+		else if(c == 0x14){
+			line++;
+			while(file_buf[scan] != '\n'){
+				scan++;
+			}
+			scan++;
+		}
+		else if(c == 0x11) scan--;
+		else if(c == 0x12) scan++;
+		else{
 			file_buf[scan] = c;
 			fseek(text, scan);
 			fputc(text, c);
 			replace = 0;
-		}
-		else{
-			if(c == 'w' && line > 0){
-				line--;
-				while(file_buf[scan] != '\n'){
-					scan--;
-				}
-				scan--;
-			}
-			else if(c == 's'){
-				line++;
-				while(file_buf[scan] != '\n'){
-					scan++;
-				}
-				scan++;
-			}
-			else if(c == 'a') scan--;
-			else if(c == 'd') scan++;
-			else if(c == 'r'){
-				replace = 1;
-			}
+			scan++;
 		}
 	}
 	
