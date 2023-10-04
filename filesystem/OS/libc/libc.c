@@ -266,3 +266,18 @@ int getArrowKey(){
 	asm("int 0x80");
 	return eax;
 }
+
+void srand(uint32_t seed){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = seed;
+	eax = 0x1D;
+	asm("int 0x80");
+}
+
+int rand(){
+	register uint32_t eax asm("eax");
+	eax = 0x1E;
+	asm("int 0x80");
+	return eax;
+}

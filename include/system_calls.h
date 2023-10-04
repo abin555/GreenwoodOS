@@ -9,6 +9,7 @@
 #include "drive.h"
 #include "program.h"
 #include "keyboard.h"
+#include "random.h"
 
 void init_syscalls();
 

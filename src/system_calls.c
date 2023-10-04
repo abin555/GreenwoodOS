@@ -189,6 +189,14 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			cpu_state.eax = getArrow();
 			break;
 		}
+		case 0x1D:{
+			srand(cpu.ebx);
+			break;
+		}
+		case 0x1E:{
+			cpu_state.eax = rand();
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

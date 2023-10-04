@@ -17,6 +17,7 @@
 #include "window.h"
 #include "console.h"
 #include "system_calls.h"
+#include "random.h"
 
 
 void idle_task(){
