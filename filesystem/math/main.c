@@ -7,10 +7,38 @@
 struct WINDOW *window;
 uint32_t *win_buf;
 
+const int zOff = 150;
+const int xOff = 20;
+const int yOff = 20;
+const int cSize = 50;
+const int view_plane = 64;
+const float angle = PI/60;
+
+float cube3d[8][3] = {
+  {xOff - cSize,yOff + cSize,zOff - cSize},
+  {xOff + cSize,yOff + cSize,zOff - cSize},
+  {xOff - cSize,yOff - cSize,zOff - cSize},
+  {xOff + cSize,yOff - cSize,zOff - cSize},
+  {xOff - cSize,yOff + cSize,zOff + cSize},
+  {xOff + cSize,yOff + cSize,zOff + cSize},
+  {xOff - cSize,yOff - cSize,zOff + cSize},
+  {xOff + cSize,yOff - cSize,zOff + cSize}
+};
+unsigned char cube2d[8][2];
+
+
 void memset(void *mem, char v, int size);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 float sin(float x);
 float cos(float x);
+
+void printcube();
+void zrotate(float q);
+void yrotate(float q);
+void xrotate(float q);
+void draw_cube();
+
+void drawCircle(float *angle, int centerX, int centerY);
 
 int main(int argc, char **argv){
     print("Opening Math Renderer\n");
@@ -22,43 +50,89 @@ int main(int argc, char **argv){
     srand(1234);
 
     float angle = 0;
-    float deltaAngle = 0.1;
-    float x, y;
-    int xReal, yReal;
     
     int centerX = window->width / 2;
     int centerY = window->height / 2;
 
-    while(1){
-        angle += deltaAngle;
-        if(angle >= PI) angle = -PI;
-        x = cos(angle);
-        y = sin(angle);
+    while(1){    
+        int rsteps = rand() % 10;
+        switch(rand() % 6) {
+          case 0:
+            for (int i = 0; i < rsteps; i++) {
+              zrotate(-0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+              
+            }
+            break;
+          case 1:
+            for (int i = 0; i < rsteps; i++) {
+              zrotate(0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+            }
+            break;
+          case 2:
+            for (int i = 0; i < rsteps; i++) {
+              xrotate(-0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+            }
+            break;
+          case 3:
+            for (int i = 0; i < rsteps; i++) {
+              xrotate(0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+            }
+            break;
+          case 4:
+            for (int i = 0; i < rsteps; i++) {
+              yrotate(-0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+            }
+            break;
+          case 5:
+            for (int i = 0; i < rsteps; i++) {
+              yrotate(0.1);
+              memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
+              printcube();
+              drawCircle(&angle, centerX, centerY);
+              window_update();
+            }
+            break;
+        }
         
-        xReal = x*SCALE + centerX;
-        yReal = y*SCALE + centerY;
         
-	      memset(win_buf, 0, window->width*window->height*sizeof(uint32_t));
-
-        //win_buf[xReal + yReal*window->width] = 0xFFFFFF;
-        drawChar(xReal, yReal, '0');
-        drawLine(centerX, centerY, xReal, yReal, 0xFFFFFF);
-
+        //printcube();
         window_update();
     }
 }
 
-/*
-float sin(float x){
-  return __builtin_sin(x);
+void drawCircle(float *angle, int centerX, int centerY){
+  int xReal;
+  int yReal;
+  *angle += 0.1;
+  if(*angle >= PI) *angle = -PI;
+  float x = cos(*angle);
+  float y = sin(*angle);
+  
+  xReal = x*SCALE + centerX;
+  yReal = y*SCALE + centerY;
+  drawChar(xReal, yReal, '0');
+  drawLine(centerX, centerY, xReal, yReal, 0xFFFFFF);
 }
-
-
-float cos(float x)
-{
-  return __builtin_cos(x);
-}
-*/
 
 #define modd(x, y) ((x) - (int)((x) / (y)) * (y))
 
@@ -154,3 +228,67 @@ void memset(void *mem, char v, int size){
 	}
 }
 
+void printcube() {
+  //calculate 2d points
+  for(unsigned char i = 0; i < 8; i++) {
+    cube2d[i][0] = (unsigned char)((cube3d[i][0] * view_plane / cube3d[i][2]) + (240/2));
+    cube2d[i][1] = (unsigned char)((cube3d[i][1] * view_plane / cube3d[i][2]) + (320/2));
+  }
+  //TV.delay_frame(1);
+  draw_cube();
+}
+
+void zrotate(float q) {
+  float tx,ty,temp;
+  for(unsigned char i = 0; i < 8; i++) {
+    tx = cube3d[i][0] - xOff;
+    ty = cube3d[i][1] - yOff;
+    temp = tx * cos(q) - ty * sin(q);
+    ty = tx * sin(q) + ty * cos(q);
+    tx = temp;
+    cube3d[i][0] = tx + xOff;
+    cube3d[i][1] = ty + yOff;
+  }
+}
+
+void yrotate(float q) {
+  float tx,tz,temp;
+  for(unsigned char i = 0; i < 8; i++) {
+    tx = cube3d[i][0] - xOff;
+    tz = cube3d[i][2] - zOff;
+    temp = tz * cos(q) - tx * sin(q);
+    tx = tz * sin(q) + tx * cos(q);
+    tz = temp;
+    cube3d[i][0] = tx + xOff;
+    cube3d[i][2] = tz + zOff;
+  }
+}
+
+void xrotate(float q) {
+  float ty,tz,temp;
+  for(unsigned char i = 0; i < 8; i++) {
+    ty = cube3d[i][1] - yOff;
+    tz = cube3d[i][2] - zOff;
+    temp = ty * cos(q) - tz * sin(q);
+    tz = ty * sin(q) + tz * cos(q);
+    ty = temp;
+    cube3d[i][1] = ty + yOff;
+    cube3d[i][2] = tz + zOff;
+  }
+}
+
+void draw_cube() {
+  drawLine(cube2d[0][0],cube2d[0][1],cube2d[1][0],cube2d[1][1],0xFF0000);
+  drawLine(cube2d[0][0],cube2d[0][1],cube2d[2][0],cube2d[2][1],0xFF0000);
+  drawLine(cube2d[0][0],cube2d[0][1],cube2d[4][0],cube2d[4][1],0xFF0000);
+  drawLine(cube2d[1][0],cube2d[1][1],cube2d[5][0],cube2d[5][1],0xFF0000);
+  drawLine(cube2d[1][0],cube2d[1][1],cube2d[3][0],cube2d[3][1],0xFF0000);
+  drawLine(cube2d[2][0],cube2d[2][1],cube2d[6][0],cube2d[6][1],0xFF0000);
+  drawLine(cube2d[2][0],cube2d[2][1],cube2d[3][0],cube2d[3][1],0xFF0000);
+  drawLine(cube2d[4][0],cube2d[4][1],cube2d[6][0],cube2d[6][1],0xFF0000);
+  drawLine(cube2d[4][0],cube2d[4][1],cube2d[5][0],cube2d[5][1],0xFF0000);
+  drawLine(cube2d[7][0],cube2d[7][1],cube2d[6][0],cube2d[6][1],0xFF0000);
+  drawLine(cube2d[7][0],cube2d[7][1],cube2d[3][0],cube2d[3][1],0xFF0000);
+  drawLine(cube2d[7][0],cube2d[7][1],cube2d[5][0],cube2d[5][1],0xFF0000);
+  //delay(500);
+}
