@@ -62,7 +62,7 @@ int main(int argc, char **argv){
 		}
 		else if(c == 0x11) scan--;
 		else if(c == 0x12) scan++;
-        if(scan > size) scan = size;
+        if(scan > size * 2) scan = size;
         if(scan < 0) scan = 0;
         if((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')){
             if(c >= '0' && c <= '9') c = c - '0';

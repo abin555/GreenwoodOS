@@ -475,6 +475,7 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	for(int i = 0; i < numsectors; i++){
 		char *buf = (char *) ISO_read_sector(iso->drive, iso->buf, newTableSector+i);
 		memset(buf, 0, 2048);
+		ISO_write_sector(iso->drive, iso->buf, newTableSector+1);
 	}
 	return 0;
 }
