@@ -461,7 +461,7 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	int numsectors = size / 2048 + 2;
 	int realsize = numsectors * 2048;
 	uint32_t newTableSector = iso->nextFileSector;
-	iso->nextFileSector += numsectors;
+	iso->nextFileSector += numsectors+1;
 	dir->name_len = path_size - (newDirName - path) + 2;
 	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
 	*((uint16_t *) &dir->sector.le) = newTableSector & 0xFFFF;
@@ -472,5 +472,9 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	dir->name[dir->name_len - 2] = ';';
 	dir->name[dir->name_len - 1] = '1';
 	ISO_write_sector(iso->drive, iso->buf, parentSector);
+	for(int i = 0; i < numsectors; i++){
+		char *buf = (char *) ISO_read_sector(iso->drive, iso->buf, newTableSector+i);
+		memset(buf, 0, 2048);
+	}
 	return 0;
 }
