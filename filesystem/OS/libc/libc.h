@@ -69,7 +69,8 @@ int fexists(char *path);
 
 typedef enum {
 	FEAT_FONT = 0x01,
-	FEAT_KEYBOARD = 0x02
+	FEAT_KEYBOARD = 0x02,
+	FEAT_PAGETABLE = 0x03
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{

@@ -409,6 +409,8 @@ int ISO9660_createDirectory(struct ISO9660 *iso, char *path){
 	return 0;
 }
 
+#include "multitasking.h"
+
 int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	if(ISO9660_checkExists(iso, path)){
 		return 1;
@@ -427,6 +429,7 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	newDirName = &path[i+1];
 	path[i] = 0;
 	print_serial("Creating File %s at parent %s for Drive %c\n", newDirName, path, iso->drive->identity);
+	print_console(tasks[task_running_idx].console, "Creating File %s at parent %s for Drive %c\n", newDirName, path, iso->drive->identity);
 	char work_buf[100];
 	bool isDone = 0;
 	uint32_t parentSector = iso->root_directory_sector;
@@ -450,6 +453,7 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 		parentSector = ISO9660_getDirectorySector(iso, parentSector, work_buf);
 	}
 	print_serial("Found Parent Directory at Sector %d\n", parentSector);
+	print_console(tasks[task_running_idx].console, "Found Parent Directory at Sector %d\n", parentSector);
 	if(parentSector == 0) return 1;
 
 	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, parentSector);
@@ -465,9 +469,10 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	dir->name_len = path_size - (newDirName - path) + 2;
 	dir->length = sizeof(struct ISO_Directory_Entry) + dir->name_len;
 	*((uint16_t *) &dir->sector.le) = newTableSector & 0xFFFF;
-	*((uint16_t *) &dir->sector.be) = newTableSector & 0xFFFF0000 >> 16;
+	*((uint16_t *) &dir->sector.be) = (newTableSector & 0xFFFF0000) >> 16;
 	*((uint16_t *) &dir->size.le) = realsize & 0xFFFF;
-	*((uint16_t *) &dir->size.be) = realsize & 0xFFFF0000 >> 16;
+	*((uint16_t *) &dir->size.be) = (realsize & 0xFFFF0000) >> 16;
+	print_console(tasks[task_running_idx].console, "Creating File %s\n - sector %d\n - drive %c\n - %d sectors\n", newDirName, newTableSector, iso->drive->identity, numsectors);
 	memcpy(dir->name, newDirName, dir->name_len-2);
 	dir->name[dir->name_len - 2] = ';';
 	dir->name[dir->name_len - 1] = '1';
@@ -475,7 +480,7 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 	for(int i = 0; i < numsectors; i++){
 		char *buf = (char *) ISO_read_sector(iso->drive, iso->buf, newTableSector+i);
 		memset(buf, 0, 2048);
-		ISO_write_sector(iso->drive, iso->buf, newTableSector+1);
+		ISO_write_sector(iso->drive, iso->buf, newTableSector+i);
 	}
 	return 0;
 }

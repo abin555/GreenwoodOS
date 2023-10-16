@@ -160,7 +160,20 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 					cpu_state.ebx = (uint32_t) sizeof(FONT);
 					break;
 				};
+				//Keyboard
 				case 0x02:{
+					cpu_state.eax = (uint32_t) keyboard_KEYBuffer;
+					cpu_state.ebx = (uint32_t) keyboard_buffer_size;
+					break;
+				};
+				//Paging Memory
+				case 0x03:{
+					cpu_state.eax = (uint32_t) page_directory;
+					cpu_state.ebx = 0;
+					break;
+				};
+				//Interrupt Descriptor Table
+				case 0x04:{
 					
 					break;
 				};
