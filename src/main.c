@@ -90,7 +90,7 @@ void kernal_task(int argc, char **argv){
     print_console(kernal_console, "Starting Initial Program: %s\n", boot_program_path);
 
     exec(boot_program_path, 0, NULL);
-    exec("/A/3D/3D.EXE", 0, NULL);
+    //exec("/A/3D/3D.EXE", 0, NULL);
 
     //set_schedule(ONFOCUS);
     char c = '#';

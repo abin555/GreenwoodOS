@@ -24,17 +24,17 @@ typedef struct {
 } triangleVptr;
 
 typedef struct {
-  Vector3 v1;
-  Vector3 v2;
-  Vector3 v3;
+  Vector3 *v1;
+  Vector3 *v2;
+  Vector3 *v3;
 } Triangle;
 
 typedef struct {
-  float x;
-  float y;
-  float z;
+  Vector3 position;
+  int numVerticies;
   Vector3 *verticies;
-  triangleVptr *triangles;
+  int numTriangles;
+  Triangle *triangles;
 } Object;
 
 typedef struct {
@@ -51,73 +51,77 @@ void memset(void *mem, char v, int size);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 float sin(float x);
 float cos(float x);
-Vector2 CalculatePlane(Camera camera, Vector3 vector);
-void drawTriangle(Camera camera, Triangle triangle);
-
-Vector3 point = {
-  2, 2, 2
-};
+Vector2 CalculatePlane(Camera camera, Vector3 offset, Vector3 vector);
+void drawTriangle(Camera camera, Vector3 offset, Triangle triangle);
+void drawObject(Camera camera, Object *object);
 
 Vector3 points[] = {
-  {2, 2, 2},//LDF
-  {2, 4, 2},//LUF
-  {4, 2, 2},//RDF
-  {4, 4, 2},//RUF
-  {2, 2, 4},//LDB
-  {2, 4, 4},//LUB
-  {4, 2, 4},//RDB
-  {4, 4, 4},//RUB
+  {0, 0, 0},//LDF
+  {0, 4, 0},//LUF
+  {4, 0, 0},//RDF
+  {4, 4, 0},//RUF
+  {0, 0, 4},//LDB
+  {0, 4, 4},//LUB
+  {4, 0, 4},//RDB
+  {4, 4, 4}//RUB
 };
-Vector2 plots[8];
+
+Triangle triangle[12] = {
+    &points[0],
+    &points[3],
+    &points[2],
+
+    &points[0],
+    &points[1],
+    &points[3],
+
+    &points[2],
+    &points[6],
+    &points[7],
+
+    &points[2],
+    &points[3],
+    &points[7],
+
+    &points[0],
+    &points[2],
+    &points[6],
+
+    &points[0],
+    &points[4],
+    &points[6],
+
+    &points[1],
+    &points[3],
+    &points[5],
+
+    &points[1],
+    &points[7],
+    &points[5],
+  };
 
 
 int main(int argc, char** argv){
   Camera camera;
-  Vector2 plot;
   window = window_open("3D");
   win_buf = window->backbuffer;
   window_update();
+  set_schedule(ONFOCUS);
 
-  camera.x = 3;
-  camera.y = 3;
+  camera.x = 0;
+  camera.y = 0;
   camera.z = 0;
-  camera.focal = 2;
+  camera.focal = 0;
 
-  Triangle cube[12] = {
-    points[0],
-    points[3],
-    points[2],
-
-    points[0],
-    points[1],
-    points[3],
-
-    points[2],
-    points[6],
-    points[7],
-
-    points[2],
-    points[3],
-    points[7],
-
-    points[0],
-    points[2],
-    points[6],
-
-    points[0],
-    points[4],
-    points[6],
-
-    points[1],
-    points[3],
-    points[5],
-
-    points[1],
-    points[7],
-    points[5],
+  Object box = {
+    0, 0, 0,
+    8,
+    points,
+    8,
+    triangle
   };
 
-  
+  int vertex = 0;
   while(1){
     char c = getc();
     switch(c){
@@ -145,13 +149,53 @@ int main(int argc, char** argv){
       case 'f':
         camera.z+=.1;
         break;
+
+      case 'y':
+        vertex--;
+        if(vertex < 0) vertex = 0;
+        break;
+      case 'h':
+        vertex++;
+        if(vertex > sizeof(points) / sizeof(Vector3)) vertex = 0;
+        break;
+      case 'i':
+        points[vertex].y-=.1;
+        break;
+      case 'k':
+        points[vertex].y+=.1;
+        break;
+      case 'j':
+        points[vertex].x-=.1;
+        break;
+      case 'l':
+        points[vertex].x+=.1;
+        break;
+      case 'u':
+        points[vertex].z-=.1;
+        break;
+      case 'o':
+        points[vertex].z+=.1;
+        break;
+      case ',':
+        box.position.z-=.1;
+        break;
+      case '.':
+        box.position.z+=.1;
+        break;
+      case 'n':
+        box.position.x-=.1;
+        break;
+      case 'm':
+        box.position.x+=.1;
+        break;
+      case '<':
+        box.position.y-=.1;
+        break;
+      case '>':
+        box.position.y+=.1;
+        break;
     }
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
-    for(int i = 0; i < 8; i++){
-      plot = CalculatePlane(camera, points[i]);
-      plots[i] = plot;
-      //win_buf[(int)(plot.x*10) + ((int)(plot.y*10))*window->width] = 0xFFFFFF;
-    }
     /*
     for(int i = 0; i < 8; i++){
       for(int j = 0; j < 8; j++){
@@ -160,36 +204,42 @@ int main(int argc, char** argv){
       }
     }
     */
+    /*
     for(int i = 0; i < 7; i++){
       drawTriangle(camera, cube[i]);
     }
-
+    */
+    drawObject(camera, &box);
     window_update();
   }
 }
 
-Vector2 CalculatePlane(Camera camera, Vector3 vector){
+Vector2 CalculatePlane(Camera camera, Vector3 offset, Vector3 vector){
   Vector2 result;
-  //result.x = camera.focal * ((vector.x - camera.x) / (camera.focal + vector.z - camera.z)) + camera.x;
-  //result.y = camera.focal * ((vector.y - camera.y) / (camera.focal + vector.z - camera.z)) + camera.y;
+  result.x = camera.focal * ((vector.x - camera.x) / (camera.focal + vector.z - camera.z)) + camera.x;
+  result.y = camera.focal * ((vector.y - camera.y) / (camera.focal + vector.z - camera.z)) + camera.y;
   
-  result.x = camera.x - (camera.focal - camera.z) * ((camera.x - vector.x) / (camera.z - vector.z));
-  result.y = camera.y - (camera.focal - camera.z) * ((camera.y - vector.y) / (camera.z - vector.z));
-  result.x *= 10;
-  result.y *= 10;
+  //result.x = camera.x - (camera.focal - camera.z) * ((camera.x - vector.x) / (vector.z - camera.z + offset.z))  + offset.x;
+  //result.y = camera.y - (camera.focal - camera.z) * ((camera.y - vector.y) / (vector.z - camera.z + offset.z))  + offset.y;
   result.x += window->width / 2;
   result.y += window->height / 2;
   return result;
 }
 
-void drawTriangle(Camera camera, Triangle triangle){
+void drawTriangle(Camera camera, Vector3 offset, Triangle triangle){
   Vector2 points[3];
-  points[0] = CalculatePlane(camera, triangle.v1);
-  points[1] = CalculatePlane(camera, triangle.v2);
-  points[2] = CalculatePlane(camera, triangle.v3);
+  points[0] = CalculatePlane(camera, offset, *triangle.v1);
+  points[1] = CalculatePlane(camera, offset, *triangle.v2);
+  points[2] = CalculatePlane(camera, offset, *triangle.v3);
   drawLine((int)points[0].x,(int) points[0].y,(int) points[1].x,(int) points[1].y, 0xFFFFFF);
   drawLine((int)points[1].x,(int) points[1].y,(int) points[2].x,(int) points[2].y, 0xFFFFFF);
   drawLine((int)points[2].x,(int) points[2].y,(int) points[0].x,(int) points[0].y, 0xFFFFFF);
+}
+
+void drawObject(Camera camera, Object *object){
+  for(int i = 0; i < object->numTriangles; i++){
+    drawTriangle(camera, object->position, object->triangles[i]);
+  }
 }
 
 #define modd(x, y) ((x) - (int)((x) / (y)) * (y))
