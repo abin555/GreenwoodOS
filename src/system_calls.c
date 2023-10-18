@@ -172,11 +172,18 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 					cpu_state.ebx = 0;
 					break;
 				};
-				//Interrupt Descriptor Table
+				//Task Table
 				case 0x04:{
-					
+					cpu_state.eax = (uint32_t) &tasks;
+					cpu_state.ebx = sizeof(tasks);
 					break;
 				};
+				//Program Memory Base
+				case 0x05:{
+					cpu_state.eax = PROGRAM_VIRT_REGION_BASE;
+					cpu_state.ebx = PROGAM_MAX_SIZE;
+					break;
+				}
 			}
 			break;
 		}

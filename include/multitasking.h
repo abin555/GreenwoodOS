@@ -48,7 +48,7 @@ struct task_state{
     bool own_console;
 };
 
-#define MAX_TASKS 10
+#define MAX_TASKS 12
 #define TASK_STACK_SIZE sizeof(uint32_t) * 0x400
 uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8)));
 

@@ -41,16 +41,18 @@ typedef struct {
 
 Player player;
 
-#define MAP_SIZE 8
+#define MAP_SIZE 10
 uint8_t Map[MAP_SIZE * MAP_SIZE] = {
-    1,1,1,1,1,1,1,1,
-    1,0,0,0,0,0,0,1,
-    1,0,0,3,3,3,0,1,
-    1,0,0,2,0,0,0,1,
-    1,0,0,2,0,1,0,1,
-    1,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,1,
-    1,1,1,1,1,1,1,1,
+    1,1,1,1,1,1,1,1,1,1,
+    1,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,1,
+    1,0,0,3,3,3,0,0,0,1,
+    1,0,0,2,0,0,0,0,0,1,
+    1,0,0,2,0,1,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,
 };
 
 uint32_t colors[] = {
@@ -85,7 +87,7 @@ int main(int argc, char **argv){
     float movespeed = 3.0f * 0.016f;
 
     while(1){
-        memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
+        //memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
         render();
         window_update();
 
