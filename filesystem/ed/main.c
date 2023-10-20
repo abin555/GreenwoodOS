@@ -45,7 +45,8 @@ int main(int argc, char **argv){
 		render_file(file_buf, line);
 		window_update();
 		char c = getc();
-		if(c == 0x13 && line > 0){
+		if(c == 0x13){
+			if(line == 0) continue;
 			line--;
 			while(file_buf[scan] != '\n'){
 				scan--;
