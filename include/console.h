@@ -40,7 +40,7 @@ void console_close(struct CONSOLE *console);
 void print_console(struct CONSOLE *console, char *msg, ...);
 char quadToHex(uint8_t quad);
 void console_clear(struct CONSOLE *console);
-int printFloat(struct CONSOLE *console, double data);
+int printFloat(struct CONSOLE *console, uint32_t data);
 int printBinary(struct CONSOLE *console, unsigned int data, int setlength);
 int printHex(struct CONSOLE *console, unsigned int data, int setlength);
 int printDecimal(struct CONSOLE *console, int data, int offset);

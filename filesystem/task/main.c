@@ -106,6 +106,10 @@ int main(int argc, char **argv){
 			line++;
             scan += 2*BYTES_PER_LINE;
 		}
+        else if(c == 's'){
+            line+=10;
+            scan += 2*10*BYTES_PER_LINE;
+        }
 		else if(c == 0x11) scan--;
 		else if(c == 0x12) scan++;
         if(scan > 0x400000 * 2) scan = 0x400000 * 2;

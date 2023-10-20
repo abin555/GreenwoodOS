@@ -104,6 +104,10 @@ void print_arg(char *str, uint32_t arg){
 	asm("int 0x80");
 }
 
+void print_float(char *str, float arg){
+	print_arg(str, *((uint32_t *) &arg));
+}
+
 struct CONSOLE *console_open(){
 	register uint32_t eax asm("eax");
 	eax = 0x09;

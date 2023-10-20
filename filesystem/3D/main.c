@@ -30,6 +30,13 @@ typedef struct {
 } TriangleRef;
 
 typedef struct {
+  int numVertex;
+  Vertex *vertices;
+  int numTriangle;
+  TriangleRef *triangles;
+} Object; 
+
+typedef struct {
   Vertex v0;
   Vertex v1;
   Vertex v2;
@@ -49,19 +56,14 @@ Vertex cube[] = {
 TriangleRef cubeTri[12] = {
   &cube[0], &cube[1], &cube[2],
   &cube[0], &cube[2], &cube[3],
-
   &cube[3], &cube[2], &cube[6],
   &cube[3], &cube[6], &cube[7],
-  
   &cube[7], &cube[6], &cube[5],
   &cube[7], &cube[5], &cube[4],
-  
   &cube[4], &cube[5], &cube[1],
   &cube[4], &cube[1], &cube[0],
-  
   &cube[1], &cube[5], &cube[6],
   &cube[1], &cube[6], &cube[2],
-  
   &cube[7], &cube[4], &cube[0],
   &cube[7], &cube[0], &cube[3]
 };
@@ -84,14 +86,19 @@ TriangleExpl transformTriangle(TriangleExpl triangle);
 TriangleExpl projectTriangle(TriangleExpl triangle);
 Vector3 calculateNormal(TriangleExpl triangle);
 
+Object loadObjFile(char *filename);
+
 void drawTriangle(TriangleExpl triangle, uint32_t color);
 void fillTriangle(TriangleExpl triangle, uint32_t color);
-
+void printTriangle(TriangleExpl tri);
+float atof(char *arr);
+int atoi(char *arr);
 void memset(void *mem, char v, int size);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 float sin(float x);
 float cos(float x);
 float sqrtf(float x);
+void *alloc(int size);
 
 int main(int argc, char** argv){
   window = window_open("3D");
@@ -119,6 +126,19 @@ int main(int argc, char** argv){
   float theta;
   int direction = 1;
   Vector3 light_normalized;
+
+  TriangleRef *triangleBuf;
+  Object obj = {
+    0,
+    NULL,
+    12,
+    &cubeTri
+  };
+
+  if(argc == 2){
+    obj = loadObjFile(argv[1]);
+  }
+
   while(1){
     theta += 0.05f * direction;
     if(theta >= PI || theta <= -PI){ direction *= -1;}
@@ -149,16 +169,23 @@ int main(int argc, char** argv){
     float light_dp;
     int color_shift;
     uint32_t color_mod;
-    for(int i = 0; i < 12; i++){
-      tri = triangleRefToExpl(&cubeTri[i]);
+    for(int i = 0; i < obj.numTriangle; i++){
+      //tri = triangleRefToExpl(&cubeTri[i]);
+      //print("Expected:\n");
+      //printTriangle(tri);
+      tri = triangleRefToExpl(&obj.triangles[i]);
+      //print("Step.\n");
+      //printTriangle(tri);
       tri = transformTriangle(tri);
       normal = calculateNormal(tri);
+      
       
       if(
         normal.x * (tri.v0.x - camera.x) +
         normal.y * (tri.v0.y - camera.y) +
         normal.z * (tri.v0.z - camera.z) >= 0.0f
         ) continue;
+      
 
       light_dp = normal.x * light_normalized.x + normal.y * light_normalized.y + normal.z * light_normalized.z;
       light_dp += 1.0f;
@@ -169,6 +196,7 @@ int main(int argc, char** argv){
       tri = projectTriangle(tri);
       fillTriangle(tri, 0xFFFFFF - color_mod);
       drawTriangle(tri, 0);
+      //drawTriangle(tri, 0xFFFFFF);
       //drawTriangle(computeTriangle(&cubeTri[i]), 0xFFFFFF);
     }
     
@@ -203,8 +231,6 @@ TriangleExpl transformTriangle(TriangleExpl triangle){
   multiplyMatrixVector(&triRotatedZX.v0, &triTranslated.v0, &MatRotX);
   multiplyMatrixVector(&triRotatedZX.v1, &triTranslated.v1, &MatRotX);
   multiplyMatrixVector(&triRotatedZX.v2, &triTranslated.v2, &MatRotX);
-
-
   triTranslated.v0.z += 3.0f;
   triTranslated.v1.z += 3.0f;
   triTranslated.v2.z += 3.0f;
@@ -482,4 +508,180 @@ float sqrtf(float x) {
   u.x = 0.25f*u.x + x/u.x;
 
   return u.x;
+}
+
+float atof(char *arr){
+  float val = 0;
+  char afterdot = 0;
+  float scale = 1;
+  char neg = 0;
+  while(*arr == ' ') arr++;
+
+  if(*arr == '-'){
+    arr++;
+    neg = 1;
+  }
+  while(*arr != 0 && *arr != ' ' && *arr != '\n'){
+    if(afterdot){
+      scale = scale / 10;
+      val = val + (*arr - '0')*scale;
+    }
+    else{
+      if(*arr == '.'){
+        afterdot++;
+      }
+      else{
+        val = val * 10.0 + (*arr - '0');
+      }
+    }
+    arr++;
+  }
+  //print_arg("ATOF: %x\n", val);
+  if(neg) return -val;
+  return val;
+}
+
+int atoi(char *arr){
+  int val = 0;
+  char neg;
+  if(*arr == '-'){
+    arr++;
+    neg = 1;
+  }
+  while(*arr != 0 && *arr != ' ' && *arr != '\n'){
+    val = val * 10 + (*arr - '0');
+    arr++;
+  }
+  //print_arg("ATOI: %d\n", val);
+  if(neg) return -val;
+  return val;
+}
+
+uint32_t last_alloc = 0x8000;
+
+void *alloc(int size){
+  void *buf = (void *) last_alloc;
+  last_alloc += size + 0x10;
+  return buf;
+}
+
+Object loadObjFile(char *filename){
+  print_arg("Loading Object File %s\n", (uint32_t) filename);
+  Object obj = {0};
+  struct FILE *obj_file = fopen(filename);
+  if(!obj_file){
+    print("File does not exist!\n");
+    return obj;
+  };
+  int size = fsize(obj_file);
+  print_arg("File is %d bytes\n", size);
+  char *filebuf = alloc(size);
+  fcopy(obj_file, filebuf, size);
+  fclose(obj_file);
+  char *scan = filebuf;
+  
+  Vertex *vertices = alloc(sizeof(Vertex) * 1000);
+  TriangleRef *triangles = alloc(sizeof(TriangleRef) * 1000);
+
+  obj.numTriangle = 0;
+  obj.numVertex = 0;
+  obj.vertices = vertices;
+  obj.triangles = triangles;
+  
+
+  while(*scan != 0 && (int) (scan - filebuf) < size){
+    switch(*scan){
+      case '#':
+      case 'o':
+      case 's':
+        goto find_newline;
+        break;
+      
+      case 'v':
+        scan += 2;
+        goto parseVertex;
+        break;
+      case 'f':
+        scan += 2;
+        goto parseFace;
+        break;
+      default:
+        goto find_newline;
+        break;
+    }
+    parseVertex:
+    print_arg("Vertex %d: \n", obj.numVertex);
+    float coord;
+
+    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+    coord = atof(scan);
+    vertices[obj.numVertex].x = coord;
+    print_arg("X: %x ", *((uint32_t *) &coord));
+    while(*scan != ' ' && *scan != '\n') scan++;
+    scan++;
+
+    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+    coord = atof(scan);
+    vertices[obj.numVertex].y = coord;
+    print_arg("Y: %x ", *((uint32_t *) &coord));
+    while(*scan != ' ' && *scan != '\n') scan++;
+    scan++;
+
+    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+    coord = atof(scan);
+    vertices[obj.numVertex].z = coord;
+    print_arg("Z: %x\n", *((uint32_t *) &coord));
+
+
+    obj.numVertex++;
+    goto find_newline;
+
+    parseFace:
+    int idx = 0;
+    idx = atoi(scan);
+    //print_arg("Face %d: ", obj.numTriangle);
+    //print_arg("%d, ", idx);
+    triangles[obj.numTriangle].v0 = &vertices[idx];
+    while(*scan != ' ' && *scan != '\n') scan++;
+    scan++;
+    idx = atoi(scan);
+    triangles[obj.numTriangle].v1 = &vertices[idx];
+    //print_arg("%d, ", idx);
+    while(*scan != ' ' && *scan != '\n') scan++;
+    scan++;
+    idx = atoi(scan);
+    triangles[obj.numTriangle].v2 = &vertices[idx];
+    //print_arg("%d\n", idx);
+    //print_arg("\n%d>\n", obj.numTriangle);
+    //printTriangle(triangleRefToExpl(&triangles[obj.numTriangle]));
+    obj.numTriangle++;
+    goto find_newline;
+
+
+    find_newline:
+    while(*scan != '\n'){
+      scan++;
+    }
+    scan++;
+    continue;
+  }
+  print("Loaded object!\n");
+  print_arg(" - %d verticies\n", obj.numVertex);
+  print_arg(" - %d triangles\n", obj.numTriangle);
+  
+  return obj;
+}
+
+void printTriangle(TriangleExpl tri){
+  print_arg("v0 - X: %x ", tri.v0.x);
+  print_arg("Y: %x ", tri.v0.y);
+  print_arg("Z: %x\n", tri.v0.z);
+  
+  print_arg("v1 - X: %x ", tri.v1.x);
+  print_arg("Y: %x ", tri.v1.y);
+  print_arg("Z: %x\n", tri.v1.z);
+  
+  print_arg("v2 - X: %x ", tri.v2.x);
+  print_arg("Y: %x ", tri.v2.y);
+  print_arg("Z: %x\n", tri.v2.z);
 }

@@ -56,6 +56,7 @@ void exec(char *filename, int argc, char **argv);
 void set_schedule(ScheduleType type);
 void print(char *str);
 void print_arg(char *str, uint32_t arg);
+void print_float(char *str, float arg);
 struct CONSOLE *console_open();
 void console_close();
 void *kmalloc(uint32_t size);

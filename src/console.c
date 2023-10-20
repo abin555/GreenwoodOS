@@ -148,17 +148,21 @@ int abs(int x){
 	return x;
 }
 
-int printFloat(struct CONSOLE *console, double data){
-	int i = (int)data;
-	int sizePart1 = printDecimal(console, i, 0);
-	data = (data-i)*1000000;
-	i = abs((int)data);
-	if(fabs(data) - i >= 0.5){
-		i++;
-	}
-	console->buf[console->Line*console->width + console->LinePlace + sizePart1] = '.';
-	int sizePart2 = printDecimal(console, i, sizePart1 + 1);
-	return sizePart1 + sizePart2 + 1;
+int printFloat(struct CONSOLE *console, uint32_t data){
+	print_serial("Printing float %x\n", data);
+	float dataf = (float) data;
+	int top = (int) dataf;
+	float lower = dataf - top;
+	int size1 = printDecimal(console, top, 0);
+	console->LinePlace += size1;
+	int iLower = (int) (lower * 1000);
+	console->buf[console->Line*console->width + console->LinePlace + size1] = '.';
+	console->LinePlace++;
+	print_serial("%d.%d\n", top, iLower);
+	int size2 = printDecimal(console, iLower, 0);
+	console->LinePlace += size2;
+	return 0;
+
 }
 
 struct CONSOLE *console_open(struct WINDOW *window){
@@ -229,7 +233,7 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 				break;
 				case 'f'://float
 				case 'F':
-					console->LinePlace += printFloat(console, va_arg(listptd, double));
+					console->LinePlace += printFloat(console, va_arg(listptd, unsigned int));
 				break;
 				case 'c':
 				case 'C':
