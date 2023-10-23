@@ -1,4 +1,5 @@
 #include "libc.h"
+#include "3D_types.h"
 
 #define PI 3.14159263f
 #define PI2 6.283
@@ -6,41 +7,7 @@
 struct WINDOW *window;
 uint32_t *win_buf;
 
-typedef struct {
-  float x;
-  float y;
-} Vector2;
 
-typedef struct {
-  float x;
-  float y;
-  float z;
-} Vector3;
-
-typedef Vector3 Vertex;
-
-typedef struct {
-  float m[4][4];
-} Matrix4x4;
-
-typedef struct {
-  Vertex *v0;
-  Vertex *v1;
-  Vertex *v2;
-} TriangleRef;
-
-typedef struct {
-  int numVertex;
-  Vertex *vertices;
-  int numTriangle;
-  TriangleRef *triangles;
-} Object; 
-
-typedef struct {
-  Vertex v0;
-  Vertex v1;
-  Vertex v2;
-} TriangleExpl;
 
 Vertex cube[] = {
   0.0,0.0,0.0,
@@ -71,6 +38,7 @@ TriangleRef cubeTri[12] = {
 Matrix4x4 ProjectionMatrix = {0};
 Matrix4x4 MatRotZ = {0};
 Matrix4x4 MatRotX = {0};
+Matrix4x4 MatRotY = {0};
 
 float fNear;
 float fFar;
@@ -85,6 +53,9 @@ TriangleExpl computeTriangle(TriangleRef *triangle);
 TriangleExpl transformTriangle(TriangleExpl triangle);
 TriangleExpl projectTriangle(TriangleExpl triangle);
 Vector3 calculateNormal(TriangleExpl triangle);
+void rotateObjZ(Object *obj, float theta);
+void rotateObjX(Object *obj, float theta);
+void rotateObjY(Object *obj, float theta);
 
 Object loadObjFile(char *filename);
 
@@ -99,6 +70,10 @@ float sin(float x);
 float cos(float x);
 float sqrtf(float x);
 void *alloc(int size);
+
+Vector3 camera = {0.0f, 0.0f, -3.0f};
+Vector3 camera_rot = {0.0f, 0.0f, 0.0f};
+Vector3 light = {0.5f, -1.0f, -1.0f};
 
 int main(int argc, char** argv){
   window = window_open("3D");
@@ -120,8 +95,7 @@ int main(int argc, char** argv){
   ProjectionMatrix.m[3][3] = 0.0f;
 
   
-  const Vector3 camera = {0.0f, 0.0f, 0.0f};
-  const Vector3 light = {0.0f, 0.0f, 1.0f};
+  
 
   float theta;
   int direction = 1;
@@ -140,22 +114,19 @@ int main(int argc, char** argv){
   }
 
   while(1){
-    theta += 0.05f * direction;
-    if(theta >= PI || theta <= -PI){ direction *= -1;}
+    //MatRotZ.m[0][0] = cos(theta);
+    //MatRotZ.m[0][1] = sin(theta);
+    //MatRotZ.m[1][0] = -sin(theta);
+    //MatRotZ.m[1][1] = cos(theta);
+    //MatRotZ.m[2][2] = 1;
+    //MatRotZ.m[3][3] = 1;
 
-    MatRotZ.m[0][0] = cos(theta);
-    MatRotZ.m[0][1] = sin(theta);
-    MatRotZ.m[1][0] = -sin(theta);
-    MatRotZ.m[1][1] = cos(theta);
-    MatRotZ.m[2][2] = 1;
-    MatRotZ.m[3][3] = 1;
-
-    MatRotX.m[0][0] = 1;
-    MatRotX.m[1][1] = cos(theta*0.5f);
-    MatRotX.m[1][2] = sin(theta*0.5f);
-    MatRotX.m[2][1] = -sin(theta*0.5f);
-    MatRotX.m[2][2] = cos(theta * 0.5f);
-    MatRotX.m[3][3] = 1;
+    //MatRotX.m[0][0] = 1;
+    //MatRotX.m[1][1] = cos(theta*0.5f);
+    //MatRotX.m[1][2] = sin(theta*0.5f);
+    //MatRotX.m[2][1] = -sin(theta*0.5f);
+    //MatRotX.m[2][2] = cos(theta * 0.5f);
+    //MatRotX.m[3][3] = 1;
 
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
 
@@ -169,6 +140,31 @@ int main(int argc, char** argv){
     float light_dp;
     int color_shift;
     uint32_t color_mod;
+
+    /*
+    Set Up Rotation Matrices for Camera
+    */
+    MatRotX.m[0][0] = 1;
+    MatRotX.m[1][1] = cos(camera_rot.x);
+    MatRotX.m[1][2] = sin(camera_rot.x);
+    MatRotX.m[2][1] = -sin(camera_rot.x);
+    MatRotX.m[2][2] = cos(camera_rot.x);
+    MatRotX.m[3][3] = 1;
+
+    MatRotY.m[0][0] = cos(camera_rot.y);
+    MatRotY.m[2][0] = sin(camera_rot.y);
+    MatRotY.m[1][1] = 1;
+    MatRotY.m[0][2] = -sin(camera_rot.y);
+    MatRotY.m[2][2] = cos(camera_rot.y);
+
+    MatRotZ.m[0][0] = cos(camera_rot.z);
+    MatRotZ.m[0][1] = sin(camera_rot.z);
+    MatRotZ.m[1][0] = -sin(camera_rot.z);
+    MatRotZ.m[1][1] = cos(camera_rot.z);
+    MatRotZ.m[2][2] = 1;
+    MatRotZ.m[3][3] = 1;
+
+
     for(int i = 0; i < obj.numTriangle; i++){
       //tri = triangleRefToExpl(&cubeTri[i]);
       //print("Expected:\n");
@@ -181,9 +177,9 @@ int main(int argc, char** argv){
       
       
       if(
-        normal.x * (tri.v0.x - camera.x) +
-        normal.y * (tri.v0.y - camera.y) +
-        normal.z * (tri.v0.z - camera.z) >= 0.0f
+        normal.x * (tri.v0.x) +
+        normal.y * (tri.v0.y) +
+        normal.z * (tri.v0.z) >= 0.0f || tri.v0.z >= 0.0f || tri.v1.z >= 0.0f || tri.v2.z >= 0.0f 
         ) continue;
       
 
@@ -191,49 +187,156 @@ int main(int argc, char** argv){
       light_dp += 1.0f;
       light_dp *= 0.5;
       color_shift = (int) 0xFF * light_dp;
+      if(color_shift < 0) color_shift = 0;
       color_mod = color_shift << 16 | color_shift << 8 | color_shift;
 
       tri = projectTriangle(tri);
       fillTriangle(tri, 0xFFFFFF - color_mod);
-      drawTriangle(tri, 0);
+      //drawTriangle(tri, 0);
       //drawTriangle(tri, 0xFFFFFF);
       //drawTriangle(computeTriangle(&cubeTri[i]), 0xFFFFFF);
     }
     
+    
+
     /*
-    int ver = rand() % 8;
+    int ver = rand() % obj.numVertex;
     float amt = (rand() % 2 ? 0.05f : -0.05f);
     switch(rand() % 3){
       case 0:
-        cube[ver].x += amt;
+        obj.vertices[ver].x += amt;
       break;
       case 1:
-        cube[ver].y += amt;
+        obj.vertices[ver].y += amt;
       break;
       case 2:
-        cube[ver].z += amt;
+        obj.vertices[ver].z += amt;
       break;
     }
     */
-
     window_update();
+
+    char c = getc();
+    switch(c){
+      case 'e':
+        rotateObjZ(&obj, 0.1f);
+        break;
+      case 'q':
+        rotateObjZ(&obj, -0.1f);
+        break;
+      case 's':
+        rotateObjX(&obj, 0.1f);
+        break;
+      case 'w':
+        rotateObjX(&obj, -0.1f);
+        break;
+      case 'a':
+        rotateObjY(&obj, 0.1f);
+        break;
+      case 'd':
+        rotateObjY(&obj, -0.1f);
+        break;
+      case 'y':
+        camera.y -= 0.1f;
+        break;
+      case 'h':
+        camera.y += 0.1f;
+        break;
+      case 'i':
+        camera.z -= 0.1f;
+        break;
+      case 'k':
+        camera.z += 0.1f;
+        break;
+      case 'j':
+        camera.x -= 0.1f;
+        break;
+      case 'l':
+        camera.x += 0.1f;
+        break;
+      case ',':
+        camera_rot.y -= 0.1f;
+        if(camera_rot.y <= -PI) camera_rot.y = PI;
+        break;
+      case '.':
+        camera_rot.y += 0.1f;
+        if(camera_rot.y >= PI) camera_rot.y = -PI;
+        break; 
+    }
+
+  }
+}
+
+void rotateObjZ(Object *obj, float theta){
+  MatRotZ.m[0][0] = cos(theta);
+  MatRotZ.m[0][1] = sin(theta);
+  MatRotZ.m[1][0] = -sin(theta);
+  MatRotZ.m[1][1] = cos(theta);
+  MatRotZ.m[2][2] = 1;
+  MatRotZ.m[3][3] = 1;
+
+  Vector3 workingVector;
+  for(int i = 0; i < obj->numVertex; i++){
+    workingVector = obj->vertices[i];
+    multiplyMatrixVector(&workingVector, &obj->vertices[i], &MatRotZ);
+  }
+}
+
+void rotateObjX(Object *obj, float theta){
+  MatRotX.m[0][0] = 1;
+  MatRotX.m[1][1] = cos(theta);
+  MatRotX.m[1][2] = sin(theta);
+  MatRotX.m[2][1] = -sin(theta);
+  MatRotX.m[2][2] = cos(theta);
+  MatRotX.m[3][3] = 1;
+
+  Vector3 workingVector;
+  for(int i = 0; i < obj->numVertex; i++){
+    workingVector = obj->vertices[i];
+    multiplyMatrixVector(&workingVector, &obj->vertices[i], &MatRotX);
+  }
+}
+
+void rotateObjY(Object *obj, float theta){
+  MatRotY.m[0][0] = cos(theta);
+  MatRotY.m[2][0] = sin(theta);
+  MatRotY.m[1][1] = 1;
+  MatRotY.m[0][2] = -sin(theta);
+  MatRotY.m[2][2] = cos(theta);
+
+  Vector3 workingVector;
+  for(int i = 0; i < obj->numVertex; i++){
+    workingVector = obj->vertices[i];
+    multiplyMatrixVector(&workingVector, &obj->vertices[i], &MatRotY);
   }
 }
 
 TriangleExpl transformTriangle(TriangleExpl triangle){
-  TriangleExpl triRotatedZX, triTranslated;
-  TriangleExpl newTriangle;
+  TriangleExpl triTranslated;
 
-  multiplyMatrixVector(&triangle.v0, &triRotatedZX.v0, &MatRotZ);
-  multiplyMatrixVector(&triangle.v1, &triRotatedZX.v1, &MatRotZ);
-  multiplyMatrixVector(&triangle.v2, &triRotatedZX.v2, &MatRotZ);
+  //multiplyMatrixVector(&triangle.v0, &triRotatedZX.v0, &MatRotZ);
+  //multiplyMatrixVector(&triangle.v1, &triRotatedZX.v1, &MatRotZ);
+  //multiplyMatrixVector(&triangle.v2, &triRotatedZX.v2, &MatRotZ);
 
-  multiplyMatrixVector(&triRotatedZX.v0, &triTranslated.v0, &MatRotX);
-  multiplyMatrixVector(&triRotatedZX.v1, &triTranslated.v1, &MatRotX);
-  multiplyMatrixVector(&triRotatedZX.v2, &triTranslated.v2, &MatRotX);
-  triTranslated.v0.z += 3.0f;
-  triTranslated.v1.z += 3.0f;
-  triTranslated.v2.z += 3.0f;
+  //multiplyMatrixVector(&triRotatedZX.v0, &triTranslated.v0, &MatRotX);
+  //multiplyMatrixVector(&triRotatedZX.v1, &triTranslated.v1, &MatRotX);
+  //multiplyMatrixVector(&triRotatedZX.v2, &triTranslated.v2, &MatRotX);
+  triangle.v0.z += camera.z;
+  triangle.v1.z += camera.z;
+  triangle.v2.z += camera.z;
+
+  triangle.v0.y += camera.y;
+  triangle.v1.y += camera.y;
+  triangle.v2.y += camera.y;
+
+  triangle.v0.x += camera.x;
+  triangle.v1.x += camera.x;
+  triangle.v2.x += camera.x;
+
+  multiplyMatrixVector(&triangle.v0, &triTranslated.v0, &MatRotY);
+  multiplyMatrixVector(&triangle.v1, &triTranslated.v1, &MatRotY);
+  multiplyMatrixVector(&triangle.v2, &triTranslated.v2, &MatRotY);
+
   return triTranslated;
 }
 
@@ -326,8 +429,7 @@ void drawHline(int x1, int x2, int y, uint32_t color){
   if(x1 > window->width) x1 = window->width;
   if(x2 < 0) x2 = 0;
   if(x2 > window->width) x2 = window->width;
-  if(y < 0) y = 0;
-  if(y > window->height) y = window->height;
+  if(y < 0 || y >= window->height) return;
 
   for(int x = x1; x < x2; x++) win_buf[x + y*window->width] = color;
 }
@@ -341,6 +443,21 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
   y2 = triangle.v1.y;
   x3 = triangle.v2.x;
   y3 = triangle.v2.y;
+  //if((x1 > window->width || x2 > window->width) || (x1 < 0 || x2 < 0) || (y1 > window->height || y2 > window->height) || (y1 < 0 || y2 < 0)) return;
+  //else{
+  //if(x1 < 0) x1 = 0;
+  //if(x2 < 0) x2 = 0;
+  //if(x3 < 0) x3 = 0;
+  //if(y1 < 0) y1 = 0;
+  //if(y2 < 0) y2 = 0;
+  //if(y3 < 0) y3 = 0;
+  //if(x1 > window->width) x1 = window->width;
+  //if(x2 > window->width) x2 = window->width;
+  //if(x3 > window->width) x3 = window->width;
+  //if(y1 > window->height) y1 = window->height;
+  //if(y2 > window->height) y2 = window->height;
+  //if(y3 > window->height) y3 = window->height;
+  //}
 
   int t1x,t2x,y,minx,maxx,t1xp,t2xp;
 	bool changed1 = false;
@@ -557,7 +674,7 @@ int atoi(char *arr){
   return val;
 }
 
-uint32_t last_alloc = 0x8000;
+uint32_t last_alloc = 0x6000;
 
 void *alloc(int size){
   void *buf = (void *) last_alloc;
@@ -580,15 +697,15 @@ Object loadObjFile(char *filename){
   fclose(obj_file);
   char *scan = filebuf;
   
-  Vertex *vertices = alloc(sizeof(Vertex) * 1000);
-  TriangleRef *triangles = alloc(sizeof(TriangleRef) * 1000);
+  Vertex *vertices = alloc(sizeof(Vertex) * 10000);
+  TriangleRef *triangles = alloc(sizeof(TriangleRef) * 10000);
 
   obj.numTriangle = 0;
   obj.numVertex = 0;
   obj.vertices = vertices;
   obj.triangles = triangles;
   
-
+  float coord;
   while(*scan != 0 && (int) (scan - filebuf) < size){
     switch(*scan){
       case '#':
@@ -597,65 +714,62 @@ Object loadObjFile(char *filename){
         goto find_newline;
         break;
       
-      case 'v':
+      case 'v':{
+        if(*(scan+1) != ' ') continue;
         scan += 2;
-        goto parseVertex;
+        //print_arg("Vertex %d: \n", obj.numVertex);
+        //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+        coord = atof(scan);
+        vertices[obj.numVertex].x = coord;
+        //print_arg("X: %x ", *((uint32_t *) &coord));
+        while(*scan != ' ' && *scan != '\n') scan++;
+        scan++;
+        //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+        coord = atof(scan);
+        vertices[obj.numVertex].y = coord;
+        //print_arg("Y: %x ", *((uint32_t *) &coord));
+        while(*scan != ' ' && *scan != '\n') scan++;
+        scan++;
+        //print_arg("<SCAN: %d>", (int) (scan-filebuf));
+        coord = atof(scan);
+        vertices[obj.numVertex].z = coord;
+        //print_arg("Z: %x\n", *((uint32_t *) &coord));
+        print("");
+        obj.numVertex++;
+        goto find_newline;
         break;
-      case 'f':
+      }
+        break;
+      case 'f':{
         scan += 2;
-        goto parseFace;
+        int idx = 0;
+        idx = atoi(scan)-1;
+        //print_arg("Face %d: ", obj.numTriangle);
+        //print_arg("%d, ", idx);
+        triangles[obj.numTriangle].v0 = &vertices[idx];
+        while(*scan != ' ' && *scan != '\n') scan++;
+        scan++;
+        idx = atoi(scan)-1;
+        triangles[obj.numTriangle].v1 = &vertices[idx];
+        //print_arg("%d, ", idx);
+        while(*scan != ' ' && *scan != '\n') scan++;
+        scan++;
+        idx = atoi(scan)-1;
+        triangles[obj.numTriangle].v2 = &vertices[idx];
+        //print_arg("%d\n", idx);
+        //print_arg("\n%d>\n", obj.numTriangle);
+        //printTriangle(triangleRefToExpl(&triangles[obj.numTriangle]));
+        obj.numTriangle++;
+        goto find_newline;
         break;
+      }
       default:
         goto find_newline;
         break;
     }
-    parseVertex:
-    print_arg("Vertex %d: \n", obj.numVertex);
-    float coord;
-
-    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
-    coord = atof(scan);
-    vertices[obj.numVertex].x = coord;
-    print_arg("X: %x ", *((uint32_t *) &coord));
-    while(*scan != ' ' && *scan != '\n') scan++;
-    scan++;
-
-    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
-    coord = atof(scan);
-    vertices[obj.numVertex].y = coord;
-    print_arg("Y: %x ", *((uint32_t *) &coord));
-    while(*scan != ' ' && *scan != '\n') scan++;
-    scan++;
-
-    //print_arg("<SCAN: %d>", (int) (scan-filebuf));
-    coord = atof(scan);
-    vertices[obj.numVertex].z = coord;
-    print_arg("Z: %x\n", *((uint32_t *) &coord));
-
-
-    obj.numVertex++;
-    goto find_newline;
 
     parseFace:
-    int idx = 0;
-    idx = atoi(scan);
-    //print_arg("Face %d: ", obj.numTriangle);
-    //print_arg("%d, ", idx);
-    triangles[obj.numTriangle].v0 = &vertices[idx];
-    while(*scan != ' ' && *scan != '\n') scan++;
-    scan++;
-    idx = atoi(scan);
-    triangles[obj.numTriangle].v1 = &vertices[idx];
-    //print_arg("%d, ", idx);
-    while(*scan != ' ' && *scan != '\n') scan++;
-    scan++;
-    idx = atoi(scan);
-    triangles[obj.numTriangle].v2 = &vertices[idx];
-    //print_arg("%d\n", idx);
-    //print_arg("\n%d>\n", obj.numTriangle);
-    //printTriangle(triangleRefToExpl(&triangles[obj.numTriangle]));
-    obj.numTriangle++;
-    goto find_newline;
+    
 
 
     find_newline:

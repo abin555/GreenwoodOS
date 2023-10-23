@@ -44,7 +44,16 @@ struct CONSOLE{
 	} color;
 };
 
-struct FILE;
+struct File_Info{
+	void *drive;
+	uint32_t sector;
+	uint32_t size;
+};
+
+struct FILE{
+	struct File_Info info;
+	int head;
+};
 
 int strcmp(const char *s1, const char *s2);
 struct WINDOW *window_open(char *name);
@@ -93,5 +102,6 @@ int getArrowKey();
 
 void srand(uint32_t seed);
 int rand();
+void exit(int code);
 
 #endif

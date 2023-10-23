@@ -110,14 +110,16 @@ int main(int argc, char **argv){
             line+=10;
             scan += 2*10*BYTES_PER_LINE;
         }
+        else if(c == 'w'){
+            line-=10;
+            scan-=2*10*BYTES_PER_LINE;
+        }
 		else if(c == 0x11) scan--;
 		else if(c == 0x12) scan++;
-        if(scan > 0x400000 * 2) scan = 0x400000 * 2;
-        if(scan < 0) scan = 0;
-        if((c >= '0' && c <= '9') || (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')){
+        else if((c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F')){
             if(c >= '0' && c <= '9') c = c - '0';
-            else if(c >= 'a' && c <= 'z')  c = c - 'a' + 0xA;
-            else if(c >= 'A' && c <= 'Z') c = c - 'A' + 0xA;
+            else if(c >= 'a' && c <= 'f')  c = c - 'a' + 0xA;
+            else if(c >= 'A' && c <= 'F') c = c - 'A' + 0xA;
             int idx = scan / 2;
             int offset = scan % 2;//if non zero, editing second half of byte.
 
@@ -133,6 +135,9 @@ int main(int argc, char **argv){
             memory[idx] = byte;
             scan++;
         }
+        if(scan > 0x400000 * 2) scan = 0x400000 * 2;
+        if(scan < 0) scan = 0;
+        
     }
 
 

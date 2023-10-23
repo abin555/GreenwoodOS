@@ -285,3 +285,12 @@ int rand(){
 	asm("int 0x80");
 	return eax;
 }
+
+void exit(int code){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) code;
+	eax = 0x1F;
+	asm("int 0x80");
+	return;
+}

@@ -217,6 +217,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			cpu_state.eax = rand();
 			break;
 		}
+		case 0x1F:{
+			stop_task(task_running_idx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;
