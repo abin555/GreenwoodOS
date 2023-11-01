@@ -4,36 +4,42 @@
 #define PI 3.14159263f
 #define PI2 6.283
 
+void multiplyMatrixVector(Vector3 *vi, Vector3 *vo, Matrix4x4 *matrix);
+TriangleExpl triangleRefToExpl(TriangleRef *tri);
+TriangleExpl transformTriangle(TriangleExpl triangle);
+TriangleExpl projectTriangle(TriangleExpl triangle);
+Vector3 calculateNormal(TriangleExpl triangle);
+void rotateObjZ(Object *obj, float theta);
+void rotateObjX(Object *obj, float theta);
+void rotateObjY(Object *obj, float theta);
+
+Object loadObjFile(char *filename);
+
+
+float edgeFunction(Vector3 *a, Vector3 *b, Vector3 *c);
+void drawTriangle(TriangleExpl triangle, uint32_t color);
+void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color);
+void printTriangle(TriangleExpl tri);
+float atof(char *arr);
+int atoi(char *arr);
+void memset(void *mem, char v, int size);
+void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
+float sin(float x);
+float cos(float x);
+float sqrtf(float x);
+void *alloc(int size);
+float min3(float a, float b, float c);
+float max3(float a, float b, float c);
+
+int max(int a, int b);
+int min(int a, int b);
+
+Vector3 camera = {0.0f, 0.0f, -3.0f};
+Vector3 camera_rot = {0.0f, 0.0f, 0.0f};
+Vector3 light = {0.5f, -1.0f, -1.0f};
+
 struct WINDOW *window;
 uint32_t *win_buf;
-
-
-
-Vertex cube[] = {
-  0.0,0.0,0.0,
-  0.0,1.0,0.0,
-  1.0,1.0,0.0,
-  1.0,0.0,0.0,
-  0.0,0.0,1.0,
-  0.0,1.0,1.0,
-  1.0,1.0,1.0,
-  1.0,0.0,1.0,
-};
-
-TriangleRef cubeTri[12] = {
-  &cube[0], &cube[1], &cube[2],
-  &cube[0], &cube[2], &cube[3],
-  &cube[3], &cube[2], &cube[6],
-  &cube[3], &cube[6], &cube[7],
-  &cube[7], &cube[6], &cube[5],
-  &cube[7], &cube[5], &cube[4],
-  &cube[4], &cube[5], &cube[1],
-  &cube[4], &cube[1], &cube[0],
-  &cube[1], &cube[5], &cube[6],
-  &cube[1], &cube[6], &cube[2],
-  &cube[7], &cube[4], &cube[0],
-  &cube[7], &cube[0], &cube[3]
-};
 
 Matrix4x4 ProjectionMatrix = {0};
 Matrix4x4 MatRotZ = {0};
@@ -45,35 +51,10 @@ float fFar;
 float fFov;
 float fAspectRatio;
 float fFovRad;
-
-void multiplyMatrixVector(Vector3 *vi, Vector3 *vo, Matrix4x4 *matrix);
-TriangleExpl triangleRefToExpl(TriangleRef *tri);
-void renderShape(TriangleRef *triangles, int numTriangles);
-TriangleExpl computeTriangle(TriangleRef *triangle);
-TriangleExpl transformTriangle(TriangleExpl triangle);
-TriangleExpl projectTriangle(TriangleExpl triangle);
-Vector3 calculateNormal(TriangleExpl triangle);
-void rotateObjZ(Object *obj, float theta);
-void rotateObjX(Object *obj, float theta);
-void rotateObjY(Object *obj, float theta);
-
-Object loadObjFile(char *filename);
-
-void drawTriangle(TriangleExpl triangle, uint32_t color);
-void fillTriangle(TriangleExpl triangle, uint32_t color);
-void printTriangle(TriangleExpl tri);
-float atof(char *arr);
-int atoi(char *arr);
-void memset(void *mem, char v, int size);
-void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
-float sin(float x);
-float cos(float x);
-float sqrtf(float x);
-void *alloc(int size);
-
-Vector3 camera = {0.0f, 0.0f, -3.0f};
-Vector3 camera_rot = {0.0f, 0.0f, 0.0f};
-Vector3 light = {0.5f, -1.0f, -1.0f};
+char Zbuffering;
+char Outlines;
+char SlowRender;
+Object obj;
 
 int main(int argc, char** argv){
   window = window_open("3D");
@@ -95,40 +76,30 @@ int main(int argc, char** argv){
   ProjectionMatrix.m[3][3] = 0.0f;
 
   
-  
+  Zbuffering = 1;
+  Outlines = 0;
+  SlowRender = 0;
 
   float theta;
   int direction = 1;
   Vector3 light_normalized;
 
   TriangleRef *triangleBuf;
-  Object obj = {
-    0,
-    NULL,
-    12,
-    &cubeTri
-  };
 
   if(argc == 2){
     obj = loadObjFile(argv[1]);
   }
-
+  else{
+    obj = loadObjFile("/A/3D/CUBE.OBJ");
+  }
+  //window->backbuffer = obj.ZBuff;
   while(1){
-    //MatRotZ.m[0][0] = cos(theta);
-    //MatRotZ.m[0][1] = sin(theta);
-    //MatRotZ.m[1][0] = -sin(theta);
-    //MatRotZ.m[1][1] = cos(theta);
-    //MatRotZ.m[2][2] = 1;
-    //MatRotZ.m[3][3] = 1;
-
-    //MatRotX.m[0][0] = 1;
-    //MatRotX.m[1][1] = cos(theta*0.5f);
-    //MatRotX.m[1][2] = sin(theta*0.5f);
-    //MatRotX.m[2][1] = -sin(theta*0.5f);
-    //MatRotX.m[2][2] = cos(theta * 0.5f);
-    //MatRotX.m[3][3] = 1;
 
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
+    for(int i = 0; i < window->width * window->height && Zbuffering; i++){
+      obj.ZBuff[i] = 0;
+    }
+
 
     float l = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
     light_normalized.x = light.x / l; 
@@ -136,6 +107,7 @@ int main(int argc, char** argv){
     light_normalized.z = light.z / l;
 
     TriangleExpl tri;
+    TriangleExpl projectedTri;
     Vector3 normal;
     float light_dp;
     int color_shift;
@@ -166,12 +138,7 @@ int main(int argc, char** argv){
 
 
     for(int i = 0; i < obj.numTriangle; i++){
-      //tri = triangleRefToExpl(&cubeTri[i]);
-      //print("Expected:\n");
-      //printTriangle(tri);
       tri = triangleRefToExpl(&obj.triangles[i]);
-      //print("Step.\n");
-      //printTriangle(tri);
       tri = transformTriangle(tri);
       normal = calculateNormal(tri);
       
@@ -190,11 +157,21 @@ int main(int argc, char** argv){
       if(color_shift < 0) color_shift = 0;
       color_mod = color_shift << 16 | color_shift << 8 | color_shift;
 
-      tri = projectTriangle(tri);
-      fillTriangle(tri, 0xFFFFFF - color_mod);
-      //drawTriangle(tri, 0);
+      projectedTri = projectTriangle(tri);
+
+      float xmin = min3(projectedTri.v0.x, projectedTri.v1.x, projectedTri.v2.x);
+      float ymin = min3(projectedTri.v0.y, projectedTri.v1.y, projectedTri.v2.y);
+      float xmax = max3(projectedTri.v0.x, projectedTri.v1.x, projectedTri.v2.x);
+      float ymax = max3(projectedTri.v0.y, projectedTri.v1.y, projectedTri.v2.y);
+      if (xmin > window->width - 1 || xmax < 0 || ymin > window->height - 1 || ymax < 0) continue;
+      
+      fillTriangle(projectedTri, &tri, 0xFFFFFF - color_mod);
+      if(Outlines){
+        drawTriangle(projectedTri, 0);
+      }
+      //
       //drawTriangle(tri, 0xFFFFFF);
-      //drawTriangle(computeTriangle(&cubeTri[i]), 0xFFFFFF);
+      if(SlowRender) window_update();
     }
     
     
@@ -261,7 +238,87 @@ int main(int argc, char** argv){
       case '.':
         camera_rot.y += 0.1f;
         if(camera_rot.y >= PI) camera_rot.y = -PI;
+        break;
+      case '<':
+        camera_rot.x -= 0.1f;
+        if(camera_rot.x <= -PI) camera_rot.x = PI;
+        break;
+      case '>':
+        camera_rot.x += 0.1f;
+        if(camera_rot.x >= PI) camera_rot.x = -PI;
         break; 
+      case 'z':
+        Zbuffering = !Zbuffering;
+        print_arg("Z Buffering: %d\n", Zbuffering);
+        break;
+      case 'x':
+        Outlines = !Outlines;
+        print_arg("Outlines: %d\n", Outlines);
+        break;
+      case 'c':
+        if(window->backbuffer == win_buf) window->backbuffer = obj.ZBuff;
+        else window->backbuffer = win_buf;
+        break;
+      case 'v':
+        SlowRender = !SlowRender;
+        print_arg("Slow Render: %d\n", SlowRender);
+        break;
+      case '1':
+        fFov -= 0.5f;
+        fFovRad = 1.0f / (sin(fFov * 0.5f / 180.0f * PI) / cos(fFov * 0.5f / 180.0f * PI));
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
+      case '2':
+        fFov += 0.5f;
+        fFovRad = 1.0f / (sin(fFov * 0.5f / 180.0f * PI) / cos(fFov * 0.5f / 180.0f * PI));
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
+      case '3':
+        fFar -= 0.5f;
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
+      case '4':
+        fFar += 0.5f;
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
+      case '5':
+        fNear -= 0.5f;
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
+      case '6':
+        fNear += 0.5f;
+        ProjectionMatrix.m[0][0] = fAspectRatio * fFovRad;
+        ProjectionMatrix.m[1][1] = fFovRad;
+        ProjectionMatrix.m[2][2] = fFar / (fFar - fNear);
+        ProjectionMatrix.m[3][3] = (-fFar * fNear) / (fFar - fNear);
+        ProjectionMatrix.m[2][3] = 1.0f;
+        ProjectionMatrix.m[3][3] = 0.0f;
+        break;
     }
 
   }
@@ -336,6 +393,10 @@ TriangleExpl transformTriangle(TriangleExpl triangle){
   multiplyMatrixVector(&triangle.v0, &triTranslated.v0, &MatRotY);
   multiplyMatrixVector(&triangle.v1, &triTranslated.v1, &MatRotY);
   multiplyMatrixVector(&triangle.v2, &triTranslated.v2, &MatRotY);
+
+  multiplyMatrixVector(&triangle.v0, &triTranslated.v0, &MatRotX);
+  multiplyMatrixVector(&triangle.v1, &triTranslated.v1, &MatRotX);
+  multiplyMatrixVector(&triangle.v2, &triTranslated.v2, &MatRotX);
 
   return triTranslated;
 }
@@ -424,18 +485,64 @@ void drawLine(int x1, int y1, int x2, int y2, uint32_t color){
   }
 }
 
-void drawHline(int x1, int x2, int y, uint32_t color){
-  if(x1 < 0) x1 = 0;
-  if(x1 > window->width) x1 = window->width;
-  if(x2 < 0) x2 = 0;
-  if(x2 > window->width) x2 = window->width;
-  if(y < 0 || y >= window->height) return;
+float calcZ(Vector3 *p1, Vector3 *p2, Vector3 *p3, float x, float y) {
+        float det = (p2->y - p3->y) * (p1->x - p3->x) + (p3->x - p2->x) * (p1->y - p3->y);
 
-  for(int x = x1; x < x2; x++) win_buf[x + y*window->width] = color;
+        float l1 = ((p2->y - p3->y) * (x - p3->x) + (p3->x - p2->x) * (y - p3->y)) / det;
+        float l2 = ((p3->y - p1->y) * (x - p3->x) + (p1->x - p3->x) * (y - p3->y)) / det;
+        float l3 = 1.0f - l1 - l2;
+
+        return l1 * p1->y + l2 * p2->y + l3 * p3->y;
+}
+
+int calculateZBuffer(int x, int y, TriangleExpl *projectedTri, TriangleExpl *unProjectedTri){
+  TriangleExpl workTri;
+  workTri.v0.x = projectedTri->v0.x;
+  workTri.v1.x = projectedTri->v1.x;
+  workTri.v2.x = projectedTri->v2.x;
+  workTri.v0.y = projectedTri->v0.y;
+  workTri.v1.y = projectedTri->v1.y;
+  workTri.v2.y = projectedTri->v2.y;
+  workTri.v0.z = unProjectedTri->v0.z;
+  workTri.v1.z = unProjectedTri->v1.z;
+  workTri.v2.z = unProjectedTri->v2.z;
+
+  //ZBuffType z = (ZBuffType) (calcZ(workTri.v0, workTri.v1, workTri.v2, (float) x, (float) y) * 100);
+  ZBuffType z = (ZBuffType) (((workTri.v0.z + workTri.v1.z + workTri.v2.z) / 3) * 100);
+  //print_arg("Z: %x\n", z);
+  if(z > obj.ZBuff[x + y * window->width]){
+    obj.ZBuff[x + y * window->width] = z;
+    return 1;
+  }
+  //print("Blocked!\n");
+  return 0;
+}
+
+void drawHline(int x1, int x2, int y, uint32_t color, TriangleExpl *projectedTri, TriangleExpl *unProjectedTri){
+  //if(x1 < 0) x1 = 0;
+  //if(x1 > window->width) x1 = window->width;
+  //if(x2 < 0) x2 = 0;
+  //if(x2 > window->width) x2 = window->width;
+  //if(y < 0 || y >= window->height) return;
+  //print_arg("Z0: %d ", (int) (tri->v0.z * 1000));
+  //print_arg("Z1: %d ", (int) (tri->v1.z * 1000));
+  //print_arg("Z2: %d\n", (int) (tri->v2.z * 1000));
+  for(int x = x1; x < x2; x++){
+    if(Zbuffering){
+      if(x < window->width && x > 0 && y > 0 && y < window->height && calculateZBuffer(x, y, projectedTri, unProjectedTri)){
+        win_buf[x + y*window->width] = color;
+      }
+    }
+    else{
+      if(x < window->width && x > 0 && y > 0 && y < window->height){
+        win_buf[x + y*window->width] = color;
+      }
+    }
+  }
 }
 
 #define SWAP(x,y) do { (x)=(x)^(y); (y)=(x)^(y); (x)=(x)^(y); } while(0)
-void fillTriangle(TriangleExpl triangle, uint32_t color){
+void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color){
   int x1, y1, x2, y2, x3, y3;
   x1 = triangle.v0.x;
   y1 = triangle.v0.y;
@@ -468,6 +575,9 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 	if (y1>y2) { SWAP(y1,y2); SWAP(x1,x2); }
 	if (y1>y3) { SWAP(y1,y3); SWAP(x1,x3); }
 	if (y2>y3) { SWAP(y2,y3); SWAP(x2,x3); }
+  //if(abs(x3 - x1) > window->width) return;  
+  
+  int maxsteps = 5000;
 
 	t1x=t2x=x1; y=y1;   // Starting points
 
@@ -492,11 +602,13 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
     e1 = (int)(dx1>>1);
 	
 	for (int i = 0; i < dx1;) {
+    maxsteps--; if(!maxsteps) return;
 		t1xp=0; t2xp=0;
 		if(t1x<t2x) { minx=t1x; maxx=t2x; }
 		else		{ minx=t2x; maxx=t1x; }
         // process first line until y value is about to change
 		while(i<dx1) {
+      maxsteps--; if(!maxsteps) return;
 			i++;			
 			e1 += dy1;
 	   	   	while (e1 >= dx1) {
@@ -511,8 +623,10 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 	next1:
         // process second line until y value is about to change
 		while (1) {
+      maxsteps--; if(!maxsteps) return;
 			e2 += dy2;		
 			while (e2 >= dx2) {
+        maxsteps--; if(!maxsteps) return;
 				e2 -= dx2;
 				if (changed2) t2xp=signx2;//t2x += signx2;
 				else          goto next2;
@@ -523,7 +637,7 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 	next2:
 		if(minx>t1x) minx=t1x; if(minx>t2x) minx=t2x;
 		if(maxx<t1x) maxx=t1x; if(maxx<t2x) maxx=t2x;
-	   	drawHline(minx, maxx, y, color);    // Draw line from min to max points found on the y
+	   	drawHline(minx, maxx, y, color, &triangle, unprojected);    // Draw line from min to max points found on the y
 		// Now increase y
 		if(!changed1) t1x += signx1;
 		t1x+=t1xp;
@@ -547,17 +661,20 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 	e1 = (int)(dx1>>1);
 	
 	for (int i = 0; i<=dx1; i++) {
+    maxsteps--; if(!maxsteps) return;
 		t1xp=0; t2xp=0;
 		if(t1x<t2x) { minx=t1x; maxx=t2x; }
 		else		{ minx=t2x; maxx=t1x; }
 	    // process first line until y value is about to change
 		while(i<dx1) {
-    		e1 += dy1;
-	   	   	while (e1 >= dx1) {
-				e1 -= dx1;
-   	   	   	   	if (changed1) { t1xp=signx1; break; }//t1x += signx1;
-				else          goto next3;
-			}
+      maxsteps--; if(!maxsteps) return;
+      e1 += dy1;
+      while (e1 >= dx1) {
+        maxsteps--; if(!maxsteps) return;
+        e1 -= dx1;
+            if (changed1) { t1xp=signx1; break; }//t1x += signx1;
+            else goto next3;
+      }
 			if (changed1) break;
 			else   	   	  t1x += signx1;
 			if(i<dx1) i++;
@@ -565,12 +682,14 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 	next3:
         // process second line until y value is about to change
 		while (t2x!=x3) {
+      maxsteps--; if(!maxsteps) return;
 			e2 += dy2;
 	   	   	while (e2 >= dx2) {
-				e2 -= dx2;
-				if(changed2) t2xp=signx2;
-				else          goto next4;
-			}
+            maxsteps--; if(!maxsteps) return;
+				    e2 -= dx2;
+				    if(changed2) t2xp=signx2;
+				    else          goto next4;
+			    }
 			if (changed2)     break;
 			else              t2x += signx2;
 		}	   	   
@@ -578,7 +697,7 @@ void fillTriangle(TriangleExpl triangle, uint32_t color){
 
 		if(minx>t1x) minx=t1x; if(minx>t2x) minx=t2x;
 		if(maxx<t1x) maxx=t1x; if(maxx<t2x) maxx=t2x;
-	   	drawHline(minx, maxx, y, color);    // Draw line from min to max points found on the y
+	   	drawHline(minx, maxx, y, color, &triangle, unprojected);    // Draw line from min to max points found on the y
 		// Now increase y
 		if(!changed1) t1x += signx1;
 		t1x+=t1xp;
@@ -704,14 +823,14 @@ Object loadObjFile(char *filename){
   obj.numVertex = 0;
   obj.vertices = vertices;
   obj.triangles = triangles;
-  
+  obj.ZBuff = alloc(window->width * window->height * sizeof(ZBuffType));
+
   float coord;
   while(*scan != 0 && (int) (scan - filebuf) < size){
     switch(*scan){
       case '#':
       case 'o':
       case 's':
-        goto find_newline;
         break;
       
       case 'v':{
@@ -736,7 +855,6 @@ Object loadObjFile(char *filename){
         //print_arg("Z: %x\n", *((uint32_t *) &coord));
         print("");
         obj.numVertex++;
-        goto find_newline;
         break;
       }
         break;
@@ -760,19 +878,11 @@ Object loadObjFile(char *filename){
         //print_arg("\n%d>\n", obj.numTriangle);
         //printTriangle(triangleRefToExpl(&triangles[obj.numTriangle]));
         obj.numTriangle++;
-        goto find_newline;
         break;
       }
       default:
-        goto find_newline;
         break;
     }
-
-    parseFace:
-    
-
-
-    find_newline:
     while(*scan != '\n'){
       scan++;
     }
@@ -799,3 +909,20 @@ void printTriangle(TriangleExpl tri){
   print_arg("Y: %x ", tri.v2.y);
   print_arg("Z: %x\n", tri.v2.z);
 }
+float edgeFunction(Vector3 *a, Vector3 *b, Vector3 *c)
+{ return (c->x - a->x) * (b->y - a->y) - (c->y - a->y) * (b->x - a->x); }
+
+float min3(float a, float b, float c){
+  if(a <= b && a <= c) return a;
+  if(b <= a && b <= c) return b;
+  if(c <= a && c <= b) return c;
+}
+
+float max3(float a, float b, float c){
+  if(a >= b && a >= c) return a;
+  if(b >= a && b >= c) return b;
+  if(c >= a && c >= b) return c;
+}
+
+int max(int a, int b){if(a >= b) return a; return b;}
+int min(int a, int b){if(a <= b) return a; return b;}

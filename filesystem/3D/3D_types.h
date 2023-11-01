@@ -24,11 +24,14 @@ typedef struct {
   Vertex *v2;
 } TriangleRef;
 
+typedef unsigned int ZBuffType;
+
 typedef struct {
   int numVertex;
   Vertex *vertices;
   int numTriangle;
   TriangleRef *triangles;
+  ZBuffType *ZBuff;
 } Object; 
 
 typedef struct {
