@@ -221,6 +221,18 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			stop_task(task_running_idx);
 			break;
 		}
+		//Request Memory Block, takes number of bytes, returns void pointer to region
+		case 0x20:{
+			int block = MEM_findRegionIdx(cpu.ebx);
+			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, 0, PROGRAM);
+			cpu_state.eax = addr;
+			break;
+		}
+		//Add Keyboard Event Listener
+		case 0x21:{
+			tasks[task_running_idx].keyboard_event_handler = (void (*)(unsigned int)) cpu.ebx;
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

@@ -8,6 +8,7 @@
 #include "framebuffer.h"
 #include "window.h"
 #include "multitasking.h"
+#include "program.h"
 
 uint32_t keyboard_buffer_size;
 uint8_t *keyboard_KEYBuffer;

@@ -1,12 +1,19 @@
 #ifndef LIBC_H
 #define LIBC_H
+#ifdef __cplusplus
+extern "C"{
+#endif
 
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
+
+#ifndef __cplusplus
 typedef char bool;
 #define true 1;
 #define false 0;
+#endif
+
 #define NULL 0
 
 struct WINDOW {
@@ -103,5 +110,13 @@ int getArrowKey();
 void srand(uint32_t seed);
 int rand();
 void exit(int code);
+
+void *requestRegion(unsigned int bytes);
+
+void addKbdEventHandler(void (*handler)(unsigned char));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

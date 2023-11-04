@@ -18,6 +18,24 @@ void kbd_init(uint32_t buffer_size){
 	KBD_flags.special = 0;
 }
 
+void kbd_callEventHandler(unsigned char ascii){
+	for(int i = 0; i < MAX_TASKS; i++){
+		if(
+			tasks[i].slot_active && 
+			tasks[i].program_slot != -1 && 
+			tasks[i].keyboard_event_handler != NULL && 
+			tasks[i].window == &windows[window_selected]
+		){
+			//print_serial("Switching to program %d and calling keyboard handler at 0x%x, and keycode 0x%x (%c)\n", tasks[i].program_slot, (uint32_t) tasks[i].keyboard_event_handler, ascii, ascii);
+			select_program(tasks[i].program_slot);
+			tasks[i].keyboard_event_handler(ascii);
+			if(tasks[task_running_idx].program_slot != -1){
+				select_program(tasks[task_running_idx].program_slot);
+			}
+		}
+	}
+}
+
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
 	char justRelease = 0;
@@ -47,6 +65,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 			}
 			KBD_ascii_buffer_idx++;
 			keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+			kbd_callEventHandler(KBD_flags.key);
 		}
 		else{
 			switch(scancode){
@@ -93,6 +112,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x11;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+						kbd_callEventHandler(0x11);
 					}
 					break;
 				case 0x74://Right Arrow
@@ -103,6 +123,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x12;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+						kbd_callEventHandler(0x12);
 					}
 					break;
 				case 0x75://Up Arrow
@@ -113,6 +134,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x13;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+						kbd_callEventHandler(0x13);
 					}
 					break;
 				case 0x72://Down Arrow
@@ -123,6 +145,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x14;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
+						kbd_callEventHandler(0x14);
 					}
 					break;
 			}
@@ -140,7 +163,6 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 		keyboard_KEYBuffer[KBD_scancode_buffer_idx] = scancode;
 		KBD_scancode_buffer_idx++;
 	}
-	
 	if(KBD_ascii_buffer_idx >= keyboard_buffer_size){
         KBD_ascii_buffer_idx = 0;
     }

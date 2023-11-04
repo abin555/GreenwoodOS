@@ -294,3 +294,20 @@ void exit(int code){
 	asm("int 0x80");
 	return;
 }
+
+void *requestRegion(unsigned int bytes){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = bytes;
+	eax = 0x20;
+	asm("int 0x80");
+	return (void *) eax;
+}
+
+void addKbdEventHandler(void (*handler)(unsigned char)){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) handler;
+	eax = 0x21;
+	asm("int 0x80");
+}
