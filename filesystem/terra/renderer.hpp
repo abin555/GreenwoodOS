@@ -21,6 +21,7 @@ struct TriangleExpl{
     Vertex v0;
     Vertex v1;
     Vertex v2;
+    unsigned int color;
 };
 
 struct TriangleRef{
@@ -33,6 +34,7 @@ struct TriangleIdx{
     unsigned int v0;
     unsigned int v1;
     unsigned int v2;
+    unsigned int color;
 };
 
 class Mesh{
@@ -120,7 +122,7 @@ void drawTriangle(TriangleExpl triangle, uint32_t color);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 
 void printTriangle(TriangleExpl tri);
-void fillTriangle(World *world, TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color);
+void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojected, uint32_t color);
 
 bool operator==(Vector3 &a, Vector3 &b);
 

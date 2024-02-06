@@ -6,7 +6,7 @@
 #include "renderer.hpp"
 
 #define CHUNK_WIDTH 8
-#define CHUNK_HEIGHT 8
+#define CHUNK_HEIGHT 32
 
 typedef enum {
     none = 0b0,
@@ -20,10 +20,13 @@ typedef enum {
 
 class Chunk{
     private:
-    uint8_t blocks[CHUNK_WIDTH][CHUNK_WIDTH][CHUNK_HEIGHT];
+    
     public:
+    uint8_t blocks[CHUNK_WIDTH][CHUNK_WIDTH][CHUNK_HEIGHT];
+    
     Chunk();
     BlockFaces calculateFacesVisible(int x, int y, int z);
+    uint32_t getColor(int x, int y, int z);
     void *getBlocksAddr();
 };
 
@@ -38,7 +41,7 @@ class Terrain{
     Mesh *getMesh();
     Object *getObject();
     Vertex *addVertex(Vertex vert);
-    void addSquareFace(BlockFaces face, float x, float y, float z);
+    void addSquareFace(BlockFaces face, float x, float y, float z, uint32_t color);
     void generateMesh(Chunk *chunk);
     Terrain(int maxVertex, int maxTriangle);
     Terrain();

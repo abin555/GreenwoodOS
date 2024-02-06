@@ -30,5 +30,9 @@ uint32_t *Window::getBuffer(){
 }
 
 void Window::clear(uint32_t color){
-    memset(this->window->backbuffer, color, this->window->width * this->window->height * sizeof(uint32_t));
+    //memset(this->window->backbuffer, color, this->window->width * this->window->height * sizeof(uint32_t));
+    uint32_t *buf = (uint32_t *) this->window->backbuffer;
+    for(int i = 0; i < this->window->width * this->window->height; i++){
+        buf[i] = color;
+    }
 }

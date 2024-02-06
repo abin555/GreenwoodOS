@@ -101,7 +101,7 @@ void World::render(){
             //float ymax = max3(projectedTri.v0.y, projectedTri.v1.y, projectedTri.v2.y);
             //if (xmin > sys.window.window->width - 1 || xmax < 0 || ymin > sys.window.window->height - 1 || ymax < 0) continue;
             
-            if(this->FillFaces) fillTriangle(this, projectedTri, &tri, 0xFFFFFF - color_mod);
+            if(this->FillFaces) fillTriangle(this, &projectedTri, &tri, tri.color - ~color_mod);
             if(this->DrawOutlines){
               if(this->FillFaces) drawTriangle(projectedTri, 0);
               else drawTriangle(projectedTri, 0xFFFFFF);
@@ -377,6 +377,8 @@ void Mesh::loadObj(char *filename){
                 scan++;
                 idx = atoi(scan)-1;
                 this->triangles[this->numTriangles].v2 = idx;
+
+                this->triangles[this->numTriangles].color = 0;
                 //print_arg("%d\n", idx);
                 //print_arg("\n%d>\n", obj.numTriangle);
                 //printTriangle(triangleRefToExpl(&triangles[obj.numTriangle]));
@@ -481,6 +483,7 @@ struct TriangleExpl triangleIdxToExpl(Mesh *mesh, struct TriangleIdx *tri){
     expl.v0 = mesh->vertex[tri->v0];
     expl.v1 = mesh->vertex[tri->v1];
     expl.v2 = mesh->vertex[tri->v2];
+    expl.color = tri->color;
 
     //expl.v0 = {0.0f, 1.0f, -1.0f};
     //expl.v1 = {1.0f, 0.0f, 0.0f};
@@ -600,14 +603,14 @@ void drawHline(World *world, int x1, int x2, int y, uint32_t color, TriangleExpl
 }
 
 #define SWAP(x,y) do { (x)=(x)^(y); (y)=(x)^(y); (x)=(x)^(y); } while(0)
-void fillTriangle(World *world, TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color){
+void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojected, uint32_t color){
   int x1, y1, x2, y2, x3, y3;
-  x1 = triangle.v0.x;
-  y1 = triangle.v0.y;
-  x2 = triangle.v1.x;
-  y2 = triangle.v1.y;
-  x3 = triangle.v2.x;
-  y3 = triangle.v2.y;
+  x1 = triangle->v0.x;
+  y1 = triangle->v0.y;
+  x2 = triangle->v1.x;
+  y2 = triangle->v1.y;
+  x3 = triangle->v2.x;
+  y3 = triangle->v2.y;
   //if((x1 > window->width || x2 > window->width) || (x1 < 0 || x2 < 0) || (y1 > window->height || y2 > window->height) || (y1 < 0 || y2 < 0)) return;
   //else{
   //if(x1 < 0) x1 = 0;
@@ -635,7 +638,7 @@ void fillTriangle(World *world, TriangleExpl triangle, TriangleExpl *unprojected
 	if (y2>y3) { SWAP(y2,y3); SWAP(x2,x3); }
   //if(abs(x3 - x1) > window->width) return;  
   
-  int maxsteps = 5000;
+  int maxsteps = 1000;
 
 	t1x=t2x=x1; y=y1;   // Starting points
 
@@ -695,7 +698,7 @@ void fillTriangle(World *world, TriangleExpl triangle, TriangleExpl *unprojected
 	next2:
 		if(minx>t1x) minx=t1x; if(minx>t2x) minx=t2x;
 		if(maxx<t1x) maxx=t1x; if(maxx<t2x) maxx=t2x;
-	   	drawHline(world, minx, maxx, y, color, &triangle, unprojected);    // Draw line from min to max points found on the y
+	   	drawHline(world, minx, maxx, y, color, triangle, unprojected);    // Draw line from min to max points found on the y
 		// Now increase y
 		if(!changed1) t1x += signx1;
 		t1x+=t1xp;
@@ -755,7 +758,7 @@ void fillTriangle(World *world, TriangleExpl triangle, TriangleExpl *unprojected
 
 		if(minx>t1x) minx=t1x; if(minx>t2x) minx=t2x;
 		if(maxx<t1x) maxx=t1x; if(maxx<t2x) maxx=t2x;
-	   	drawHline(world, minx, maxx, y, color, &triangle, unprojected);    // Draw line from min to max points found on the y
+	   	drawHline(world, minx, maxx, y, color, triangle, unprojected);    // Draw line from min to max points found on the y
 		// Now increase y
 		if(!changed1) t1x += signx1;
 		t1x+=t1xp;
