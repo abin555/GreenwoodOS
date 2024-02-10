@@ -55,6 +55,7 @@ uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8))
 
 int8_t task_running_idx;
 struct task_state tasks[MAX_TASKS];
+bool task_lock;
 
 //Switch from active task to passed task pointer.
 void switch_to_task(struct task_state* old_task, struct task_state* new_task);

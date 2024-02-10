@@ -52,6 +52,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 					if(windows[new_window].active){
 						window_selected = new_window;
 						window_copy_buffer(&windows[window_selected]);
+						window_render_bar();
 					}
 				}
 			}

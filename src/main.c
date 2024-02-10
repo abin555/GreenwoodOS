@@ -48,28 +48,22 @@ void idle_task(){
 
 void kernal_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
-    //fb_print(0, 8, "Kernal Tasking!");
-
+    task_lock = 1;
     program_init();
     init_syscalls();
     window_init();
     console_init();
     init_drive_system();
-
-    //printk("[Driver] Initializing Drivers\n");
     for(int i = 0; i < PCI_numDrivers; i++){
         if(PCI_drivers[i]->init_driver != NULL){
-            //printk("[Driver] Init #%x\n", i);
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
     MEM_printRegions();
 
     drive_enumerate();
-    
-    //AHCI_read((volatile HBA_PORT *)(drives[0]->driver.ahci), 0, 0, 5, (uint16_t *) fb_frontbuffer);
 
-    start_task(idle_task, -1, 0, NULL, "IDLE");
+    //start_task(idle_task, -1, 0, NULL, "IDLE");
 
     struct WINDOW *kernal_win = window_open("KERNEL", true);
     kernal_console = console_open(kernal_win);
@@ -87,12 +81,11 @@ void kernal_task(int argc, char **argv){
 
     char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
 
-    print_console(kernal_console, "Starting Initial Program: %s\n", boot_program_path);
-
+    print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
-    //exec("/A/3D/3D.EXE", 0, NULL);
-
+    task_lock = 0;
     //set_schedule(ONFOCUS);
+
     char c = '#';
     char OpenedConsole = 0;
     while(1){
@@ -138,46 +131,29 @@ int kmain(unsigned int magic, unsigned long magic_addr){
         return 0xFF;
     }
 	parse_multiboot2(magic_addr);
-    // size = *(unsigned *) magic_addr;
 	load_gdt();
     interrupts_install_idt();
     getCPUVendorString();
     enableSSE();
-    //asm("int 0x80");
 	page_init();
-
-
     set_PAT();
-
     MEM_populateRegions();
-    
-
 	fb_init(GRUB_tagfb);
 
     for(int i = 0; i < 8; i++){
         fb_putChar(i*8, 4*8, '1'+i, 0xFFFFFFFF, 0);
     }
-    //printk("Bootup Start\n");
+    
     MEM_printRegions();
     alloc_init();
-    //printk("Alloc Success\n");
-
     MEM_printRegions();
-
-    //printk("Init PCI\n");
     PCI_init();
-    //printk("Init Keyboard\n");
     kbd_init(0xFF);
     ps2_init();
-
-    timer_init(1000);
-    //printk("Starting Kernal Task");
+    timer_init(100);
     start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 
-    while(1){
-
-    }
-
-	return 0;
+    while(1){}
+	return 1;
 }

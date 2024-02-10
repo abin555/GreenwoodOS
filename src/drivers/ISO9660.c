@@ -51,7 +51,7 @@ void ISO9660_read_volume(struct ISO9660 *iso){
 	struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) ISO_read_sector(iso->drive, iso->buf, 0x10);
 	iso->root_directory_sector = getLe32(primary_vol->root_dir_ent.sector);
 	iso->nextTableSector = iso->root_directory_sector;
-	ISO9660_printTree(iso);
+	//ISO9660_printTree(iso);
 }
 
 int strcmp(const char *s1, const char *s2){

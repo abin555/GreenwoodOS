@@ -77,6 +77,7 @@ struct WINDOW *window_open(char *name, bool copyPromptOnly){
 		window->name[i] = name[i];
 	}
 	window_selected = i;
+	window_render_bar();
 	return window;
 }
 
@@ -84,4 +85,5 @@ void window_close(struct WINDOW *window){
 	window->active = false;
 	memset(window->backbuffer, 0, window_buf_size);
 	memset(window->name, 0, sizeof(windows->name));
+	window_render_bar();
 }

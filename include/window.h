@@ -30,7 +30,7 @@ struct WINDOW{
 extern int window_selected;
 extern struct WINDOW windows[MAX_WINDOWS];
 
-void render_window_bar();
+void window_render_bar();
 void window_init();
 struct WINDOW *window_open(char *name, bool copyPromptOnly);
 void window_close(struct WINDOW *window);

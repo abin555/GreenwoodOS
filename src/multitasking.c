@@ -2,6 +2,7 @@
 
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
+    task_lock = 0;
 	timer_attach(1, task_callback);
 }
 
@@ -74,6 +75,7 @@ void stop_task(int8_t task_idx){
         tasks[task_idx].own_console = false;
     }
     print_serial("[TASK] Killed Task %d %s\n", task_idx, tasks[task_idx].task_name);
+    task_callback();
 }
 
 void task_end(){
@@ -133,6 +135,7 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
 }
 
 void task_callback(){
+    if(task_lock) return;
     ////printk("[TASK] Callback\n");
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
@@ -149,7 +152,9 @@ void task_callback(){
             break;
         }
     }
-    if(!task_available) return;
+    if(!task_available){
+        return;
+    }
     /*
     //printk("Task end is at 0x%x\n", (uint32_t) &task_end);
     //printk("Dumping Task #%d's Top of Stack:\n", task_running_idx);
@@ -169,7 +174,8 @@ void task_callback(){
     }
     */
     int8_t next_idx = running_idx + 1;
-    while(1){
+    //while(1){
+    for(int checks = 0; checks < MAX_TASKS+5; checks++){
         if(next_idx == MAX_TASKS){
             next_idx = 0;
             continue;
