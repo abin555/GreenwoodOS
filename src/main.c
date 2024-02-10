@@ -71,7 +71,6 @@ void kernal_task(int argc, char **argv){
     kernal_task->console = kernal_console;
     char kernal_path[] = "A/";
 
-
     memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
     memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
     

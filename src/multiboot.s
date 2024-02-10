@@ -17,6 +17,8 @@ framebuffer_tag_start:
 	DD framebuffer_tag_end - framebuffer_tag_start
 	;DD 1366
 	;DD 768
+	;DD 1280
+	;DD 800
 	;DD 1920
 	;DD 1080
 	DD 640

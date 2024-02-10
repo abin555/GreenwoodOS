@@ -9,7 +9,7 @@ PROG = 3D
 
 all:
 	make -C ../OS/libc
-	$(CC) $(CFLAGS) $(FILES) -o $(OBJ)
+	$(CC) $(CFLAGS) -gstabs $(FILES) -o $(OBJ)
 	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
 	rm $(OBJ)
