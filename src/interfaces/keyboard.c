@@ -55,6 +55,9 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						window_render_bar();
 					}
 				}
+				else if(kbd_US[scancode] == '`'){
+					task_lock = !task_lock;
+				}
 			}
 			else if(KBD_flags.shift){
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US_shift[scancode];
