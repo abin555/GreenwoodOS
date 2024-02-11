@@ -179,20 +179,6 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		}
 		
 	}
-	else if(interrupt == 0x6){
-		print_serial("Invalid Opcode @ 0x%x\n", stack.eip);
-		print_console(tasks[task_running_idx].console, "Invalid Opcode @ 0x%x\n", stack.eip);
-		//printk("Invalid Opcode @ 0x%x\n", stack.eip);
-		asm volatile("hlt");
-	}
-	else if(interrupt == 0xD){
-		print_serial("General Protection Fault @ 0x%x Task %s\n", stack.eip, tasks[task_running_idx].task_name);
-		print_serial("ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
-		print_console(tasks[task_running_idx].console, "General Protection Fault @ 0x%x Task %s\n", stack.eip, tasks[task_running_idx].task_name);
-		print_console(tasks[task_running_idx].console, "ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
-		//asm volatile ("hlt");
-
-	}
 	else{
 		print_serial("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);

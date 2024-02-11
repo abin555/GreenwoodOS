@@ -18,6 +18,7 @@
 #include "console.h"
 #include "system_calls.h"
 #include "random.h"
+#include "exceptions.h"
 
 
 void idle_task(){
@@ -79,7 +80,7 @@ void kernal_task(int argc, char **argv){
     print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
 
     char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
-
+    
     print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
@@ -111,7 +112,7 @@ void kernal_task(int argc, char **argv){
         if(&windows[window_selected] == kernal_win){
             if(kbd_getChar() == 10 && !OpenedConsole){
                 OpenedConsole = 1;
-                exec("OS/TERM/TERM.EXE", 0, NULL);
+                exec(boot_program_path, 0, NULL);
             }
             if(!(KBD_flags.key == 10)){
                 OpenedConsole = 0;
@@ -135,6 +136,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     getCPUVendorString();
     enableSSE();
 	page_init();
+    exceptions_init();
     set_PAT();
     MEM_populateRegions();
 	fb_init(GRUB_tagfb);
