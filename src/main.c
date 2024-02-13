@@ -20,33 +20,6 @@
 #include "random.h"
 #include "exceptions.h"
 
-
-void idle_task(){
-    char c = '@';
-    while(1){
-        if(c == '@') c = 'X';
-        else c = '@';
-        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
-        for(int i = 0; i < 100000; i++){
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-        }
-    }
-}
-
 void kernal_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
@@ -80,7 +53,9 @@ void kernal_task(int argc, char **argv){
     print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
 
     char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
-    
+
+    //while(1){}
+
     print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
@@ -91,7 +66,7 @@ void kernal_task(int argc, char **argv){
     while(1){
         if(c == '#') c = '*';
         else c = '#';
-        fb_putChar(fb_width-2*CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
+        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
         for(int i = 0; i < 100000; i++){
             asm("nop");
             asm("nop");

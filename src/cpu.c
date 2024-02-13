@@ -17,7 +17,7 @@ void getCPUVendorString(){
 }
 
 uint8_t getCPUFeatures(uint32_t feature){
-    uint32_t eax, unused, edx;
+    uint32_t eax, unused, edx = 0;
     __get_cpuid(1, &eax, &unused, &unused, &edx);
     ////printk("CPU Feature:\n%b\n%b\n%b\n", feature, edx, edx & feature);
     return (edx & feature) != 0;

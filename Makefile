@@ -25,6 +25,7 @@ OBJECTS = \
 		src/drivers/drive.o \
 		src/drivers/FAT32.o \
 		src/drivers/ISO9660.o \
+		src/drivers/ext2.o \
 		src/program.o \
 		src/window.o \
 		src/console.o \
@@ -34,7 +35,7 @@ OBJECTS = \
 		src/exceptions.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -O0 -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf

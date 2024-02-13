@@ -7,6 +7,7 @@
 #include "ahci.h"
 #include "FAT32.h"
 #include "ISO9660.h"
+#include "ext2.h"
 #include "console.h"
 
 #define DRIVE_NUM 20
@@ -25,7 +26,8 @@ struct DRIVE{
 		FAT12,
 		exFAT,
 		ISO9660,
-		RAW
+		RAW,
+		EXT2
 	} format;
 	union{
 		struct FAT32 *fat32;
