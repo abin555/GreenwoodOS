@@ -80,6 +80,29 @@ struct ext2_super_block{ //Stored at 0x400 (sector 2)
 	uint32_t	s_reserved[190];	/* Padding to the end of the block */
 };
 
+struct EXT2_BlockGroupDescriptor{
+	uint32_t block_usage_addr;
+	uint32_t inode_usage_addr;
+	uint32_t inode_table_addr;
+	uint16_t num_unalloc_blocks_per_group;
+	uint16_t num_unalloc_inodes_per_group;
+	uint16_t num_directories_per_group;
+};
+
+struct EXT2_FS{
+	struct DRIVE *drive;
+	char *buf;
+	uint32_t block_size;
+	uint32_t sectors_per_block;
+	uint32_t block_count;
+	uint32_t inode_count;
+	uint32_t starting_block_number;
+	uint32_t inodes_per_group;
+	uint32_t block_addr_block_usage_map;
+	uint32_t block_addr_inode_usage_map;
+	uint32_t inode_table_starting_addr;
+};
+
 int ext2_check_format(struct DRIVE *drive);
 
 #endif

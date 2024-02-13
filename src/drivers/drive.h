@@ -32,6 +32,7 @@ struct DRIVE{
 	union{
 		struct FAT32 *fat32;
 		struct ISO9660 *ISO;
+		struct EXT2_FS *ext2;
 	} format_info;
 	bool locked;
 	bool ready;
