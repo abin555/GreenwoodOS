@@ -89,10 +89,52 @@ struct EXT2_BlockGroupDescriptor{
 	uint16_t num_directories_per_group;
 };
 
+#define EXT2_InodeType_FIFO 0x1000
+#define EXT2_InodeType_CharDevice 0x2000
+#define EXT2_InodeType_Directory 0x4000
+#define EXT2_InodeType_BlockDevice 0x6000
+#define EXT2_InodeType_RegularFile 0x8000
+#define EXT2_InodeType_SymbolicLink 0xA000
+#define EXT2_InodeType_Unix_Socket 0xC000
+
+struct EXT2_Inode{
+	uint16_t type_perms;
+	uint16_t userId;
+	uint32_t lsbSize;
+	uint32_t lastAccessTime;
+	uint32_t creationTime;
+	uint32_t lastModificationTime;
+	uint32_t deletionTime;
+	uint32_t GroupID;
+	uint32_t hardLinkCount;
+	uint32_t diskSectorsCount;
+	uint32_t flags;
+	uint32_t OSval;
+	uint32_t DirectBlockPointer[12];
+	uint32_t SingleIndirectBlockPointer;
+	uint32_t DoubleIndirectBlockPointer;
+	uint32_t TripleIndirectBlockPointer;
+	uint32_t GenerationNumber;
+	uint32_t ExtendedAttributes;
+	uint32_t msbSize;//If file, ACL if directory, invalid if version = 0
+	uint32_t fragmentBlock;
+	uint8_t  OSval2[12];
+};
+
+struct EXT2_Directory{
+	uint32_t inode;
+	uint16_t entry_size;
+	uint8_t name_length;
+	uint8_t type;
+	char name[];
+};
+
 struct EXT2_FS{
 	struct DRIVE *drive;
 	char *buf;
+	uint32_t ext2_version;
 	uint32_t block_size;
+	uint32_t inode_size;
 	uint32_t sectors_per_block;
 	uint32_t block_count;
 	uint32_t inode_count;
@@ -102,6 +144,7 @@ struct EXT2_FS{
 	uint32_t block_addr_inode_usage_map;
 	uint32_t inode_table_starting_addr;
 };
+
 
 int ext2_check_format(struct DRIVE *drive);
 
