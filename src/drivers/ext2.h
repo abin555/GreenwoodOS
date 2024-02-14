@@ -87,6 +87,8 @@ struct EXT2_BlockGroupDescriptor{
 	uint16_t num_unalloc_blocks_per_group;
 	uint16_t num_unalloc_inodes_per_group;
 	uint16_t num_directories_per_group;
+	uint16_t _pad;
+	uint32_t _reserved[3];
 };
 
 #define EXT2_InodeType_FIFO 0x1000
@@ -110,10 +112,7 @@ struct EXT2_Inode{
 	uint32_t diskSectorsCount;
 	uint32_t flags;
 	uint32_t OSval;
-	uint32_t DirectBlockPointer[12];
-	uint32_t SingleIndirectBlockPointer;
-	uint32_t DoubleIndirectBlockPointer;
-	uint32_t TripleIndirectBlockPointer;
+	uint32_t BlockPointers[15];
 	uint32_t GenerationNumber;
 	uint32_t ExtendedAttributes;
 	uint32_t msbSize;//If file, ACL if directory, invalid if version = 0
@@ -138,11 +137,13 @@ struct EXT2_FS{
 	uint32_t sectors_per_block;
 	uint32_t block_count;
 	uint32_t inode_count;
+	uint32_t group_count;
 	uint32_t starting_block_number;
 	uint32_t inodes_per_group;
 	uint32_t block_addr_block_usage_map;
 	uint32_t block_addr_inode_usage_map;
 	uint32_t inode_table_starting_addr;
+	uint32_t first_inode;
 };
 
 
