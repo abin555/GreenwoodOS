@@ -87,3 +87,11 @@ make_fs:
 	#mkfs.vfat filesystem.iso
 	#mcopy -v ./filesystem/* ./filesystem.iso
 
+make_ext2:
+	truncate -s 1G fstest.img
+	mkfs.ext2 fstest.img
+	mkdir fs_ext2
+	sudo mount -t ext2 -o loop fstest.img fs_ext2
+	sudo cp -r ./filesystem/* fs_ext2/
+	sudo umount fs_ext2
+	rmdir fs_ext2
