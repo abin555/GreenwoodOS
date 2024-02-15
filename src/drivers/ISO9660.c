@@ -54,13 +54,7 @@ void ISO9660_read_volume(struct ISO9660 *iso){
 	//ISO9660_printTree(iso);
 }
 
-int strcmp(const char *s1, const char *s2){
-	while(*s1 && (*s1 == *s2)){
-		s1++;
-		s2++;
-	}
-	return *(const unsigned char *)s1 - *(const unsigned char*)s2;
-}
+
 
 void strprnt(char *s, int size){
 	for(int i = 0; i < size; i++){

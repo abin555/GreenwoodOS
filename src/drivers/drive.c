@@ -271,9 +271,12 @@ void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path){
 	char drive_letter = big_path[0];
 	path = big_path + 2;
 	struct DRIVE *drive = drive_get(drive_letter);
-	print_serial("[DRIVE] Directory Listing %s\n", big_path);
+	print_serial("[DRIVE] Directory Listing %s / %s\n", big_path, path);
 	if(drive->format == ISO9660){
 		ISO9660_printFileList(console, drive->format_info.ISO, path);
+	}
+	else if(drive->format == EXT2){
+		ext2_listDirectory(console, drive->format_info.ext2, path);
 	}
 }
 

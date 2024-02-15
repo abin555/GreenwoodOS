@@ -20,6 +20,8 @@
 #include "random.h"
 #include "exceptions.h"
 
+#include "ext2.h"
+
 void kernal_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
@@ -51,6 +53,7 @@ void kernal_task(int argc, char **argv){
 
     print_console(kernal_console, "Kernal Window & Console Opened.\n");
     print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
+    ext2_console_printDirectory(kernal_console, drive_get('C')->format_info.ext2, EXT2_ROOT_INODE);
 
     char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
 

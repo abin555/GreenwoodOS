@@ -5,6 +5,7 @@
 #include "allocator.h"
 #include "serial.h"
 #include "console.h"
+#include "utils.h"
 
 struct DRIVE;
 

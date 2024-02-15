@@ -5,6 +5,7 @@
 #include "allocator.h"
 #include "serial.h"
 #include "console.h"
+#include "utils.h"
 
 #define EXT2_SUPER_MAGIC 0xEF53
 
@@ -99,6 +100,8 @@ struct EXT2_BlockGroupDescriptor{
 #define EXT2_InodeType_SymbolicLink 0xA000
 #define EXT2_InodeType_Unix_Socket 0xC000
 
+#define EXT2_ROOT_INODE 2
+
 struct EXT2_Inode{
 	uint16_t type_perms;
 	uint16_t userId;
@@ -139,14 +142,19 @@ struct EXT2_FS{
 	uint32_t inode_count;
 	uint32_t group_count;
 	uint32_t starting_block_number;
+	uint32_t blocks_per_group;
 	uint32_t inodes_per_group;
-	uint32_t block_addr_block_usage_map;
-	uint32_t block_addr_inode_usage_map;
-	uint32_t inode_table_starting_addr;
+	
+	uint32_t *block_addr_block_usage_map;
+	uint32_t *block_addr_inode_usage_map;
+	uint32_t *inode_table_starting_addr;
+
 	uint32_t first_inode;
 };
 
-
+void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx);
 int ext2_check_format(struct DRIVE *drive);
+void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *path);
+uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path);
 
 #endif
