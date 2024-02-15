@@ -64,7 +64,10 @@ uint32_t ext2_get_direntry_inode(struct EXT2_FS *ext2, uint32_t parent_inodeIdx,
 
 void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx){
 	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
-	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory) return;
+	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory){
+		print_console(console, "File of size %d\n", inode.lsbSize);
+		return;
+	};
 	
 	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
 	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
@@ -175,12 +178,12 @@ int ext2_check_format(struct DRIVE *drive){
 	//struct EXT2_Inode root_inode = ext2_read_inode_data(ext2, 2);
 
 	//print_serial("[EXT2] Root Directory Block %d\n", root_inode.BlockPointers[0]);
-	ext2_print_directory(ext2, EXT2_ROOT_INODE);
+	//ext2_print_directory(ext2, EXT2_ROOT_INODE);
 
 	//print_serial("[EXT2] %d\n", ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "LISP"));
-	ext2_print_directory(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"));
-	struct EXT2_Inode test = ext2_read_inode_data(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"), "term.exe"));
-	ext2_debug_print_inode(&test);
+	//ext2_print_directory(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"));
+	//struct EXT2_Inode test = ext2_read_inode_data(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"), "term.exe"));
+	//ext2_debug_print_inode(&test);
 	//print_serial("%d\n", ext2_get_inodeIdx_from_path(ext2, "3D"));
 	//ext2_debug_print_inode(&root_inode);
 
@@ -211,8 +214,8 @@ uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path){
 
 
 void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *path){
-	print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
+	//print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
 	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
-	print_serial("[EXT2] Directory is at inode %d\n", inodeIdx);
+	print_serial("[EXT2] entry is at inode %d\n", inodeIdx);
 	ext2_console_printDirectory(console, ext2, inodeIdx);
 }

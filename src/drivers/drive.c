@@ -231,6 +231,11 @@ int fexists(char *path){
 	if(drive->format == ISO9660){
 		return ISO9660_checkExists(drive->format_info.ISO, path);
 	}
+	else if(drive->format == EXT2){
+		uint32_t inode = ext2_get_inodeIdx_from_path(drive->format_info.ext2, path);
+		if(inode) return 1;
+		return 0;
+	}
 	return 0;
 }
 
