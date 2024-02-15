@@ -205,6 +205,7 @@ uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path){
 			path_component_size++;
 		}
 		working_idx = ext2_get_direntry_inode(ext2, working_idx, work_buf);
+		if(working_idx == 0) return 0;
 		print_serial("[EXT2] Solving Path Iter %d Partial Path: %s Working Inode Idx: %d\n", iterations, work_buf, working_idx);
 		path += path_component_size + 1;
 		iterations++;
@@ -217,5 +218,9 @@ void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *pat
 	//print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
 	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
 	print_serial("[EXT2] entry is at inode %d\n", inodeIdx);
+	if(inodeIdx == 0){
+		print_console(console, "%s does not exist\n", path);
+		return;
+	}
 	ext2_console_printDirectory(console, ext2, inodeIdx);
 }
