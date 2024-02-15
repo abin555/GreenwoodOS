@@ -159,7 +159,19 @@ struct FILE *fopen(char *path){
 	if(drive == NULL) return file;
 	if(drive->format == ISO9660){
 		file->info = ISO9660_GetFile(drive->format_info.ISO, path);
+		//file->info.type = ISO9660;
 		if(file->info.drive == NULL || file->info.sector == 0 || file->info.size == 0) return NULL;
+		file->head = 0;
+		return file;
+	}
+	if(drive->format == EXT2){
+		print_serial("[EXT2] Opening File %s\n", path);
+		uint32_t inodeIdx = ext2_get_inodeIdx_from_path(drive->format_info.ext2, path);
+		if(inodeIdx == 0) return NULL;
+		file->info.drive = drive;
+		file->info.inode = (struct EXT2_Inode *) malloc(sizeof(struct EXT2_Inode));
+		*file->info.inode = ext2_read_inode_data(drive->format_info.ext2, inodeIdx);
+		//file->info.type = EXT2;
 		file->head = 0;
 		return file;
 	}
@@ -201,6 +213,7 @@ int fseek(struct FILE *file, int idx){
 
 int fcopy(struct FILE *file, char *buf, int buf_size){
 	print_serial("[DRIVE] Copying file to 0x%x\n", (uint32_t) buf);
+	if(file == NULL || buf == NULL || buf_size == 0) return 1;
 	if(file->info.drive->format == ISO9660){
 		char *iso_buf = (char *) ISO_read_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
 		if(iso_buf == NULL) return 1;
@@ -220,7 +233,30 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 
 		return 0;
 	}
-	return 0;
+	else if(file->info.drive->format == EXT2){
+		print_serial("[DRIVE] [EXT2] Copying File\n");
+		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
+		struct EXT2_Inode *inode = file->info.inode;
+		//char *block_buf = (char *) ext2_read_block(ext2, inode)
+		uint32_t block_idx = 0;
+		int idx;
+		char *block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+		while((uint32_t) file->head < ext2->block_size && idx < buf_size){
+			if(block_idx > 12) break;
+			buf[idx] = block[file->head];
+			//print_serial("%c\n", buf[idx]);
+			file->head++;
+			idx++;
+			if((uint32_t) file->head == ext2->block_size){
+				block_idx++;
+				print_serial("[DRIVE] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
+				block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+				file->head = 0;
+			}
+		}
+		return 0;
+	}
+	return 1;
 }
 
 int fexists(char *path){

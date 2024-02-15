@@ -45,6 +45,7 @@ struct DIRECTORY{
 
 struct File_Info{
 	struct DRIVE *drive;
+	struct EXT2_Inode *inode;
 	uint32_t sector;
 	uint32_t size;
 };
