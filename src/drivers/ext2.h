@@ -107,8 +107,8 @@ struct EXT2_Inode{
 	uint32_t creationTime;
 	uint32_t lastModificationTime;
 	uint32_t deletionTime;
-	uint32_t GroupID;
-	uint32_t hardLinkCount;
+	uint16_t GroupID;
+	uint16_t hardLinkCount;
 	uint32_t diskSectorsCount;
 	uint32_t flags;
 	uint32_t OSval;

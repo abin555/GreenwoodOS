@@ -22,6 +22,46 @@ struct EXT2_Inode ext2_read_inode_data(struct EXT2_FS *ext2, uint32_t inodeIdx){
 	return *inode;
 }
 
+void ext2_print_directory(struct EXT2_FS *ext2, uint32_t directoryBlock){
+	void *directory_entries = ext2_read_block(ext2, directoryBlock);
+	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;;
+	while(dir->entry_size != 0){
+		print_serial("[EXT2] Inode %d Type %d - ");
+
+		for(uint8_t i = 0; i < dir->name_length; i++){
+			print_serial("%c", dir->name[i]);
+		}
+		print_serial("\n");
+
+		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
+	}
+
+}
+
+void ext2_debug_print_inode(struct EXT2_Inode *inode){
+	print_serial("[EXT2] Type Perms %x\n", inode->type_perms);
+	print_serial("[EXT2] User Id %x\n", inode->userId);
+	print_serial("[EXT2] Lsb Size %x\n", inode->lsbSize);
+	print_serial("[EXT2] Last Access %x\n", inode->lastAccessTime);
+	print_serial("[EXT2] Creation %x\n", inode->creationTime);
+	print_serial("[EXT2] Modification %x\n", inode->lastModificationTime);
+	print_serial("[EXT2] Deletion %x\n", inode->deletionTime);
+	print_serial("[EXT2] GroupID %x\n", inode->GroupID);
+	print_serial("[EXT2] Hardlink # %x\n", inode->hardLinkCount);
+	print_serial("[EXT2] Disk Sectors %x\n", inode->diskSectorsCount);
+	print_serial("[EXT2] flags %x\n", inode->flags);
+	print_serial("[EXT2] OSval %x\n", inode->OSval);
+
+	for(int i = 0; i < 15; i++)
+		print_serial("[EXT2] BP%d %x\n", i, inode->BlockPointers[i]);
+
+	print_serial("[EXT2] Gen Num %x\n", inode->GenerationNumber);
+	print_serial("[EXT2] Attributes %x\n", inode->ExtendedAttributes);
+	print_serial("[EXT2] Msb Size %x\n", inode->msbSize);
+	print_serial("[EXT2] Fragment Block %x\n", inode->fragmentBlock);
+
+}
+
 int ext2_check_format(struct DRIVE *drive){
 	print_serial("[EXT2] Checking format on drive %c\n", drive->identity);
 	if(drive == NULL){
@@ -66,9 +106,13 @@ int ext2_check_format(struct DRIVE *drive){
 	ext2->inode_table_starting_addr = BGD->inode_table_addr;
 	print_serial("[EXT2] Block Usage Bitmap Addr: %d, Inode Usage Bitmap Addr: %d, Inode Table Addr: %d\n", BGD->block_usage_addr, BGD->inode_usage_addr, BGD->inode_table_addr);
 
+
+
 	struct EXT2_Inode root_inode = ext2_read_inode_data(ext2, 2);
 
 	print_serial("[EXT2] Root Directory Block %d\n", root_inode.BlockPointers[0]);
+	ext2_print_directory(ext2, root_inode.BlockPointers[0]);
+	//ext2_debug_print_inode(&root_inode);
 
 	return 1;
 }

@@ -89,7 +89,7 @@ make_fs:
 
 make_ext2:
 	truncate -s 1G fstest.img
-	mkfs.ext2 -r 0 -b 1024 fstest.img
+	mkfs.ext2 -r 1 -b 1024 fstest.img
 	mkdir fs_ext2
 	sudo mount -t ext2 -o loop fstest.img fs_ext2
 	sudo cp -r ./filesystem/* fs_ext2/
