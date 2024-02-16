@@ -159,4 +159,18 @@ int ext2_check_format(struct DRIVE *drive);
 void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *path);
 uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path);
 
+uint32_t ext2_getBlockContainingIdx(struct EXT2_FS *ext2, EXT2_Inode *inode);
+
+uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2);
+uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2);
+
+uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint32_t inodeIdx);
+uint32_t ext2_alloc_block(struct EXT2_FS *ext2, uint32_t blockIdx);
+
+int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size);
+int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount);
+
+int ext2_createDirectory(struct EXT2_FS *ext2, char *path);
+
+
 #endif
