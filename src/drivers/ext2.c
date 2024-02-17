@@ -8,6 +8,14 @@ void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id){
 	return ext2->buf;
 }
 
+int ext2_write_block(struct EXT2_FS *ext2, uint32_t block_id, void *buf){
+	print_serial("[EXT2] Writing block %d\n", block_id);
+	if(block_id > ext2->block_count) return 0;
+	int err = drive_write(ext2->drive, buf, block_id*ext2->sectors_per_block, ext2->sectors_per_block);
+	if(err == -1) return 0;
+	return 1;
+}
+
 struct EXT2_Inode ext2_read_inode_data(struct EXT2_FS *ext2, uint32_t inodeIdx){
 	uint32_t group = (inodeIdx - 1) / ext2->inodes_per_group;
 	uint32_t inode_table_block = ext2->inode_table_starting_addr[group];
@@ -170,23 +178,10 @@ int ext2_check_format(struct DRIVE *drive){
 		ext2->block_addr_block_usage_map[i] = BGD->block_usage_addr;
 		ext2->block_addr_inode_usage_map[i] = BGD->inode_usage_addr;
 		ext2->inode_table_starting_addr[i] = BGD->inode_table_addr;
-		//print_serial("[EXT2] Group %d Block Usage Bitmap Addr: %x, Inode Usage Bitmap Addr: %x, Inode Table Addr: %x\n", i, BGD->block_usage_addr, BGD->inode_usage_addr, BGD->inode_table_addr);
-
 		BGD = BGD + 1;
 	}
-
-	//struct EXT2_Inode root_inode = ext2_read_inode_data(ext2, 2);
-
-	//print_serial("[EXT2] Root Directory Block %d\n", root_inode.BlockPointers[0]);
-	//ext2_print_directory(ext2, EXT2_ROOT_INODE);
-
-	//print_serial("[EXT2] %d\n", ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "LISP"));
-	//ext2_print_directory(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"));
-	//struct EXT2_Inode test = ext2_read_inode_data(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, ext2_get_direntry_inode(ext2, EXT2_ROOT_INODE, "OS"), "term"), "term.exe"));
-	//ext2_debug_print_inode(&test);
-	//print_serial("%d\n", ext2_get_inodeIdx_from_path(ext2, "3D"));
-	//ext2_debug_print_inode(&root_inode);
-
+	print_serial("[EXT2] Inode map at %d Block map at %d\n", ext2->block_addr_inode_usage_map[0], ext2->block_addr_block_usage_map[0]);
+	ext2_get_freeInodeIdx(ext2);
 	return 1;
 }
 
@@ -223,4 +218,168 @@ void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *pat
 		return;
 	}
 	ext2_console_printDirectory(console, ext2, inodeIdx);
+}
+
+
+uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2){
+	uint32_t byte_block_idx = 0;
+	uint8_t byte_block = 0;
+	uint8_t inode_bit_idx = 0;
+	uint8_t inode_alloc_state = 0;
+
+	uint32_t group = 0;
+	uint32_t temp_group = 0;
+	uint8_t *inode_map = ext2_read_block(ext2, ext2->block_addr_inode_usage_map[group]);
+
+	for(int i = 11; i < 30; i++){
+		temp_group = (i - 1) / ext2->inodes_per_group;
+		if(group != temp_group){
+			group = temp_group;
+			inode_map = ext2_read_block(ext2, ext2->block_addr_inode_usage_map[group]);
+		}
+		byte_block_idx = (i - 1) / 8;
+		inode_bit_idx = 1 << (i - 1) % 8;
+		byte_block = inode_map[byte_block_idx];
+		inode_alloc_state = (byte_block & inode_bit_idx) ? 1 : 0;
+		if(inode_alloc_state == 1) return i;
+		//print_serial("%d %d %x\n", i, inode_alloc_state, byte_block);
+	}
+	return 0;
+}
+
+void ext2_make_dir_entry(struct EXT2_FS *ext2, uint32_t dirInodeIdx, char *name, uint32_t childInodeIdx){
+	struct EXT2_Inode dir_inode = ext2_read_inode_data(ext2, dirInodeIdx);
+	if((dir_inode.type_perms & 0xF000) != EXT2_InodeType_Directory) return;
+	void *block = ext2_read_block(ext2, dir_inode.BlockPointers[0]);
+	struct EXT2_Directory *dir = (struct EXT2_Directory *) block;
+	while(dir->inode != 0) dir++;
+	dir->inode = childInodeIdx;
+	dir->name_length = 0;
+	dir->entry_size = 8;
+	while(*name != '\0'){
+		dir->name[dir->name_length] = *name;
+		name++;
+		dir->name_length++;
+		dir->entry_size++;
+	}
+	ext2_write_block(ext2, dir_inode.BlockPointers[0], block);
+}
+
+uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint16_t type, uint32_t size){
+	uint32_t inodeIdx = ext2_get_freeInodeIdx(ext2);
+	uint32_t group = (inodeIdx - 1) / ext2->inodes_per_group;
+
+	uint8_t *inode_map = ext2_read_block(ext2, ext2->block_addr_inode_usage_map[group]);
+	uint32_t byte_block_idx = (inodeIdx - 1) / 8;
+	uint8_t inode_bit_idx = 1 << (inodeIdx - 1) % 8;
+	inode_map[byte_block_idx] |= inode_bit_idx;
+	if(!ext2_write_block(ext2, ext2->block_addr_inode_usage_map[group], inode_map)) return 0;
+
+	uint32_t inode_table_block = ext2->inode_table_starting_addr[group];
+	uint32_t idx_in_group = inodeIdx - group * ext2->inodes_per_group;
+	uint32_t block_offset = (idx_in_group - 1) * ext2->inode_size / ext2->block_size;
+	uint32_t offset_in_block = (idx_in_group - 1) - block_offset * (ext2->block_size / ext2->inode_size);
+	char *block = ext2_read_block(ext2, inode_table_block + block_offset);
+	struct EXT2_Inode *inode = ((struct EXT2_Inode *) (block + offset_in_block * ext2->inode_size));
+	
+	inode->type_perms = type;
+	inode->lsbSize = size;
+	inode->lastAccessTime = 100;
+	inode->creationTime = 100;
+	inode->lastModificationTime = 100;
+	inode->deletionTime = 0xFFFFFFFF;
+	inode->diskSectorsCount = (size / ext2->block_size + 1) * ext2->sectors_per_block;
+
+	for(int i = 0; i < 15; i++){
+		inode->BlockPointers[i] = 0;
+	}
+	inode->msbSize = 0;
+
+	if(!ext2_write_block(ext2, inode_table_block + block_offset, block)) return 0;
+
+	uint32_t BlockPointers[15];
+	memset(BlockPointers, 0, sizeof(BlockPointers));
+
+	if(type == EXT2_InodeType_Directory){
+		BlockPointers[0] = ext2_alloc_block(ext2);
+	}
+	else if(type == EXT2_InodeType_RegularFile){
+		for(uint32_t i = 0; i < size / ext2->block_size && i < 12; i++){
+			BlockPointers[i] = ext2_alloc_block(ext2);
+		}
+	}
+	block = ext2_read_block(ext2, inode_table_block + block_offset);
+	inode = ((struct EXT2_Inode *) (block + offset_in_block * ext2->inode_size));
+	for(int i = 0; i < 15; i++){
+		inode->BlockPointers[i] = BlockPointers[i];
+	}
+	if(!ext2_write_block(ext2, inode_table_block + block_offset, block)) return 0;
+	return inodeIdx;
+}
+
+
+uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2){
+	uint32_t byte_block_idx = 0;
+	uint8_t byte_block = 0;
+	uint8_t block_bit_idx = 0;
+	uint8_t block_alloc_state = 0;
+
+	uint32_t group = 0;
+	uint32_t temp_group = 0;
+	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
+
+	for(int i = 11; i < 30; i++){
+		temp_group = (i - 1) / ext2->blocks_per_group;
+		if(group != temp_group){
+			group = temp_group;
+			block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
+		}
+		byte_block_idx = (i - 1) / 8;
+		block_bit_idx = 1 << (i - 1) % 8;
+		byte_block = block_map[byte_block_idx];
+		block_alloc_state = (byte_block & block_bit_idx) ? 1 : 0;
+		if(block_alloc_state == 1) return i;
+	}
+	return 0;
+}
+
+
+uint32_t ext2_alloc_block(struct EXT2_FS *ext2){
+	uint32_t blockIdx = ext2_get_freeInodeIdx(ext2);
+	uint32_t group = blockIdx / ext2->blocks_per_group;
+
+	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
+	uint32_t byte_block_idx = (blockIdx - 1) / 8;
+	uint8_t block_bit_idx = 1 << (blockIdx - 1) % 8;
+	block_map[byte_block_idx] |= block_bit_idx;
+	if(!ext2_write_block(ext2, ext2->block_addr_block_usage_map[group], block_map)) return 0;
+	return blockIdx;
+}
+
+int ext2_createDirectory(struct EXT2_FS *ext2, char *path){
+	print_serial("[EXT2] Creating Directory %s\n", path);
+	if(ext2_get_inodeIdx_from_path(ext2, path)){
+		print_serial("[EXT2] %s already exists\n", path);
+		return 1;
+	}
+	uint32_t path_length = 0;
+	for(int i = 0; path[i] != '\0' && i < 255; i++){
+		path_length++;
+	}
+
+	int dir_name_idx = 0;
+	for(uint32_t i = 0; i < path_length; i++){
+		if(path[i] == '/' && path[i+1] != '\0') dir_name_idx = i+1;
+	}
+
+	char parent_path[50];
+	memset(parent_path, '\0', sizeof(parent_path));
+	parent_path[0] = '.';
+	parent_path[1] = '/';
+	for(int i = 2; i < dir_name_idx && i < (int) sizeof(parent_path); i++){
+		parent_path[i] = path[i-2];//TODO: THIS IS WHAT IS BROKEN!
+	}
+
+	print_serial("[EXT2] Making Directory named %s from parent %s\n", path+dir_name_idx, parent_path);
+	return 0;
 }

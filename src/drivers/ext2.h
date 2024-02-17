@@ -153,6 +153,8 @@ struct EXT2_FS{
 };
 
 void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id);
+int ext2_write_block(struct EXT2_FS *ext2, uint32_t block_id, void *buf);
+
 struct EXT2_Inode ext2_read_inode_data(struct EXT2_FS *ext2, uint32_t inodeIdx);
 void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx);
 int ext2_check_format(struct DRIVE *drive);
@@ -164,8 +166,8 @@ uint32_t ext2_getBlockContainingIdx(struct EXT2_FS *ext2, struct EXT2_Inode *ino
 uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2);
 uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2);
 
-uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint32_t inodeIdx);
-uint32_t ext2_alloc_block(struct EXT2_FS *ext2, uint32_t blockIdx);
+uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint16_t type, uint32_t size);
+uint32_t ext2_alloc_block(struct EXT2_FS *ext2);
 
 int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size);
 int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount);

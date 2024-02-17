@@ -359,9 +359,15 @@ int fmkdir(char *path){
 	char drive_letter = path[0];
 	path+=2;
 	struct DRIVE *drive = drive_get(drive_letter);
-	if(drive == NULL) return 1;
+	if(drive == NULL){
+		print_serial("[Drive] Drive access to %c failed?\n", drive_letter);
+		return 1;
+	}
 	if(drive->format == ISO9660){
 		return ISO9660_createDirectory(drive->format_info.ISO, path);
+	}
+	else if(drive->format == EXT2){
+		return ext2_createDirectory(drive->format_info.ext2, path);
 	}
 	return 1;
 }
