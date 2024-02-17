@@ -159,7 +159,7 @@ int ext2_check_format(struct DRIVE *drive);
 void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *path);
 uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path);
 
-uint32_t ext2_getBlockContainingIdx(struct EXT2_FS *ext2, EXT2_Inode *inode);
+uint32_t ext2_getBlockContainingIdx(struct EXT2_FS *ext2, struct EXT2_Inode *inode);
 
 uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2);
 uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2);
