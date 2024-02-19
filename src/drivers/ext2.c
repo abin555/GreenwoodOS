@@ -181,7 +181,8 @@ int ext2_check_format(struct DRIVE *drive){
 		BGD = BGD + 1;
 	}
 	print_serial("[EXT2] Inode map at %d Block map at %d\n", ext2->block_addr_inode_usage_map[0], ext2->block_addr_block_usage_map[0]);
-	ext2_get_freeInodeIdx(ext2);
+	print_serial("[EXT2] Free inode test %d\n", ext2_get_freeInodeIdx(ext2));
+	print_serial("[EXT2] Free block test %d\n", ext2_get_freeBlockIdx(ext2));
 	return 1;
 }
 
@@ -231,7 +232,7 @@ uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2){
 	uint32_t temp_group = 0;
 	uint8_t *inode_map = ext2_read_block(ext2, ext2->block_addr_inode_usage_map[group]);
 
-	for(int i = 11; i < 30; i++){
+	for(uint32_t i = 11; i < ext2->inode_count; i++){
 		temp_group = (i - 1) / ext2->inodes_per_group;
 		if(group != temp_group){
 			group = temp_group;
@@ -241,31 +242,38 @@ uint32_t ext2_get_freeInodeIdx(struct EXT2_FS *ext2){
 		inode_bit_idx = 1 << (i - 1) % 8;
 		byte_block = inode_map[byte_block_idx];
 		inode_alloc_state = (byte_block & inode_bit_idx) ? 1 : 0;
-		if(inode_alloc_state == 1) return i;
+		if(inode_alloc_state == 0){
+			print_serial("[EXT2] Found free inode at %d\n", i);
+			return i;
+		}
 		//print_serial("%d %d %x\n", i, inode_alloc_state, byte_block);
 	}
 	return 0;
 }
 
 void ext2_make_dir_entry(struct EXT2_FS *ext2, uint32_t dirInodeIdx, char *name, uint32_t childInodeIdx){
+	print_serial("[EXT2] Make directory %s\n", name);
 	struct EXT2_Inode dir_inode = ext2_read_inode_data(ext2, dirInodeIdx);
 	if((dir_inode.type_perms & 0xF000) != EXT2_InodeType_Directory) return;
 	void *block = ext2_read_block(ext2, dir_inode.BlockPointers[0]);
 	struct EXT2_Directory *dir = (struct EXT2_Directory *) block;
-	while(dir->inode != 0) dir++;
+	while(dir->entry_size != 0) dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
 	dir->inode = childInodeIdx;
 	dir->name_length = 0;
 	dir->entry_size = 8;
-	while(*name != '\0'){
-		dir->name[dir->name_length] = *name;
-		name++;
+	char *dir_name = name;
+	while(*dir_name != '\0'){
+		dir->name[dir->name_length] = *dir_name;
+		dir_name++;
 		dir->name_length++;
 		dir->entry_size++;
 	}
 	ext2_write_block(ext2, dir_inode.BlockPointers[0], block);
+	print_serial("[EXT2] Made directory %s from inode parent %d of inode %d\n", name, dirInodeIdx, childInodeIdx);
 }
 
 uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint16_t type, uint32_t size){
+	print_serial("[EXT2] Inode Alloc Request\n");
 	uint32_t inodeIdx = ext2_get_freeInodeIdx(ext2);
 	uint32_t group = (inodeIdx - 1) / ext2->inodes_per_group;
 
@@ -324,28 +332,31 @@ uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2){
 	uint8_t block_bit_idx = 0;
 	uint8_t block_alloc_state = 0;
 
-	uint32_t group = 0;
-	uint32_t temp_group = 0;
+	uint32_t group = 1;
+	uint32_t temp_group = 1;
 	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
 
-	for(int i = 11; i < 30; i++){
-		temp_group = (i - 1) / ext2->blocks_per_group;
+	for(uint32_t i = 0; i < ext2->block_count; i++){
+		temp_group = i / ext2->blocks_per_group;
 		if(group != temp_group){
 			group = temp_group;
 			block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
 		}
-		byte_block_idx = (i - 1) / 8;
-		block_bit_idx = 1 << (i - 1) % 8;
+		byte_block_idx = i / 8;
+		block_bit_idx = 1 << i % 8;
 		byte_block = block_map[byte_block_idx];
 		block_alloc_state = (byte_block & block_bit_idx) ? 1 : 0;
-		if(block_alloc_state == 1) return i;
+		if(block_alloc_state == 0){
+			print_serial("[EXT2] Free Block at %d\n", i);
+			return i;
+		}
 	}
 	return 0;
 }
 
 
 uint32_t ext2_alloc_block(struct EXT2_FS *ext2){
-	uint32_t blockIdx = ext2_get_freeInodeIdx(ext2);
+	uint32_t blockIdx = ext2_get_freeBlockIdx(ext2);
 	uint32_t group = blockIdx / ext2->blocks_per_group;
 
 	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
@@ -353,6 +364,9 @@ uint32_t ext2_alloc_block(struct EXT2_FS *ext2){
 	uint8_t block_bit_idx = 1 << (blockIdx - 1) % 8;
 	block_map[byte_block_idx] |= block_bit_idx;
 	if(!ext2_write_block(ext2, ext2->block_addr_block_usage_map[group], block_map)) return 0;
+	void *block = ext2_read_block(ext2, blockIdx);
+	memset(block, 0, ext2->block_size);
+	ext2_write_block(ext2, blockIdx, block);
 	return blockIdx;
 }
 
@@ -376,10 +390,17 @@ int ext2_createDirectory(struct EXT2_FS *ext2, char *path){
 	memset(parent_path, '\0', sizeof(parent_path));
 	parent_path[0] = '.';
 	parent_path[1] = '/';
-	for(int i = 2; i < dir_name_idx && i < (int) sizeof(parent_path); i++){
-		parent_path[i] = path[i-2];//TODO: THIS IS WHAT IS BROKEN!
+	for(int i = 0; i < dir_name_idx && i < (int) sizeof(parent_path); i++){
+		parent_path[i] = path[i];
 	}
 
 	print_serial("[EXT2] Making Directory named %s from parent %s\n", path+dir_name_idx, parent_path);
+	uint32_t parent_inode_idx = ext2_get_inodeIdx_from_path(ext2, parent_path);
+	if(parent_inode_idx == 0) return 1;
+	uint32_t child_inode_idx = ext2_alloc_inode(ext2, EXT2_InodeType_Directory, 0);
+	if(child_inode_idx == 0) return 1;
+	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx);
+	//ext2_make_dir_entry(ext2, child_inode_idx, ".", child_inode_idx);
+	//ext2_make_dir_entry(ext2, child_inode_idx, "..", parent_inode_idx);
 	return 0;
 }

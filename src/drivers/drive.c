@@ -354,10 +354,12 @@ void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path){
 	}
 }
 
-int fmkdir(char *path){
-	print_serial("[Drive] Mkdir %s\n", path);
-	char drive_letter = path[0];
-	path+=2;
+int fmkdir(struct DIRECTORY *dir, char *path){
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	print_serial("[Drive] Mkdir %s\n", big_path);
+	char drive_letter = big_path[0];
+	path = big_path+2;
 	struct DRIVE *drive = drive_get(drive_letter);
 	if(drive == NULL){
 		print_serial("[Drive] Drive access to %c failed?\n", drive_letter);

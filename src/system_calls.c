@@ -198,7 +198,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x1A:{
-			fmkdir((char *) cpu.ebx);
+			fmkdir(&task->currentDirectory, (char *) cpu.ebx);
 			break;
 		}
 		case 0x1B:{
