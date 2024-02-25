@@ -138,7 +138,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//File Exists
 		case 0x15:{
-			cpu_state.eax = fexists((char *) cpu_state.ebx);
+			cpu_state.eax = fexists_rel(&task->currentDirectory, (char *) cpu_state.ebx);
 			break;
 		}
 		//Print Serial

@@ -1,0 +1,8 @@
+mov eax, 0x8
+mov ebx, str
+int 0x80
+ret
+str:
+	dd "Test"
+	dd 0xa
+	dd 0x0

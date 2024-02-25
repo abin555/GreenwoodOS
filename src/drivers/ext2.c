@@ -258,7 +258,7 @@ void ext2_make_dir_entry(struct EXT2_FS *ext2, uint32_t dirInodeIdx, char *name,
 	void *block = ext2_read_block(ext2, dir_inode.BlockPointers[0]);
 	struct EXT2_Directory *dir = (struct EXT2_Directory *) block;
 	char text_buf[20];
-	if(!new_dir){
+	if(!new_dir && dir->entry_size != 0){
 		while(ext2->block_size - dir->entry_size - ((uint32_t) dir - (uint32_t) block) != 0){
 			memset(text_buf, 0, sizeof(text_buf));
 			memcpy(text_buf, dir->name, dir->name_length);
@@ -348,7 +348,8 @@ uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2){
 
 	uint32_t group = 4;
 	uint32_t temp_group = 4;
-	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
+	print_serial("[EXT2 BLOCK ALLOC] Getting Block Map\n");
+	uint8_t *block_map;// = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
 
 	for(uint32_t i = 0; i < ext2->block_count; i++){
 		temp_group = i / ext2->blocks_per_group;
@@ -374,8 +375,8 @@ uint32_t ext2_alloc_block(struct EXT2_FS *ext2){
 	uint32_t group = blockIdx / ext2->blocks_per_group;
 
 	uint8_t *block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
-	uint32_t byte_block_idx = (blockIdx - 1) / 8;
-	uint8_t block_bit_idx = 1 << (blockIdx - 1) % 8;
+	uint32_t byte_block_idx = blockIdx / 8;
+	uint8_t block_bit_idx = 1 << blockIdx % 8;
 	block_map[byte_block_idx] |= block_bit_idx;
 	if(!ext2_write_block(ext2, ext2->block_addr_block_usage_map[group], block_map)) return 0;
 	void *block = ext2_read_block(ext2, blockIdx);
@@ -415,8 +416,11 @@ int ext2_createDirectory(struct EXT2_FS *ext2, char *path){
 	uint32_t child_inode_idx = ext2_alloc_inode(ext2, EXT2_InodeType_Directory, 0);
 	if(child_inode_idx == 0) return 1;
 	print_serial("[EXT2] Parent Inode %d, Child Inode is now %d\n", parent_inode_idx, child_inode_idx);
-	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx, 2, false);
+	print_serial("[EXT2] Creating New Directory\n");
+	ext2_make_dir_entry(ext2, parent_inode_idx,path+dir_name_idx, child_inode_idx, 2, false);
+	print_serial("[EXT2] Creating Self Reference Directory\n");
 	ext2_make_dir_entry(ext2, child_inode_idx, ".", child_inode_idx, 2, true);
+	print_serial("[EXT2] Creating Reference to Parent Directory\n");
 	ext2_make_dir_entry(ext2, child_inode_idx, "..", parent_inode_idx, 2, false);
 	return 0;
 }
@@ -448,9 +452,9 @@ int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size){
 	print_serial("[EXT2] Making File named %s from parent %s\n", path+dir_name_idx, parent_path);
 	uint32_t parent_inode_idx = ext2_get_inodeIdx_from_path(ext2, parent_path);
 	if(parent_inode_idx == 0) return 1;
-	uint32_t child_inode_idx = ext2_alloc_inode(ext2, EXT2_InodeType_RegularFile, size + (ext2->block_size - size % ext2->block_size));
+	uint32_t child_inode_idx = ext2_alloc_inode(ext2, EXT2_InodeType_RegularFile, size);
 	if(child_inode_idx == 0) return 1;
 	print_serial("[EXT2] Parent Inode %d, Child Inode is now %d\n", parent_inode_idx, child_inode_idx);
-	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx, 2, false);
+	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx, 1, false);
 	return 0;
 }

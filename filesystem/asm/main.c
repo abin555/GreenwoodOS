@@ -3,10 +3,10 @@
 char *input_filename;
 char *output_filename;
 
-FILE *input_file;
-FILE *output_file;
+struct FILE *input_file;
+struct FILE *output_file;
 
-
+void *work_region;
 
 int main(int argc, char** argv){
     if(argc < 3){
@@ -24,7 +24,7 @@ int main(int argc, char** argv){
     output_filename = argv[2];
 
     if(!fexists(input_filename)){
-        print_arg("Assembly File %s does not exists!\n", (uint32_t) input_filename);
+        print_arg("Assembly File %s does not exist!\n", (uint32_t) input_filename);
         return 1;
     }
     if(!fexists(output_filename)){
@@ -34,10 +34,18 @@ int main(int argc, char** argv){
     input_file = fopen(input_filename);
     output_file = fopen(output_filename);
 
-    
+    work_region = requestRegion(0x10000);
+    fcopy(input_file, work_region, fsize(input_file));
+    //print_arg("%s\n", work_region);
+    char *file_buf = work_region;
+    int x = 0;
+    while(*file_buf){
+        //drawChar(8*x++, 0, *file_buf++);
+        print_arg("%c", *file_buf++);
+    }
 
     fclose(input_file);
-    fclose(output_file):
+    fclose(output_file);
 
     return 0;
 }

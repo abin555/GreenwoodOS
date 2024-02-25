@@ -318,6 +318,24 @@ int fexists(char *path){
 	return 0;
 }
 
+int fexists_rel(struct DIRECTORY *dir, char *path){
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	char drive_letter = big_path[0];
+	path = big_path + 2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	if(drive == NULL) return 0;
+	if(drive->format == ISO9660){
+		return ISO9660_checkExists(drive->format_info.ISO, path);
+	}
+	else if(drive->format == EXT2){
+		uint32_t inode = ext2_get_inodeIdx_from_path(drive->format_info.ext2, path);
+		if(inode) return 1;
+		return 0;
+	}
+	return 0;
+}
+
 int changeDirectory(struct DIRECTORY *dir, char *path){
 	/*
 	Manipulates the task currentDirectory string.

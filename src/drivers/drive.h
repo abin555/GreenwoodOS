@@ -83,6 +83,7 @@ int fsize(struct FILE *file);
 int fseek(struct FILE *file, int idx);
 int fcopy(struct FILE *file, char *buf, int buf_size);
 int fexists(char *path);
+int fexists_rel(struct DIRECTORY *dir, char *path);
 int changeDirectory(struct DIRECTORY *dir, char *path);
 void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path);
 int fmkdir(struct DIRECTORY *dir, char *path);
