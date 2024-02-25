@@ -86,6 +86,6 @@ int fexists(char *path);
 int changeDirectory(struct DIRECTORY *dir, char *path);
 void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path);
 int fmkdir(struct DIRECTORY *dir, char *path);
-int fmkfile(char *path, int size);
+int fmkfile(struct DIRECTORY *dir, char *path, int size);
 
 #endif

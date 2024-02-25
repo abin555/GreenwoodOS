@@ -201,6 +201,16 @@ void fputc(struct FILE *file, char c){
 		buf[file->head] = c;
 		ISO_write_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
 	}
+	else if(file->info.drive->format == EXT2){
+		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
+		uint32_t block_idx = file->head / ext2->block_size;
+		if(block_idx < 12){
+			uint32_t block = file->info.inode->BlockPointers[block_idx];
+			buf = ext2_read_block(ext2, block);
+			buf[file->head % ext2->block_size] = c;
+			ext2_write_block(ext2, block, buf);
+		}
+	}
 }
 
 int fsize(struct FILE *file){
@@ -374,14 +384,19 @@ int fmkdir(struct DIRECTORY *dir, char *path){
 	return 1;
 }
 
-int fmkfile(char *path, int size){
-	print_serial("[Drive] Make File %s\n", path);
-	char drive_letter = path[0];
-	path+=2;
+int fmkfile(struct DIRECTORY *dir, char *path, int size){
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	print_serial("[Drive] Make File %s\n", big_path);
+	char drive_letter = big_path[0];
+	path = big_path+2;
 	struct DRIVE *drive = drive_get(drive_letter);
 	if(drive == NULL) return 1;
 	if(drive->format == ISO9660){
 		return ISO9660_createFile(drive->format_info.ISO, path, size);
+	}
+	else if(drive->format == EXT2){
+		return ext2_createFile(drive->format_info.ext2, path, size);
 	}
 	return 1;
 }
