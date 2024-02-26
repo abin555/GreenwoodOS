@@ -210,6 +210,17 @@ int fexists(char *path){
 	return eax;
 }
 
+int fextend(struct FILE *file, uint32_t amount){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = amount;
+	ebx = (uint32_t) file;
+	eax = 0x22;
+	asm("int 0x80");
+	return eax;
+}
+
 struct FEATURE_INFO getKernelFeature(KERNEL_FEATURE feature){
 	void *addr;
 	uint32_t size;

@@ -105,6 +105,7 @@ void fseek(struct FILE *file, int idx);
 void fputc(struct FILE *file, char c);
 void fmkdir(char *path);
 void fmkfile(char *path, int size);
+int fextend(struct FILE *file, uint32_t amount);
 int getArrowKey();
 
 void srand(uint32_t seed);

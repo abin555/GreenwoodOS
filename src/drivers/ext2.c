@@ -1,7 +1,7 @@
 #include "ext2.h"
 
 void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id){
-	print_serial("[EXT2] Reading block %d\n", block_id);
+	//print_serial("[EXT2] Reading block %d\n", block_id);
 	if(block_id > ext2->block_count) return NULL;
 	int err = drive_read(ext2->drive, ext2->buf, block_id*ext2->sectors_per_block, ext2->sectors_per_block);
 	if(err == -1) return NULL;
@@ -9,7 +9,7 @@ void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id){
 }
 
 int ext2_write_block(struct EXT2_FS *ext2, uint32_t block_id, void *buf){
-	print_serial("[EXT2] Writing block %d\n", block_id);
+	//print_serial("[EXT2] Writing block %d\n", block_id);
 	if(block_id > ext2->block_count) return 0;
 	int err = drive_write(ext2->drive, buf, block_id*ext2->sectors_per_block, ext2->sectors_per_block);
 	if(err == -1) return 0;
@@ -26,6 +26,21 @@ struct EXT2_Inode ext2_read_inode_data(struct EXT2_FS *ext2, uint32_t inodeIdx){
 	struct EXT2_Inode *inode = ((struct EXT2_Inode *) (block + offset_in_block * ext2->inode_size));
 	print_serial("[EXT2] Inode %d: Group %d, Type: 0x%x, Size: %d, Block: %d\n", inodeIdx, group, inode->type_perms & 0xF000, inode->lsbSize, inode_table_block + block_offset);
 	return *inode;
+}
+
+void ext2_write_inode_data(struct EXT2_FS *ext2, struct EXT2_Inode *inode, uint32_t inodeIdx){
+	if(ext2 == NULL || inode == NULL) return;
+	print_serial("[EXT2] Writing Inode %d from 0x%x\n", inodeIdx, inode);
+	uint32_t group = (inodeIdx - 1) / ext2->inodes_per_group;
+	uint32_t inode_table_block = ext2->inode_table_starting_addr[group];
+	uint32_t idx_in_group = inodeIdx - group * ext2->inodes_per_group;
+	uint32_t block_offset = (idx_in_group - 1) * ext2->inode_size / ext2->block_size;
+	uint32_t offset_in_block = (idx_in_group - 1) - block_offset * (ext2->block_size / ext2->inode_size);
+	char *block = ext2_read_block(ext2, inode_table_block + block_offset);
+	struct EXT2_Inode *inode_replace = ((struct EXT2_Inode *) (block + offset_in_block * ext2->inode_size));
+	print_serial("[EXT2] Inode Write - Size: %d / %d\n", inode_replace->lsbSize, inode->lsbSize);
+	memcpy(inode_replace, inode, sizeof(struct EXT2_Inode));
+	ext2_write_block(ext2, inode_table_block + block_offset, block);
 }
 
 void ext2_print_directory(struct EXT2_FS *ext2, uint32_t inodeIdx){
@@ -456,5 +471,30 @@ int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size){
 	if(child_inode_idx == 0) return 1;
 	print_serial("[EXT2] Parent Inode %d, Child Inode is now %d\n", parent_inode_idx, child_inode_idx);
 	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx, 1, false);
+	return 0;
+}
+
+int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount){
+	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
+	uint32_t current_size = inode.lsbSize;
+	uint32_t new_size = current_size + extendAmount;
+	uint32_t current_block_count = (current_size / ext2->block_size + 1);
+	uint32_t new_block_count = (new_size / ext2->block_size + 1);
+	uint32_t blocks_needed = new_block_count - current_block_count;
+
+	print_serial("[EXT2] Extending File from inode %d by size %d currently has %d blocks, adding %d blocks\n", inodeIdx, extendAmount, current_block_count, blocks_needed);
+
+	inode.lsbSize += extendAmount;
+	inode.diskSectorsCount += blocks_needed * ext2->block_size / 512;
+	if(current_block_count >= 12) return 1;//TODO: Single and Doublely indirect links to blocks
+
+	uint32_t block_idx = current_block_count + 1;
+	for(uint32_t i = 0; i < blocks_needed; i++){
+		if(block_idx + i >= 12) break;
+		print_serial("[EXT2] Block Idx %d\n", block_idx + i);
+		inode.BlockPointers[block_idx + i] = ext2_alloc_block(ext2);
+		
+	}
+	ext2_write_inode_data(ext2, &inode, inodeIdx);
 	return 0;
 }

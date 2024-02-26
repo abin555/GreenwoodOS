@@ -173,6 +173,7 @@ struct FILE *fopen(char *path){
 		*file->info.inode = ext2_read_inode_data(drive->format_info.ext2, inodeIdx);
 		//file->info.type = EXT2;
 		file->info.size = file->info.inode->lsbSize;
+		file->info.inodeIdx = inodeIdx;
 		file->head = 0;
 		return file;
 	}
@@ -202,6 +203,7 @@ void fputc(struct FILE *file, char c){
 		ISO_write_sector(file->info.drive, file->info.drive->format_info.ISO->buf, file->info.sector);
 	}
 	else if(file->info.drive->format == EXT2){
+		//print_serial("[DRIVE] PUTC @ %d -> %c\n", file->head, c);
 		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
 		uint32_t block_idx = file->head / ext2->block_size;
 		if(block_idx < 12){
@@ -297,6 +299,72 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 			}
 		}
 		print_serial("[DRIVE][EXT2] Copied %d bytes\n", idx);
+		return 0;
+	}
+	return 1;
+}
+
+int fwrite(struct FILE *file, char *buf, uint32_t numBytes){
+	print_serial("[DRIVE] Saving file from 0x%x of %d bytes\n", (uint32_t) buf, numBytes);
+	if(file == NULL || numBytes == 0) return 1;
+	if(file->info.drive->format == ISO9660){
+		return 1;
+	}
+	else if(file->info.drive->format == EXT2){
+		print_serial("[DRIVE] [EXT2] Writing File, buf size is %d\n", numBytes);
+		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
+		struct EXT2_Inode *inode = file->info.inode;
+		//char *block_buf = (char *) ext2_read_block(ext2, inode)
+		uint32_t block_idx = 0;
+		uint32_t single_indirect_idx = 0;
+		uint32_t idx = 0;
+		char *block;// = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+		ext2_write_block(ext2, inode->BlockPointers[block_idx], buf + (idx / ext2->block_size));
+		uint32_t head = file->head;
+		while((uint32_t) head < ext2->block_size && idx <= (uint32_t) numBytes){
+			//buf[idx] = block[head];
+			//print_serial("%c\n", buf[idx]);
+			head++;
+			idx++;
+
+			if((uint32_t) head == ext2->block_size){
+				print_serial("[DRIVE] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
+				if(block_idx == 12){
+					handle_first_indirect:;
+					block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+					//ext2_write_block(ext2, inode->BlockPointers[block_idx], buf + (idx / ext2->block_size));
+					uint32_t *indirect_blocks = (uint32_t *) block;
+					uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+					print_serial("[DRIVE] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
+					//block = ext2_read_block(ext2, indirect_block);
+					ext2_write_block(ext2, indirect_block, buf + (idx / ext2->block_size));
+					//block = ext2_read_block(ext2, inode->BlockPointers[0]);
+					single_indirect_idx++;
+					if(single_indirect_idx * sizeof(uint32_t) > ext2->block_size){
+						block_idx++;
+					}
+					head = 0;
+				}
+				else if(block_idx == 13){
+					print_serial("[DRIVE] [EXT2] Double Indirect Block\n");
+					break;
+				}
+				else if(block_idx > 13){
+					print_serial("[DRIVE] [EXT2] Fucky Wucky time on the block idx\n");
+					break;
+				}
+				else{
+					block_idx++;
+					ext2_write_block(ext2, inode->BlockPointers[block_idx], buf + (idx / ext2->block_size));
+					if(block_idx == 12){
+						goto handle_first_indirect;
+					}
+				}
+
+				head = 0;
+			}
+		}
+		print_serial("[DRIVE][EXT2] Wrote %d bytes\n", idx);
 		return 0;
 	}
 	return 1;
@@ -415,6 +483,26 @@ int fmkfile(struct DIRECTORY *dir, char *path, int size){
 	}
 	else if(drive->format == EXT2){
 		return ext2_createFile(drive->format_info.ext2, path, size);
+	}
+	return 1;
+}
+
+int fextend(struct FILE *file, uint32_t extendAmount){
+	print_serial("[DRIVE] Extending File by %d bytes\n", extendAmount);
+	if(file == NULL) return 1;
+	struct DRIVE *drive = file->info.drive;
+	if(drive->format == ISO9660){
+		return 1;
+	}
+	else if(drive->format == EXT2){
+		print_serial("[DRIVE] Current size is %d\n", file->info.inode->lsbSize);
+		if(!ext2_extendFile(drive->format_info.ext2, file->info.inodeIdx, extendAmount)){
+			print_serial("[DRIVE] EXT2 Successfully Extended file, reflecting in FILE structure\n");
+			file->info.size += extendAmount;
+			*file->info.inode = ext2_read_inode_data(drive->format_info.ext2, file->info.inodeIdx);
+			print_serial("[DRIVE] New size is %d (%d)\n", file->info.inode->lsbSize, file->info.size);
+			return 0;
+		}
 	}
 	return 1;
 }

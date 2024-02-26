@@ -156,6 +156,7 @@ void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id);
 int ext2_write_block(struct EXT2_FS *ext2, uint32_t block_id, void *buf);
 
 struct EXT2_Inode ext2_read_inode_data(struct EXT2_FS *ext2, uint32_t inodeIdx);
+void ext2_write_inode_data(struct EXT2_FS *ext2, struct EXT2_Inode *inode, uint32_t inodeIdx);
 void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx);
 int ext2_check_format(struct DRIVE *drive);
 void ext2_listDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, char *path);

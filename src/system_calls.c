@@ -233,6 +233,11 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			tasks[task_running_idx].keyboard_event_handler = (void (*)(unsigned int)) cpu.ebx;
 			break;
 		}
+		//Exten Files
+		case 0x22:{
+			cpu_state.eax = fextend((struct FILE *) cpu.ebx, (uint32_t) cpu.ecx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

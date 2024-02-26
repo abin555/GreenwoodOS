@@ -46,6 +46,7 @@ struct DIRECTORY{
 struct File_Info{
 	struct DRIVE *drive;
 	struct EXT2_Inode *inode;
+	uint32_t inodeIdx;
 	uint32_t sector;
 	uint32_t size;
 };
@@ -82,11 +83,13 @@ void fputc(struct FILE *file, char c);
 int fsize(struct FILE *file);
 int fseek(struct FILE *file, int idx);
 int fcopy(struct FILE *file, char *buf, int buf_size);
+int fwrite(struct FILE *file, char *buf, uint32_t numBytes);
 int fexists(char *path);
 int fexists_rel(struct DIRECTORY *dir, char *path);
 int changeDirectory(struct DIRECTORY *dir, char *path);
 void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path);
 int fmkdir(struct DIRECTORY *dir, char *path);
 int fmkfile(struct DIRECTORY *dir, char *path, int size);
+int fextend(struct FILE *file, uint32_t extendAmount);
 
 #endif
