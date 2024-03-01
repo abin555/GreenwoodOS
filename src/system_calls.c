@@ -184,6 +184,11 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 					cpu_state.ebx = PROGAM_MAX_SIZE;
 					break;
 				}
+				//Raw Framebuffer
+				case 0x06:{
+					cpu_state.eax = fb_frontbuffer;
+					break;
+				}
 			}
 			break;
 		}
@@ -236,6 +241,14 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		//Exten Files
 		case 0x22:{
 			cpu_state.eax = fextend((struct FILE *) cpu.ebx, (uint32_t) cpu.ecx);
+			break;
+		}
+		//Request Memory Block of size to be alloced to requested virtual memory region
+		case 0x23:{
+			break;
+		}
+		//Add timer callback
+		case 0x24:{
 			break;
 		}
 	}
