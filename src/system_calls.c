@@ -186,8 +186,14 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 				}
 				//Raw Framebuffer
 				case 0x06:{
-					cpu_state.eax = fb_frontbuffer;
+					cpu_state.eax = (uint32_t) fb_frontbuffer;
+					cpu_state.ebx = fb_width * fb_height * sizeof(uint32_t);
 					break;
+				}
+				//Timer Function Buffer
+				case 0x07:{
+					cpu_state.eax = (uint32_t) &timer_attached_functions;
+					cpu_state.ebx = timer_attached_functions_num;
 				}
 			}
 			break;
@@ -245,10 +251,22 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Request Memory Block of size to be alloced to requested virtual memory region
 		case 0x23:{
+			int block = MEM_findRegionIdx(cpu.ebx);
+			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
+			cpu_state.eax = addr;
 			break;
 		}
 		//Add timer callback
 		case 0x24:{
+			timer_attach((int) cpu.ebx, (void *) cpu.ecx);
+			break;
+		}
+		case 0x25:{
+			print_serial((char *) cpu.ebx);
+			break;
+		}
+		case 0x26:{
+			start_task((void *) cpu.ebx, -1, 0, NULL, (char *) cpu.ecx);
 			break;
 		}
 	}

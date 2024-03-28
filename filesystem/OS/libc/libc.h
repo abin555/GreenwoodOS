@@ -91,7 +91,9 @@ typedef enum {
 	FEAT_KEYBOARD = 0x02,
 	FEAT_PAGETABLE = 0x03,
 	FEAT_TASKTABLE = 0x04,
-	FEAT_PROGRAMBASE = 0x05
+	FEAT_PROGRAMBASE = 0x05,
+	FEAT_FRAMEBUFFER = 0x06,
+	FEAT_TIMER = 0x07
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{
@@ -115,6 +117,10 @@ void exit(int code);
 void *requestRegion(unsigned int bytes);
 
 void addKbdEventHandler(void (*handler)(unsigned char));
+void *requestRegionAt(unsigned int bytes, unsigned int addr);
+void attachTimerCallback(unsigned int timer, void *callback);
+void dprint(char *msg);
+void start_manual_task(void *addr, char *name);
 
 #ifdef __cplusplus
 }

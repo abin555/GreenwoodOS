@@ -322,3 +322,42 @@ void addKbdEventHandler(void (*handler)(unsigned char)){
 	eax = 0x21;
 	asm("int 0x80");
 }
+
+void *requestRegionAt(unsigned int bytes, unsigned int addr){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = addr;
+	ebx = bytes;
+	eax = 0x23;
+	asm("int 0x80");
+	return (void *) eax;
+}
+
+void attachTimerCallback(unsigned int timer, void *callback){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) callback;
+	ebx = (uint32_t) timer;
+	eax = 0x24;
+	asm("int 0x80");
+}
+
+void dprint(char *msg){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) msg;
+	eax = 0x25;
+	asm("int 0x80");
+}
+
+void start_manual_task(void *addr, char *name){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) name;
+	ebx = (uint32_t) addr;
+	eax = 0x26;
+	asm("int 0x80");
+}

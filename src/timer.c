@@ -16,6 +16,7 @@ void timer_init(uint32_t frequency){
 	timer_ticks = 0;
     interrupt_add_handle(32, timer_callback);
     IRQ_clear_mask(0);
+	memset(&timer_attached_functions, 0, sizeof(timer_attached_functions));
     print_serial("[Timer] Initialized at 0x%x hz\n", frequency);
 
 	IRQ_RES;

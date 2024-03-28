@@ -39,8 +39,6 @@ void kernal_task(int argc, char **argv){
 
     drive_enumerate();
 
-    //start_task(idle_task, -1, 0, NULL, "IDLE");
-
     struct WINDOW *kernal_win = window_open("KERNEL", true);
     kernal_console = console_open(kernal_win);
     struct task_state *kernal_task = &tasks[task_running_idx];
@@ -53,17 +51,12 @@ void kernal_task(int argc, char **argv){
 
     print_console(kernal_console, "Kernal Window & Console Opened.\n");
     print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
-    //ext2_console_printDirectory(kernal_console, drive_get('C')->format_info.ext2, EXT2_ROOT_INODE);
-
-    //char boot_program_path[] = "/A/OS/TERM/TERM.EXE";
     char boot_program_path[] = "/A/OS/term/term.exe";
 
-    //while(1){}
 
     print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
-    //set_schedule(ONFOCUS);
 
     char c = '#';
     char OpenedConsole = 0;
