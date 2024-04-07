@@ -95,23 +95,23 @@ void kernal_task(int argc, char **argv){
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
-	init_serial();
+    init_serial();
     print_serial("\n\nGreenwood OS Boot Start!\n");
-	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
         print_serial("WTF, not multiboot?!?!\nHow did we get here...\n:(\n");
         return 0xFF;
     }
-	parse_multiboot2(magic_addr);
-	load_gdt();
+    parse_multiboot2(magic_addr);
+    load_gdt();
     interrupts_install_idt();
     getCPUVendorString();
     enableSSE();
-	page_init();
+    page_init();
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-	fb_init(GRUB_tagfb);
+    fb_init(GRUB_tagfb);
 
     for(int i = 0; i < 8; i++){
         fb_putChar(i*8, 4*8, '1'+i, 0xFFFFFFFF, 0);
@@ -128,5 +128,5 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     multitask_init();
 
     while(1){}
-	return 1;
+    return 1;
 }
