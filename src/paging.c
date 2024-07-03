@@ -22,11 +22,11 @@ void page_init(){
 
 struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
     print_serial("\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
-    print_console(kernal_console, "\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
+    print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
     //asm("hlt");
     stop_task(task_running_idx);
     switch_to_task(&tasks[task_running_idx], &tasks[0]);
-    print_console(kernal_console, "Returning to KERNAL Task\n");
+    print_console(kernel_console, "Returning to kernel Task\n");
     return cpu;
 }
 
@@ -91,7 +91,7 @@ void set_PAT(){
         Bit Flag
          0  Present (1)
          1  Read/Write (1)
-         2  User/Supervisor (0) **ENTIRE OS IS KERNAL MODE**
+         2  User/Supervisor (0) **ENTIRE OS IS kernel MODE**
          3  PWT
          4  PCD
          5  Accessed

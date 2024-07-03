@@ -22,7 +22,7 @@
 
 #include "ext2.h"
 
-void kernal_task(int argc, char **argv){
+void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
     program_init();
@@ -39,22 +39,22 @@ void kernal_task(int argc, char **argv){
 
     drive_enumerate();
 
-    struct WINDOW *kernal_win = window_open("KERNEL", true);
-    kernal_console = console_open(kernal_win);
-    struct task_state *kernal_task = &tasks[task_running_idx];
-    kernal_task->console = kernal_console;
-    char kernal_path[] = "A/";
+    struct WINDOW *kernel_win = window_open("KERNEL", true);
+    kernel_console = console_open(kernel_win);
+    struct task_state *kernel_task = &tasks[task_running_idx];
+    kernel_task->console = kernel_console;
+    char kernel_path[] = "A/";
 
-    memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
-    memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
+    memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
+    memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
     
 
-    print_console(kernal_console, "Kernal Window & Console Opened.\n");
-    print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
+    print_console(kernel_console, "kernel Window & Console Opened.\n");
+    print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     char boot_program_path[] = "/A/OS/term/term.exe";
 
 
-    print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
+    print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
 
@@ -81,7 +81,7 @@ void kernal_task(int argc, char **argv){
             asm("nop");
             asm("nop");
         }
-        if(&windows[window_selected] == kernal_win){
+        if(&windows[window_selected] == kernel_win){
             if(kbd_getChar() == 10 && !OpenedConsole){
                 OpenedConsole = 1;
                 exec(boot_program_path, 0, NULL);
@@ -91,7 +91,7 @@ void kernal_task(int argc, char **argv){
             }
         }
     }
-    window_close(kernal_win);
+    window_close(kernel_win);
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
@@ -124,7 +124,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     ps2_init();
     timer_init(100);
-    start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 
     while(1){}
