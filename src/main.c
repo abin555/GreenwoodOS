@@ -19,7 +19,6 @@
 #include "system_calls.h"
 #include "random.h"
 #include "exceptions.h"
-
 #include "ext2.h"
 
 void kernel_task(int argc, char **argv){
@@ -43,6 +42,9 @@ void kernel_task(int argc, char **argv){
     kernel_console = console_open(kernel_win);
     struct task_state *kernel_task = &tasks[task_running_idx];
     kernel_task->console = kernel_console;
+    kernel_task->window = kernel_win;
+    set_schedule(ONFOCUS);
+
     char kernel_path[] = "A/";
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
@@ -58,29 +60,8 @@ void kernel_task(int argc, char **argv){
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
 
-    char c = '#';
     char OpenedConsole = 0;
     while(1){
-        if(c == '#') c = '*';
-        else c = '#';
-        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
-        for(int i = 0; i < 100000; i++){
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-        }
         if(&windows[window_selected] == kernel_win){
             if(kbd_getChar() == 10 && !OpenedConsole){
                 OpenedConsole = 1;
@@ -123,7 +104,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     PCI_init();
     kbd_init(0xFF);
     ps2_init();
-    timer_init(100);
+    timer_init(10);
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 
