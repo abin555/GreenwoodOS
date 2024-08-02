@@ -77,7 +77,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 		pdev->device
 	);
 	PCI_load_BAR(pdriver);
-	for(int i = 0; i <=6; i++){
+	for(int i = 0; i < 6; i++){
 		print_serial("[PCI BARs] 0x%x\n", pdriver->BAR[i]);
 	}
 	
@@ -207,7 +207,7 @@ uint32_t PCI_getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint
 }
 
 void PCI_load_BAR(struct PCI_driver *driver){
-	for(int bar = 0; bar <= 6; bar++){
+	for(int bar = 0; bar < 6; bar++){
 		uint32_t bar_data = PCI_getDeviceBar(
 			driver->device->bus,
 			driver->device->slot,

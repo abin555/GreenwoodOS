@@ -136,6 +136,7 @@ void interrupts_install_idt()
 	interrupts_init_descriptor(42,  int_handler_42);
 	interrupts_init_descriptor(43,  int_handler_43);
 	interrupts_init_descriptor(44,  int_handler_44);
+	interrupts_init_descriptor(45,  int_handler_45);
 	
 	interrupts_init_descriptor(50,  int_handler_50);
 	interrupts_init_descriptor(51,  int_handler_51);
@@ -180,7 +181,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		
 	}
 	else{
-		print_serial("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
+		print_serial("[CPU INT] Uninitialized Interrupt %d\n", interrupt);
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}

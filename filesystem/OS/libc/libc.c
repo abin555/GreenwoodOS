@@ -8,11 +8,12 @@ int strcmp(const char *s1, const char *s2){
 	return *(const unsigned char *)s1 - *(const unsigned char*)s2;
 }
 
-struct WINDOW *window_open(char *name){
+struct WINDOW *window_open(char *name, uint32_t copyOnPrompt){
 	register unsigned int eax asm("eax");
     register unsigned int ebx asm("ebx");
     register unsigned int ecx asm("ecx");
-    register unsigned int edx asm("edx");    
+    register unsigned int edx asm("edx"); 
+	ecx = (unsigned int) copyOnPrompt;   
     ebx = (unsigned int) name;
     eax = 0x01;
     asm("int 0x80");

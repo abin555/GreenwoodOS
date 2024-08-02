@@ -6,6 +6,7 @@
 #include "stdint.h"
 #include "interrupts.h"
 #include "keyboard.h"
+#include "mouse.h"
 
 // Ports
 #define PS2_CMD 0x64

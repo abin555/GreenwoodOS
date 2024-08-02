@@ -20,6 +20,7 @@ OBJECTS = \
 		src/cpu_asm.o \
 		src/ps2.o \
 		src/interfaces/keyboard.o \
+		src/interfaces/mouse.o \
 		src/multitasking.o \
 		src/drivers/ahci.o \
 		src/drivers/drive.o \
@@ -42,7 +43,7 @@ LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
 
-all: kernel.elf transfer-compiled make_fs
+all: build emulate
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
@@ -50,39 +51,29 @@ kernel.elf: $(OBJECTS)
 	cd ..
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	grub-mkrescue -o GreenwoodOS.iso iso
-run: os.iso transfer-compiled emulate
+	/usr/local/bin/grub-mkrescue -o GreenwoodOS.iso iso
+run: os.iso emulate
 
 DEBUG_EMU = 
 
 emulate:
-	qemu-system-i386 $(DEBUG_EMU) -boot order=c -m 512 -monitor stdio -serial file:serial.log \
-	-device ich9-intel-hda \
-	-audiodev pa,id=snd0 \
-	-device hda-output,audiodev=snd0 \
-	-drive id=disk,file=GreenwoodOS.iso,if=none,format=raw \
-	-drive id=disk2,file=filesystem.iso,if=none,format=raw \
-	-device ahci,id=ahci \
-	-device ide-hd,drive=disk2,bus=ahci.0,bootindex=2 \
-	-device ide-hd,drive=disk,bus=ahci.1,bootindex=1
+	./emulate.sh
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -o $@
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
 clean:
-	rm -rf src/*.o src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
-cleanup:
-	rm -rf src/*.o src/*.i src/main.s *\~ src/*/*.o ./*/*.o
-build: os.iso transfer-compiled debug #make_fs
+	rm -rf src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
+	rm -rf $(OBJECTS)
+
+build: os.iso debug #make_fs
+
+
 debug: build make_fs
 	objcopy --only-keep-debug kernel.elf kernel.sym
 	objcopy --strip-debug kernel.elf
-transfer-compiled:
-	rm -rf src/*.o
-	rm -rf src/interfaces/*.o
-	rm -rf src/drivers/*.o
-	rm -rf programs/*.o
+
 make_fs:
 	mkisofs -o ./filesystem.iso ./filesystem/
 	#dd if=/dev/zero of=filesystem.iso bs=1024 count=1024000

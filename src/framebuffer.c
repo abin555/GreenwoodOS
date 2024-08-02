@@ -1,7 +1,6 @@
 #include "framebuffer.h"
 
 uint32_t *fb_frontbuffer;
-uint32_t *fb_backbuffer;
 uint32_t fb_width;
 uint32_t fb_height;
 
@@ -9,7 +8,6 @@ void fb_init(struct multiboot_tag_framebuffer* tagfb){
 	fb_frontbuffer = (uint32_t *) (uint32_t) tagfb->common.framebuffer_addr;
 	fb_width = tagfb->common.framebuffer_width;
 	fb_height = tagfb->common.framebuffer_height;
-    fb_backbuffer = (uint32_t *) 0xB0000000;
 
     print_serial("[Framebuffer] Initializing\n");
     print_serial("[Framebuffer] Width: %d Height %d\n", fb_width, fb_height);
@@ -18,9 +16,6 @@ void fb_init(struct multiboot_tag_framebuffer* tagfb){
     //create_page_entry((uint32_t) fb_frontbuffer+0x400000, (uint32_t) fb_frontbuffer+0x400000, 0x93);
     MEM_reserveRegion((uint32_t) fb_frontbuffer, (uint32_t) fb_frontbuffer, FRAMEBUFFER);
     MEM_reserveRegion((uint32_t) fb_frontbuffer+0x400000, (uint32_t) fb_frontbuffer+0x400000, FRAMEBUFFER);
-    
-    int backbuffer_mem_idx = MEM_findRegionIdx(fb_width * fb_height * sizeof(uint32_t));
-    MEM_reserveRegionBlock(backbuffer_mem_idx, fb_width * fb_height * sizeof(uint32_t), (uint32_t) fb_backbuffer, FRAMEBUFFER);
 
     print_serial("[Framebuffer] Initialized\n");
 }

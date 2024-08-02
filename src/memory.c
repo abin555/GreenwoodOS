@@ -52,14 +52,14 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 
 void MEM_populateRegions(){
 	print_serial("Loading Memory Map into Memory Region Table\n");
-	for(int i = 0; i < 10; i++){
+	for(unsigned int i = 0; i < 10; i++){
         MEMORY_REGIONS[i].exists = 1;
 		MEMORY_REGIONS[i].available = 0;
         MEMORY_REGIONS[i].type = KERNEL;
         MEMORY_REGIONS[i].physical_addr = i*0x400000;
         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
     }
-	for(int i = 15; i < 0x300; i++){
+	for(unsigned int i = 15; i < 0x300; i++){
 		MEMORY_REGIONS[i].exists = 1;
 		MEMORY_REGIONS[i].available = 1;
         MEMORY_REGIONS[i].type = AVAILABLE;
@@ -133,7 +133,7 @@ void MEM_populateRegions(){
 void MEM_printRegions(){
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
 		if(MEMORY_REGIONS[i].exists && !MEMORY_REGIONS[i].available){
-			char *type;
+			char *type = "  UNKNOWN  ";
 			switch(MEMORY_REGIONS[i].type){
 				case KERNEL:
 					type = "  KERNEL   ";

@@ -2,7 +2,7 @@
 #include "utilities.hpp"
 
 Window::Window(char *name){
-    this->window = window_open(name);
+    this->window = window_open(name, 1);
 }
 Window::Window(){
     this->window = NULL;

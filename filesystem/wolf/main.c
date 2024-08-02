@@ -73,7 +73,7 @@ void rotate(float rot);
 
 int main(int argc, char **argv){
     print("Opening Wolfenstein Style Renderer");
-    window = window_open("MapRender");
+    window = window_open("MapRender", 1);
     win_buf = window->backbuffer;
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
     set_schedule(ONFOCUS);

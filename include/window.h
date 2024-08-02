@@ -5,6 +5,8 @@
 #include "memory.h"
 #include "framebuffer.h"
 #include "timer.h"
+#include "utils.h"
+#include "mouse.h"
 
 struct WINDOW{
 	uint32_t *backbuffer;

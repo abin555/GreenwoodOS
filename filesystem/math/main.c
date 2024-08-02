@@ -42,7 +42,7 @@ void drawCircle(float *angle, int centerX, int centerY);
 
 int main(int argc, char **argv){
     print("Opening Math Renderer\n");
-    window = window_open("Math Renderer");
+    window = window_open("Math Renderer", 1);
     win_buf = window->backbuffer;
     
     window_update();

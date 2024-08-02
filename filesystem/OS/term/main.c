@@ -20,7 +20,7 @@ void memset(void *dest, char v, int size);
 
 int main(int argc, char **argv){
 	char *window_name = "TERMINAL";
-	window = window_open(window_name);
+	window = window_open(window_name, 0);
 	set_schedule(2);
 	term_width = window->width / 8;
 	term_height = window->height / 8;
@@ -42,7 +42,7 @@ int main(int argc, char **argv){
 		for(i++; i < term_width; i++){
 			drawChar(8*i,(term_height-2)*8,' ');
 		}
-		window_update();
+		//window_update();
 		char c = getc();
 		if(c == 0x11) idx-=2;
 		else if(c == 0x12) idx++;

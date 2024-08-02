@@ -19,6 +19,7 @@
 #include "system_calls.h"
 #include "random.h"
 #include "exceptions.h"
+#include "mouse.h"
 
 #include "ext2.h"
 
@@ -111,17 +112,16 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-	fb_init(GRUB_tagfb);
 
-    for(int i = 0; i < 8; i++){
-        fb_putChar(i*8, 4*8, '1'+i, 0xFFFFFFFF, 0);
-    }
-    
+	fb_init(GRUB_tagfb);    
     MEM_printRegions();
+
     alloc_init();
     MEM_printRegions();
+
     PCI_init();
     kbd_init(0xFF);
+    mouse_init();
     ps2_init();
     timer_init(100);
     start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");

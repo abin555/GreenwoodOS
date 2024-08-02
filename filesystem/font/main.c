@@ -17,7 +17,7 @@ void drawCharBig(int idx, int size, int x, int y);
 
 int main(int argc, char *argv[]){
     print("Opening Font Editor\n");
-    window = window_open("FONTED");
+    window = window_open("FONTED", 0);
     win_buf = window->backbuffer;
 
     window_update();
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         }
         drawCharBig(letter, FontScale, 1, 1);
         drawPixelScaled(IndicatorScale + x*IndicatorScale, IndicatorScale + y*IndicatorScale, FontScale/IndicatorScale, 0x4040FF);
-        window_update();
+        //window_update();
 
         input = getc();
 

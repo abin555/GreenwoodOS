@@ -63,7 +63,7 @@ struct FILE{
 };
 
 int strcmp(const char *s1, const char *s2);
-struct WINDOW *window_open(char *name);
+struct WINDOW *window_open(char *name, uint32_t copyOnPrompt);
 void window_close(struct WINDOW *window);
 void window_update();
 void drawChar(uint32_t x, uint32_t y, char c);

@@ -57,7 +57,7 @@ char SlowRender;
 Object obj;
 
 int main(int argc, char** argv){
-  window = window_open("3D");
+  window = window_open("3D", 1);
   win_buf = window->backbuffer;
   window_update();
   set_schedule(ONFOCUS);

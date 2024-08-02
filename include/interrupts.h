@@ -139,6 +139,7 @@ extern void int_handler_41();
 extern void int_handler_42();
 extern void int_handler_43();
 extern void int_handler_44();
+extern void int_handler_45();
 
 extern void int_handler_50();
 extern void int_handler_51();

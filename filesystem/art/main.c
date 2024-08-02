@@ -5,7 +5,7 @@ struct WINDOW *win;
 int main(int argc, char **argv){
     print("Opening ART Window\n");
     set_schedule(2);
-    win = window_open("ART");
+    win = window_open("ART", 1);
     uint32_t *buf = win->backbuffer;
     uint32_t x = win->width/2;
     uint32_t y = win->height/2;

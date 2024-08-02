@@ -35,7 +35,7 @@ int main(int argc, char **argv){
 	file_buf = alloc(size);
 	fcopy(text, file_buf, size);
 
-	window = window_open("HexED");
+	window = window_open("HexED", 0);
 	win_buf = window->backbuffer;
 	
 	window_update();
@@ -48,7 +48,7 @@ int main(int argc, char **argv){
         render_file(file_buf, line);
 
 
-        window_update();
+        //window_update();
         char c = getc();
 		if(c == 0x13 && line > 0){
 			line--;

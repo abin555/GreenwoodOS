@@ -364,7 +364,7 @@ uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2){
 	uint32_t group = 4;
 	uint32_t temp_group = 4;
 	print_serial("[EXT2 BLOCK ALLOC] Getting Block Map\n");
-	uint8_t *block_map;// = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
+	uint8_t *block_map = NULL;// = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
 
 	for(uint32_t i = 0; i < ext2->block_count; i++){
 		temp_group = i / ext2->blocks_per_group;
@@ -372,6 +372,7 @@ uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2){
 			group = temp_group;
 			block_map = ext2_read_block(ext2, ext2->block_addr_block_usage_map[group]);
 		}
+		if(block_map == NULL) return 1;
 		byte_block_idx = i / 8;
 		block_bit_idx = 1 << i % 8;
 		byte_block = block_map[byte_block_idx];

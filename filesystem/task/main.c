@@ -87,7 +87,7 @@ int main(int argc, char **argv){
         memory = (char *) (((uint32_t) program_base) + pgrm_feature.size*tasks[task_id].program_slot);
     else memory = (uint32_t *) 0xC0000000;
     scan = 0;
-    window = window_open("TASKMGR");
+    window = window_open("TASKMGR", 1);
     set_schedule(ONFOCUS);
     win_buf = window->backbuffer;
     window_update();

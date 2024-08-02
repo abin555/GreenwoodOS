@@ -43,7 +43,7 @@ int main(int argc, char **argv){
     print_arg("Image Width is %d\n", header->w);
     print_arg("Image Height is %d\n", header->h);
 
-    struct WINDOW *window = window_open("Image Viewer");
+    struct WINDOW *window = window_open("Image Viewer", 0);
     uint32_t *buffer = window->backbuffer;
 
     uint32_t *image_buf = (uint32_t *) (file_buf + sizeof(tga_header_t));
@@ -53,7 +53,7 @@ int main(int argc, char **argv){
             buffer[y*window->width + x] = image_buf[x+y*header->w];
         }
     }
-    window_update();
+    //window_update();
     set_schedule(ONFOCUS);
     while(1){
 

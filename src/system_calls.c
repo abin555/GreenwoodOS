@@ -12,7 +12,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 	switch(cpu.eax){
 		//Open Window
 		case 0x01:{
-			struct WINDOW *window = window_open((char *) cpu.ebx, true);
+			struct WINDOW *window = window_open((char *) cpu.ebx, cpu.ecx);
 			print_serial("Name address is: 0x%x\n", cpu.ebx);
 			cpu_state.eax = (uint32_t) window;
 			task->window = window;
