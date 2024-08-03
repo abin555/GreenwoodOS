@@ -31,7 +31,7 @@ struct CONSOLE{
 };
 
 extern struct CONSOLE consoles[MAX_CONSOLE];
-extern struct CONSOLE *kernal_console;
+extern struct CONSOLE *kernel_console;
 void console_init();
 
 struct CONSOLE *console_open(struct WINDOW *window);

@@ -113,7 +113,7 @@ c00000ec:	81 7d f0 9f 86 01 00 	cmpl   $0x1869f,-0x10(%ebp)
 c00000f3:	7e e4                	jle    c00000d9 <idle_task+0x5b>
 c00000f5:	eb 9d                	jmp    c0000094 <idle_task+0x16>
 
-c00000f7 <kernal_task>:
+c00000f7 <kernel_task>:
 c00000f7:	55                   	push   %ebp
 c00000f8:	89 e5                	mov    %esp,%ebp
 c00000fa:	53                   	push   %ebx
@@ -133,13 +133,13 @@ c000012b:	e8 b1 83 00 00       	call   c00084e1 <window_init>
 c0000130:	e8 89 88 00 00       	call   c00089be <console_init>
 c0000135:	e8 26 59 00 00       	call   c0005a60 <init_drive_system>
 c000013a:	c7 45 f4 00 00 00 00 	movl   $0x0,-0xc(%ebp)
-c0000141:	eb 3b                	jmp    c000017e <kernal_task+0x87>
+c0000141:	eb 3b                	jmp    c000017e <kernel_task+0x87>
 c0000143:	c7 c0 60 1e 04 c0    	mov    $0xc0041e60,%eax
 c0000149:	8b 55 f4             	mov    -0xc(%ebp),%edx
 c000014c:	8b 04 90             	mov    (%eax,%edx,4),%eax
 c000014f:	8b 40 28             	mov    0x28(%eax),%eax
 c0000152:	85 c0                	test   %eax,%eax
-c0000154:	74 24                	je     c000017a <kernal_task+0x83>
+c0000154:	74 24                	je     c000017a <kernel_task+0x83>
 c0000156:	c7 c0 60 1e 04 c0    	mov    $0xc0041e60,%eax
 c000015c:	8b 55 f4             	mov    -0xc(%ebp),%edx
 c000015f:	8b 04 90             	mov    (%eax,%edx,4),%eax
@@ -155,7 +155,7 @@ c000017a:	83 45 f4 01          	addl   $0x1,-0xc(%ebp)
 c000017e:	c7 c0 48 1e 04 c0    	mov    $0xc0041e48,%eax
 c0000184:	8b 00                	mov    (%eax),%eax
 c0000186:	39 45 f4             	cmp    %eax,-0xc(%ebp)
-c0000189:	7c b8                	jl     c0000143 <kernal_task+0x4c>
+c0000189:	7c b8                	jl     c0000143 <kernel_task+0x4c>
 c000018b:	e8 cd 1f 00 00       	call   c000215d <MEM_printRegions>
 c0000190:	e8 1f 5c 00 00       	call   c0005db4 <drive_enumerate>
 c0000195:	83 ec 0c             	sub    $0xc,%esp
@@ -252,9 +252,9 @@ c00002be:	83 c4 10             	add    $0x10,%esp
 c00002c1:	c6 45 f3 23          	movb   $0x23,-0xd(%ebp)
 c00002c5:	c6 45 f2 00          	movb   $0x0,-0xe(%ebp)
 c00002c9:	80 7d f3 23          	cmpb   $0x23,-0xd(%ebp)
-c00002cd:	75 06                	jne    c00002d5 <kernal_task+0x1de>
+c00002cd:	75 06                	jne    c00002d5 <kernel_task+0x1de>
 c00002cf:	c6 45 f3 2a          	movb   $0x2a,-0xd(%ebp)
-c00002d3:	eb 04                	jmp    c00002d9 <kernal_task+0x1e2>
+c00002d3:	eb 04                	jmp    c00002d9 <kernel_task+0x1e2>
 c00002d5:	c6 45 f3 23          	movb   $0x23,-0xd(%ebp)
 c00002d9:	0f be 45 f3          	movsbl -0xd(%ebp),%eax
 c00002dd:	c7 c2 50 30 02 c0    	mov    $0xc0023050,%edx
@@ -272,7 +272,7 @@ c00002fc:	52                   	push   %edx
 c00002fd:	e8 f5 02 00 00       	call   c00005f7 <fb_putChar>
 c0000302:	83 c4 20             	add    $0x20,%esp
 c0000305:	c7 45 ec 00 00 00 00 	movl   $0x0,-0x14(%ebp)
-c000030c:	eb 13                	jmp    c0000321 <kernal_task+0x22a>
+c000030c:	eb 13                	jmp    c0000321 <kernel_task+0x22a>
 c000030e:	90                   	nop
 c000030f:	90                   	nop
 c0000310:	90                   	nop
@@ -290,7 +290,7 @@ c000031b:	90                   	nop
 c000031c:	90                   	nop
 c000031d:	83 45 ec 01          	addl   $0x1,-0x14(%ebp)
 c0000321:	81 7d ec 9f 86 01 00 	cmpl   $0x1869f,-0x14(%ebp)
-c0000328:	7e e4                	jle    c000030e <kernal_task+0x217>
+c0000328:	7e e4                	jle    c000030e <kernel_task+0x217>
 c000032a:	c7 c0 e0 54 08 c0    	mov    $0xc00854e0,%eax
 c0000330:	8b 10                	mov    (%eax),%edx
 c0000332:	89 d0                	mov    %edx,%eax
@@ -300,12 +300,12 @@ c0000339:	c1 e0 03             	shl    $0x3,%eax
 c000033c:	c7 c2 00 55 08 c0    	mov    $0xc0085500,%edx
 c0000342:	01 d0                	add    %edx,%eax
 c0000344:	39 45 e8             	cmp    %eax,-0x18(%ebp)
-c0000347:	75 80                	jne    c00002c9 <kernal_task+0x1d2>
+c0000347:	75 80                	jne    c00002c9 <kernel_task+0x1d2>
 c0000349:	e8 bc 3c 00 00       	call   c000400a <kbd_getChar>
 c000034e:	3c 0a                	cmp    $0xa,%al
-c0000350:	75 20                	jne    c0000372 <kernal_task+0x27b>
+c0000350:	75 20                	jne    c0000372 <kernel_task+0x27b>
 c0000352:	80 7d f2 00          	cmpb   $0x0,-0xe(%ebp)
-c0000356:	75 1a                	jne    c0000372 <kernal_task+0x27b>
+c0000356:	75 1a                	jne    c0000372 <kernel_task+0x27b>
 c0000358:	c6 45 f2 01          	movb   $0x1,-0xe(%ebp)
 c000035c:	83 ec 04             	sub    $0x4,%esp
 c000035f:	6a 00                	push   $0x0
@@ -316,9 +316,9 @@ c000036a:	e8 6c 80 00 00       	call   c00083db <exec>
 c000036f:	83 c4 10             	add    $0x10,%esp
 c0000372:	0f b6 83 13 1c 01 00 	movzbl 0x11c13(%ebx),%eax
 c0000379:	3c 0a                	cmp    $0xa,%al
-c000037b:	0f 84 48 ff ff ff    	je     c00002c9 <kernal_task+0x1d2>
+c000037b:	0f 84 48 ff ff ff    	je     c00002c9 <kernel_task+0x1d2>
 c0000381:	c6 45 f2 00          	movb   $0x0,-0xe(%ebp)
-c0000385:	e9 3f ff ff ff       	jmp    c00002c9 <kernal_task+0x1d2>
+c0000385:	e9 3f ff ff ff       	jmp    c00002c9 <kernel_task+0x1d2>
 
 c000038a <kmain>:
 c000038a:	55                   	push   %ebp

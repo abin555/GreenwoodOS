@@ -34,7 +34,8 @@ OBJECTS = \
 		src/font.o \
 		src/drivers/random.o \
 		src/exceptions.o \
-		src/utils.o
+		src/utils.o \
+		src/drivers/elf.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

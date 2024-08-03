@@ -24,7 +24,7 @@ struct cpu_state exception_gpf(struct cpu_state cpu __attribute__((unused)), str
 	//asm volatile ("hlt");
 	stop_task(task_running_idx);
 	switch_to_task(&tasks[task_running_idx], &tasks[0]);
-	print_console(kernal_console, "General Protection Fault, returning to task 0\n");
+	print_console(kernel_console, "General Protection Fault, returning to task 0\n");
 	return cpu;
 }
 

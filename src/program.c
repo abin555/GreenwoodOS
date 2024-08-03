@@ -1,4 +1,5 @@
 #include "program.h"
+#include "elf.h"
 
 bool program_slot_status[PROGRAM_MAX] = {
     false,
@@ -44,7 +45,17 @@ void exec(char *filename, int argc, char **argv){
 
 	struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	if(file == NULL) return;
-	fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));	
-	fclose(file);
-	start_task(0, slot, argc, argv, filename);
+	if(elf_check_supported(file)){
+		print_serial("[PROGRAM] Is ELF Format!\n");
+		fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));
+		//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
+		fclose(file);
+		start_task((void *)0x1000, slot, argc, argv, filename);
+	}
+	else {
+		fseek(file, 0);
+		fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));	
+		fclose(file);
+		start_task(0, slot, argc, argv, filename);
+	}
 }

@@ -23,7 +23,7 @@
 
 #include "ext2.h"
 
-void kernal_task(int argc, char **argv){
+void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
     program_init();
@@ -40,49 +40,31 @@ void kernal_task(int argc, char **argv){
 
     drive_enumerate();
 
-    struct WINDOW *kernal_win = window_open("KERNEL", true);
-    kernal_console = console_open(kernal_win);
-    struct task_state *kernal_task = &tasks[task_running_idx];
-    kernal_task->console = kernal_console;
-    char kernal_path[] = "A/";
+    struct WINDOW *kernel_win = window_open("KERNEL", true);
+    kernel_console = console_open(kernel_win);
+    struct task_state *kernel_task = &tasks[task_running_idx];
+    kernel_task->console = kernel_console;
+    kernel_task->window = kernel_win;
+    set_schedule(ONFOCUS);
 
-    memset(kernal_task->currentDirectory.path, 0, sizeof(kernal_task->currentDirectory.path));
-    memcpy(kernal_task->currentDirectory.path, kernal_path, sizeof(kernal_path));
+    char kernel_path[] = "A/";
+
+    memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
+    memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
     
 
-    print_console(kernal_console, "Kernal Window & Console Opened.\n");
-    print_console(kernal_console, "Initial Directory: %s\n", kernal_path);
+    print_console(kernel_console, "kernel Window & Console Opened.\n");
+    print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     char boot_program_path[] = "/A/OS/term/term.exe";
 
 
-    print_console(kernal_console, "Starting INIT Program: %s\n", boot_program_path);
+    print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
 
-    char c = '#';
     char OpenedConsole = 0;
     while(1){
-        if(c == '#') c = '*';
-        else c = '#';
-        fb_putChar(fb_width-CHAR_W,fb_height-CHAR_H, c, 0xFFFFFFFF, 0);
-        for(int i = 0; i < 100000; i++){
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-            asm("nop");
-        }
-        if(&windows[window_selected] == kernal_win){
+        if(&windows[window_selected] == kernel_win){
             if(kbd_getChar() == 10 && !OpenedConsole){
                 OpenedConsole = 1;
                 exec(boot_program_path, 0, NULL);
@@ -92,23 +74,23 @@ void kernal_task(int argc, char **argv){
             }
         }
     }
-    window_close(kernal_win);
+    window_close(kernel_win);
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
-	init_serial();
+    init_serial();
     print_serial("\n\nGreenwood OS Boot Start!\n");
-	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+    if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
     {
         print_serial("WTF, not multiboot?!?!\nHow did we get here...\n:(\n");
         return 0xFF;
     }
-	parse_multiboot2(magic_addr);
-	load_gdt();
+    parse_multiboot2(magic_addr);
+    load_gdt();
     interrupts_install_idt();
     getCPUVendorString();
     enableSSE();
-	page_init();
+    page_init();
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
@@ -123,10 +105,10 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(100);
-    start_task(kernal_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    timer_init(10);
+    start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 
     while(1){}
-	return 1;
+    return 1;
 }

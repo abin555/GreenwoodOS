@@ -37,9 +37,9 @@ higher_half:
 
 	push ebx			;push multiboot info struct pointer
 	push eax			;push magic number
-	call kmain			;Call Kernal Main C Function *main.c*
+	call kmain			;Call kernel Main C Function *main.c*
 	hlt
-	jmp .loop			;If the kernal main ends, jump to infinite loop
+	jmp .loop			;If the kernel main ends, jump to infinite loop
 	
 .loop:
 	jmp .loop
