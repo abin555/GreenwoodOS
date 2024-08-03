@@ -39,6 +39,7 @@ int main(int argc, char **argv){
     chunk = Chunk();
     print_arg("Blocks are at 0x%x\n", (uint32_t) chunk.getBlocksAddr());
     Terrain terra = Terrain(1000, 1000);
+    Terrain terra2 = Terrain(1000, 1000);
 
     //world.addObject(&testObject);
     //world.addObject(&ball);
@@ -47,11 +48,15 @@ int main(int argc, char **argv){
 
     terra.generateMesh(&chunk);
     terra.getMesh()->translate({-CHUNK_WIDTH/2, 0, -CHUNK_WIDTH/2});
+
+    terra2.generateMesh(&chunk);
+    terra2.getMesh()->translate({CHUNK_WIDTH + -CHUNK_WIDTH/2, 0, -CHUNK_WIDTH/2});
     //terra.getObject()->worldPosition.z = -4;
     //terra.getObject()->worldRotation.x = -(PI/4);
     //terra.getObject()->worldRotation.z = -(PI/4);
     //terra.getObject()->worldRotation.y = -0.7f;
     world.addObject(terra.getObject());
+    world.addObject(terra2.getObject());
     world.addObject(&cow);
 
     //world.addObject(&teapot);

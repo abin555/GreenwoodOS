@@ -1,4 +1,6 @@
-SUBDIRS := $(wildcard */.)
+SUBDIRS += echo
+SUBDIRS += term
+SUBDIRS += libc
 
 all: $(SUBDIRS)
 $(SUBDIRS):
