@@ -50,7 +50,7 @@ int main(int argc, char *argv[]){
         }
         drawCharBig(letter, FontScale, 1, 1);
         drawPixelScaled(IndicatorScale + x*IndicatorScale, IndicatorScale + y*IndicatorScale, FontScale/IndicatorScale, 0x4040FF);
-        //window_update();
+        window_update();
 
         input = getc();
 

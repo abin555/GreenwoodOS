@@ -28,17 +28,19 @@ void kernel_task(int argc, char **argv){
     task_lock = 1;
     program_init();
     init_syscalls();
-    window_init();
-    console_init();
     init_drive_system();
     for(int i = 0; i < PCI_numDrivers; i++){
         if(PCI_drivers[i]->init_driver != NULL){
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
-    MEM_printRegions();
 
     drive_enumerate();
+
+
+    window_init();
+    console_init();
+    MEM_printRegions();
 
     struct WINDOW *kernel_win = window_open("KERNEL", true);
     kernel_console = console_open(kernel_win);
@@ -105,7 +107,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(10);
+    timer_init(1);
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 

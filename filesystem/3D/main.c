@@ -96,7 +96,7 @@ int main(int argc, char** argv){
   while(1){
 
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
-    for(int i = 0; i < window->width * window->height && Zbuffering; i++){
+    for(unsigned int i = 0; i < window->width * window->height && Zbuffering; i++){
       obj.ZBuff[i] = 0;
     }
 
@@ -823,7 +823,7 @@ Object loadObjFile(char *filename){
   obj.numVertex = 0;
   obj.vertices = vertices;
   obj.triangles = triangles;
-  obj.ZBuff = alloc(window->width * window->height * sizeof(ZBuffType));
+  obj.ZBuff = requestRegion(window->width * window->height * sizeof(ZBuffType));
 
   float coord;
   while(*scan != 0 && (int) (scan - filebuf) < size){

@@ -244,7 +244,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			tasks[task_running_idx].keyboard_event_handler = (void (*)(unsigned int)) cpu.ebx;
 			break;
 		}
-		//Exten Files
+		//Extend Files
 		case 0x22:{
 			cpu_state.eax = fextend((struct FILE *) cpu.ebx, (uint32_t) cpu.ecx);
 			break;
@@ -253,6 +253,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x23:{
 			int block = MEM_findRegionIdx(cpu.ebx);
 			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
+			//MEM_printRegions();
 			cpu_state.eax = addr;
 			break;
 		}

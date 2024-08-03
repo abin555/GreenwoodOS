@@ -12,5 +12,5 @@ all:
 	$(CC) $(CFLAGS) -gstabs $(FILES) -o $(OBJ)
 	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
-	rm $(OBJ)
+#	rm $(OBJ)
 #	rm $(PROG).elf

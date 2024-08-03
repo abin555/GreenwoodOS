@@ -8,6 +8,8 @@
 #include "utils.h"
 #include "mouse.h"
 
+#define WINDOW_MOUSE_FILE "A/OS/icons/mouse.tga"
+
 struct WINDOW{
 	uint32_t *backbuffer;
 	char name[21];

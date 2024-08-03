@@ -53,7 +53,7 @@ int main(int argc, char **argv){
             buffer[y*window->width + x] = image_buf[x+y*header->w];
         }
     }
-    //window_update();
+    window_update();
     set_schedule(ONFOCUS);
     while(1){
 
