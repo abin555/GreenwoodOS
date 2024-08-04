@@ -465,6 +465,10 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
 }
 
 void listFiles(struct CONSOLE *console, struct DIRECTORY *dir, char *path){
+	if(console == NULL || dir == NULL || path == NULL){
+		if(console != NULL) print_console(console, "Err: Invalid Args\n");
+		return;
+	}
 	char big_path[100];
 	expandPath(big_path, sizeof(big_path), dir, path);
 	char drive_letter = big_path[0];

@@ -91,6 +91,11 @@ void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, 
 		print_console(console, "File of size %d\n", inode.lsbSize);
 		return;
 	};
+	if(*((int *) &inode.lsbSize) < 0){
+		print_serial("[EXT2] Error reading directory!\n");
+		print_console(console, "[EXT2] Error reading directory!\n");
+		return;
+	}
 	
 	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
 	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;

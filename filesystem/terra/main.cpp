@@ -13,9 +13,9 @@ Player player;
 //Object testObject;
 //Object ball;
 //Object ship;
-Object cow;
 
 void keyboard_handler(unsigned char keycode);
+void mouse_handler();
 
 int main(int argc, char **argv){
     print((char *) "Opening Terrain Application\n");
@@ -23,8 +23,10 @@ int main(int argc, char **argv){
     sys.window = Window((char *)"Terra");
     sys.window.clear(0xFF0000);
     sys.window.update();
+
     set_schedule(ONFOCUS);
     addKbdEventHandler(keyboard_handler);
+    addMouseEventHandler(mouse_handler);
     
     print_arg("Width: %d\n", sys.window.getWidth());
     print_arg("Height: %d\n", sys.window.getHeight());
@@ -33,13 +35,12 @@ int main(int argc, char **argv){
     //testObject = Object("/A/3D/CUBE.OBJ");
     //ball = Object("/A/3D/BALL.OBJ");
     //ship = Object("/A/3D/SHIP.OBJ");
-    cow = Object("/A/3D/MCCOW.OBJ");
+    //cow = Object("/A/3D/MCCOW.OBJ");
     //Object teapot = Object("/A/3D/TEACUP.OBJ");
 
     chunk = Chunk();
     print_arg("Blocks are at 0x%x\n", (uint32_t) chunk.getBlocksAddr());
     Terrain terra = Terrain(1000, 1000);
-    Terrain terra2 = Terrain(1000, 1000);
 
     //world.addObject(&testObject);
     //world.addObject(&ball);
@@ -48,16 +49,13 @@ int main(int argc, char **argv){
 
     terra.generateMesh(&chunk);
     terra.getMesh()->translate({-CHUNK_WIDTH/2, 0, -CHUNK_WIDTH/2});
-
-    terra2.generateMesh(&chunk);
-    terra2.getMesh()->translate({CHUNK_WIDTH + -CHUNK_WIDTH/2, 0, -CHUNK_WIDTH/2});
+    print("Generated Mesh\n");
     //terra.getObject()->worldPosition.z = -4;
     //terra.getObject()->worldRotation.x = -(PI/4);
     //terra.getObject()->worldRotation.z = -(PI/4);
     //terra.getObject()->worldRotation.y = -0.7f;
     world.addObject(terra.getObject());
-    world.addObject(terra2.getObject());
-    world.addObject(&cow);
+    //world.addObject(&cow);
 
     //world.addObject(&teapot);
     //world.ZBuffering = 0;
@@ -68,8 +66,6 @@ int main(int argc, char **argv){
     //ship.worldPosition.y = -3;
     //ship.worldRotation.x = 0.75f;
     //ball.worldPosition.y = 4;
-    cow.worldPosition.y = 4.5;
-    cow.worldPosition.x = 1;
 
 
     player = Player({0, 5.4f, 0}, {0, 0, 0});
@@ -91,11 +87,11 @@ int main(int argc, char **argv){
     
     char c;
     float amt = 0.1;
+    print("Starting Game\n");
     while(1){
         (*world.getCamera()) = player.getCamera();
         //terra.getMesh()->rotateX(0.02f);
         //terra.getMesh()->rotateY(0.01f);
-        cow.masterMesh->rotateY(0.1f);
         //teapot.masterMesh->rotateY(0.1f);
         terra.generateMesh(&chunk);
         terra.getMesh()->translate({-CHUNK_WIDTH/2, 0, -CHUNK_WIDTH/2});
@@ -113,6 +109,13 @@ int main(int argc, char **argv){
     print((char *)"Exit!\n");
     
     return 0;
+}
+
+void mouse_handler(){
+    struct MouseStatus mouse = getMouse();
+    player.getRotation()->x -= 0.01f * ((float) mouse.lastDelta.y);
+    player.getRotation()->y -= 0.01f * ((float) mouse.lastDelta.x);
+    return;
 }
 
 void keyboard_handler(unsigned char keycode){

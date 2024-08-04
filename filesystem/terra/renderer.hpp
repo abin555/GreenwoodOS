@@ -81,7 +81,6 @@ typedef unsigned int ZBuffType;
 
 class World{
     private:
-    Window *window;
     Camera cam;
 
     Vector3 light;
@@ -99,6 +98,7 @@ class World{
     Matrix4x4 ProjectionMatrix;
 
     public:
+    Window *window;
     ZBuffType *ZBuff;
     bool ZBuffering;
     bool FillFaces;

@@ -581,10 +581,10 @@ int calculateZBuffer(World *world, int x, int y, TriangleExpl *projectedTri, Tri
 
 void drawHline(World *world, int x1, int x2, int y, uint32_t color, TriangleExpl *projectedTri, TriangleExpl *unProjectedTri){
   //if(x1 < 0) x1 = 0;
-  //if(x1 > window->width) x1 = window->width;
+  //if(x1 > sys.window->width) x1 = sys.window->width;
   //if(x2 < 0) x2 = 0;
-  //if(x2 > window->width) x2 = window->width;
-  //if(y < 0 || y >= window->height) return;
+  //if(x2 > sys.window->width) x2 = sys.window->width;
+  //if(y < 0 || y >= sys.window->height) return;
   //print_arg("Z0: %d ", (int) (tri->v0.z * 1000));
   //print_arg("Z1: %d ", (int) (tri->v1.z * 1000));
   //print_arg("Z2: %d\n", (int) (tri->v2.z * 1000));
@@ -611,7 +611,7 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
   y2 = triangle->v1.y;
   x3 = triangle->v2.x;
   y3 = triangle->v2.y;
-  //if((x1 > window->width || x2 > window->width) || (x1 < 0 || x2 < 0) || (y1 > window->height || y2 > window->height) || (y1 < 0 || y2 < 0)) return;
+  //if((x1 > sys.window.window->width || x2 > sys.window.window->width) || (x1 < 0 || x2 < 0) || (y1 > sys.window.window->height || y2 > sys.window.window->height) || (y1 < 0 || y2 < 0)) return;
   //else{
   //if(x1 < 0) x1 = 0;
   //if(x2 < 0) x2 = 0;
@@ -619,12 +619,12 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
   //if(y1 < 0) y1 = 0;
   //if(y2 < 0) y2 = 0;
   //if(y3 < 0) y3 = 0;
-  //if(x1 > window->width) x1 = window->width;
-  //if(x2 > window->width) x2 = window->width;
-  //if(x3 > window->width) x3 = window->width;
-  //if(y1 > window->height) y1 = window->height;
-  //if(y2 > window->height) y2 = window->height;
-  //if(y3 > window->height) y3 = window->height;
+  //if(x1 > sys.window.window->width) x1 =  sys.window.window->width;
+  //if(x2 > sys.window.window->width) x2 =  sys.window.window->width;
+  //if(x3 > sys.window.window->width) x3 =  sys.window.window->width;
+  //if(y1 > sys.window.window->height) y1 = sys.window.window->height;
+  //if(y2 > sys.window.window->height) y2 = sys.window.window->height;
+  //if(y3 > sys.window.window->height) y3 = sys.window.window->height;
   //}
 
   int t1x,t2x,y,minx,maxx,t1xp,t2xp;
@@ -636,7 +636,7 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
 	if (y1>y2) { SWAP(y1,y2); SWAP(x1,x2); }
 	if (y1>y3) { SWAP(y1,y3); SWAP(x1,x3); }
 	if (y2>y3) { SWAP(y2,y3); SWAP(x2,x3); }
-  //if(abs(x3 - x1) > window->width) return;  
+  //if(abs(x3 - x1) > sys.window->width) return;  
   
   int maxsteps = 1000;
 

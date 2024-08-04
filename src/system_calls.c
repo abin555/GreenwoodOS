@@ -241,6 +241,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Add Keyboard Event Listener
 		case 0x21:{
+			print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu.ebx);
 			tasks[task_running_idx].keyboard_event_handler = (void (*)(unsigned int)) cpu.ebx;
 			break;
 		}
@@ -282,6 +283,11 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x29:{
 			cpu_state.eax = (uint32_t) &timer_ticks;
 			print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", cpu_state.eax);
+			break;
+		}
+		case 0x2A:{
+			print_serial("[SYSCALL] Program requested mouse event handler @%x\n", cpu.ebx);
+			tasks[task_running_idx].mouse_event_handler = (void (*)(void)) cpu.ebx;
 			break;
 		}
 	}

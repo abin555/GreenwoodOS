@@ -26,6 +26,10 @@ struct MouseStatus{
 		uint8_t left : 1;
 		uint8_t middle : 1;
 	} buttons;
+	struct {
+		int x;
+		int y;
+	} lastDelta;
 };
 
 struct PCSpeaker_Handle{
@@ -142,6 +146,7 @@ void start_manual_task(void *addr, char *name);
 struct MouseStatus getMouse();
 struct PCSpeaker_Handle *getPCSpeaker();
 uint32_t *getTimerTickHandle();
+void addMouseEventHandler(void (*handler)(void));
 
 #ifdef __cplusplus
 }

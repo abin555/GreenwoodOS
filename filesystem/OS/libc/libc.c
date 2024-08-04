@@ -391,3 +391,11 @@ uint32_t *getTimerTickHandle(){
 	tick_handle = (uint32_t *) eax;
 	return tick_handle;
 }
+
+void addMouseEventHandler(void (*handler)(void)){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) handler;
+	eax = 0x2A;
+	asm("int 0x80");
+}

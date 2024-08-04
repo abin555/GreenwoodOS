@@ -14,6 +14,7 @@ struct MouseButtons{
 struct MouseStatus{
     struct IVec2 pos;
     struct MouseButtons buttons;
+    struct IVec2 lastDelta;
 };
 
 extern struct MouseStatus mouseStatus;
