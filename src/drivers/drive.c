@@ -254,6 +254,7 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 		//char *block_buf = (char *) ext2_read_block(ext2, inode)
 		uint32_t block_idx = 0;
 		uint32_t single_indirect_idx = 0;
+		uint32_t double_indirect_idx = 0;
 		uint32_t idx = 0;
 		char *block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
 
@@ -264,24 +265,48 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 			idx++;
 
 			if((uint32_t) file->head == ext2->block_size){
-				print_serial("[DRIVE] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
+				//print_serial("[DRIVE] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
 				if(block_idx == 12){
 					handle_first_indirect:;
 					block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
 					uint32_t *indirect_blocks = (uint32_t *) block;
 					uint32_t indirect_block = indirect_blocks[single_indirect_idx];
-					print_serial("[DRIVE] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
+					//print_serial("[DRIVE] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
 					block = ext2_read_block(ext2, indirect_block);
 					//block = ext2_read_block(ext2, inode->BlockPointers[0]);
 					single_indirect_idx++;
-					if(single_indirect_idx * sizeof(uint32_t) > ext2->block_size){
+					if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
 						block_idx++;
+						if(block_idx == 13){
+							single_indirect_idx = 0;
+						}
 					}
 					file->head = 0;
 				}
 				else if(block_idx == 13){
-					print_serial("[DRIVE] [EXT2] Double Indirect Block\n");
-					break;
+					handle_first_double_indirect:;
+					//print_serial("[DRIVE] [EXT2] Double Indirect Block\n");
+					block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+					uint32_t *double_indirect_blocks = (uint32_t *) block;
+					uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
+					
+					block = ext2_read_block(ext2, double_indirect_block);
+					uint32_t *indirect_blocks = (uint32_t *) block;
+					uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+					//print_serial("[DRIVE] Indirect Block is at %d-%d block %d, idx %d is %d\n", inode->BlockPointers[block_idx], double_indirect_idx, double_indirect_block, single_indirect_idx, indirect_block);
+					block = ext2_read_block(ext2, indirect_block);
+					//block = ext2_read_block(ext2, inode->BlockPointers[0]);
+					single_indirect_idx++;
+					if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+						double_indirect_idx++;
+						single_indirect_idx = 0;
+					}
+
+					if(double_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+						block_idx++;
+					}
+
+					file->head = 0;
 				}
 				else if(block_idx > 13){
 					print_serial("[DRIVE] [EXT2] Fucky Wucky time on the block idx\n");
@@ -292,6 +317,10 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 					block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
 					if(block_idx == 12){
 						goto handle_first_indirect;
+					}
+					if(block_idx == 13){
+						single_indirect_idx = 0;
+						goto handle_first_double_indirect;
 					}
 				}
 

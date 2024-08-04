@@ -20,6 +20,7 @@
 #include "random.h"
 #include "exceptions.h"
 #include "mouse.h"
+#include "pcspeaker.h"
 
 #include "ext2.h"
 
@@ -108,6 +109,9 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     mouse_init();
     ps2_init();
     timer_init(1);
+
+    //PCSpeaker_Handle.beep();
+
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_init();
 

@@ -16,6 +16,8 @@ struct MouseStatus{
     struct MouseButtons buttons;
 };
 
+extern struct MouseStatus mouseStatus;
+
 void mouse_init();
 
 void mouse_update(int deltaX, int deltaY, struct MouseButtons btns);

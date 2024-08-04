@@ -16,6 +16,24 @@ typedef char bool;
 
 #define NULL 0
 
+struct MouseStatus{
+	struct {
+		int x;
+		int y;
+	} pos;
+	struct {
+		uint8_t right : 1;
+		uint8_t left : 1;
+		uint8_t middle : 1;
+	} buttons;
+};
+
+struct PCSpeaker_Handle{
+    void (*play)(uint32_t);
+    void (*mute)(void);
+    void (*beep)(void);
+};
+
 struct WINDOW {
 	uint32_t *backbuffer;
 	char name[21];
@@ -121,6 +139,9 @@ void *requestRegionAt(unsigned int bytes, unsigned int addr);
 void attachTimerCallback(unsigned int timer, void *callback);
 void dprint(char *msg);
 void start_manual_task(void *addr, char *name);
+struct MouseStatus getMouse();
+struct PCSpeaker_Handle *getPCSpeaker();
+uint32_t *getTimerTickHandle();
 
 #ifdef __cplusplus
 }

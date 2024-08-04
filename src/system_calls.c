@@ -270,6 +270,20 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			start_task((void *) cpu.ebx, -1, 0, NULL, (char *) cpu.ecx);
 			break;
 		}
+		case 0x27:{
+			cpu_state.eax = (uint32_t) &mouseStatus;
+			break;
+		}
+		case 0x28:{
+			cpu_state.eax = (uint32_t) &PCSpeaker_Handle;
+			print_serial("[SYSCALL] Program requested handle to PCspeaker - returned 0x%x\n", cpu_state.eax);
+			break;
+		}
+		case 0x29:{
+			cpu_state.eax = (uint32_t) &timer_ticks;
+			print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", cpu_state.eax);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

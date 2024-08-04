@@ -362,3 +362,32 @@ void start_manual_task(void *addr, char *name){
 	eax = 0x26;
 	asm("int 0x80");
 }
+
+struct MouseStatus getMouse(){
+	struct MouseStatus *mousePtr;
+	struct MouseStatus mouse;
+	register uint32_t eax asm("eax");
+	eax = 0x27;
+	asm("int 0x80");
+	mousePtr = (struct MouseStatus *) eax;
+	mouse = *mousePtr;
+	return mouse;
+}
+
+struct PCSpeaker_Handle *getPCSpeaker(){
+	struct PCSpeaker_Handle *handle;
+	register uint32_t eax asm("eax");
+	eax = 0x28;
+	asm("int 0x80");
+	handle = (struct PCSpeaker_Handle *) eax;
+	return handle;
+}
+
+uint32_t *getTimerTickHandle(){
+	uint32_t *tick_handle;
+	register uint32_t eax asm("eax");
+	eax = 0x29;
+	asm("int 0x80");
+	tick_handle = (uint32_t *) eax;
+	return tick_handle;
+}

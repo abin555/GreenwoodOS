@@ -10,6 +10,8 @@
 #include "program.h"
 #include "keyboard.h"
 #include "random.h"
+#include "mouse.h"
+#include "pcspeaker.h"
 
 void init_syscalls();
 

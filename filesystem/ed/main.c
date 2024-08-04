@@ -42,7 +42,7 @@ int main(int argc, char **argv){
 	file_buf = heap;
 	fcopy(text, file_buf, size);
 
-	window = window_open("Ed", 0);
+	window = window_open("Ed", 1);
 	win_buf = window->backbuffer;
 	
 	window_update();
@@ -64,7 +64,7 @@ int main(int argc, char **argv){
 				drawChar(i*8, window->height-16, cmd_buf[i]);
 			}
 		}
-		//window_update();
+		window_update();
 		char c = getc();
 		//print_arg("Key %2x\n", c);
 		if(c == 0x33){
