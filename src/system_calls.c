@@ -237,6 +237,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			int block = MEM_findRegionIdx(cpu.ebx);
 			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, 0, PROGRAM);
 			cpu_state.eax = addr;
+			MEM_printRegions();
 			break;
 		}
 		//Add Keyboard Event Listener
@@ -288,6 +289,16 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x2A:{
 			print_serial("[SYSCALL] Program requested mouse event handler @%x\n", cpu.ebx);
 			tasks[task_running_idx].mouse_event_handler = (void (*)(void)) cpu.ebx;
+			break;
+		}
+		case 0x2B:{
+			MEM_freeRegionBlock(cpu.ebx, cpu.ecx);
+			MEM_printRegions();
+			break;
+		}
+		case 0x2C:{
+			print_serial("[SYSCALL] Program requested program end event handler @%x\n", cpu.ebx);
+			tasks[task_running_idx].end_callback = (void (*)(void)) cpu.ebx;
 			break;
 		}
 	}

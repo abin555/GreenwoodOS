@@ -36,10 +36,12 @@ void memcpy(void *dest, void* src, int size);
 void memfcpy(void* target, void* source, uint32_t size);
 
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type);
+void MEM_freeRegion(uint32_t virtual);
 void MEM_populateRegions();
 
 int MEM_findRegionIdx(uint32_t size);
 uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type);
+void MEM_freeRegionBlock(uint32_t virtual, uint32_t size);
 
 void MEM_printRegions();
 

@@ -56,6 +56,11 @@ char Outlines;
 char SlowRender;
 Object obj;
 
+void *region;
+uint32_t region_size;
+
+void endCallback();
+
 int main(int argc, char** argv){
   window = window_open("3D", 1);
   win_buf = window->backbuffer;
@@ -92,6 +97,9 @@ int main(int argc, char** argv){
   else{
     obj = loadObjFile("/A/3D/CUBE.OBJ");
   }
+
+
+  addEndCallback(endCallback);
   //window->backbuffer = obj.ZBuff;
   while(1){
 
@@ -322,6 +330,11 @@ int main(int argc, char** argv){
     }
 
   }
+}
+
+void endCallback(){
+  print("3D render ending & cleaning\n");
+  freeRegion(region, region_size);
 }
 
 void rotateObjZ(Object *obj, float theta){
@@ -810,11 +823,15 @@ Object loadObjFile(char *filename){
     return obj;
   };
   int size = fsize(obj_file);
+  region_size = sizeof(Vertex) * 10000 + sizeof(TriangleRef) * 10000 + window->width * window->height * sizeof(ZBuffType) + size;
+  region = requestRegion(region_size);
+  last_alloc = (uint32_t) region;
   print_arg("File is %d bytes\n", size);
   char *filebuf = alloc(size);
   fcopy(obj_file, filebuf, size);
   fclose(obj_file);
   char *scan = filebuf;
+  
   
   Vertex *vertices = alloc(sizeof(Vertex) * 10000);
   TriangleRef *triangles = alloc(sizeof(TriangleRef) * 10000);
@@ -823,7 +840,7 @@ Object loadObjFile(char *filename){
   obj.numVertex = 0;
   obj.vertices = vertices;
   obj.triangles = triangles;
-  obj.ZBuff = requestRegion(window->width * window->height * sizeof(ZBuffType));
+  obj.ZBuff = alloc(window->width * window->height * sizeof(ZBuffType));
 
   float coord;
   while(*scan != 0 && (int) (scan - filebuf) < size){

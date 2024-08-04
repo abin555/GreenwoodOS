@@ -30,7 +30,7 @@ struct WINDOW{
 	bool copyOnPromptOnly;
 };
 
-#define MAX_WINDOWS 10
+#define MAX_WINDOWS 16
 extern int window_selected;
 extern struct WINDOW windows[MAX_WINDOWS];
 

@@ -62,6 +62,7 @@ void kernel_task(int argc, char **argv){
 
 
     print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
+    exec("/A/tune/tune.exe", 0, NULL);
     exec(boot_program_path, 0, NULL);
     task_lock = 0;
 

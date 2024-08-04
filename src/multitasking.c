@@ -48,6 +48,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].slot_active = 1;
             tasks[i].keyboard_event_handler = NULL;
             tasks[i].mouse_event_handler = NULL;
+            tasks[i].end_callback = NULL;
             break;
         }
     }
@@ -59,6 +60,14 @@ void set_schedule(ScheduleType type){
 }
 
 void stop_task(int8_t task_idx){
+    if(tasks[task_idx].end_callback != NULL){
+        select_program(tasks[task_idx].program_slot);
+        tasks[task_idx].end_callback();
+        if(tasks[task_running_idx].program_slot != -1){
+            select_program(tasks[task_running_idx].program_slot);
+        }
+    }
+
     tasks[task_idx].slot_active = 0;
     if(tasks[task_idx].program_slot != -1){
         program_slot_status[tasks[task_idx].program_slot] = false;

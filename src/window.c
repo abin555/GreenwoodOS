@@ -95,7 +95,7 @@ void window_render_bar(){
 			fb_putChar((CHAR_W+2)*i, y, '1'+i, 0xFFFFFFFF, 0x0000AA);
 		}
 	}
-	fb_print(CHAR_W*12, y, windows[window_selected].name);
+	fb_print(CHAR_W*(MAX_WINDOWS + 2), y, windows[window_selected].name);
 }
 
 void window_copy_buffer(struct WINDOW *window){

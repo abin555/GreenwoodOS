@@ -147,6 +147,8 @@ struct MouseStatus getMouse();
 struct PCSpeaker_Handle *getPCSpeaker();
 uint32_t *getTimerTickHandle();
 void addMouseEventHandler(void (*handler)(void));
+void freeRegion(void *addr, uint32_t size);
+void addEndCallback(void (*handler)(void));
 
 #ifdef __cplusplus
 }

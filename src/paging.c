@@ -59,6 +59,11 @@ void create_page_entry(
     update_page();
 }
 
+void delete_page_entry(uint32_t target_address){
+    page_directory[get_page_index_from_addr(target_address)] = 0;
+    update_page();
+}
+
 uint32_t get_page_index_from_addr(uint32_t address){
     return (address >> 22);
 }

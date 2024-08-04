@@ -399,3 +399,21 @@ void addMouseEventHandler(void (*handler)(void)){
 	eax = 0x2A;
 	asm("int 0x80");
 }
+
+void freeRegion(void *addr, uint32_t size){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = size;
+	ebx = (uint32_t) addr;
+	eax = 0x2B;
+	asm("int 0x80");
+}
+
+void addEndCallback(void (*handler)(void)){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) handler;
+	eax = 0x2C;
+	asm("int 0x80");
+}

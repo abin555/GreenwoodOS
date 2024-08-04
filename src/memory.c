@@ -50,6 +50,17 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 	return 0;
 }
 
+void MEM_freeRegion(uint32_t virtual){
+	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
+		if(MEMORY_REGIONS[i].virtual_addr == virtual){
+			MEMORY_REGIONS[i].exists = 1;
+			MEMORY_REGIONS[i].available = 1;
+			delete_page_entry(virtual);
+			break;
+		}
+	}
+}
+
 void MEM_populateRegions(){
 	print_serial("Loading Memory Map into Memory Region Table\n");
 	for(unsigned int i = 0; i < 10; i++){
@@ -164,7 +175,7 @@ void MEM_printRegions(){
 					break;
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
-			print_console(kernel_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			//print_console(kernel_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
 }
@@ -208,4 +219,11 @@ uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, M
 		MEM_reserveRegion(start_physical + i * PAGE_SIZE, virtual_base + i * PAGE_SIZE, type);
 	}
 	return start_physical;
+}
+
+void MEM_freeRegionBlock(uint32_t virtual, uint32_t size){
+	int needed_blocks = calculateBlocks(size);
+	for(int i = 0; i < needed_blocks; i++){
+		MEM_freeRegion(virtual + i * PAGE_SIZE);
+	}
 }

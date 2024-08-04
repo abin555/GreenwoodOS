@@ -19,8 +19,7 @@ void mouse_callEventHandler(){
 			tasks[i].mouse_event_handler != NULL && 
 			tasks[i].window == &windows[window_selected]
 		){
-			print_serial("Switching to program %d and calling mouse handler at 0x%x\n", tasks[i].program_slot, (uint32_t) tasks[i].mouse_event_handler);
-			select_program(tasks[i].program_slot);
+            select_program(tasks[i].program_slot);
 			tasks[i].mouse_event_handler();
 			if(tasks[task_running_idx].program_slot != -1){
 				select_program(tasks[task_running_idx].program_slot);

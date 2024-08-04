@@ -27,6 +27,7 @@ void create_page_entry(
 	uint32_t base_address, 
 	uint32_t target_address,
 	 uint16_t flag);
+void delete_page_entry(uint32_t target_address);
 
 static inline void __native_flush_tlb_single(unsigned long addr) {
    asm volatile("invlpg [%0]" ::"r" (addr) : "memory");
