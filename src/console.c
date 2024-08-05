@@ -173,12 +173,14 @@ struct CONSOLE *console_open(struct WINDOW *window){
 			break;
 		}
 	}
-	if(console == NULL) return NULL;
+	if(console == NULL || window == NULL) return NULL;
 	memset(console->buf, 0, console->buf_size);
 	console->active = true;
 	console->cursor = 0;
 	console->last_cursor = 0;
 	console->window = window;
+	console->width = console->window->width / CHAR_W;
+	console->height = console->window->height / CHAR_H - CHAR_H;
 
 	console->Line = 0;
 	console->Start = 0;

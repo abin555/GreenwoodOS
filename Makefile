@@ -36,7 +36,8 @@ OBJECTS = \
 		src/exceptions.o \
 		src/utils.o \
 		src/drivers/elf.o \
-		src/drivers/pcspeaker.o
+		src/drivers/pcspeaker.o \
+		src/desktop.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

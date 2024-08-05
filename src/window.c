@@ -24,8 +24,8 @@ typedef struct {
 } __attribute__((packed)) tga_header_t;
 uint8_t *cursor_file;
 uint32_t *cursor_bitmap;
-uint8_t cursor_width;
-uint8_t cursor_height;
+int cursor_width;
+int cursor_height;
 
 void window_init(){
 	print_serial("[WINDOW] Initialization\n");

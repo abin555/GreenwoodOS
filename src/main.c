@@ -21,7 +21,7 @@
 #include "exceptions.h"
 #include "mouse.h"
 #include "pcspeaker.h"
-
+#include "desktop.h"
 #include "ext2.h"
 
 void kernel_task(int argc, char **argv){
@@ -62,8 +62,11 @@ void kernel_task(int argc, char **argv){
 
 
     print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
-    exec("/A/tune/tune.exe", 0, NULL);
+    //exec("/A/tune/tune.exe", 0, NULL);
     exec(boot_program_path, 0, NULL);
+
+    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+
     task_lock = 0;
 
     char OpenedConsole = 0;
