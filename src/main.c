@@ -54,7 +54,6 @@ void kernel_task(int argc, char **argv){
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
-    
 
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
@@ -63,9 +62,13 @@ void kernel_task(int argc, char **argv){
 
     print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
     //exec("/A/tune/tune.exe", 0, NULL);
+
+    
+
     exec(boot_program_path, 0, NULL);
 
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+
 
     task_lock = 0;
 

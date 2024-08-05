@@ -2,7 +2,7 @@
 
 
 void *alloc_base;
-const uint32_t alloc_table_size = 0x800000;
+const uint32_t alloc_table_size = 0xB00000;
 uint32_t total_alloc = 0;
 uint8_t first_alloc = 1;
 

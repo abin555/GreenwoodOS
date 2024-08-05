@@ -1,5 +1,7 @@
 #include "multitasking.h"
 
+bool task_lock;
+
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
     task_lock = 0;

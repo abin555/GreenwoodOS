@@ -1,6 +1,6 @@
 #include "desktop.h"
 
-#define BACKGROUND_FILE "A/image/bliss.tga"
+#define BACKGROUND_FILE "A/image/bliss.tga\0"
 
 typedef struct {
   unsigned char magic1;             // must be zero
@@ -16,84 +16,34 @@ typedef struct {
   unsigned char pixeltype;          // must be 40
 } __attribute__((packed)) tga_header_t;
 
-void drawRect(
-    uint32_t outerColor,
-    uint32_t innerColor,
-    int x1,
-    int y1,
-    int x2,
-    int y2,
-    uint32_t *buf,
-    uint32_t buf_width
-);
+struct Bitmap{
+    uint8_t *file;
+    uint32_t *bitmap;
+    uint32_t width;
+    uint32_t height;
+};
 
-int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
-    struct WINDOW *window = window_open("DESKTOP", true);
-    struct task_state *window_task = &tasks[task_running_idx];
-    window_task->window = window;
-    set_schedule(ONFOCUS);
+struct Bitmap loadIcon(char *filename){
+    struct Bitmap bitmap = {
+        NULL,
+        NULL,
+        0,
+        0
+    };
+    struct FILE *file = fopen(filename);
+    if(file == NULL) return bitmap;
+    int size = fsize(file);
 
-    uint8_t *background_file = NULL;
-    uint32_t *background_bitmap = NULL;
-    uint32_t background_width;
-    uint32_t background_height;
-
-    if(!fexists(BACKGROUND_FILE)){
-        return 1;
-    }
-
-    print_serial("[DESKTOP] Loading background image\n");
-    struct FILE *background = fopen(BACKGROUND_FILE);
-    int size = fsize(background);
-    background_file = malloc(size+100);
-    fcopy(background, (char *) background_file, size);
-    fclose(background);
-    tga_header_t *header = ((tga_header_t *) background_file);
-    background_width = header->w;
-    background_height = header->h;
-    background_bitmap = (uint32_t *) (background_file + sizeof(tga_header_t) + header->magic1);
-    print_serial("[DESKTOP] BG W: %d H: %d BM: 0x%x\n", background_width, background_height, background_bitmap);
-
-    struct {
-        int startX;
-        int startY;
-        char dragging;
-    } ClickDrag;
-
-    while(1){
-        for(uint32_t ly = 0; ly < background_height-8; ly++){
-            for(uint32_t lx = 0; lx < background_width; lx++){
-                uint32_t color = background_bitmap[lx+ly*background_width];
-                if(!(color & 0xFF000000)) continue;
-                window->backbuffer[(ly)*window->width + (lx)] = color;
-            }
-        }
-
-        if(mouseStatus.buttons.left && !ClickDrag.dragging){
-            ClickDrag.dragging = 1;
-            ClickDrag.startX = mouseStatus.pos.x;
-            ClickDrag.startY = mouseStatus.pos.y;
-        }
-        if(!mouseStatus.buttons.left && ClickDrag.dragging) ClickDrag.dragging = 0;
-
-        if(ClickDrag.dragging){
-            //window->backbuffer[(ClickDrag.startY)*window->width + (ClickDrag.startX)] = 0xFF0000;
-            //window->backbuffer[(mouseStatus.pos.y)*window->width + (mouseStatus.pos.x)] = 0xFF0000;
-
-            drawRect(
-                0x0000FF,
-                0x0000DD,
-                ClickDrag.startX,
-                ClickDrag.startY,
-                mouseStatus.pos.x,
-                mouseStatus.pos.y,
-                window->backbuffer,
-                window->width
-            );
-        }
-
-        window_copy_buffer(window);
-    }
+    bitmap.file = malloc(size+100);
+    fcopy(file, (char *) bitmap.file, size);
+    fclose(file);
+    tga_header_t *header = ((tga_header_t *) bitmap.file);
+    bitmap.width = header->w;
+    bitmap.height = header->h;
+    bitmap.bitmap = (uint32_t *) (bitmap.file + sizeof(tga_header_t) + header->magic1);
+    print_serial("[DESKTOP] Loaded Icon %s - W: %d H: %d\n", filename, bitmap.width, bitmap.height);
+    
+    return bitmap;
 }
 
 void drawRect(
@@ -124,5 +74,111 @@ void drawRect(
                 buf[y*buf_width + x] = outerColor;
             }
         }
+    }
+}
+
+void drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window){
+    if(bitmap.bitmap == NULL || window == NULL) return;
+    for(uint32_t ly = 0; ly < bitmap.height; ly++){
+        for(uint32_t lx = 0; lx < bitmap.width; lx++){
+            uint32_t color = bitmap.bitmap[lx+ly*bitmap.width];
+            if(!(color & 0xFF000000)) continue;
+            window->backbuffer[(y + ly)*window->width + (x + lx)] = color;
+        }
+    }
+}
+
+struct Icon {
+    struct Bitmap bitmap;
+    struct {
+        int x;
+        int y;
+        int w;
+        int h;
+    } loc;
+};
+
+struct Icon generateIcon(struct Bitmap bitmap, int x, int y, int w, int h){
+    struct Icon new_icon = {
+        bitmap,
+        {
+            x,
+            y,
+            w,
+            h
+        }
+    };
+    return new_icon;
+}
+
+bool getIconHover(struct Icon *icon, int x, int y){
+    if(icon == NULL) return false;
+    if(x > icon->loc.x && x < icon->loc.x + icon->loc.w && y > icon->loc.y && y < icon->loc.y + icon->loc.h) return true;
+    return false;
+}
+
+void drawIcon(struct Icon *icon, struct WINDOW *window){
+    if(icon == NULL) return;
+    drawBitmap(
+        icon->loc.x,
+        icon->loc.y,
+        icon->bitmap,
+        window
+    );
+}
+
+
+int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
+    struct WINDOW *window = window_open("DESKTOP", true);
+    struct task_state *window_task = &tasks[task_running_idx];
+    window_task->window = window;
+    window_task->console = kernel_console;
+    set_schedule(ONFOCUS);
+
+    struct Bitmap background = loadIcon(BACKGROUND_FILE);
+    struct Bitmap folder = loadIcon("A/OS/icons/folder.tga\0");
+
+    struct Icon icons[5];
+    for(int i = 0; i < 5; i++){
+        icons[i] = generateIcon(folder, 25 + i * 35, 25, folder.width, folder.height);
+    }
+
+    exec("/A/tune/tune.exe", 0, NULL);
+
+    struct {
+        int startX;
+        int startY;
+        char dragging;
+    } ClickDrag;
+
+    while(1){
+        drawBitmap(0, 0, background, window); 
+        for(int i = 0; i < 5; i++)  
+            drawIcon(&icons[i], window);
+
+        if(mouseStatus.buttons.left && !ClickDrag.dragging){
+            ClickDrag.dragging = 1;
+            ClickDrag.startX = mouseStatus.pos.x;
+            ClickDrag.startY = mouseStatus.pos.y;
+        }
+        if(!mouseStatus.buttons.left && ClickDrag.dragging) ClickDrag.dragging = 0;
+
+        if(ClickDrag.dragging){
+            //window->backbuffer[(ClickDrag.startY)*window->width + (ClickDrag.startX)] = 0xFF0000;
+            //window->backbuffer[(mouseStatus.pos.y)*window->width + (mouseStatus.pos.x)] = 0xFF0000;
+
+            drawRect(
+                0x0000FF,
+                0x0000DD,
+                ClickDrag.startX,
+                ClickDrag.startY,
+                mouseStatus.pos.x,
+                mouseStatus.pos.y,
+                window->backbuffer,
+                window->width
+            );
+        }
+
+        window_copy_buffer(window);
     }
 }

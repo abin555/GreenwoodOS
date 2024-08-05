@@ -1,18 +1,7 @@
 #include "program.h"
 #include "elf.h"
 
-bool program_slot_status[PROGRAM_MAX] = {
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false,
-    false
-};
+bool program_slot_status[PROGRAM_MAX] = {0};
 
 uint32_t program_region_phys_base;
 
