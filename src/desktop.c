@@ -265,7 +265,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     struct Bitmap folder = loadIcon("A/OS/icons/folder.tga\0");
     struct Bitmap blockDevice = loadIcon("A/OS/icons/block-device.tga\0");
 
-    int numIcons = drive_count;
+    int numIcons = drive_count + 2;
     struct Icon *icons = malloc(sizeof(struct Icon) * numIcons);
 
     for(int i = 0; i < numIcons; i++){
@@ -277,7 +277,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         icons[i] = generateIcon(blockDevice, 25 + i * 35, 25, blockDevice.width, blockDevice.height, driveLabel);
     }
 
-    struct Viewport testViewport = make_viewport(100,100, "Test VP");
+    struct Viewport testViewport = make_viewport(400,400, "Test VP");
 
     //exec("/A/tune/tune.exe", 0, NULL);
 
@@ -285,6 +285,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         int startX;
         int startY;
         char dragging;
+        int dragType;//0 = icon, 1 = viewport
     } ClickDrag;
 
     while(1){
@@ -295,15 +296,19 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         draw_viewport(&testViewport, window);
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
-            for(int i = 0; i < numIcons; i++){
-                if(getIconHover(&icons[i], mouseStatus.pos.x, mouseStatus.pos.y)){
-                    icons[i].selected = 1;
-                    icons[i].oldLoc = icons[i].loc;
-                }
-            }
             if(getViewportHover(&testViewport, mouseStatus.pos.x, mouseStatus.pos.y)){
                 testViewport.selected = 1;
                 testViewport.oldLoc = testViewport.loc;
+                ClickDrag.dragType = 1;
+            }
+            if(ClickDrag.dragType != 1){
+                for(int i = 0; i < numIcons; i++){
+                    if(getIconHover(&icons[i], mouseStatus.pos.x, mouseStatus.pos.y)){
+                        icons[i].selected = 1;
+                        icons[i].oldLoc = icons[i].loc;
+                        ClickDrag.dragType = 0;
+                    }
+                }
             }
             
             ClickDrag.dragging = 1;
@@ -312,6 +317,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         }
         if(!mouseStatus.buttons.left && ClickDrag.dragging) {
             ClickDrag.dragging = 0;
+            ClickDrag.dragType = -1;
             for(int i = 0; i < numIcons; i++){
                 icons[i].selected = 0;
             }
