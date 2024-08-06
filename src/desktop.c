@@ -97,6 +97,7 @@ void fillRect(
         y1 = y2;
         y2 = temp;
     }
+    if(x2 >= (int) buf_width) x2 = buf_width - 1;
 
     for(int x = x1; x <= x2; x++){
         for(int y = y1; y <= y2; y++){
@@ -337,6 +338,10 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
             if(testViewport.selected){
                 testViewport.loc.x = testViewport.oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x);
                 testViewport.loc.y = testViewport.oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y);
+                if(testViewport.loc.x < 0) testViewport.loc.x = 0;
+                if(testViewport.loc.y < 0) testViewport.loc.y = 0;
+                if(testViewport.loc.x + testViewport.loc.w >= (int) window->width) testViewport.loc.x = window->width - testViewport.loc.w;
+                if(testViewport.loc.y + testViewport.loc.h >= (int) window->height) testViewport.loc.y = window->height - testViewport.loc.h;
             }
             /*
             drawRect(
