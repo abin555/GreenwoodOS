@@ -46,7 +46,7 @@ uint32_t get_virtual(uint32_t address){
             return (i << 22) | (address & ~0xFFC00000);
         }
     }
-    return 0;
+    return 0x68;
 }
 
 void create_page_entry(
