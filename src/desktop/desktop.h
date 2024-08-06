@@ -6,6 +6,11 @@
 #include "framebuffer.h"
 #include "window.h"
 #include "mouse.h"
+#include "bitmap.h"
+#include "gfx.h"
+#include "icon.h"
+#include "viewport.h"
+#include "desktop_shared.h"
 
 int desktop_viewer(int argc, char **argv);
 

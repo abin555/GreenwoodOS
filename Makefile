@@ -37,11 +37,15 @@ OBJECTS = \
 		src/utils.o \
 		src/drivers/elf.o \
 		src/drivers/pcspeaker.o \
-		src/desktop.o
+		src/desktop/desktop.o \
+		src/desktop/bitmap.o \
+		src/desktop/gfx.o \
+		src/desktop/icon.o \
+		src/desktop/viewport.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
