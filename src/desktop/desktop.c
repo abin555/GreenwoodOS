@@ -26,7 +26,10 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         icons[i] = generateIcon(blockDevice, 25 + i * 35, 25, blockDevice.width, blockDevice.height, driveLabel);
     }
 
-    struct Viewport testViewport = make_viewport(400,400, "Test VP");
+    struct Viewport viewports[2];
+    viewports[0] = make_viewport(400, 400, "VP 1");
+    viewports[1] = make_viewport(200, 100, "VP 2");
+
 
     //exec("/A/tune/tune.exe", 0, NULL);
 
@@ -42,13 +45,17 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
 
-        draw_viewport(&testViewport, window);
+        for(int i = 0; i < 2; i++)
+            draw_viewport(&viewports[i], window);
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
-            if(viewport_handle_click_event(&testViewport, mouseStatus.pos.x, mouseStatus.pos.y)){
-                testViewport.selected = 1;
-                testViewport.oldLoc = testViewport.loc;
-                ClickDrag.dragType = 1;
+            for(int i = 0; i < 2; i++){
+                if(viewport_handle_click_event(&viewports[i], mouseStatus.pos.x, mouseStatus.pos.y)){
+                    viewports[i].selected = 1;
+                    viewports[i].oldLoc = viewports[i].loc;
+                    ClickDrag.dragType = 1;
+                    break;
+                }
             }
             if(ClickDrag.dragType != 1){
                 for(int i = 0; i < numIcons; i++){
@@ -56,6 +63,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
                         icons[i].selected = 1;
                         icons[i].oldLoc = icons[i].loc;
                         ClickDrag.dragType = 0;
+                        break;
                     }
                 }
             }
@@ -70,7 +78,8 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
             for(int i = 0; i < numIcons; i++){
                 icons[i].selected = 0;
             }
-            testViewport.selected = 0;
+            for(int i = 0; i < 2; i++)
+                viewports[i].selected = 0;
         }
 
         if(ClickDrag.dragging){
@@ -83,13 +92,15 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
                     icons[i].loc.y = icons[i].oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y);
                 }
             }
-            if(testViewport.selected){
-                testViewport.loc.x = testViewport.oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x);
-                testViewport.loc.y = testViewport.oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y);
-                if(testViewport.loc.x < 0) testViewport.loc.x = 0;
-                if(testViewport.loc.y < 0) testViewport.loc.y = 0;
-                if(testViewport.loc.x + testViewport.loc.w >= (int) window->width) testViewport.loc.x = window->width - testViewport.loc.w;
-                if(testViewport.loc.y + testViewport.loc.h >= (int) window->height) testViewport.loc.y = window->height - testViewport.loc.h;
+            for(int i = 0; i < 2; i++){
+                if(viewports[i].selected){
+                    viewports[i].loc.x = viewports[i].oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x);
+                    viewports[i].loc.y = viewports[i].oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y);
+                    if(viewports[i].loc.x < 0) viewports[i].loc.x = 0;
+                    if(viewports[i].loc.y < 0) viewports[i].loc.y = 0;
+                    if(viewports[i].loc.x + viewports[i].loc.w >= (int) window->width) viewports[i].loc.x = window->width - viewports[i].loc.w;
+                    if(viewports[i].loc.y + viewports[i].loc.h >= (int) window->height) viewports[i].loc.y = window->height - viewports[i].loc.h;
+                }
             }
             /*
             drawRect(
