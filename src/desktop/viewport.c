@@ -96,8 +96,8 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
     }
 }
 
-bool viewport_handle_click_event(struct Viewport *viewport, int x, int y){
-    if(!getViewportHover(viewport, x, y)) return false;
+bool viewport_handle_title_click_event(struct Viewport *viewport, int x, int y){
+    if(!getViewportTitleHover(viewport, x, y)) return false;
     if(x > viewport->loc.x + viewport->loc.w - 16 && x < viewport->loc.x + viewport->loc.w - 8){
         viewport->minimized = !viewport->minimized;
         if(viewport->minimized){
@@ -119,11 +119,11 @@ bool viewport_handle_click_event(struct Viewport *viewport, int x, int y){
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){
         return false;
-    }
+    } 
     return true;
 }
 
-bool getViewportHover(struct Viewport *viewport, int x, int y){
+bool getViewportTitleHover(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
     if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y && y < viewport->loc.y + 10) return true;
     return false;

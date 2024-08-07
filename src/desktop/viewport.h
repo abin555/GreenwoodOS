@@ -26,7 +26,7 @@ struct Viewport {
 
 struct Viewport make_viewport(int w, int h, char *title);
 void draw_viewport(struct Viewport *viewport, struct WINDOW *window);
-bool getViewportHover(struct Viewport *viewport, int x, int y);
-bool viewport_handle_click_event(struct Viewport *viewport, int x, int y);
+bool getViewportTitleHover(struct Viewport *viewport, int x, int y);
+bool viewport_handle_title_click_event(struct Viewport *viewport, int x, int y);
 
 #endif

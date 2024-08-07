@@ -1,6 +1,7 @@
 #include "desktop.h"
 
-#define BACKGROUND_FILE "A/image/bliss.tga\0"
+//#define BACKGROUND_FILE "A/image/bliss.tga\0"
+#define BACKGROUND_FILE "A/image/Eibsee.tga\0"
 
 #define numIcons 10
 
@@ -50,7 +51,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
             for(int i = 0; i < 2; i++){
-                if(viewport_handle_click_event(&viewports[i], mouseStatus.pos.x, mouseStatus.pos.y)){
+                if(viewport_handle_title_click_event(&viewports[i], mouseStatus.pos.x, mouseStatus.pos.y)){
                     viewports[i].selected = 1;
                     viewports[i].oldLoc = viewports[i].loc;
                     ClickDrag.dragType = 1;
