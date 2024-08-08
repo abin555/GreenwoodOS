@@ -12,6 +12,8 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.title = title;
     viewport.minimized_w = viewport.loc.w;
     viewport.minimized_h = viewport.loc.h;
+    viewport.buf = NULL;
+    viewport.buf_size = 0;
     return viewport;
 }
 
@@ -24,7 +26,7 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             viewport->loc.x,
             viewport->loc.y,
             viewport->loc.x + viewport->loc.w,
-            viewport->loc.y + 10,
+            viewport->loc.y + VIEWPORT_HEADER_HEIGHT,
             window->backbuffer,
             window->width
         );
@@ -52,20 +54,26 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             viewport->loc.x,
             viewport->loc.y,
             viewport->loc.x + viewport->loc.w,
-            viewport->loc.y + 10,
+            viewport->loc.y + VIEWPORT_HEADER_HEIGHT,
             window->backbuffer,
             window->width
         );
-        fillRect(
-            0x0,
-            0x222222,
-            viewport->loc.x,
-            viewport->loc.y+10,
-            viewport->loc.x + viewport->loc.w,
-            viewport->loc.y + viewport->loc.h,
-            window->backbuffer,
-            window->width
-        );
+        if(viewport->buf == NULL || viewport->buf_size == 0){
+            fillRect(
+                0x0,
+                0x222222,
+                viewport->loc.x,
+                viewport->loc.y+10,
+                viewport->loc.x + viewport->loc.w,
+                viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT,
+                window->backbuffer,
+                window->width
+            );
+        }
+        else{
+            viewport_draw_buf(viewport, window);
+        }
+
         buf_putChar(
             window->backbuffer,
             viewport->loc.x + viewport->loc.w - 16,
@@ -128,7 +136,7 @@ struct ViewportList *global_viewport_list;
 
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
-    if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y && y < viewport->loc.y + 10) return true;
+    if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y && y < viewport->loc.y + VIEWPORT_HEADER_HEIGHT) return true;
     return false;
 }
 
@@ -266,6 +274,29 @@ void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int
 
 bool getViewportBodyClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
-    if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y + 10 && y < viewport->loc.y + viewport->loc.h) return true;
+    if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y + VIEWPORT_HEADER_HEIGHT && y < viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT) return true;
     return false;
+}
+
+void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t buf_size){
+    if(viewport == NULL || buffer == NULL) return;
+    viewport->buf = buffer;
+    viewport->buf_size = buf_size;
+}
+
+void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
+    uint32_t x = (uint32_t) viewport->loc.x;
+    uint32_t y = (uint32_t) viewport->loc.y + VIEWPORT_HEADER_HEIGHT;
+    uint32_t w = (uint32_t) viewport->loc.w;
+    uint32_t h = (uint32_t) viewport->loc.h;
+    uint32_t i = 0;
+    for(uint32_t ly = 0; ly < h; ly++){
+        for(uint32_t lx = 0; lx < w; lx++){
+            window->backbuffer[(y + ly)*window->width + (x + lx)] = viewport->buf[lx+ly*w];
+            i++;
+            if(i > viewport->buf_size) goto escape;
+        }
+    }
+    escape:;
+    return;
 }
