@@ -50,7 +50,8 @@ struct WINDOW {
 typedef enum {
     ALWAYS = 1,
     ONFOCUS = 2,
-    NOCHILD = 3
+    NOCHILD = 3,
+	NEVER = 4
 } ScheduleType;
 
 struct CONSOLE{
@@ -157,6 +158,15 @@ struct Location {
     int h;
 };
 
+typedef enum {
+    VP_FOCUSED,
+    VP_UNFOCUSED,
+    VP_KEY,
+    VP_EXIT,
+    VP_MINIMIZE,
+    VP_MAXIMIZE
+} VIEWPORT_EVENT_TYPE;
+
 struct Viewport {
     struct Location loc;
     struct Location oldLoc;
@@ -169,13 +179,21 @@ struct Viewport {
     int minimized_w;
     int minimized_h;
     char *title;
-    void (*exit_event_handler)(struct Viewport *);
+    int owner_program_slot;
+	int owner_task_id;
+
+    void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 };
 
-struct Viewport *viewport_open(int w, int h, char *title);
-void viewport_close(struct Viewport *viewport);
-void viewport_set_buffer(struct Viewport *viewport, uint32_t *buf, uint32_t *buf_size);
-void viewport_copy(struct Viewport *viewport);
+struct ViewportFunctions {
+    struct Viewport *(*open)(int, int, char*);
+    void (*close)(struct Viewport*);
+    void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
+    void (*copy)(struct Viewport*);
+    void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
+};
+
+struct ViewportFunctions *viewport_get_funcs();
 
 #ifdef __cplusplus
 }

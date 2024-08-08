@@ -55,7 +55,10 @@ all: build emulate
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 	#~/copy_bin/ln $(LDFLAGS) $(OBJECTS) -o kernel.elf
-	cd ..
+	cd ..	
+	objcopy --only-keep-debug kernel.elf kernel.sym
+	objcopy --strip-debug kernel.elf
+
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
 	/usr/local/bin/grub-mkrescue -o GreenwoodOS.iso iso
@@ -78,8 +81,6 @@ build: os.iso debug #make_fs
 
 
 debug: build make_fs
-	objcopy --only-keep-debug kernel.elf kernel.sym
-	objcopy --strip-debug kernel.elf
 
 make_fs:
 	mkisofs -o ./filesystem.iso ./filesystem/

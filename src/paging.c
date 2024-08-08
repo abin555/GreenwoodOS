@@ -21,8 +21,8 @@ void page_init(){
 }
 
 struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    print_serial("\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
-    print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x\n", stack.eip);
+    print_serial("\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
+    print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     //asm("hlt");
     stop_task(task_running_idx);
     switch_to_task(&tasks[task_running_idx], &tasks[0]);

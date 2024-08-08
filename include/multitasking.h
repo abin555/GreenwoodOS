@@ -30,7 +30,8 @@ struct task_registers{
 typedef enum {
     ALWAYS = 1,
     ONFOCUS = 2,
-    NOCHILD = 3
+    NOCHILD = 3,
+    NEVER = 4
 } ScheduleType;
 
 struct task_state{

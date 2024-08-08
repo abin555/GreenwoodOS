@@ -199,13 +199,13 @@ void task_callback(){
         if(tasks[next_idx].slot_active 
             && (tasks[next_idx].schedule_type == ALWAYS 
             || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
+            && (tasks[next_idx].schedule_type != NEVER)
         ){
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx]);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;
             running_idx = next_idx;
             task_running_idx = running_idx;
-            ////printk("Switched to task %2x\n", running_idx);
             break;
         }
         else{

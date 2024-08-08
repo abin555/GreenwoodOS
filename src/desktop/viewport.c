@@ -15,6 +15,9 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.backbuf = NULL;
     viewport.frontbuf = NULL;
     viewport.buf_size = 0;
+    viewport.owner_program_slot = tasks[task_running_idx].program_slot;
+    viewport.owner_task_id = task_running_idx;
+    viewport.event_handler = NULL;
     return viewport;
 }
 
@@ -119,14 +122,17 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
             }
             viewport->loc.w = (8*title_len) + 3*8;
             viewport->loc.h = 8;
+            viewport_send_event(viewport, VP_MINIMIZE);
         }
         else{
             viewport->loc.w = viewport->minimized_w;
             viewport->loc.h = viewport->minimized_h;
+            viewport_send_event(viewport, VP_MAXIMIZE);
         }
         return VP_Scale;
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){
+        viewport_send_event(viewport, VP_EXIT);
         return VP_Close;
     } 
     return VP_None;
@@ -134,6 +140,15 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
 
 __attribute__((section(".text")))
 struct ViewportList *global_viewport_list;
+
+__attribute__((section(".text")))
+struct ViewportFunctions global_viewport_functions = {
+    viewport_indirect_open,
+    viewport_indirect_close,
+    viewport_set_buffer,
+    viewport_copy_buffer,
+    viewport_add_event_handler
+};
 
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
@@ -157,8 +172,19 @@ void viewport_init_sys(struct ViewportList *viewport_list){
 
 }
 
+struct Viewport *viewport_indirect_open(int w, int h, char *title){
+    int title_len = 0;
+    char *title_ptr = title;
+    while(*title_ptr++) title_len++;
+    title_len++;
+    title_ptr = malloc(title_len);
+    for(int i = 0; i < title_len; i++) title_ptr[i] = title[i];
+    return viewport_open(global_viewport_list, w, h, title_ptr);
+}
+
 struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
     print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
+    if(w > (int) fb_width || h > (int) fb_height || w < 0 || h < 0) return NULL;
     int element_idx = -1;
     int viewport_idx = -1;
     for(int i = 0; i < viewport_list->max; i++){
@@ -185,9 +211,14 @@ struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h,
     return &viewport_list->viewports[viewport_idx];
 }
 
+void viewport_indirect_close(struct Viewport *viewport){
+    viewport_close(global_viewport_list, viewport);
+}
+
 void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
     if(viewport == NULL) return;
     viewport->open = false;
+    viewport->event_handler = NULL;
     int drop_idx = -1;
     for(int i = 0; i < viewport_list->count; i++){
         if(viewport_list->elements[i].vp == viewport){
@@ -203,15 +234,19 @@ void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewpor
         struct ViewportList_element temp = viewport_list->elements[i+1];
         viewport_list->elements[i+1] = viewport_list->elements[i];
         viewport_list->elements[i] = temp;
-    }    
+    }
+    viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
 }
 
 void viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
+    if(element_idx == 0) return;
     for(int i = element_idx; i > 0; i--){
         struct ViewportList_element temp = viewport_list->elements[i - 1];
         viewport_list->elements[i - 1] = viewport_list->elements[i];
         viewport_list->elements[i] = temp;
     }
+    viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
+    viewport_send_event(viewport_list->elements[1].vp, VP_UNFOCUSED);
     return;
 }
 
@@ -304,5 +339,34 @@ void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
 }
 
 void viewport_copy_buffer(struct Viewport *viewport){
+    if(viewport == NULL) return;
+    if(viewport->backbuf == NULL || viewport->frontbuf == NULL || viewport->minimized || !viewport->open) return;
     memfcpy(viewport->frontbuf, viewport->backbuf, viewport->buf_size);
+}
+
+void viewport_add_event_handler(struct Viewport *viewport, void (*handler)(struct Viewport *, VIEWPORT_EVENT_TYPE)){
+    if(viewport == NULL || handler == NULL) return;
+    print_serial("[VIEWPORT] %s (SLOT %d) added event handler 0x%x\n", viewport->title, viewport->owner_program_slot, (uint32_t) handler);
+    viewport->event_handler = handler;
+}
+
+void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event){
+    if(viewport == NULL || viewport->event_handler == NULL) return;
+    //print_serial("[VIEWPORT] Sending event %d to viewport %s (SLOT %d) @ 0x%x\n", event, viewport->title, viewport->owner_program_slot, viewport->event_handler);
+    task_lock = 1;
+    int current_task_id = task_running_idx;
+
+    if(viewport->owner_program_slot != -1){
+        task_running_idx = viewport->owner_task_id;
+        select_program(viewport->owner_program_slot);
+    }
+    
+    viewport->event_handler(viewport, event);
+    
+    task_running_idx = current_task_id;
+    if(tasks[task_running_idx].program_slot != -1){
+        select_program(tasks[task_running_idx].program_slot);
+    }
+    task_lock = 0;
+    //print_serial("[VIEWPORT] Sent event\n");
 }

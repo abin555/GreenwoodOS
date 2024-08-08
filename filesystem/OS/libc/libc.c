@@ -418,43 +418,9 @@ void addEndCallback(void (*handler)(void)){
 	asm("int 0x80");
 }
 
-struct Viewport *viewport_open(int w, int h, char *title){
-	struct Viewport *vp;
+struct ViewportFunctions *viewport_get_funcs(){
 	register uint32_t eax asm("eax");
-	register uint32_t ebx asm("ebx");
-	register uint32_t ecx asm("ecx");
-	register uint32_t edx asm("edx");
-	edx = (uint32_t) title;
-	ecx = h;
-	ebx = w;
 	eax = 0x2D;
 	asm("int 0x80");
-	vp = (struct Viewport *) eax;
-	return vp;
-}
-
-void viewport_close(struct Viewport *viewport){
-	register uint32_t eax asm("eax");
-	register uint32_t ebx asm("ebx");
-	ebx = (uint32_t) viewport;
-	eax = 0x2E;
-	asm("int 0x80");
-}
-
-void viewport_set_buffer(struct Viewport *viewport, uint32_t *buf, uint32_t *buf_size){
-	register uint32_t eax asm("eax");
-	register uint32_t ebx asm("ebx");
-	register uint32_t ecx asm("ecx");
-	ecx = (uint32_t) buf;
-	ebx = (uint32_t) buf_size;
-	eax = 0x2F;
-	asm("int 0x80");
-}
-
-void viewport_copy(struct Viewport *viewport){
-	register uint32_t eax asm("eax");
-	register uint32_t ebx asm("ebx");
-	ebx = (uint32_t) viewport;
-	eax = 0x30;
-	asm("int 0x80");
+	return (struct ViewportFunctions *) eax;
 }

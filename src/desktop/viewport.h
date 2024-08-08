@@ -4,13 +4,22 @@
 #include "stdint.h"
 #include "bitmap.h"
 #include "window.h"
+#include "multitasking.h"
 #include "framebuffer.h"
 #include "gfx.h"
 #include "desktop_shared.h"
 
 #define VIEWPORT_HEADER_HEIGHT 10
 
-struct Viewport;
+typedef enum {
+    VP_FOCUSED,
+    VP_UNFOCUSED,
+    VP_KEY,
+    VP_EXIT,
+    VP_MINIMIZE,
+    VP_MAXIMIZE
+} VIEWPORT_EVENT_TYPE;
+
 struct Viewport {
     struct Location loc;
     struct Location oldLoc;
@@ -23,8 +32,10 @@ struct Viewport {
     int minimized_w;
     int minimized_h;
     char *title;
+    int owner_program_slot;
+    int owner_task_id;
 
-    void (*exit_event_handler)(struct Viewport *);
+    void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 };
 
 #define MAX_VIEWPORTS 100
@@ -54,10 +65,21 @@ struct Viewport_Interaction{
     struct Viewport *vp;
 };
 
+struct ViewportFunctions {
+    struct Viewport *(*open)(int, int, char*);
+    void (*close)(struct Viewport*);
+    void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
+    void (*copy)(struct Viewport*);
+    void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
+};
+
+extern struct ViewportFunctions global_viewport_functions;
 extern struct ViewportList *global_viewport_list;
 
 void viewport_init_sys(struct ViewportList *viewport_list);
+struct Viewport *viewport_indirect_open(int w, int h, char *title);
 struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title);
+void viewport_indirect_close(struct Viewport *viewport);
 void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport);
 void viewport_move_element_to_front(struct ViewportList *viewport_list, int elemIdx);
 struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y);
@@ -72,5 +94,7 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
 void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y);
 void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t buf_size);
 void viewport_copy_buffer(struct Viewport *viewport);
+void viewport_add_event_handler(struct Viewport *viewport, void (*handler)(struct Viewport *viewport, VIEWPORT_EVENT_TYPE));
+void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event);
 
 #endif
