@@ -4,6 +4,7 @@
 #include "drive.h"
 #include "multitasking.h"
 #include "framebuffer.h"
+#include "keyboard.h"
 #include "window.h"
 #include "mouse.h"
 #include "bitmap.h"

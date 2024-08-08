@@ -7,8 +7,8 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.loc.w = w;
     viewport.loc.h = h;
     viewport.resizeable = 1;
-    viewport.selected = 0;
     viewport.minimized = 0;
+    viewport.open = true;
     viewport.title = title;
     viewport.minimized_w = viewport.loc.w;
     viewport.minimized_h = viewport.loc.h;
@@ -96,8 +96,8 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
     }
 }
 
-bool viewport_handle_title_click_event(struct Viewport *viewport, int x, int y){
-    if(!getViewportTitleHover(viewport, x, y)) return false;
+VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport, int x, int y){
+    if(!getViewportTitleClick(viewport, x, y)) return VP_None;
     if(x > viewport->loc.x + viewport->loc.w - 16 && x < viewport->loc.x + viewport->loc.w - 8){
         viewport->minimized = !viewport->minimized;
         if(viewport->minimized){
@@ -115,16 +115,156 @@ bool viewport_handle_title_click_event(struct Viewport *viewport, int x, int y){
             viewport->loc.w = viewport->minimized_w;
             viewport->loc.h = viewport->minimized_h;
         }
-        return false;
+        return VP_Scale;
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){
-        return false;
+        return VP_Close;
     } 
-    return true;
+    return VP_None;
 }
 
-bool getViewportTitleHover(struct Viewport *viewport, int x, int y){
+struct ViewportList *global_viewport_list;
+
+bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
     if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y && y < viewport->loc.y + 10) return true;
+    return false;
+}
+
+void viewport_init_sys(struct ViewportList *viewport_list){
+    if(viewport_list == NULL){
+        print_serial("[VIEWPORT] List is null!\n");
+    }
+    viewport_list->max = MAX_VIEWPORTS;
+    viewport_list->count = 0;
+
+    print_serial("[VIEWPORT] Init System %x %d %d\n", viewport_list, viewport_list->max, viewport_list->count);
+
+    for(int i = 0; i < viewport_list->max; i++){
+        viewport_list->viewports[i].open = false;
+        viewport_list->elements[i].inUse = false;
+    } 
+
+}
+
+struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
+    print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
+    int element_idx = -1;
+    int viewport_idx = -1;
+    for(int i = 0; i < viewport_list->max; i++){
+        if(viewport_list->elements[i].inUse == false){
+            print_serial("[VIEWPORT] Element %d is not in use\n", i);
+            element_idx = i;
+            viewport_list->count++;
+            break;
+        }
+    }
+    if(element_idx == -1) return NULL;
+    for(int i = 0; i < viewport_list->max; i++){
+        if(!viewport_list->viewports[i].open){
+            viewport_idx = i;
+            break;
+        }
+    }
+    viewport_list->elements[element_idx].inUse = true;
+    viewport_list->elements[element_idx].vp = &viewport_list->viewports[viewport_idx];
+    
+    viewport_list->viewports[viewport_idx] = make_viewport(w, h, title);
+    print_serial("[VIEWPORT] Opened - Elem: %d - VP: %d & %x Count: %d\n", element_idx, viewport_idx, viewport_list->elements[element_idx].vp, viewport_list->count);
+    viewport_move_element_to_front(viewport_list, element_idx);
+    return &viewport_list->viewports[viewport_idx];
+}
+
+void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
+    if(viewport == NULL) return;
+    viewport->open = false;
+    int drop_idx = -1;
+    for(int i = 0; i < viewport_list->count; i++){
+        if(viewport_list->elements[i].vp == viewport){
+            viewport_list->elements[i].vp = NULL;
+            viewport_list->elements[i].inUse = false;
+            drop_idx = i;
+            viewport_list->count--;
+            break;
+        }
+    }
+    if(drop_idx == -1) return;
+    for(int i = drop_idx; i < viewport_list->count; i++){
+        struct ViewportList_element temp = viewport_list->elements[i+1];
+        viewport_list->elements[i+1] = viewport_list->elements[i];
+        viewport_list->elements[i] = temp;
+    }    
+}
+
+void viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
+    for(int i = element_idx; i > 0; i--){
+        struct ViewportList_element temp = viewport_list->elements[i - 1];
+        viewport_list->elements[i - 1] = viewport_list->elements[i];
+        viewport_list->elements[i] = temp;
+    }
+    return;
+}
+
+void viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
+    for(int i = viewport_list->count - 1; i >= 0; i--){
+        if(!viewport_list->elements[i].inUse){
+            //print_serial("[VIEWPORT] %d not in use\n", i);
+            continue;
+        }
+        if(viewport_list->elements[i].vp == NULL){
+            //print_serial("[VIEWPORT] %d is NULL\n", i);
+            continue;
+        }
+        if(!viewport_list->elements[i].vp->open){
+            //print_serial("[VIEWPORT] %d is not open\n", i);
+            continue;
+        }
+        draw_viewport(viewport_list->elements[i].vp, window);
+    }
+}
+
+struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y){
+    struct Viewport_Interaction interaction = {
+        VP_None,
+        NULL
+    };
+    for(int i = 0; i < viewport_list->count; i++){
+        if(!viewport_list->elements[i].inUse) continue;
+        if(viewport_list->elements[i].vp == NULL) continue;
+        struct Viewport *vp = viewport_list->elements[i].vp;
+        if(getViewportTitleClick(vp, x, y)){
+            interaction.clickType = VP_Header;
+            interaction.vp = vp;
+            viewport_move_element_to_front(viewport_list, i);
+            VIEWPORT_CLICK_TYPE button_check = viewport_handle_title_click_event(vp, x, y);
+            if(button_check != VP_None){
+                interaction.clickType = button_check;
+            }
+            return interaction;
+        }
+        else if(getViewportBodyClick(vp, x, y)){
+            interaction.clickType = VP_Body;
+            interaction.vp = vp;
+            viewport_move_element_to_front(viewport_list, i);
+            return interaction;
+        }
+    }
+    return interaction;
+}
+
+void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y){
+    if(viewport == NULL) return;
+    viewport->loc.x = x;
+    viewport->loc.y = y;
+
+    if(viewport->loc.x < 0) viewport->loc.x = 0;
+    if(viewport->loc.y < 0) viewport->loc.y = 0;
+    if(viewport->loc.x + viewport->loc.w >= (int) window->width) viewport->loc.x = window->width - viewport->loc.w;
+    if(viewport->loc.y + viewport->loc.h >= (int) window->height) viewport->loc.y = window->height - viewport->loc.h;
+}
+
+bool getViewportBodyClick(struct Viewport *viewport, int x, int y){
+    if(viewport == NULL) return false;
+    if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y + 10 && y < viewport->loc.y + viewport->loc.h) return true;
     return false;
 }
