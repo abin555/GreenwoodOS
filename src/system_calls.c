@@ -305,6 +305,13 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			cpu_state.eax = (uint32_t) &global_viewport_functions;
 			break;
 		}
+		case 0x2E:{
+			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu.ebx);
+			cpu_state.eax = (uint32_t) console;
+			task->console = console;
+			task->own_console = true;
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

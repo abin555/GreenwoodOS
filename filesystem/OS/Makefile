@@ -1,5 +1,6 @@
 SUBDIRS += echo
 SUBDIRS += term
+SUBDIRS += termvp
 SUBDIRS += libc
 
 all: $(SUBDIRS)

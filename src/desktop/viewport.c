@@ -1,4 +1,8 @@
 #include "viewport.h"
+#include "framebuffer.h"
+#include "bitmap.h"
+#include "window.h"
+#include "multitasking.h"
 
 struct Viewport make_viewport(int w, int h, char *title){
     struct Viewport viewport;
@@ -147,8 +151,19 @@ struct ViewportFunctions global_viewport_functions = {
     viewport_indirect_close,
     viewport_set_buffer,
     viewport_copy_buffer,
-    viewport_add_event_handler
+    viewport_add_event_handler,
+    vp_draw_char
 };
+
+void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg){
+    if(vp == NULL || vp->backbuf == NULL) return;
+    buf_putChar(
+        vp->backbuf,
+        x, y,
+        c,
+        fg, bg
+    );
+}
 
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
@@ -164,6 +179,12 @@ void viewport_init_sys(struct ViewportList *viewport_list){
     viewport_list->count = 0;
 
     print_serial("[VIEWPORT] Init System %x %d %d\n", viewport_list, viewport_list->max, viewport_list->count);
+
+    int block = MEM_findRegionIdx(MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t));
+    uint32_t addr = MEM_reserveRegionBlock(block, MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t), 0, FRAMEBUFFER);
+
+    viewport_list->frontbuf_region = (uint32_t *) addr;
+    MEM_printRegions();
 
     for(int i = 0; i < viewport_list->max; i++){
         viewport_list->viewports[i].open = false;
@@ -318,7 +339,8 @@ void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t b
     if(viewport == NULL || buffer == NULL) return;
     viewport->backbuf = buffer;
     viewport->buf_size = buf_size;
-    viewport->frontbuf = malloc(sizeof(uint32_t) * viewport->buf_size);
+    int frontbuf_idx = viewport - global_viewport_list->viewports;
+    viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
 }
 
 void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){

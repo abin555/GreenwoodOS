@@ -6,11 +6,19 @@
 #include "serial.h"
 #include "window.h"
 #include "framebuffer.h"
+#include "viewport.h"
 
 #define MAX_CONSOLE 10
 
+typedef enum {
+	CONSOLE_WINDOW,
+	CONSOLE_VIEWPORT
+} CONSOLE_TYPE;
+
 struct CONSOLE{
+	CONSOLE_TYPE view_type;
 	struct WINDOW *window;
+	struct Viewport *viewport;
 	uint32_t width;
 	uint32_t height;
 	uint32_t buf_size;
@@ -27,7 +35,6 @@ struct CONSOLE{
 		uint32_t fg;
 		uint32_t bg;
 	} color;
-
 };
 
 extern struct CONSOLE consoles[MAX_CONSOLE];
@@ -35,6 +42,7 @@ extern struct CONSOLE *kernel_console;
 void console_init();
 
 struct CONSOLE *console_open(struct WINDOW *window);
+struct CONSOLE *console_open_vp(struct Viewport *vp);
 void console_close(struct CONSOLE *console);
 
 void print_console(struct CONSOLE *console, char *msg, ...);

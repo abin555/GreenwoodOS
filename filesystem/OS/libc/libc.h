@@ -191,9 +191,11 @@ struct ViewportFunctions {
     void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
+    void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
 };
 
 struct ViewportFunctions *viewport_get_funcs();
+struct CONSOLE *console_open_vp(struct Viewport *vp);
 
 #ifdef __cplusplus
 }

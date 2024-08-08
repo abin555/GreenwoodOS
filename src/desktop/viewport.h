@@ -2,10 +2,6 @@
 #define VIEWPORT_H
 
 #include "stdint.h"
-#include "bitmap.h"
-#include "window.h"
-#include "multitasking.h"
-#include "framebuffer.h"
 #include "gfx.h"
 #include "desktop_shared.h"
 
@@ -48,6 +44,7 @@ struct ViewportList_element{
 struct ViewportList {
     struct Viewport viewports[MAX_VIEWPORTS];
     struct ViewportList_element elements[MAX_VIEWPORTS];
+    uint32_t *frontbuf_region;
     int max;
     int count;
 };
@@ -71,11 +68,14 @@ struct ViewportFunctions {
     void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
+    void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
 };
 
 extern struct ViewportFunctions global_viewport_functions;
 extern struct ViewportList *global_viewport_list;
 
+
+void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg);
 void viewport_init_sys(struct ViewportList *viewport_list);
 struct Viewport *viewport_indirect_open(int w, int h, char *title);
 struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title);

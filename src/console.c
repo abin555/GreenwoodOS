@@ -26,14 +26,26 @@ void console_drawFull(struct CONSOLE *console){
 		for(uint32_t indexX = 0; indexX < console->width; indexX++){
 			char sym = console->buf[indexX + indexY * console->width];
 			if(sym != '\0' && sym != '\n' && !clearLine){
-				buf_write_cell(
-					console->window->backbuffer, 
-					console->width*8, 
-					indexX + indexY * console->width, 
-					sym, 
-					console->color.fg, 
-					console->color.bg
-				);
+				if(console->view_type == CONSOLE_WINDOW){
+					buf_write_cell(
+						console->window->backbuffer, 
+						console->width*8, 
+						indexX + indexY * console->width, 
+						sym, 
+						console->color.fg, 
+						console->color.bg
+					);
+				}
+				else if(console->view_type == CONSOLE_VIEWPORT){
+					buf_write_cell(
+						console->viewport->backbuf, 
+						console->width*8, 
+						indexX + indexY * console->width, 
+						sym, 
+						console->color.fg, 
+						console->color.bg
+					);
+				}
 			}
 			else{
 				clearLine = 1;
@@ -175,10 +187,12 @@ struct CONSOLE *console_open(struct WINDOW *window){
 	}
 	if(console == NULL || window == NULL) return NULL;
 	memset(console->buf, 0, console->buf_size);
+	console->view_type = CONSOLE_WINDOW;
 	console->active = true;
 	console->cursor = 0;
 	console->last_cursor = 0;
 	console->window = window;
+	console->viewport = NULL;
 	console->width = console->window->width / CHAR_W;
 	console->height = console->window->height / CHAR_H - CHAR_H;
 
@@ -188,6 +202,36 @@ struct CONSOLE *console_open(struct WINDOW *window){
 	console->LastLine = 0;
 	console->color.fg = 0xFFFFFF;
 	console->color.bg = 0;
+	return console;
+}
+
+struct CONSOLE *console_open_vp(struct Viewport *vp){
+	struct CONSOLE *console = NULL;
+	for(int i = 0; i < MAX_CONSOLE; i++){
+		if(!consoles[i].active){
+			console = &consoles[i];
+			break;
+		}
+	}
+	if(console == NULL || vp == NULL) return NULL;
+	memset(console->buf, 0, console->buf_size);
+	console->view_type = CONSOLE_VIEWPORT;
+	console->active = true;
+	console->cursor = 0;
+	console->last_cursor = 0;
+	console->window = NULL;
+	console->viewport = vp;
+	console->width = console->viewport->loc.w / CHAR_W;
+	console->height = console->viewport->loc.h / CHAR_H - CHAR_H;
+
+	console->Line = 0;
+	console->Start = 0;
+	console->LinePlace = 0;
+	console->LastLine = 0;
+	console->color.fg = 0xFFFFFF;
+	console->color.bg = 0;
+
+	print_serial("[CONSOLE] Open Viewport console for %s\n", console->viewport->title);
 	return console;
 }
 
@@ -304,7 +348,12 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 			if(msg[p] == '\n'){
 				console->LinePlace = 0;          
 				if(console->Line == (unsigned int) console->height-2){
-					memset(console->window->backbuffer, 0, console->window->width * console->window->height * sizeof(uint32_t));
+					if(console->view_type == CONSOLE_WINDOW){
+						memset(console->window->backbuffer, 0, console->window->width * console->window->height * sizeof(uint32_t));
+					}
+					else if(console->view_type == CONSOLE_VIEWPORT){
+						memset(console->viewport->backbuf, 0, console->viewport->buf_size);
+					}
 					shiftConsoleUp(console);					
 					//memset(console->buf, 0, console->window->width*console->window->height);
 					//console->Line = 0;

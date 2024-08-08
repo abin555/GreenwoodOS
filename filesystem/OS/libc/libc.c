@@ -424,3 +424,13 @@ struct ViewportFunctions *viewport_get_funcs(){
 	asm("int 0x80");
 	return (struct ViewportFunctions *) eax;
 }
+
+struct CONSOLE *console_open_vp(struct Viewport *vp){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) vp;
+	eax = 0x2E;
+	asm("int 0x80");
+	struct CONSOLE *console = (struct CONSOLE *) eax;
+	return console;
+}
