@@ -123,6 +123,7 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
     return VP_None;
 }
 
+__attribute__((section(".text")))
 struct ViewportList *global_viewport_list;
 
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y){

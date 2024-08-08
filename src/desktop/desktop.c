@@ -28,17 +28,16 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     }
 
     print_serial("[DESKTOP] Global Viewport is at %x\n", &global_viewport_list);
+    print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
     void *vp_list_ptr = malloc(sizeof(struct ViewportList));
+    global_viewport_list = (struct ViewportList*) vp_list_ptr;
     print_serial("[DESKTOP] VP LIST pointer is %x\n", vp_list_ptr);
-    global_viewport_list = vp_list_ptr;
     print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
 
-    struct ViewportList viewport_list;
+    viewport_init_sys(global_viewport_list);
 
-    viewport_init_sys(&viewport_list);
-
-    viewport_open(&viewport_list, 400, 400, "Test Viewport 1");
-    viewport_open(&viewport_list, 200, 200, "Test Viewport 2");
+    viewport_open(global_viewport_list, 400, 400, "Test Viewport 1");
+    viewport_open(global_viewport_list, 200, 200, "Test Viewport 2");
 
 
     //exec("/A/tune/tune.exe", 0, NULL);
@@ -57,7 +56,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
         if((KBD_flags.key == 10) && !OpenWindow){
             OpenWindow = true;
-            viewport_open(&viewport_list, 300, 300, "Dynamic VP!");
+            viewport_open(global_viewport_list, 300, 300, "Dynamic VP!");
         }
         if(!(KBD_flags.key == 10)){
             OpenWindow = false;
@@ -66,12 +65,12 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         drawBitmap(0, 0, background, window); 
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
-        viewport_draw_all(&viewport_list, window);
+        viewport_draw_all(global_viewport_list, window);
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
-            struct Viewport_Interaction vp_interaction = viewport_process_click(&viewport_list, mouseStatus.pos.x, mouseStatus.pos.y);
+            struct Viewport_Interaction vp_interaction = viewport_process_click(global_viewport_list, mouseStatus.pos.x, mouseStatus.pos.y);
             if(vp_interaction.clickType == VP_Close && vp_interaction.vp != NULL){
-                viewport_close(&viewport_list, vp_interaction.vp);
+                viewport_close(global_viewport_list, vp_interaction.vp);
             }
             else if(vp_interaction.clickType == VP_Header && vp_interaction.vp != NULL){
                 ClickDrag.selected_vp = vp_interaction.vp;
