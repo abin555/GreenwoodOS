@@ -150,6 +150,33 @@ void addMouseEventHandler(void (*handler)(void));
 void freeRegion(void *addr, uint32_t size);
 void addEndCallback(void (*handler)(void));
 
+struct Location {
+    int x;
+    int y;
+    int w;
+    int h;
+};
+
+struct Viewport {
+    struct Location loc;
+    struct Location oldLoc;
+    uint32_t *frontbuf;
+    uint32_t *backbuf;
+    uint32_t buf_size;
+    uint8_t resizeable;
+    bool minimized;
+    bool open;
+    int minimized_w;
+    int minimized_h;
+    char *title;
+    void (*exit_event_handler)(struct Viewport *);
+};
+
+struct Viewport *viewport_open(int w, int h, char *title);
+void viewport_close(struct Viewport *viewport);
+void viewport_set_buffer(struct Viewport *viewport, uint32_t *buf, uint32_t *buf_size);
+void viewport_copy(struct Viewport *viewport);
+
 #ifdef __cplusplus
 }
 #endif

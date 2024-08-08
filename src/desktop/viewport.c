@@ -12,7 +12,8 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.title = title;
     viewport.minimized_w = viewport.loc.w;
     viewport.minimized_h = viewport.loc.h;
-    viewport.buf = NULL;
+    viewport.backbuf = NULL;
+    viewport.frontbuf = NULL;
     viewport.buf_size = 0;
     return viewport;
 }
@@ -58,7 +59,7 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             window->backbuffer,
             window->width
         );
-        if(viewport->buf == NULL || viewport->buf_size == 0){
+        if(viewport->backbuf == NULL || viewport->buf_size == 0){
             fillRect(
                 0x0,
                 0x222222,
@@ -280,8 +281,9 @@ bool getViewportBodyClick(struct Viewport *viewport, int x, int y){
 
 void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t buf_size){
     if(viewport == NULL || buffer == NULL) return;
-    viewport->buf = buffer;
+    viewport->backbuf = buffer;
     viewport->buf_size = buf_size;
+    viewport->frontbuf = malloc(sizeof(uint32_t) * viewport->buf_size);
 }
 
 void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
@@ -292,11 +294,15 @@ void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
     uint32_t i = 0;
     for(uint32_t ly = 0; ly < h; ly++){
         for(uint32_t lx = 0; lx < w; lx++){
-            window->backbuffer[(y + ly)*window->width + (x + lx)] = viewport->buf[lx+ly*w];
+            window->backbuffer[(y + ly)*window->width + (x + lx)] = viewport->frontbuf[lx+ly*w];
             i++;
             if(i > viewport->buf_size) goto escape;
         }
     }
     escape:;
     return;
+}
+
+void viewport_copy_buffer(struct Viewport *viewport){
+    memfcpy(viewport->frontbuf, viewport->backbuf, viewport->buf_size);
 }

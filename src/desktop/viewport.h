@@ -14,7 +14,8 @@ struct Viewport;
 struct Viewport {
     struct Location loc;
     struct Location oldLoc;
-    uint32_t *buf;
+    uint32_t *frontbuf;
+    uint32_t *backbuf;
     uint32_t buf_size;
     uint8_t resizeable;
     bool minimized;
@@ -70,5 +71,6 @@ bool getViewportBodyClick(struct Viewport *viewport, int x, int y);
 VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport, int x, int y);
 void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y);
 void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t buf_size);
+void viewport_copy_buffer(struct Viewport *viewport);
 
 #endif

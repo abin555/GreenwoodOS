@@ -12,6 +12,7 @@
 #include "random.h"
 #include "mouse.h"
 #include "pcspeaker.h"
+#include "viewport.h"
 
 void init_syscalls();
 

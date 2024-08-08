@@ -301,6 +301,28 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			tasks[task_running_idx].end_callback = (void (*)(void)) cpu.ebx;
 			break;
 		}
+		case 0x2D:{
+			char *title = (char *) cpu.ebx;
+			print_serial("[SYSCALL] Opening viewport for %s - %x\n", title, title);
+			int len = 0;
+			while(title[len] != '\0') len++;
+			char *dup_title = malloc(++len);
+			for(int i = 0; i < len; i++) dup_title[i] = title[i];
+			cpu_state.eax = (uint32_t) viewport_open(global_viewport_list, cpu.ebx, cpu.edx, dup_title);
+			break;
+		}
+		case 0x2E:{
+			viewport_close(global_viewport_list, (struct Viewport *) cpu.ebx);
+			break;
+		}
+		case 0x2F:{
+			viewport_set_buffer((struct Viewport *) cpu.ebx, (uint32_t *) cpu.ecx, cpu.edx);
+			break;
+		}
+		case 0x30:{
+			viewport_copy_buffer((struct Viewport *) cpu.ebx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

@@ -36,10 +36,9 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     viewport_init_sys(global_viewport_list);
 
-    struct Viewport *vp1 = viewport_open(global_viewport_list, 400, 400, "Test Viewport 1");
+    viewport_open(global_viewport_list, 400, 400, "Test Viewport 1");
     viewport_open(global_viewport_list, 200, 200, "Test Viewport 2");
 
-    viewport_set_buffer(vp1, background.bitmap, 400*400*sizeof(uint32_t));
 
 
     //exec("/A/tune/tune.exe", 0, NULL);
