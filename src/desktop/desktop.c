@@ -10,7 +10,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     struct task_state *window_task = &tasks[task_running_idx];
     window_task->window = window;
     window_task->console = kernel_console;
-    set_schedule(ONFOCUS);
+    set_schedule(ALWAYS);
 
     struct Bitmap background = loadBitmap(BACKGROUND_FILE);
     struct Bitmap folder = loadBitmap("A/OS/icons/folder.tga\0");
@@ -36,10 +36,6 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     viewport_init_sys(global_viewport_list);
 
-    viewport_open(global_viewport_list, 400, 400, "Test Viewport 1");
-    viewport_open(global_viewport_list, 200, 200, "Test Viewport 2");
-
-
 
     //exec("/A/tune/tune.exe", 0, NULL);
 
@@ -52,6 +48,8 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     } ClickDrag;
 
     bool OpenWindow = false;
+
+    set_schedule(ONFOCUS);
 
     while(1){
 

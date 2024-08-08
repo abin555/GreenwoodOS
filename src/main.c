@@ -64,10 +64,10 @@ void kernel_task(int argc, char **argv){
     //exec("/A/tune/tune.exe", 0, NULL);
 
     
+    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
 
     exec(boot_program_path, 0, NULL);
 
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
 
 
     task_lock = 0;
