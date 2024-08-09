@@ -15,7 +15,7 @@ uint32_t *cube_buf;
 struct WINDOW *window;
 uint32_t *win_buf;
 
-const int zOff = 150;
+const int zOff = 250;
 const int xOff = 10;
 const int yOff = 10;
 const int cSize = 50;
@@ -81,7 +81,7 @@ int main(int argc, char **argv){
     switch(rand() % 6) {
       case 0:
         for (int i = 0; i < rsteps; i++) {
-          zrotate(-0.01);
+          zrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);
@@ -89,7 +89,7 @@ int main(int argc, char **argv){
         break;
       case 1:
         for (int i = 0; i < rsteps; i++) {
-          zrotate(0.01);
+          zrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);
@@ -97,7 +97,7 @@ int main(int argc, char **argv){
         break;
       case 2:
         for (int i = 0; i < rsteps; i++) {
-          xrotate(-0.01);
+          xrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);
@@ -105,7 +105,7 @@ int main(int argc, char **argv){
         break;
       case 3:
         for (int i = 0; i < rsteps; i++) {
-          xrotate(0.01);
+          xrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);
@@ -113,7 +113,7 @@ int main(int argc, char **argv){
         break;
       case 4:
         for (int i = 0; i < rsteps; i++) {
-          yrotate(-0.01);
+          yrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);
@@ -121,7 +121,7 @@ int main(int argc, char **argv){
         break;
       case 5:
         for (int i = 0; i < rsteps; i++) {
-          yrotate(0.01);
+          yrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
           vp_funcs->copy(cube_vp);

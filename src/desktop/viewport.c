@@ -113,27 +113,31 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
     }
 }
 
+void viewport_toggle_size(struct Viewport *viewport){
+    viewport->minimized = !viewport->minimized;
+    if(viewport->minimized){
+        viewport->minimized_w = viewport->loc.w;
+        viewport->minimized_h = viewport->loc.h;
+        int title_len = 0;
+        char *title_counter = viewport->title;
+        while(title_counter[title_len] && title_len < 50){
+            title_len++;
+        }
+        viewport->loc.w = (8*title_len) + 3*8;
+        viewport->loc.h = 8;
+        viewport_send_event(viewport, VP_MINIMIZE);
+    }
+    else{
+        viewport->loc.w = viewport->minimized_w;
+        viewport->loc.h = viewport->minimized_h;
+        viewport_send_event(viewport, VP_MAXIMIZE);
+    }
+}
+
 VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport, int x, int y){
     if(!getViewportTitleClick(viewport, x, y)) return VP_None;
     if(x > viewport->loc.x + viewport->loc.w - 16 && x < viewport->loc.x + viewport->loc.w - 8){
-        viewport->minimized = !viewport->minimized;
-        if(viewport->minimized){
-            viewport->minimized_w = viewport->loc.w;
-            viewport->minimized_h = viewport->loc.h;
-            int title_len = 0;
-            char *title_counter = viewport->title;
-            while(title_counter[title_len] && title_len < 50){
-                title_len++;
-            }
-            viewport->loc.w = (8*title_len) + 3*8;
-            viewport->loc.h = 8;
-            viewport_send_event(viewport, VP_MINIMIZE);
-        }
-        else{
-            viewport->loc.w = viewport->minimized_w;
-            viewport->loc.h = viewport->minimized_h;
-            viewport_send_event(viewport, VP_MAXIMIZE);
-        }
+        viewport_toggle_size(viewport);
         return VP_Scale;
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){

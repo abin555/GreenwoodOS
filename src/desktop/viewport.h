@@ -79,6 +79,7 @@ extern struct ViewportList *global_viewport_list;
 
 void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg);
 char viewport_getc(struct Viewport *vp);
+void viewport_toggle_size(struct Viewport *viewport);
 void viewport_init_sys(struct ViewportList *viewport_list);
 struct Viewport *viewport_indirect_open(int w, int h, char *title);
 struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title);

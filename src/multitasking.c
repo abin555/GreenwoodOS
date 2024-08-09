@@ -57,7 +57,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
 }
 
 void set_schedule(ScheduleType type){
-    print_serial("[TASK] Set Task %d schedule type to %d\n", task_running_idx, type);
+    //print_serial("[TASK] Set Task %d schedule type to %d\n", task_running_idx, type);
     tasks[task_running_idx].schedule_type = type;
 }
 

@@ -189,7 +189,7 @@ struct Viewport {
 struct ViewportFunctions {
     struct Viewport *(*open)(int, int, char*);
     void (*close)(struct Viewport*);
-    void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
+    void (*set_buffer)(struct Viewport* viewport, uint32_t* buf, uint32_t size);
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
     void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);

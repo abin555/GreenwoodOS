@@ -186,5 +186,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     }
     else if(event == VP_EXIT){
         running = 0;
+		set_schedule(ALWAYS);
+		exit(1);
     }
 }

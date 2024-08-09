@@ -66,7 +66,7 @@ void kernel_task(int argc, char **argv){
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
 
-    exec(boot_program_path, 0, NULL);
+    //exec(boot_program_path, 0, NULL);
 
 
 

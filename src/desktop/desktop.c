@@ -37,7 +37,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     viewport_init_sys(global_viewport_list);
 
-    exec("/A/OS/termvp/term.exe", 0, NULL);
+    
 
     //exec("/A/tune/tune.exe", 0, NULL);
 
@@ -123,7 +123,18 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
 void desktop_kbd_event(char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
-    if(global_viewport_list->elements[0].inUse){
+    if(KBD_flags.ctrl && ascii == 'T'){
+        exec("/A/OS/termvp/term.exe", 0, NULL);
+    }
+    else if(KBD_flags.ctrl && ascii == 'M'){
+        for(int i = 0; i < global_viewport_list->count; i++){
+            if(global_viewport_list->elements[i].inUse){
+                if(!global_viewport_list->elements[i].vp->minimized)
+                    viewport_toggle_size(global_viewport_list->elements[i].vp);
+            }
+        }
+    }
+    else if(global_viewport_list->elements[0].inUse){
         if(global_viewport_list->elements[0].vp == NULL) return;
         if(!global_viewport_list->elements[0].vp->minimized){
             global_viewport_list->elements[0].vp->ascii = (char) ascii;

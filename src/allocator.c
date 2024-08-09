@@ -15,7 +15,7 @@ void alloc_init(){
 
 void *malloc(uint32_t size){
 	size += 10;
-	print_serial("[MALLOC] Alloc for size %x Total Remaining: %x\n", size, alloc_table_size - total_alloc);
+	//print_serial("[MALLOC] Alloc for size %x Total Remaining: %x\n", size, alloc_table_size - total_alloc);
 	struct ALLOC_TABLE *alloc_table = (struct ALLOC_TABLE *) alloc_base;
 	//Building initial head block
 
