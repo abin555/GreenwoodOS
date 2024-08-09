@@ -30,6 +30,7 @@ struct Viewport {
     char *title;
     int owner_program_slot;
     int owner_task_id;
+    char ascii;
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 };
@@ -69,6 +70,7 @@ struct ViewportFunctions {
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
     void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
+    char (*getc)(struct Viewport *);
 };
 
 extern struct ViewportFunctions global_viewport_functions;
@@ -76,6 +78,7 @@ extern struct ViewportList *global_viewport_list;
 
 
 void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg);
+char viewport_getc(struct Viewport *vp);
 void viewport_init_sys(struct ViewportList *viewport_list);
 struct Viewport *viewport_indirect_open(int w, int h, char *title);
 struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title);

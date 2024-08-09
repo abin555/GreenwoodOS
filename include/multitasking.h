@@ -45,7 +45,7 @@ struct task_state{
     struct WINDOW *window;
     struct CONSOLE *console;
     struct DIRECTORY currentDirectory;
-    void (*keyboard_event_handler)(unsigned int);
+    void (*keyboard_event_handler)(char);
     void (*mouse_event_handler)(void);
     void (*end_callback)(void);
     bool own_window;

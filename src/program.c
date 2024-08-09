@@ -21,6 +21,7 @@ void select_program(uint8_t program_slot){
 }
 
 void exec(char *filename, int argc, char **argv){
+	print_serial("\n[EXEC] Starting Program %s\n", filename);
 	int slot = -1;
 	for(int i = 0; i < PROGRAM_MAX; i++){
 		if(program_slot_status[i] == false){
@@ -47,4 +48,5 @@ void exec(char *filename, int argc, char **argv){
 		fclose(file);
 		start_task(0, slot, argc, argv, filename);
 	}
+	print_serial("[EXEC] Program started!\n\n");
 }

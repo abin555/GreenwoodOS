@@ -8,6 +8,7 @@
 int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
+    window_task->keyboard_event_handler = desktop_kbd_event;
     window_task->window = window;
     window_task->console = kernel_console;
     set_schedule(ALWAYS);
@@ -36,6 +37,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     viewport_init_sys(global_viewport_list);
 
+    exec("/A/OS/termvp/term.exe", 0, NULL);
 
     //exec("/A/tune/tune.exe", 0, NULL);
 
@@ -47,20 +49,9 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         struct Viewport *selected_vp;
     } ClickDrag;
 
-    bool OpenWindow = false;
-
     set_schedule(ONFOCUS);
 
     while(1){
-
-        if((KBD_flags.key == 10) && !OpenWindow){
-            OpenWindow = true;
-            viewport_open(global_viewport_list, 300, 300, "Dynamic VP!");
-        }
-        if(!(KBD_flags.key == 10)){
-            OpenWindow = false;
-        }
-
         drawBitmap(0, 0, background, window); 
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
@@ -127,5 +118,15 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         }
 
         window_copy_buffer(window);
+    }
+}
+
+void desktop_kbd_event(char ascii){
+    //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
+    if(global_viewport_list->elements[0].inUse){
+        if(global_viewport_list->elements[0].vp == NULL) return;
+        if(!global_viewport_list->elements[0].vp->minimized){
+            global_viewport_list->elements[0].vp->ascii = (char) ascii;
+        }
     }
 }

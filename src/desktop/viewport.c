@@ -22,6 +22,7 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.owner_program_slot = tasks[task_running_idx].program_slot;
     viewport.owner_task_id = task_running_idx;
     viewport.event_handler = NULL;
+    viewport.ascii = '\0';
     return viewport;
 }
 
@@ -152,13 +153,24 @@ struct ViewportFunctions global_viewport_functions = {
     viewport_set_buffer,
     viewport_copy_buffer,
     viewport_add_event_handler,
-    vp_draw_char
+    vp_draw_char,
+    viewport_getc
 };
+
+char viewport_getc(struct Viewport *vp){
+    if(vp == NULL) return '\0';
+    while(vp->ascii == '\0'){}
+    char c = vp->ascii;
+    vp->ascii = '\0';
+    //print_serial("[VIEWPORT] %s getc call returns %c\n", vp->title, c);
+    return c;
+}
 
 void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg){
     if(vp == NULL || vp->backbuf == NULL) return;
-    buf_putChar(
+    buf_w_putChar(
         vp->backbuf,
+        vp->loc.w,
         x, y,
         c,
         fg, bg

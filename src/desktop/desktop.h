@@ -14,5 +14,6 @@
 #include "desktop_shared.h"
 
 int desktop_viewer(int argc, char **argv);
+void desktop_kbd_event(char ascii);
 
 #endif

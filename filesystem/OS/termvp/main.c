@@ -27,19 +27,20 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 
 int main(int argc, char **argv){
 	print("Terminal!\n");
+	set_schedule(ALWAYS);
 	vp_funcs = viewport_get_funcs();
 	vp = vp_funcs->open(WIDTH, HEIGHT, "GWOS Terminal");
-	backbuf = kmalloc(WIDTH * HEIGHT * sizeof(uint32_t));
+	backbuf = (uint32_t *) requestRegion(WIDTH * HEIGHT *sizeof(uint32_t));
 	vp_funcs->set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
 	vp_funcs->add_event_handler(vp, event_handler);
-	set_schedule(ALWAYS);
 	term_width = WIDTH / 8;
 	term_height = HEIGHT / 8;
 	console = console_open_vp(vp);
 	print("Greenwood OS Terminal\n");
 	vp_funcs->copy(vp);
-	char *termbuf = alloc(term_width);
-	memset(termbuf, 0, term_width);
+
+	char termbuf[50];
+	memset(termbuf, 0, 50);
 	
 	int idx = 0;
 	
@@ -55,7 +56,7 @@ int main(int argc, char **argv){
 			vp_funcs->drawChar(vp, 8*i,(term_height-2)*8,' ', 0xFFFFFF, 0x0);
 		}
 		vp_funcs->copy(vp);
-		char c = getc();
+		char c = vp_funcs->getc(vp);
 		if(c == 0x11) idx-=2;
 		else if(c == 0x12) idx++;
 		else{
@@ -91,6 +92,7 @@ int main(int argc, char **argv){
 		vp_funcs->copy(vp);
 	}
 	vp_funcs->close(vp);
+	freeRegion(backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
 }
 
 void *alloc(int size){
@@ -117,7 +119,7 @@ void run_command(char *cmd){
 	vp_funcs->copy(vp);
 	char *command;
 	int argc = 1;
-	for(int i = 0; cmd[i] != 0; i++){
+	for(int i = 0; cmd[i] != 0 && i < 50; i++){
 		if(cmd[i] == ' ') argc++;
 	}
 	args = (char **) kmalloc(sizeof(char *) * argc);
@@ -185,5 +187,4 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     else if(event == VP_EXIT){
         running = 0;
     }
-    
 }

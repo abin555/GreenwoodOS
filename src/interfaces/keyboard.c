@@ -21,13 +21,13 @@ void kbd_init(uint32_t buffer_size){
 void kbd_callEventHandler(unsigned char ascii){
 	for(int i = 0; i < MAX_TASKS; i++){
 		if(
-			tasks[i].slot_active && 
-			tasks[i].program_slot != -1 && 
+			tasks[i].slot_active &&
 			tasks[i].keyboard_event_handler != NULL && 
 			tasks[i].window == &windows[window_selected]
 		){
 			//print_serial("Switching to program %d and calling keyboard handler at 0x%x, and keycode 0x%x (%c)\n", tasks[i].program_slot, (uint32_t) tasks[i].keyboard_event_handler, ascii, ascii);
-			select_program(tasks[i].program_slot);
+			if(tasks[i].program_slot != -1)
+				select_program(tasks[i].program_slot);
 			tasks[i].keyboard_event_handler(ascii);
 			if(tasks[task_running_idx].program_slot != -1){
 				select_program(tasks[task_running_idx].program_slot);

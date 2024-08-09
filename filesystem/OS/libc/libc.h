@@ -181,6 +181,7 @@ struct Viewport {
     char *title;
     int owner_program_slot;
 	int owner_task_id;
+	char ascii;
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 };
@@ -192,6 +193,7 @@ struct ViewportFunctions {
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
     void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
+    char (*getc)(struct Viewport *);
 };
 
 struct ViewportFunctions *viewport_get_funcs();
