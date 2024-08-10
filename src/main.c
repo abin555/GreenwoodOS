@@ -72,17 +72,8 @@ void kernel_task(int argc, char **argv){
 
     task_lock = 0;
 
-    char OpenedConsole = 0;
     while(1){
-        if(&windows[window_selected] == kernel_win){
-            if(kbd_getChar() == 10 && !OpenedConsole){
-                OpenedConsole = 1;
-                exec(boot_program_path, 0, NULL);
-            }
-            if(!(KBD_flags.key == 10)){
-                OpenedConsole = 0;
-            }
-        }
+        asm("hlt");
     }
     window_close(kernel_win);
 }

@@ -54,10 +54,10 @@ struct task_state{
 
 #define MAX_TASKS 12
 #define TASK_STACK_SIZE sizeof(uint32_t) * 0x400
-uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8)));
+extern uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE];
 
-int8_t task_running_idx;
-struct task_state tasks[MAX_TASKS];
+extern int8_t task_running_idx;
+extern struct task_state tasks[MAX_TASKS];
 extern bool task_lock;
 
 //Switch from active task to passed task pointer.

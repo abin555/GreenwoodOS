@@ -99,6 +99,9 @@ int main(int argc, char** argv){
   TriangleRef *triangleBuf;
 
   if(argc == 2){
+    if(!fexists(argv[1])){
+      return 1;
+    }
     obj = loadObjFile(argv[1]);
   }
   else{

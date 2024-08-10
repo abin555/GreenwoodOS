@@ -91,6 +91,7 @@ int main(int argc, char **argv){
 		draw_cursor(idx);
 		vp_funcs->copy(vp);
 	}
+	console_close();
 	vp_funcs->close(vp);
 	freeRegion(backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
 }
@@ -181,7 +182,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     if(event == VP_FOCUSED || event == VP_MAXIMIZE){
         set_schedule(ALWAYS);
     }
-    else if(event == VP_UNFOCUSED || event == VP_MINIMIZE){
+    else if(event == VP_MINIMIZE){
         set_schedule(NEVER);
     }
     else if(event == VP_EXIT){

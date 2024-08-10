@@ -213,7 +213,7 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 			break;
 		}
 	}
-	if(console == NULL || vp == NULL) return NULL;
+	if(console == NULL || vp == NULL || vp->backbuf == NULL) return NULL;
 	memset(console->buf, 0, console->buf_size);
 	console->view_type = CONSOLE_VIEWPORT;
 	console->active = true;
@@ -221,6 +221,7 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	console->last_cursor = 0;
 	console->window = NULL;
 	console->viewport = vp;
+	memset(console->viewport->backbuf, 0, console->viewport->buf_size);
 	console->width = console->viewport->loc.w / CHAR_W;
 	console->height = console->viewport->loc.h / CHAR_H - CHAR_H;
 

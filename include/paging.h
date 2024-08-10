@@ -6,6 +6,7 @@
 #include "io.h"
 #include "cpu.h"
 #include "interrupts.h"
+#include "stacktrace.h"
 
 
 #define PAGE_SIZE 0x400000

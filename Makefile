@@ -41,7 +41,8 @@ OBJECTS = \
 		src/desktop/bitmap.o \
 		src/desktop/gfx.o \
 		src/desktop/icon.o \
-		src/desktop/viewport.o
+		src/desktop/viewport.o \
+		src/stacktrace.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

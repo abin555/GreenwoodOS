@@ -77,7 +77,6 @@ void MEM_populateRegions(){
         MEMORY_REGIONS[i].physical_addr = i*0x400000;
         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
 	}
-	return;
 	int num_blocks = (GRUB_MMAP->size) / GRUB_MMAP->entry_size;
 	print_serial("Total Size: 0x%x\nEntry Size: 0x%x\nNum Blocks: 0x%x\n", GRUB_MMAP->size, GRUB_MMAP->entry_size, num_blocks);
 	for(int i = 0; i < num_blocks; i++){
@@ -92,7 +91,7 @@ void MEM_populateRegions(){
 		}
 		int table_idx = GRUB_MMAP->entries[i].upper_addr >> 22;
 		int contains_count = (GRUB_MMAP->entries[i].upper_len / PAGE_SIZE) + 1;
-		print_serial("Table IDX %x with %x regions\n", table_idx, contains_count);
+		print_serial("Table IDX %d with %d regions\n", table_idx, contains_count);
 		for(int j = 0; j < contains_count; j++){
 			MEMORY_REGION_TYPE type;
 			switch(GRUB_MMAP->entries[i].type){
@@ -116,7 +115,7 @@ void MEM_populateRegions(){
 			else{
 				MEMORY_REGIONS[table_idx + j].available = 0;
 			}
-			//print_serial("IDX %x is type %x at PHYS 0x%x VIRT: 0x%x\n", table_idx + j, type, MEMORY_REGIONS[table_idx + j].physical_addr, MEMORY_REGIONS[table_idx + j].virtual_addr);
+			//print_serial("IDX %d is type %d at PHYS 0x%x VIRT: 0x%x\n", table_idx + j, type, MEMORY_REGIONS[table_idx + j].physical_addr, MEMORY_REGIONS[table_idx + j].virtual_addr);
 		}
 	}
 

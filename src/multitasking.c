@@ -1,6 +1,9 @@
 #include "multitasking.h"
 
 bool task_lock;
+int8_t task_running_idx;
+uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8)));
+struct task_state tasks[MAX_TASKS];
 
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
@@ -201,6 +204,11 @@ void task_callback(){
             || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
             && (tasks[next_idx].schedule_type != NEVER)
         ){
+            if(tasks[next_idx].registers.esp <= (uint32_t) &task_stack_array[next_idx]){
+                print_serial("ERROR: Stack Overflow: %s (%d)\n", tasks[next_idx].task_name, next_idx);
+                stop_task(next_idx);
+                continue;
+            }
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx]);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;
