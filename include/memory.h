@@ -20,7 +20,8 @@ typedef enum {
 	PROGRAM = 6,
 	UNDEFINED = 7,
 	FRAMEBUFFER = 8,
-	AVAILABLE = 9
+	AVAILABLE = 9,
+	STACK = 10
 } MEMORY_REGION_TYPE;
 
 struct memory_region{

@@ -2,11 +2,24 @@
 
 bool task_lock;
 int8_t task_running_idx;
-uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE] __attribute__((aligned (8)));
+void *task_stack_base;
+uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (8)));
 struct task_state tasks[MAX_TASKS];
+
+#define TASK_STACK_VIRTUAL_BASE 0xA0000000
 
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
+    task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, TASK_STACK_VIRTUAL_BASE, STACK));
+    MEM_printRegions();
+    print_serial("[TASK] Setting Stack!\n");
+    for(int i = 0; i < MAX_TASKS; i++){
+        task_stack_array[i] = task_stack_base + (TASK_STACK_SIZE * i);
+        print_serial("%d - 0x%x\n", i, task_stack_array[i]);
+    }
+}
+
+void multitask_start(){
     task_lock = 0;
 	timer_attach(1, task_callback);
 }
@@ -30,11 +43,12 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].registers.edi = edi;
             tasks[i].registers.esi = esi;
             
-            tasks[i].stack_region = (uint32_t) &task_stack_array[i];
-            tasks[i].registers.ebp = (uint32_t) &task_stack_array[i]+TASK_STACK_SIZE-(3*4);
+            tasks[i].stack_region = (uint32_t) task_stack_array[i];
+            tasks[i].registers.ebp = (uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4);
             tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
 
             uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
+            print_serial("RI: 0x%x\n", (uint32_t) return_instruction);
             return_instruction[1] = tasks[i].registers.ebp;
             return_instruction[-1] = (uint32_t) argv;
             return_instruction[-2] = (uint32_t) argc;
@@ -204,11 +218,6 @@ void task_callback(){
             || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
             && (tasks[next_idx].schedule_type != NEVER)
         ){
-            if(tasks[next_idx].registers.esp <= (uint32_t) &task_stack_array[next_idx]){
-                print_serial("ERROR: Stack Overflow: %s (%d)\n", tasks[next_idx].task_name, next_idx);
-                stop_task(next_idx);
-                continue;
-            }
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx]);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;

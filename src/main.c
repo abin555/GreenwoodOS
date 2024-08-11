@@ -109,9 +109,10 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     timer_init(1);
 
     //PCSpeaker_Handle.beep();
+    multitask_init();
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
-    multitask_init();
+    multitask_start();
 
     while(1){}
     return 1;

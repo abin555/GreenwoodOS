@@ -52,9 +52,9 @@ struct task_state{
     bool own_console;
 };
 
-#define MAX_TASKS 12
-#define TASK_STACK_SIZE sizeof(uint32_t) * 0x400
-extern uint8_t task_stack_array[MAX_TASKS][TASK_STACK_SIZE];
+#define MAX_TASKS 20
+#define TASK_STACK_SIZE 0x40000
+extern uint8_t *task_stack_array[MAX_TASKS];
 
 extern int8_t task_running_idx;
 extern struct task_state tasks[MAX_TASKS];
@@ -71,6 +71,7 @@ void task_end();
 void task_callback();
 
 void multitask_init();
+void multitask_start();
 
 void list_tasks();
 void set_schedule(ScheduleType type);

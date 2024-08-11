@@ -45,7 +45,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 	MEMORY_REGIONS[idx].physical_addr = physical;
 	MEMORY_REGIONS[idx].virtual_addr = virtual;
 
-	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
+	print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
 	create_page_entry(physical, virtual, flag);
 	return 0;
 }
@@ -172,6 +172,8 @@ void MEM_printRegions(){
 				case AVAILABLE:
 					type = " AVAILABLE ";
 					break;
+				case STACK:
+					type = "  STACK    ";
 			}
 			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 			//print_console(kernel_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
