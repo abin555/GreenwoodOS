@@ -15,11 +15,11 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 int main(int argc, char **argv){
     print("Opening ART Window\n");
     set_schedule(ALWAYS);
-    backbuffer = 0x6000;
+    backbuffer = (uint32_t *) 0x6000;
     struct ViewportFunctions *vp_funcs = viewport_get_funcs();
     win = vp_funcs->open(WIDTH, HEIGHT, "ART");
     vp_funcs->add_event_handler(win, event_handler);
-    if(win == NULL) return;
+    if(win == NULL) return 1;
     uint32_t *buf = backbuffer;
     vp_funcs->set_buffer(win, buf, BUF_SIZE);
     uint32_t x = WIDTH/2;

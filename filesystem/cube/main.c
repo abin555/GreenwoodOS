@@ -54,7 +54,7 @@ int main(int argc, char **argv){
   print("Opening Math Renderer\n");
   uint32_t *ticks = getTimerTickHandle();
   vp_funcs = viewport_get_funcs();
-  cube_buf = 0x6000;
+  cube_buf = (uint32_t *) 0x6000;
 
   cube_vp = vp_funcs->open(WIDTH, HEIGHT, "Cube");
   vp_funcs->add_event_handler(cube_vp, event_handler);

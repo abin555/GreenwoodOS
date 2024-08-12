@@ -87,7 +87,7 @@ int main(int argc, char **argv){
     char *memory;
     if(tasks[task_id].program_slot != -1)
         memory = (char *) (((uint32_t) program_base) + pgrm_feature.size*tasks[task_id].program_slot);
-    else memory = (uint32_t *) 0xC0000000;
+    else memory = (char *) 0xC0000000;
     scan = 0;
     window = window_open("TASKMGR", 1);
     set_schedule(ONFOCUS);
