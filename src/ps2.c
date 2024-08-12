@@ -1,5 +1,5 @@
 #include "ps2.h"
-
+#include "framebuffer.h"
 
 char ps2_controllers[] = {1, 1};
 
@@ -33,9 +33,11 @@ void ps2_init(){
     ps2_write(PS2_CMD, PS2_SELF_TEST);
     if(ps2_read(PS2_DATA) != PS2_SELF_TEST_OK){
         //print_serial("[PS2] Controller failed self-test\n");
-        ps2_controllers[0] = 0;
-        ps2_controllers[1] = 0;
-        return;
+        //ps2_controllers[0] = 0;
+        //ps2_controllers[1] = 0;
+        fb_putChar(0, 0, 'X', 0xFF0000, 0x0000FF);
+        for(int i = 0; i < 0xFFFFFFF; i++){}
+        //return;
     }
 
     
@@ -118,17 +120,21 @@ void ps2_init(){
                 case PS2_KEYBOARD:
                 case PS2_KEYBOARD_TRANSLATED:
                     print_serial("[PS2] Keyboard on %d\n", i);
+                    fb_putChar(i*8, 0, 'K', 0xda42f5, 0x000000);
                     ps2_keyboard_init(i);
                     break;
                 case PS2_MOUSE:
                 case PS2_MOUSE_SCROLL_WHEEL:
                 case PS2_MOUSE_FIVE_BUTTONS:
                     print_serial("[PS2] Mouse on %d\n", i);
+                    fb_putChar(i*8, 0, 'M', 0x42ecf5, 0x000000);
                     ps2_mouse_init(i);
                     break;
             }
         }
     }
+    fb_putChar(16, 0, 'P', 0xed4566, 0x000000);
+    for(int i = 0; i < 0xFFFFFFF; i++){}
 
 
     IRQ_RES;

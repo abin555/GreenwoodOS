@@ -62,7 +62,7 @@ kernel.elf: $(OBJECTS)
 
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf
-	/usr/local/bin/grub-mkrescue -o GreenwoodOS.iso iso
+	grub-mkrescue -o GreenwoodOS.iso iso
 run: os.iso emulate
 
 DEBUG_EMU = 
