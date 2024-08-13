@@ -4,25 +4,27 @@
 char ps2_controllers[] = {1, 1};
 
 void ps2_init(){
-    //print_serial("[PS2] Init PS/2 Devices\n");
+    print_serial("[PS2] Init PS/2 Devices\n");
     char dual_channel = 1;
 
     IRQ_OFF;
+    
+    //PS2 Controller Self Test
 
     ps2_write(PS2_CMD, PS2_DISABLE_FIRST);
     ps2_write(PS2_CMD, PS2_DISABLE_SECOND);
 
     inb(PS2_DATA);
 
-    ps2_write(PS2_CMD, PS2_READ_CONFIG);
-    
+    ps2_write(PS2_CMD, PS2_READ_CONFIG);    
 
     uint8_t config = ps2_read(PS2_DATA);
+    //uint8_t original_config = config;
 
     config |= PS2_CFG_SYSTEM_FLAG;
 
     if(config & PS2_CFG_MUST_BE_ZERO){
-        //print_serial("[PS2] Invalid bit set in config\n");
+        print_serial("[PS2] Invalid bit set in config\n");
     }
 
     config &= ~(PS2_CFG_FIRST_PORT | PS2_CFG_SECOND_PORT | PS2_CFG_TRANSLATION);
@@ -30,14 +32,26 @@ void ps2_init(){
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
 
-    ps2_write(PS2_CMD, PS2_SELF_TEST);
-    if(ps2_read(PS2_DATA) != PS2_SELF_TEST_OK){
-        //print_serial("[PS2] Controller failed self-test\n");
-        //ps2_controllers[0] = 0;
-        //ps2_controllers[1] = 0;
-        fb_putChar(0, 0, 'X', 0xFF0000, 0x0000FF);
-        for(int i = 0; i < 0xFFFFFFF; i++){}
-        //return;
+    inb(PS2_DATA);
+
+    for(int j = 0; j < 5; j++){
+        fb_putChar(8, 8*j, 'T', 0xFF0000, 0x0000FF);
+        ps2_write(PS2_CMD, PS2_SELF_TEST);
+        if(ps2_read(PS2_DATA) != PS2_SELF_TEST_OK){
+            print_serial("[PS2] Controller failed self-test\n");
+            ps2_controllers[0] = 1;
+            ps2_controllers[1] = 1;
+            fb_putChar(0, 8*j, 'X', 0xFF0000, 0x0000FF);
+            for(int i = 0; i < 0xFFFFFFF; i++){}
+            //return;
+        }
+        else{
+            ps2_controllers[0] = 1;
+            ps2_controllers[1] = 1;
+            fb_putChar(8, 8*j, 'T', 0x00FF00, 0x000000);
+            for(int i = 0; i < 0xFFFFFFF; i++){}
+            break;
+        }
     }
 
     
@@ -49,23 +63,40 @@ void ps2_init(){
     ps2_write(PS2_CMD, PS2_READ_CONFIG);
     config = ps2_read(PS2_DATA);
 
+    inb(PS2_DATA);
     
+    //Controllers Self Test
 
     if(config & PS2_CFG_SECOND_CLOCK){
         //print_serial("[PS2] Only one PS/2 controller\n");
+
+        fb_putChar(8*4, 0, '2', 0xFF0000, 0x000000);
+        for(int i = 0; i < 0xFFFFFFF; i++){}
         dual_channel = 0;
         ps2_controllers[1] = 0;
     }
     else{
+        fb_putChar(8*4, 0, '2', 0x00FF00, 0x000000);
+        for(int i = 0; i < 0xFFFFFFF; i++){}
         ps2_write(PS2_CMD, PS2_DISABLE_SECOND);
     }
+
+    inb(PS2_DATA);
 
     ps2_write(PS2_CMD, PS2_TEST_FIRST);
 
     if(ps2_read(PS2_DATA) != PS2_TEST_OK){
         //print_serial("[PS2] PS/2 Port 1 failed test\n");
         ps2_controllers[0] = 0;
+        fb_putChar(8*4, 8, '1', 0xFF0000, 0x000000);
+        for(int i = 0; i < 0xFFFFFFF; i++){}
     }
+    else{
+        fb_putChar(8*4, 8, '1', 0x00FF00, 0x000000);
+        for(int i = 0; i < 0xFFFFFFF; i++){}
+    }
+
+    inb(PS2_DATA);
 
     if(dual_channel){
         ps2_write(PS2_CMD, PS2_TEST_SECOND);
@@ -74,9 +105,7 @@ void ps2_init(){
             //print_serial("[PS2] PS/2 Port 2 failed test\n");
             ps2_controllers[1] = 0;
         }
-    }
-
-    
+    }    
 
     if(ps2_controllers[0]){
         ps2_write(PS2_CMD, PS2_ENABLE_FIRST);
@@ -104,7 +133,7 @@ void ps2_init(){
         uint8_t ret = ps2_read(PS2_DATA);
 
         if(ret != PS2_DEV_ACK || ps2_read(PS2_DATA) != PS2_DEV_RESET_ACK){
-            //print_serial("[PS2] Failure to reset dev %1x\n", i);
+            print_serial("[PS2] Failure to reset dev %1x\n", i);
             ps2_controllers[i] = 0;
             config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
 
@@ -133,6 +162,7 @@ void ps2_init(){
             }
         }
     }
+
     fb_putChar(16, 0, 'P', 0xed4566, 0x000000);
     for(int i = 0; i < 0xFFFFFFF; i++){}
 
@@ -230,7 +260,6 @@ struct cpu_state ps2_keyboard_handler(struct cpu_state cpu __attribute__((unused
 }
 
 void ps2_keyboard_init(int device){
-	IRQ_OFF;
     print_serial("[PS2 KEYBOARD] Initializing\n");
     ps2_write_device(device, PS2_KBD_SSC_CMD);
     ps2_expect_ack();
@@ -266,7 +295,6 @@ void ps2_keyboard_init(int device){
     interrupt_add_handle(33, &ps2_keyboard_handler);
     IRQ_clear_mask(1);
     print_serial("[PS2 KEYBOARD] Enabled!\n");
-    IRQ_RES;
 }
 
 uint8_t mouse_cycle;

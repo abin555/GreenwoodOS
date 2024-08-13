@@ -6,8 +6,6 @@
 
 #define numIcons 10
 
-char *testImage = "/A/image/cards.tga";
-
 int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
@@ -42,9 +40,8 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     
 
-    exec("/A/tune/tune.exe", 0, NULL);
+    //exec("/A/tune/tune.exe", 0, NULL);
     exec("/A/OS/termvp/term.exe", 0, NULL);
-    exec("/A/image/image.exe", 1, &testImage);
 
     struct {
         int startX;
