@@ -158,8 +158,8 @@ void ps2_init(){
 
         if(!((ret[0] == PS2_DEV_ACK && ret[1] == PS2_DEV_RESET_ACK) || (ret[0] == PS2_DEV_RESET_ACK && ret[1] == PS2_DEV_ACK))){
             print_serial("[PS2] Failure to reset dev %d\n", i);
-            //ps2_controllers[i] = 0;
-            //config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
+            ps2_controllers[i] = 0;
+            config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
             fb_print(6*8, 8*i, "Fail to reset dev");           
         }
     }
