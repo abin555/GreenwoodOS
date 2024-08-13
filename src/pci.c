@@ -51,7 +51,25 @@ void PCI_initDevice(struct PCI_device *pdev){
 	struct PCI_driver *pdriver;
 	switch(pdev->class_code){
 		case 0x0C03://USB Controller
-			print_serial("[PCI Device] USB Device Identified Type: %x\n", pdev->progIF);
+			print_serial("[PCI Device] USB Device Identified Type: %x ", pdev->progIF);
+			switch(pdev->progIF){
+				case 0x00:
+					print_serial("UHCI");
+					break;
+				case 0x10:
+					print_serial("OHCI");
+					break;
+				case 0x20:
+					print_serial("EHCI");
+					break;
+				case 0x30:
+					print_serial("XHCI");
+					break;
+				default:
+					print_serial("UNKN");
+					break;
+			}
+			print_serial("\n");
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "USB Device";
 			pdriver->init_driver = NULL;

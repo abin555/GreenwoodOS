@@ -31,7 +31,7 @@ void ps2_init(){
         print_serial("[PS2] Invalid bit set in config\n");
     }
 
-    config &= ~(PS2_CFG_FIRST_PORT | PS2_CFG_SECOND_PORT);
+    config &= ~(PS2_CFG_FIRST_PORT | PS2_CFG_SECOND_PORT | PS2_CFG_TRANSLATION);
 
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*7, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
@@ -147,8 +147,10 @@ void ps2_init(){
         ps2_read(PS2_DATA);
         ps2_read(PS2_DATA);
         ps2_write_device(i, PS2_DEV_RESET);
+        try_again:;
         uint8_t ret[2];
         ret[0] = ps2_read(PS2_DATA);
+        if(ret[0] == 0x00) goto try_again;
         ret[1] = ps2_read(PS2_DATA);
 
         fb_putChar(8*(10 + 3*i), 8*10, quadToHex(ret[0] & 0xF0), 0xFFFFFF, 0);
