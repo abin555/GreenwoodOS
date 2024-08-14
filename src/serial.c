@@ -1,6 +1,7 @@
 #include "serial.h"
 #include <stdarg.h>
 #define PORT 0x3f8
+#include "framebuffer.h"
 
 char quadToHex(uint8_t quad){
   switch(quad){
@@ -154,14 +155,20 @@ int is_transmit_empty() {
    return inb(PORT + 5) & 0x20;
 }
  
+int fb_idx;
+int fb_idxy = 0;
+int serial_debug_mode = 0;
 void write_serial(char a) {
-   while (is_transmit_empty() == 0);
- 
-   outb(PORT,a);
+  while (is_transmit_empty() == 0);
+  if(serial_debug_mode && fb_frontbuffer != 0x0){
+    fb_putChar(8*(fb_idx++), 8*fb_idxy, a, 0xFFFFFF, 0x0);
+  }
+  outb(PORT,a);
 }
 
 void print_serial(char str[], ...){
     int i  = 0;
+    fb_idx = 0;
     va_list listpd;
     va_start(listpd, str);
     while(1){
@@ -188,4 +195,9 @@ void print_serial(char str[], ...){
         i++;
     }
     va_end(listpd);
+    if(serial_debug_mode && fb_frontbuffer != 0x0){
+      fb_idxy++;
+      if(fb_idxy > (int) fb_height / 8) fb_idxy = 0;
+      for(int j = 0; j < 0xFFFFFF; j++){}
+    }
 }

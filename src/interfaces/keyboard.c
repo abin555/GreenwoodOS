@@ -58,6 +58,10 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 				else if(kbd_US[scancode] == '`'){
 					task_lock = !task_lock;
 				}
+				else if(kbd_US[scancode] == 'a'){
+					struct MouseButtons btns = {0, 0, 0};
+					mouse_update(-1, 0, btns);
+				}
 			}
 			else if(KBD_flags.shift){
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US_shift[scancode];

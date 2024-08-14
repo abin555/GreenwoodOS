@@ -6,11 +6,11 @@ void *task_stack_base;
 uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (8)));
 struct task_state tasks[MAX_TASKS];
 
-#define TASK_STACK_VIRTUAL_BASE 0xA0000000
+#define TASK_STACK_VIRTUAL_BASE 0x80000000
 
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
-    task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, TASK_STACK_VIRTUAL_BASE, STACK));
+    task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, 0, STACK));
     MEM_printRegions();
     print_serial("[TASK] Setting Stack!\n");
     for(int i = 0; i < MAX_TASKS; i++){

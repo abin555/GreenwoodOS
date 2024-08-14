@@ -45,7 +45,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 	MEMORY_REGIONS[idx].physical_addr = physical;
 	MEMORY_REGIONS[idx].virtual_addr = virtual;
 
-	print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
+	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
 	create_page_entry(physical, virtual, flag);
 	return 0;
 }
@@ -77,6 +77,7 @@ void MEM_populateRegions(){
         MEMORY_REGIONS[i].physical_addr = i*0x400000;
         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
 	}
+	/*
 	int num_blocks = (GRUB_MMAP->size) / GRUB_MMAP->entry_size;
 	print_serial("Total Size: 0x%x\nEntry Size: 0x%x\nNum Blocks: 0x%x\n", GRUB_MMAP->size, GRUB_MMAP->entry_size, num_blocks);
 	for(int i = 0; i < num_blocks; i++){
@@ -118,6 +119,7 @@ void MEM_populateRegions(){
 			//print_serial("IDX %d is type %d at PHYS 0x%x VIRT: 0x%x\n", table_idx + j, type, MEMORY_REGIONS[table_idx + j].physical_addr, MEMORY_REGIONS[table_idx + j].virtual_addr);
 		}
 	}
+	*/
 
 	print_serial("Loading Existing Page Table into Memory Region Table\n");
 	for(int i = 0; i < NUM_PAGES; i++){

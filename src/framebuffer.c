@@ -1,6 +1,6 @@
 #include "framebuffer.h"
 
-uint32_t *fb_frontbuffer;
+uint32_t *fb_frontbuffer = 0x0;
 uint32_t fb_width;
 uint32_t fb_height;
 

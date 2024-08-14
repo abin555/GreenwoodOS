@@ -2,6 +2,8 @@
 #define SERIAL_H
 #include "io.h"
 
+extern int serial_debug_mode;
+
 int init_serial();
 
 int serial_recieved();

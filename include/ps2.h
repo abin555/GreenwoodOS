@@ -66,6 +66,10 @@ void ps2_init();
 
 uint32_t ps2_identify_dev(uint32_t dev_num);
 uint32_t ps2_identify_bytes_to_type(uint8_t first, uint8_t second);
+
+uint32_t ps2_identify_multiplex();
+void ps2_deactivate_multiplexing();
+
 char ps2_wait_write();
 char ps2_wait_read();
 uint8_t ps2_read(uint32_t port);

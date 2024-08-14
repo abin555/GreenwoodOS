@@ -38,10 +38,14 @@ void kernel_task(int argc, char **argv){
 
     drive_enumerate();
 
+    MEM_printRegions();
+
 
     window_init();
     console_init();
     MEM_printRegions();
+
+    serial_debug_mode = 0;
 
     struct WINDOW *kernel_win = window_open("KERNEL", true);
     kernel_console = console_open(kernel_win);
@@ -98,6 +102,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
 	fb_init(GRUB_tagfb);    
     MEM_printRegions();
+    serial_debug_mode = 1;
 
     alloc_init();
     MEM_printRegions();
@@ -108,7 +113,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     ps2_init();
     timer_init(1);
 
-    //PCSpeaker_Handle.beep();
+    PCSpeaker_Handle.beep();
     multitask_init();
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");

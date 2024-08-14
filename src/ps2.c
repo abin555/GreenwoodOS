@@ -119,6 +119,10 @@ void ps2_init(){
         }
     }    
 
+    if(ps2_identify_multiplex()){
+        ps2_deactivate_multiplexing();
+    }
+
     if(ps2_controllers[0]){
         ps2_write(PS2_CMD, PS2_ENABLE_FIRST);
         config |= PS2_CFG_FIRST_PORT;
@@ -160,8 +164,8 @@ void ps2_init(){
 
         if(!((ret[0] == PS2_DEV_ACK && ret[1] == PS2_DEV_RESET_ACK) || (ret[0] == PS2_DEV_RESET_ACK && ret[1] == PS2_DEV_ACK))){
             print_serial("[PS2] Failure to reset dev %d\n", i);
-            ps2_controllers[i] = 0;
-            config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
+            //ps2_controllers[i] = 0;
+            //config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
             fb_print(6*8, 8*i, "Fail to reset dev");           
         }
     }
@@ -211,6 +215,54 @@ void ps2_init(){
     //print_serial("[PS2] Initialized\n");
 }
 
+uint32_t ps2_identify_multiplex(){
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0xF0);
+    uint8_t res1 = ps2_read(PS2_DATA);//Should be 0xF0 if multi
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0x56);
+    uint8_t res2 = ps2_read(PS2_DATA);//Should be 0x56 if multi
+
+    fb_putChar(8*(10), 8*4, quadToHex(res1 & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(11), 8*4, quadToHex(res1 & 0xF), 0xFFFFFF, 0);
+    fb_putChar(8*(10), 8*5, quadToHex(res2 & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(11), 8*5, quadToHex(res2 & 0xF), 0xFFFFFF, 0);
+
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0xA4);
+    uint8_t ver = ps2_read(PS2_DATA);
+    fb_putChar(8*(10), 8*6, quadToHex(ver & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(11), 8*6, quadToHex(ver & 0xF), 0xFFFFFF, 0);
+    print_serial("[PS2] Multiplex Test: %x %x %x\n", res1, res2, ver);
+    if(ver != 0xA4){
+        print_serial("[PS2] Mutliplex is available!\n");
+        return 1;
+    }
+    return 0;
+}
+
+void ps2_deactivate_multiplexing(){
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0xF0);
+    uint8_t res1 = ps2_read(PS2_DATA);//Should be 0xF0 if multi
+
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0x56);
+    uint8_t res2 = ps2_read(PS2_DATA);//Should be 0xF0 if multi
+    
+    ps2_write(PS2_CMD, 0xD3);
+    ps2_write(PS2_DATA, 0xA5);
+    uint8_t ver = ps2_read(PS2_DATA);//Should be 0xF0 if multi
+
+    fb_putChar(8*(14), 8*4, quadToHex(res1 & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(15), 8*4, quadToHex(res1 & 0xF), 0xFFFFFF, 0);
+    fb_putChar(8*(14), 8*5, quadToHex(res2 & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(15), 8*5, quadToHex(res2 & 0xF), 0xFFFFFF, 0);
+    fb_putChar(8*(14), 8*6, quadToHex(ver & 0xF0), 0xFFFFFF, 0);
+    fb_putChar(8*(15), 8*6, quadToHex(ver & 0xF), 0xFFFFFF, 0);
+
+    print_serial("[PS2] Disabled Multiplexing %x %x %x\n", res1, res2, ver);
+}
 
 uint32_t ps2_identify_dev(uint32_t dev_num){
     ps2_write_device(dev_num, PS2_DEV_DISABLE_SCAN);
@@ -301,10 +353,6 @@ struct cpu_state ps2_keyboard_handler(struct cpu_state cpu __attribute__((unused
 
 void ps2_keyboard_init(int device){
     print_serial("[PS2 KEYBOARD] Initializing\n");
-    ps2_write_device(device, PS2_KBD_SSC_CMD);
-    ps2_expect_ack();
-    ps2_write_device(device, PS2_KBD_SSC_2);
-    ps2_expect_ack();
 
     ps2_write_device(device, PS2_KBD_SSC_CMD);
     ps2_expect_ack();
@@ -312,20 +360,6 @@ void ps2_keyboard_init(int device){
     ps2_expect_ack();
     keyboard_scancode = ps2_read(PS2_DATA);
     print_serial("[PS2 KEYBOARD] Scancode is currently: %d\n", keyboard_scancode);
-
-    if(keyboard_scancode != 2){
-        ps2_write_device(device, PS2_KBD_SSC_CMD);
-        ps2_expect_ack();
-        ps2_write_device(device, 2);
-        ps2_expect_ack();
-
-        ps2_write_device(device, PS2_KBD_SSC_CMD);
-        ps2_expect_ack();
-        ps2_write_device(device, PS2_KBD_SSC_GET);
-        ps2_expect_ack();
-        keyboard_scancode = ps2_read(PS2_DATA);
-        print_serial("[PS2 KEYBOARD] Scancode is currently: %d\n", keyboard_scancode);
-    }
 
     
 
