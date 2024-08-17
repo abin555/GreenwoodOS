@@ -21,9 +21,11 @@ void ps2_init(){
     uint8_t config = ps2_read(PS2_DATA);
     //uint8_t original_config = config;
 
+    /*
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*6, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
     }
+    */
 
     config |= PS2_CFG_SYSTEM_FLAG;
 
@@ -33,9 +35,11 @@ void ps2_init(){
 
     config &= ~(PS2_CFG_FIRST_PORT | PS2_CFG_SECOND_PORT | PS2_CFG_TRANSLATION);
 
+    /*
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*7, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
     }
+    */
 
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
@@ -49,15 +53,15 @@ void ps2_init(){
             print_serial("[PS2] Controller failed self-test\n");
             ps2_controllers[0] = 1;
             ps2_controllers[1] = 1;
-            fb_putChar(0, 8*j, 'X', 0xFF0000, 0x0000FF);
-            for(int i = 0; i < 0xFFFFFFF; i++){}
+            //fb_putChar(0, 8*j, 'X', 0xFF0000, 0x0000FF);
+            //for(int i = 0; i < 0xFFFFFFF; i++){}
             //return;
         }
         else{
             ps2_controllers[0] = 1;
             ps2_controllers[1] = 1;
-            fb_putChar(8, 8*j, 'T', 0x00FF00, 0x000000);
-            for(int i = 0; i < 0xFFFFFFF; i++){}
+            //fb_putChar(8, 8*j, 'T', 0x00FF00, 0x000000);
+            //for(int i = 0; i < 0xFFFFFFF; i++){}
             break;
         }
     }
@@ -71,9 +75,11 @@ void ps2_init(){
     ps2_write(PS2_CMD, PS2_READ_CONFIG);
     config = ps2_read(PS2_DATA);
 
+    /*
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*8, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
     }
+    */
 
     inb(PS2_DATA);
     
@@ -82,15 +88,15 @@ void ps2_init(){
     if(config & PS2_CFG_SECOND_CLOCK){
         //print_serial("[PS2] Only one PS/2 controller\n");
 
-        fb_putChar(8*4, 0, '2', 0xFF0000, 0x000000);
-        for(int i = 0; i < 0xFFFFFFF; i++){}
+        //fb_putChar(8*4, 0, '2', 0xFF0000, 0x000000);
+        //for(int i = 0; i < 0xFFFFFFF; i++){}
         dual_channel = 0;
         ps2_controllers[1] = 0;
     }
     else{
         fb_putChar(8*4, 0, '2', 0x00FF00, 0x000000);
-        for(int i = 0; i < 0xFFFFFFF; i++){}
-        ps2_write(PS2_CMD, PS2_DISABLE_SECOND);
+        //for(int i = 0; i < 0xFFFFFFF; i++){}
+        //ps2_write(PS2_CMD, PS2_DISABLE_SECOND);
     }
 
     inb(PS2_DATA);
@@ -100,12 +106,12 @@ void ps2_init(){
     if(ps2_read(PS2_DATA) != PS2_TEST_OK){
         //print_serial("[PS2] PS/2 Port 1 failed test\n");
         ps2_controllers[0] = 0;
-        fb_putChar(8*4, 8, '1', 0xFF0000, 0x000000);
-        for(int i = 0; i < 0xFFFFFFF; i++){}
+        //fb_putChar(8*4, 8, '1', 0xFF0000, 0x000000);
+        //for(int i = 0; i < 0xFFFFFFF; i++){}
     }
     else{
-        fb_putChar(8*4, 8, '1', 0x00FF00, 0x000000);
-        for(int i = 0; i < 0xFFFFFFF; i++){}
+        //fb_putChar(8*4, 8, '1', 0x00FF00, 0x000000);
+        //for(int i = 0; i < 0xFFFFFFF; i++){}
     }
 
     inb(PS2_DATA);
@@ -140,63 +146,80 @@ void ps2_init(){
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
 
+    /*
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*9, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
     }
+    */
 
     
-
+    /*
     for(uint32_t i = 0; i < 2; i++){
         if(!ps2_controllers[i]) continue;
         ps2_read(PS2_DATA);
         ps2_read(PS2_DATA);
         ps2_write_device(i, PS2_DEV_RESET);
-        try_again:;
-        uint8_t ret[2];
-        ret[0] = ps2_read(PS2_DATA);
-        if(ret[0] == 0x00) goto try_again;
-        ret[1] = ps2_read(PS2_DATA);
+        int pass = 0;
+        for(int j = 0; j < 5; j++){
+            try_again:;
+            uint8_t ret[2];
+            ret[0] = ps2_read(PS2_DATA);
+            if(ret[0] == 0x00) goto try_again;
+            ret[1] = ps2_read(PS2_DATA);
 
-        fb_putChar(8*(10 + 3*i), 8*10, quadToHex(ret[0] & 0xF0), 0xFFFFFF, 0);
-        fb_putChar(8*(11 + 3*i), 8*10, quadToHex(ret[0] & 0xF), 0xFFFFFF, 0);
-        fb_putChar(8*(10 + 3*i), 8*11, quadToHex(ret[1] & 0xF0), 0xFFFFFF, 0);
-        fb_putChar(8*(11 + 3*i), 8*11, quadToHex(ret[1] & 0xF), 0xFFFFFF, 0);
+            fb_putChar(8*(10 + 3*i), 8*10, quadToHex(ret[0] & 0xF0), 0xFFFFFF, 0);
+            fb_putChar(8*(11 + 3*i), 8*10, quadToHex(ret[0] & 0xF), 0xFFFFFF, 0);
+            fb_putChar(8*(10 + 3*i), 8*11, quadToHex(ret[1] & 0xF0), 0xFFFFFF, 0);
+            fb_putChar(8*(11 + 3*i), 8*11, quadToHex(ret[1] & 0xF), 0xFFFFFF, 0);
 
-        if(!((ret[0] == PS2_DEV_ACK && ret[1] == PS2_DEV_RESET_ACK) || (ret[0] == PS2_DEV_RESET_ACK && ret[1] == PS2_DEV_ACK))){
-            print_serial("[PS2] Failure to reset dev %d\n", i);
-            //ps2_controllers[i] = 0;
-            //config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
-            fb_print(6*8, 8*i, "Fail to reset dev");           
+            if((ret[0] == PS2_DEV_ACK && ret[1] == PS2_DEV_RESET_ACK) || (ret[0] == PS2_DEV_RESET_ACK && ret[1] == PS2_DEV_ACK)){
+                fb_putChar(6*(8*j), 8*i, 'D', 0xFF0000, 0x0);
+                pass = 1;
+                break;
+            }
+            else{
+                print_serial("[PS2] Failure to reset dev %d\n", i);
+                //ps2_controllers[i] = 0;
+                //config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
+                fb_putChar(6*(8*j), 8*i, 'D', 0xFF0000, 0x0);
+            }
+        }
+        if(!pass){
+            ps2_controllers[i] = 0;
+            config &= ~(i == 0 ? PS2_CFG_FIRST_PORT : PS2_CFG_SECOND_PORT);
         }
     }
+
     ps2_write(PS2_CMD, PS2_WRITE_CONFIG);
     ps2_write(PS2_DATA, config);
     for(int i = 0; i < 8; i++){
         fb_putChar(8*i, 8*10, (config >> (7 - i)) & 1 ? '1' : '0', 0xFFFFFF, 0x0);
     }
+    */
 
     for(int i = 0; i < 2; i++){
         if(ps2_controllers[i]){
             uint32_t type = ps2_identify_dev(i);
-            fb_putChar(8*i, 8, '0'+type, 0xFFFFFF,0);
+            //fb_putChar(8*i, 8, '0'+type, 0xFFFFFF,0);
             switch(type){
                 case PS2_KEYBOARD:
                 case PS2_KEYBOARD_TRANSLATED:
                     print_serial("[PS2] Keyboard on %d\n", i);
-                    fb_putChar(i*8, 0, 'K', 0xda42f5, 0x000000);
+                    //fb_putChar(i*8, 0, 'K', 0xda42f5, 0x000000);
                     ps2_keyboard_init(i);
                     break;
                 case PS2_MOUSE:
                 case PS2_MOUSE_SCROLL_WHEEL:
                 case PS2_MOUSE_FIVE_BUTTONS:
                     print_serial("[PS2] Mouse on %d\n", i);
-                    fb_putChar(i*8, 0, 'M', 0x42ecf5, 0x000000);
+                    //fb_putChar(i*8, 0, 'M', 0x42ecf5, 0x000000);
                     ps2_mouse_init(i);
                     break;
             }
         }
     }
 
+    /*
     fb_putChar(16, 0, 'P', 0xed4566, 0x000000);
     for(int i = 0; i < 0xFFFFFFF; i++){}
 
@@ -209,7 +232,7 @@ void ps2_init(){
     for(int i = 0; i < 0xFFFFFFF; i++){}
 
     for(int i = 0; i < 0xFFFFFFF; i++){}
-
+    */
 
     IRQ_RES;
     //print_serial("[PS2] Initialized\n");

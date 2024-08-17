@@ -63,7 +63,7 @@ void window_init(){
 		print_serial("[WINDOW] Cursor image unavailable!\n");
 	}
 
-	timer_attach(2, window_timer_callback);
+	timer_attach(10, window_timer_callback);
 	
 }
 

@@ -52,6 +52,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     } ClickDrag;
 
     set_schedule(ONFOCUS);
+    //serial_debug_mode = 1;
 
     while(1){
         drawBitmap(0, 0, background, window); 

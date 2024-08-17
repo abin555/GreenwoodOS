@@ -27,6 +27,7 @@
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
+    print_serial("Program Init\n");
     program_init();
     init_syscalls();
     init_drive_system();
@@ -113,7 +114,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     ps2_init();
     timer_init(1);
 
-    PCSpeaker_Handle.beep();
     multitask_init();
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");

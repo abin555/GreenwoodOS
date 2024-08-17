@@ -3,6 +3,7 @@
 void *ext2_read_block(struct EXT2_FS *ext2, uint32_t block_id){
 	//print_serial("[EXT2] Reading block %d\n", block_id);
 	if(block_id > ext2->block_count) return NULL;
+	memset(ext2->buf, 0, ext2->block_size);
 	int err = drive_read(ext2->drive, ext2->buf, block_id*ext2->sectors_per_block, ext2->sectors_per_block);
 	if(err == -1) return NULL;
 	return ext2->buf;
@@ -84,40 +85,6 @@ uint32_t ext2_get_direntry_inode(struct EXT2_FS *ext2, uint32_t parent_inodeIdx,
 	return 0;
 }
 
-
-void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx){
-	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
-	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory){
-		print_console(console, "File of size %d\n", inode.lsbSize);
-		return;
-	};
-	if(*((int *) &inode.lsbSize) < 0){
-		//print_serial("[EXT2] Error reading directory!\n");
-		print_console(console, "[EXT2] Error reading directory!\n");
-		return;
-	}
-	
-	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
-	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
-
-	char work_buf[20];
-	//memset(work_buf, 0, sizeof(work_buf));
-
-	while(dir->entry_size != 0){
-		memset(work_buf, 0, sizeof(work_buf));
-		memcpy(work_buf, dir->name, dir->name_length);
-		//for(uint8_t i = 0; i < dir->name_length; i++){
-		//	print_serial("%c", dir->name[i]);
-		//}
-		//print_serial("\n");
-		print_console(console, "%s\n", work_buf);
-		//print_serial("[EXT2] [LS] Inode %d %s %x\n", inodeIdx, work_buf, (uint32_t) dir);
-		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
-	}
-}
-
-
-
 void ext2_debug_print_inode(struct EXT2_Inode *inode){
 	print_serial("[EXT2] Type Perms %x\n", inode->type_perms);
 	print_serial("[EXT2] User Id %x\n", inode->userId);
@@ -142,6 +109,42 @@ void ext2_debug_print_inode(struct EXT2_Inode *inode){
 
 }
 
+void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx){
+	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
+	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory){
+		print_console(console, "File of size %d\n", inode.lsbSize);
+		return;
+	};
+	if(*((int *) &inode.lsbSize) < 0){
+		//print_serial("[EXT2] Error reading directory!\n");
+		print_console(console, "[EXT2] Error reading directory!\n");
+		return;
+	}
+	
+	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
+	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
+
+	char work_buf[21];
+	//memset(work_buf, 0, sizeof(work_buf));
+
+	ext2_debug_print_inode(&inode);
+
+	int i = 0;
+	while(dir->entry_size != 0 && i < 20){
+		i++;
+		memset(work_buf, 0, sizeof(work_buf));
+		memcpy(work_buf, dir->name, dir->name_length <= 20 ? dir->name_length : 20);
+		//for(uint8_t i = 0; i < dir->name_length; i++){
+		//	print_serial("%c", dir->name[i]);
+		//}
+		//print_serial("\n");
+		print_serial("%s %d\n", work_buf, dir->entry_size);
+		print_console(console, "%s\n", work_buf);
+		//print_serial("[EXT2] [LS] Inode %d %s %x\n", inodeIdx, work_buf, (uint32_t) dir);
+		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
+	}
+}
+
 int ext2_check_format(struct DRIVE *drive){
 	print_serial("[EXT2] Checking format on drive %c\n", drive->identity);
 	if(drive == NULL){
@@ -161,6 +164,7 @@ int ext2_check_format(struct DRIVE *drive){
 	ext2->block_size = 1024 << super_block->log_block_size;
 	ext2->sectors_per_block = ext2->block_size / 0x200;
 	ext2->buf = (char *) malloc(sizeof(char) * ext2->block_size);
+	memset(ext2->buf, 0, ext2->block_size);
 	ext2->block_count = super_block->blocks_count;
 	ext2->inode_count = super_block->inodes_count;
 	ext2->starting_block_number = super_block->first_data_block;

@@ -232,7 +232,7 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	console->color.fg = 0xFFFFFF;
 	console->color.bg = 0;
 
-	print_serial("[CONSOLE] Open Viewport console for %s\n", console->viewport->title);
+	print_serial("[CONSOLE] Open Viewport console for %s %dx%d\n", console->viewport->title, console->width, console->height);
 	return console;
 }
 
@@ -252,6 +252,10 @@ void console_clear(struct CONSOLE *console){
 
 void print_console(struct CONSOLE *console, char *msg, ...){
 	if(console == NULL) return;
+	if(msg == NULL){
+		print_serial("MSG is null!\n");
+		return;
+	}
 	uint32_t p = 0;
 	char allowed = 1;
 	va_list listptd;
