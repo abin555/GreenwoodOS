@@ -7,8 +7,15 @@
 #define IRQ_RES { asm volatile ("sti"); }
 
 //extern void outb(unsigned short port, unsigned char data);
-void outb(uint16_t portid, uint8_t value);
-extern unsigned char inb(unsigned short port);
+static inline void outb(uint16_t portid, uint8_t value){
+	asm volatile("out dx, al": :"d" (portid), "a" (value & 0xFF));
+}
+
+static inline uint8_t inb(uint16_t port){
+	uint8_t data;
+	__asm__ volatile("in al, dx" : "=a"(data) : "d"(port));
+	return data;
+}
 
 void outportl(uint16_t port, uint32_t value);
 uint32_t inportl(uint16_t port);

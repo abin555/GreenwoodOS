@@ -312,6 +312,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			task->own_console = true;
 			break;
 		}
+		case 0x2F:{
+			cpu_state.eax = (uint32_t) &RTC;
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

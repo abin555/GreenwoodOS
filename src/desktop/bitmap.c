@@ -42,10 +42,12 @@ struct Bitmap loadBitmap(char *filename){
 void drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window){
     if(bitmap.bitmap == NULL || window == NULL) return;
     for(uint32_t ly = 0; ly < bitmap.height; ly++){
+        uint32_t yoff = ly*bitmap.width;
+        uint32_t byoff = (y + ly) * window->width;
         for(uint32_t lx = 0; lx < bitmap.width; lx++){
-            uint32_t color = bitmap.bitmap[lx+ly*bitmap.width];
+            uint32_t color = bitmap.bitmap[lx+yoff];
             if(!(color & 0xFF000000)) continue;
-            window->backbuffer[(y + ly)*window->width + (x + lx)] = color;
+            window->backbuffer[byoff + (x + lx)] = color;
         }
     }
 }

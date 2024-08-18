@@ -13,6 +13,7 @@
 #include "mouse.h"
 #include "pcspeaker.h"
 #include "viewport.h"
+#include "rtc.h"
 
 void init_syscalls();
 

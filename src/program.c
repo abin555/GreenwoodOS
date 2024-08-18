@@ -4,10 +4,11 @@
 bool program_slot_status[PROGRAM_MAX] = {0};
 
 uint32_t program_region_phys_base;
+uint32_t program_region_virt_base;
 
 void program_init(){
 	int blockStart = MEM_findRegionIdx(0x400000 * PROGRAM_MAX);
-	MEM_reserveRegionBlock(blockStart, 0x400000 * PROGRAM_MAX, PROGRAM_VIRT_REGION_BASE, PROGRAM);
+	program_region_virt_base = MEM_reserveRegionBlock(blockStart, 0x400000 * PROGRAM_MAX, 0, PROGRAM);
 	program_region_phys_base = blockStart * 0x400000;
 	print_serial("[PROGRAM] Memory Region Initialized at Physical 0x%x\n", program_region_phys_base);
 }
@@ -15,7 +16,7 @@ void program_init(){
 uint8_t program_active_slot = 0;
 
 void select_program(uint8_t program_slot){
-    create_page_entry(program_region_phys_base + 0x400000*program_active_slot, PROGRAM_VIRT_REGION_BASE + 0x400000*program_active_slot, 0x83);
+    create_page_entry(program_region_phys_base + 0x400000*program_active_slot, program_region_virt_base + 0x400000*program_active_slot, 0x83);
     create_page_entry(program_region_phys_base + 0x400000*program_slot, 0, 0x83);
     program_active_slot = program_slot;
 }
@@ -37,14 +38,14 @@ void exec(char *filename, int argc, char **argv){
 	if(file == NULL) return;
 	if(elf_check_supported(file)){
 		print_serial("[PROGRAM] Is ELF Format!\n");
-		fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));
+		fcopy(file, (char *) (program_region_virt_base + 0x400000*slot), fsize(file));
 		//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
 		fclose(file);
 		start_task((void *)0x1000, slot, argc, argv, filename);
 	}
 	else {
 		fseek(file, 0);
-		fcopy(file, (char *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), fsize(file));	
+		fcopy(file, (char *) (program_region_virt_base + 0x400000*slot), fsize(file));	
 		fclose(file);
 		start_task(0, slot, argc, argv, filename);
 	}

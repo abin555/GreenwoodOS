@@ -36,7 +36,7 @@ void kbd_callEventHandler(unsigned char ascii){
 	}
 }
 
-void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
+void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
 	char justRelease = 0;
 	char justSpecial = 0;

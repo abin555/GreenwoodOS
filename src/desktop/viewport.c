@@ -219,7 +219,7 @@ struct Viewport *viewport_indirect_open(int w, int h, char *title){
     return viewport_open(global_viewport_list, w, h, title_ptr);
 }
 
-struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
+struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
     print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
     if(w > (int) fb_width || h > (int) fb_height || w < 0 || h < 0) return NULL;
     int element_idx = -1;
@@ -252,7 +252,7 @@ void viewport_indirect_close(struct Viewport *viewport){
     viewport_close(global_viewport_list, viewport);
 }
 
-void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
+void __attribute__ ((optimize("-O3"))) viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
     if(viewport == NULL) return;
     viewport->open = false;
     viewport->event_handler = NULL;
@@ -275,7 +275,7 @@ void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewpor
     viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
 }
 
-void viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
+void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
     if(element_idx == 0) return;
     for(int i = element_idx; i > 0; i--){
         struct ViewportList_element temp = viewport_list->elements[i - 1];
@@ -287,7 +287,7 @@ void viewport_move_element_to_front(struct ViewportList *viewport_list, int elem
     return;
 }
 
-void viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
+void __attribute__ ((optimize("-O3"))) viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
     for(int i = viewport_list->count - 1; i >= 0; i--){
         if(!viewport_list->elements[i].inUse){
             //print_serial("[VIEWPORT] %d not in use\n", i);
@@ -305,7 +305,7 @@ void viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window
     }
 }
 
-struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y){
+struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_click(struct ViewportList *viewport_list, int x, int y){
     struct Viewport_Interaction interaction = {
         VP_None,
         NULL
@@ -334,7 +334,7 @@ struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport
     return interaction;
 }
 
-void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y){
+void __attribute__ ((optimize("-O3"))) viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y){
     if(viewport == NULL) return;
     viewport->loc.x = x;
     viewport->loc.y = y;
@@ -345,7 +345,7 @@ void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int
     if(viewport->loc.y + viewport->loc.h >= (int) window->height) viewport->loc.y = window->height - viewport->loc.h;
 }
 
-bool getViewportBodyClick(struct Viewport *viewport, int x, int y){
+bool __attribute__ ((optimize("-O3"))) getViewportBodyClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
     if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y + VIEWPORT_HEADER_HEIGHT && y < viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT) return true;
     return false;
@@ -359,15 +359,17 @@ void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t b
     viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
 }
 
-void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
+void __attribute__ ((optimize("-O3"))) viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
     uint32_t x = (uint32_t) viewport->loc.x;
     uint32_t y = (uint32_t) viewport->loc.y + VIEWPORT_HEADER_HEIGHT;
     uint32_t w = (uint32_t) viewport->loc.w;
     uint32_t h = (uint32_t) viewport->loc.h;
     uint32_t i = 0;
     for(uint32_t ly = 0; ly < h; ly++){
+        uint32_t yoff = ly*w;
+        uint32_t byoff = (y + ly) * window->width;
         for(uint32_t lx = 0; lx < w; lx++){
-            window->backbuffer[(y + ly)*window->width + (x + lx)] = viewport->frontbuf[lx+ly*w];
+            window->backbuffer[byoff + (x + lx)] = viewport->frontbuf[lx+yoff];
             i++;
             if(i > viewport->buf_size) goto escape;
         }

@@ -23,6 +23,7 @@
 #include "pcspeaker.h"
 #include "desktop.h"
 #include "ext2.h"
+#include "rtc.h"
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -45,6 +46,8 @@ void kernel_task(int argc, char **argv){
     window_init();
     console_init();
     MEM_printRegions();
+
+    rtc_init();
 
     serial_debug_mode = 0;
 

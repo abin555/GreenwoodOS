@@ -19,6 +19,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
 
     struct Icon icons[numIcons];
+    memset(icons, 0, sizeof(struct Icon) * numIcons);
 
     for(int i = 0; i < numIcons; i++){
         char folderLabel[5] = {'F','O','L','D',0};
@@ -49,7 +50,13 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
         char dragging;
         int dragType;//0 = icon, 1 = viewport
         struct Viewport *selected_vp;
-    } ClickDrag;
+    } ClickDrag = {
+        0,
+        0,
+        0,
+        -1,
+        NULL
+    };
 
     set_schedule(ONFOCUS);
     //serial_debug_mode = 1;

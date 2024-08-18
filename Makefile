@@ -5,7 +5,6 @@ OBJECTS = \
 		src/framebuffer.o \
 		src/serial.o \
 		src/io.o \
-		src/io_asm.o \
 		src/cpu.o \
 		src/gdt.o \
 		src/paging_asm.o \
@@ -42,7 +41,8 @@ OBJECTS = \
 		src/desktop/gfx.o \
 		src/desktop/icon.o \
 		src/desktop/viewport.o \
-		src/stacktrace.o
+		src/stacktrace.o \
+		src/rtc.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
@@ -58,7 +58,7 @@ kernel.elf: $(OBJECTS)
 	#~/copy_bin/ln $(LDFLAGS) $(OBJECTS) -o kernel.elf
 	cd ..	
 	objcopy --only-keep-debug kernel.elf kernel.sym
-	objcopy --strip-debug kernel.elf
+#	objcopy --strip-debug kernel.elf
 
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf

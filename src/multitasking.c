@@ -135,7 +135,7 @@ void task_end(){
 	while(1){}
 }
 
-void switch_to_task(struct task_state* old_task, struct task_state* new_task){
+void __attribute__ ((optimize("-O2"))) switch_to_task(struct task_state* old_task, struct task_state* new_task){
     //Save current task's state
     old_task->registers.eip = most_recent_int_stack_state.eip;
     old_task->registers.eax = most_recent_int_cpu_state.eax;
@@ -163,7 +163,8 @@ void switch_to_task(struct task_state* old_task, struct task_state* new_task){
     most_recent_int_cpu_state.esp = new_task->registers.esp;
 }
 
-void task_callback(){
+
+void __attribute__ ((optimize("-O2"))) task_callback(){
     if(task_lock) return;
     ////printk("[TASK] Callback\n");
     int8_t running_idx=-1;

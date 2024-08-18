@@ -434,3 +434,10 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	struct CONSOLE *console = (struct CONSOLE *) eax;
 	return console;
 }
+
+struct RealTimeClock *get_rtc(){
+	register uint32_t eax asm("eax");
+	eax = 0x2F;
+	asm("int 0x80");
+	return (struct RealTimeClock *) eax;
+}

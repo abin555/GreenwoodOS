@@ -199,6 +199,17 @@ struct ViewportFunctions {
 struct ViewportFunctions *viewport_get_funcs();
 struct CONSOLE *console_open_vp(struct Viewport *vp);
 
+struct RealTimeClock {
+	unsigned char second;
+	unsigned char minute;
+	unsigned char hour;
+	unsigned char day;
+	unsigned char month;
+	unsigned int year;
+};
+
+struct RealTimeClock *get_rtc();
+
 #ifdef __cplusplus
 }
 #endif
