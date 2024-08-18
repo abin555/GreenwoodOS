@@ -6,7 +6,12 @@
 
 #define numIcons 10
 
-int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
+void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, struct WINDOW *window){
+    if(bitmap.bitmap == NULL || window == NULL) return;
+    memfcpy(window->backbuffer, bitmap.bitmap, bitmap.width * bitmap.height * sizeof(uint32_t));
+}
+
+int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
     window_task->keyboard_event_handler = desktop_kbd_event;
@@ -39,8 +44,6 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
 
     viewport_init_sys(global_viewport_list);
 
-    
-
     //exec("/A/tune/tune.exe", 0, NULL);
     exec("/A/OS/termvp/term.exe", 0, NULL);
 
@@ -62,10 +65,12 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     //serial_debug_mode = 1;
 
     while(1){
-        drawBitmap(0, 0, background, window); 
+        task_lock = 1;
+        drawBackground(background, window);
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
         viewport_draw_all(global_viewport_list, window);
+        task_lock = 0;
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
             struct Viewport_Interaction vp_interaction = viewport_process_click(global_viewport_list, mouseStatus.pos.x, mouseStatus.pos.y);
@@ -131,7 +136,7 @@ int desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((
     }
 }
 
-void desktop_kbd_event(char ascii){
+void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
     if(KBD_flags.ctrl && ascii == 'T'){
         exec("/A/OS/termvp/term.exe", 0, NULL);

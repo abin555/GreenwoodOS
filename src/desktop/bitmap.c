@@ -39,7 +39,7 @@ struct Bitmap loadBitmap(char *filename){
 }
 
 
-void drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window){
+void __attribute__ ((optimize("-O3"))) drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window){
     if(bitmap.bitmap == NULL || window == NULL) return;
     for(uint32_t ly = 0; ly < bitmap.height; ly++){
         uint32_t yoff = ly*bitmap.width;

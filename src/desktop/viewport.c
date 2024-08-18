@@ -364,17 +364,20 @@ void __attribute__ ((optimize("-O3"))) viewport_draw_buf(struct Viewport *viewpo
     uint32_t y = (uint32_t) viewport->loc.y + VIEWPORT_HEADER_HEIGHT;
     uint32_t w = (uint32_t) viewport->loc.w;
     uint32_t h = (uint32_t) viewport->loc.h;
-    uint32_t i = 0;
+
+    uint32_t wbytes = sizeof(uint32_t) * w;
+    uint32_t wy = y*window->width;
+
     for(uint32_t ly = 0; ly < h; ly++){
-        uint32_t yoff = ly*w;
-        uint32_t byoff = (y + ly) * window->width;
-        for(uint32_t lx = 0; lx < w; lx++){
-            window->backbuffer[byoff + (x + lx)] = viewport->frontbuf[lx+yoff];
-            i++;
-            if(i > viewport->buf_size) goto escape;
+        uint32_t yoff = (ly)*window->width;
+        //uint32_t wyoff = yoff + wy;
+        memfcpy(window->backbuffer + wy + yoff + x, viewport->frontbuf + ly*w, wbytes);
+        /*
+        for(int lx = 0; lx < (int) w; lx++){
+            window->backbuffer[(y+ly)*window->width + (x+lx)] = viewport->frontbuf[ly*w+lx];
         }
+        */
     }
-    escape:;
     return;
 }
 

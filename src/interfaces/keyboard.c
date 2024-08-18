@@ -71,6 +71,9 @@ void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US[scancode];
 				KBD_flags.key = kbd_US[scancode];
 			}
+
+			fb_putChar(fb_width - 8, fb_height - 8, KBD_flags.key, 0xFFFFFF, 0x0);
+			
 			KBD_ascii_buffer_idx++;
 			keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 			kbd_callEventHandler(KBD_flags.key);
