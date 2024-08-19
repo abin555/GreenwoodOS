@@ -8,6 +8,10 @@ uint32_t AHCI_BASE;
 
 void initialize_AHCI(struct PCI_driver *driver){
     print_serial("[AHCI Driver] AHCI DRIVER INIT\n");
+	if(driver == NULL){
+		print_serial("[AHCI Driver] Fatal, NULL PCI Driver");
+		return;
+	}
 	//create_page_entry(AHCI_BASE, AHCI_BASE, 0x83);
 	//create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000, 0x83);
 	//create_page_entry((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], 0x83);
@@ -18,7 +22,7 @@ void initialize_AHCI(struct PCI_driver *driver){
 	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
 	MEM_reserveRegion((uint32_t) driver->BAR[5]+0x400000, (uint32_t) driver->BAR[5]+0x400000, DRIVER);
 
-    print_serial("[AHCI Driver] AHCI Driver 0x%x BAR: 0x%x INT: 0x%x\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
+    print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
     ABAR = (volatile HBA_MEM *)driver->BAR[5];
     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
     AHCI_int_trigger = false;
