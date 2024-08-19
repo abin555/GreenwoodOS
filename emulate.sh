@@ -1,5 +1,7 @@
 qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
--device intel-hda -device hda-output,audiodev=speaker \
+-audiodev pa,id=Sound \
+-device intel-hda \
+-device hda-output,audiodev=Sound \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
 -drive id=disk3,file=fstest.img,if=none,format=raw \
 -drive id=disk2,file=filesystem.iso,if=none,format=raw \

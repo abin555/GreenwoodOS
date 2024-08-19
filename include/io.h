@@ -41,6 +41,13 @@ static inline uint32_t inqw(uint16_t port){
 	return data;
 }
 
+void mmio_outb(uint32_t base, uint8_t value);
+void mmio_outw(uint32_t base, uint16_t value);
+void mmio_outd(uint32_t base, uint32_t value);
+uint8_t mmio_inb(uint32_t base);
+uint16_t mmio_inw(uint32_t base);
+uint32_t mmio_ind(uint32_t base);
+
 void reboot();
 
 #endif

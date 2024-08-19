@@ -1,4 +1,6 @@
 #include "pci.h"
+#include "hda.h"
+
 
 int PCI_numDevices;
 struct PCI_device *PCI_devices[50];
@@ -80,6 +82,14 @@ void PCI_initDevice(struct PCI_device *pdev){
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "AHCI Device";
 			pdriver->init_driver = initialize_AHCI;
+			goto generic_installation;
+			break;
+		case 0x0403:
+			if(!((pdev->vendorID == 0x8086 || pdev->vendorID == 0x1002) && (pdev->deviceID == 0x2668))) break;
+			print_serial("[PCI Device] Intel High Definition Audio Identified\n");
+			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
+			pdriver->name = "Intel HDA";
+			pdriver->init_driver = hda_init;
 			goto generic_installation;
 			break;
 	}

@@ -42,7 +42,8 @@ OBJECTS = \
 		src/desktop/icon.o \
 		src/desktop/viewport.o \
 		src/stacktrace.o \
-		src/rtc.o
+		src/rtc.o \
+		src/drivers/hda.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
