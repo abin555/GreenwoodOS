@@ -56,6 +56,24 @@ struct FILE{
 	int head;
 };
 
+enum DirEntryType{
+	ENTRY_FILE = 0,
+	ENTRY_DIRECTORY = 1
+};
+
+struct DirectoryEntry{
+	char filename[50];
+	int name_len;
+	uint32_t type;
+};
+
+struct DirectoryListing{
+	char *directory_path;
+	int directory_path_len;
+	struct DirectoryEntry *entries;
+	int num_entries;
+};
+
 #define NUM_FILES 50
 extern struct FILE files[NUM_FILES];
 
@@ -92,4 +110,6 @@ int fmkdir(struct DIRECTORY *dir, char *path);
 int fmkfile(struct DIRECTORY *dir, char *path, int size);
 int fextend(struct FILE *file, uint32_t extendAmount);
 
+struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path); 
+struct DirectoryListing task_listDirectory(char *path);
 #endif

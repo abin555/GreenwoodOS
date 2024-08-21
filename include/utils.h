@@ -9,5 +9,8 @@ struct IVec2{
 };
 
 int strcmp(const char *s1, const char *s2);
+int strlen(char *s);
+char *strdup(char *s);
+char *strndup(char *s, int n);
 
 #endif

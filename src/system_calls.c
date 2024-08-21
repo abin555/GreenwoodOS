@@ -316,6 +316,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			cpu_state.eax = (uint32_t) &RTC;
 			break;
 		}
+		case 0x30:{
+			cpu_state.eax = (uint32_t) &task_listDirectory;
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

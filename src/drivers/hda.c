@@ -47,6 +47,7 @@ void hda_init(struct PCI_driver *driver){
 	
 	MEM_reserveRegion((uint32_t) driver->BAR[0], (uint32_t) driver->BAR[0], DRIVER);
 	MEM_reserveRegion((uint32_t) driver->BAR[0]+0x400000, (uint32_t) driver->BAR[0]+0x400000, DRIVER);
+	return;
 
 	hdaDriver.base = driver->BAR[0];
 	hdaDriver.commType = HDA_UNINITALIZED;
@@ -173,9 +174,11 @@ void hda_init(struct PCI_driver *driver){
 	}
 	mmio_outw(hdaDriver.base + 0x58, 0x8000); //reset write pointer
 	uint32_t sticks = timer_ticks;
-	while(timer_ticks < sticks + 1000){}
+	while(timer_ticks < sticks + 10){}
 	mmio_outw(hdaDriver.base + 0x5A, 0); //disable interrupts
 	hdaDriver.rirb_pointer = 1;
+
+	print_serial("HDA: Starting CORB & RIRB\n");
 
 	//start CORB and RIRB
 	mmio_outb(hdaDriver.base + 0x4C, 0x2);
@@ -185,7 +188,9 @@ void hda_init(struct PCI_driver *driver){
 	//TODO: find more codecs
 	for(uint32_t codec_number=0, codec_id=0; codec_number<16; codec_number++) {
 		hdaDriver.commType = HDA_CORB_RIRB;
+		print_serial("HDA: Finding Codec %d\n", codec_number);
 		codec_id = hda_send_verb(codec_number, 0, 0xF00, 0);
+		
 
 		if(codec_id!=0) {
 			print_serial("HDA: CORB/RIRB communication interface\n");
@@ -225,7 +230,7 @@ int hda_send_verb(uint32_t codec, uint32_t node, uint32_t verb, uint32_t command
 		mmio_outw(hdaDriver.base + 0x48, hdaDriver.corb_pointer);
 
 		//wait for response
-		uint32_t ticks = timer_ticks + 50000;
+		uint32_t ticks = timer_ticks + 100;
 		while(timer_ticks < ticks) {
 			asm("nop");
 			if(mmio_inw(hdaDriver.base + 0x58)==hdaDriver.corb_pointer) {

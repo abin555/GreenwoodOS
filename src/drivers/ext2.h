@@ -174,6 +174,6 @@ int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size);
 int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount);
 
 int ext2_createDirectory(struct EXT2_FS *ext2, char *path);
-
+struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path);
 
 #endif

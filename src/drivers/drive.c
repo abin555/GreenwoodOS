@@ -459,7 +459,15 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
 		}
 	}
 	else{//Relative Directory
-		
+		print_serial("[DRIVE] CD: Relative %s\n", path);
+		if(path[0] == '.' && path[1] == '.' && path[2] == '\0'){
+			int last_slash = 0;
+			for(int i = 0; dir->path[i] != 0 && i < (int) sizeof(dir->path); i++) last_slash++;
+			for(int i = last_slash-2; dir->path[i] != '/'; i--) last_slash = i;
+			dir->path[last_slash] = '\0';
+			print_serial("[DRIVE] CD: Relative backup %s %d\n", dir->path, last_slash);
+			return 0;
+		}
 	}
 	return 1;
 }
@@ -538,4 +546,36 @@ int fextend(struct FILE *file, uint32_t extendAmount){
 		}
 	}
 	return 1;
+}
+
+struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path){
+	struct DirectoryListing listing = {0};
+	if(dir == NULL || path == NULL){
+		print_serial("[DRIVE] List Directory: Err: Invalid Args\n");
+		return listing;
+	}
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	char drive_letter = big_path[0];
+	path = big_path + 2;
+	struct DRIVE *drive = drive_get(drive_letter);
+	print_serial("[DRIVE] Directory Listing %s / %s\n", big_path, path);
+	if(drive->format == ISO9660){
+		//ISO9660_printFileList(console, drive->format_info.ISO, path);
+	}
+	else if(drive->format == EXT2){
+		//ext2_listDirectory(console, drive->format_info.ext2, path);
+		listing = ext2_advListDirectory(drive->format_info.ext2, path);
+	}
+	print_serial("%s:\n", listing.directory_path);
+	for(int i = 0; i < listing.num_entries; i++){
+		print_serial(" %s - %d %d\n", listing.entries[i].filename, listing.entries[i].type, listing.entries[i].name_len);
+	}
+	return listing;
+}
+
+
+#include "multitasking.h"
+struct DirectoryListing task_listDirectory(char *path){
+	return listDirectory(&tasks[task_running_idx].currentDirectory, path);
 }

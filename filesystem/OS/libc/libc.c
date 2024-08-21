@@ -441,3 +441,12 @@ struct RealTimeClock *get_rtc(){
 	asm("int 0x80");
 	return (struct RealTimeClock *) eax;
 }
+
+struct DirectoryListing getDirectoryListing(char *path){
+	struct DirectoryListing (*listFunc)(char *);
+	register uint32_t eax asm("eax");
+	eax = 0x30;
+	asm("int 0x80");
+	listFunc = (struct DirectoryListing (*)(char *)) eax;
+	return listFunc(path);
+}

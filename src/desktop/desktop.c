@@ -46,6 +46,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     //exec("/A/tune/tune.exe", 0, NULL);
     exec("/A/OS/termvp/term.exe", 0, NULL);
+    exec("/A/OS/explorer/explorer.exe", 0, NULL);
 
     struct {
         int startX;

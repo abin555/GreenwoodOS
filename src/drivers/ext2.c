@@ -130,7 +130,7 @@ void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, 
 	ext2_debug_print_inode(&inode);
 
 	int i = 0;
-	while(dir->entry_size != 0 && i < 20){
+	while(dir->entry_size != 0 && i < 50){
 		i++;
 		memset(work_buf, 0, sizeof(work_buf));
 		memcpy(work_buf, dir->name, dir->name_length <= 20 ? dir->name_length : 20);
@@ -507,4 +507,95 @@ int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmou
 	}
 	ext2_write_inode_data(ext2, &inode, inodeIdx);
 	return 0;
+}
+
+/*
+void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx){
+	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
+	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory){
+		print_console(console, "File of size %d\n", inode.lsbSize);
+		return;
+	};
+	if(*((int *) &inode.lsbSize) < 0){
+		//print_serial("[EXT2] Error reading directory!\n");
+		print_console(console, "[EXT2] Error reading directory!\n");
+		return;
+	}
+	
+	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
+	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
+
+	char work_buf[21];
+	//memset(work_buf, 0, sizeof(work_buf));
+
+	ext2_debug_print_inode(&inode);
+
+	int i = 0;
+	while(dir->entry_size != 0 && i < 20){
+		i++;
+		memset(work_buf, 0, sizeof(work_buf));
+		memcpy(work_buf, dir->name, dir->name_length <= 20 ? dir->name_length : 20);
+		//for(uint8_t i = 0; i < dir->name_length; i++){
+		//	print_serial("%c", dir->name[i]);
+		//}
+		//print_serial("\n");
+		print_serial("%s %d\n", work_buf, dir->entry_size);
+		print_console(console, "%s\n", work_buf);
+		//print_serial("[EXT2] [LS] Inode %d %s %x\n", inodeIdx, work_buf, (uint32_t) dir);
+		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
+	}
+}
+*/
+
+struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
+	struct DirectoryListing listing = {0};
+	//print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
+	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
+	//print_serial("[EXT2] entry is at inode %d\n", inodeIdx);
+	if(inodeIdx == 0){
+		print_serial("[EXT2] Adv Listing Failure, invalid inode\n");
+		return listing;
+	}
+	listing.directory_path_len = strlen(path);
+	listing.directory_path = strdup(path);
+	listing.entries = NULL;
+	listing.num_entries = 0;
+
+	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
+	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory || *((int *) &inode.lsbSize) < 0){
+		return listing;
+	};
+
+	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
+	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
+
+	//char work_buf[51];
+	//memset(work_buf, 0, sizeof(work_buf));
+
+	ext2_debug_print_inode(&inode);
+
+	int count = 0;
+	while(dir->entry_size != 0 && count < 50){
+		count++;
+		listing.num_entries++;
+		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
+	}
+
+	dir = (struct EXT2_Directory *) directory_entries;
+
+	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
+	print_serial("There are %d entries\n", listing.num_entries);
+	
+	for(int i = 0; i < listing.num_entries; i++){
+		//listing.entries[i].filename = strncpy(dir->name, dir->name_length);
+		memset(listing.entries[i].filename, 0, 50);
+		memcpy(listing.entries[i].filename, dir->name, dir->name_length);
+		
+		print_serial("%d - %s\n", i, listing.entries[i].filename);
+		listing.entries[i].name_len = dir->name_length;
+		if(dir->type == 2) listing.entries[i].type = ENTRY_DIRECTORY;
+		else if(dir->type == 1) listing.entries[i].type = ENTRY_FILE;
+		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
+	}
+	return listing;
 }

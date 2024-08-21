@@ -75,7 +75,7 @@ void kernel_task(int argc, char **argv){
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
 
     //exec(boot_program_path, 0, NULL);
-
+    listDirectory(&tasks[task_running_idx].currentDirectory, "/A/3D/");
 
 
     task_lock = 0;
