@@ -7,7 +7,7 @@ int devicePortNums[32] = {0};
 uint32_t AHCI_BASE;
 
 void initialize_AHCI(struct PCI_driver *driver){
-    print_serial("[AHCI Driver] AHCI DRIVER INIT\n");
+    print_serial("[AHCI Driver] AHCI DRIVER INIT %x\n", driver);
 	if(driver == NULL){
 		print_serial("[AHCI Driver] Fatal, NULL PCI Driver");
 		return;
@@ -19,10 +19,12 @@ void initialize_AHCI(struct PCI_driver *driver){
 	//MEM_reserveRegion(AHCI_BASE, AHCI_BASE, DRIVER);
 	//MEM_reserveRegion(AHCI_BASE+0x400000, AHCI_BASE+0x400000, DRIVER);
 	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x400000, 0, DRIVER);//Identity Map AHCI_BASE
+	print_serial("[AHCI Driver] BAR: 0x%x New Base: 0x%x\n", driver->BAR[5], AHCI_BASE);
 	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
 	MEM_reserveRegion((uint32_t) driver->BAR[5]+0x400000, (uint32_t) driver->BAR[5]+0x400000, DRIVER);
+	MEM_printRegions();
 
-    print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
+    //print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
     ABAR = (volatile HBA_MEM *)driver->BAR[5];
     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
     AHCI_int_trigger = false;

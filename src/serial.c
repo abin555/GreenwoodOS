@@ -198,6 +198,6 @@ void print_serial(char str[], ...){
     if(serial_debug_mode && fb_frontbuffer != 0x0){
       fb_idxy++;
       if(fb_idxy > (int) fb_height / 8) fb_idxy = 0;
-      for(int j = 0; j < 0xFFFF; j++){}
+      for(int j = 0; j < 0xFFFFF; j++){}
     }
 }

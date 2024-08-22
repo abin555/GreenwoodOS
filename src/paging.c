@@ -21,13 +21,19 @@ void page_init(){
 }
 
 struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    print_serial("\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d) \"%s\"\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot, tasks[task_running_idx].task_name);
+    register uint32_t eax asm("eax");
+    asm("mov eax, cr2");
+
+    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\"\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name);
     print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     print_stack_trace(cpu.ebx, 10);
     //asm("hlt");
     stop_task(task_running_idx);
     switch_to_task(&tasks[task_running_idx], &tasks[0]);
     window_selected = 0;
+    if(task_running_idx == 0){
+        asm("hlt");
+    }
     //print_console(kernel_console, "Returning to kernel Task\n");
     return cpu;
 }

@@ -28,6 +28,7 @@ void memfcpy(void* target, void* source, uint32_t size){
 }
 
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type){
+	physical &= 0xFFC00000;
 	uint32_t idx = physical >> 22;
 	uint32_t flag;
 	switch(type){
@@ -43,7 +44,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 	MEMORY_REGIONS[idx].available = 0;
 	MEMORY_REGIONS[idx].type = type;
 	MEMORY_REGIONS[idx].physical_addr = physical;
-	MEMORY_REGIONS[idx].virtual_addr = virtual;
+	MEMORY_REGIONS[idx].virtual_addr = virtual & 0xFFC00000;
 
 	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
 	create_page_entry(physical, virtual, flag);
@@ -51,6 +52,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 }
 
 void MEM_freeRegion(uint32_t virtual){
+	virtual = virtual & 0xFFC00000;
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
 		if(MEMORY_REGIONS[i].virtual_addr == virtual){
 			MEMORY_REGIONS[i].exists = 1;
@@ -70,7 +72,7 @@ void MEM_populateRegions(){
         MEMORY_REGIONS[i].physical_addr = i*0x400000;
         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
     }
-	for(unsigned int i = 15; i < 0x300; i++){
+	for(unsigned int i = 10; i < 0x300; i++){
 		MEMORY_REGIONS[i].exists = 1;
 		MEMORY_REGIONS[i].available = 1;
         MEMORY_REGIONS[i].type = AVAILABLE;
@@ -207,7 +209,7 @@ int MEM_findRegionIdx(uint32_t size){
 		}
 		check_count++;
 		if(check_count == needed_blocks){
-			print_serial("Found region of size %x at idx %x to %x\n");
+			print_serial("Found region of size %x at idx %x to %x\n", size, i, MEMORY_REGIONS[i].physical_addr);
 			return check_idx;
 		}
 	}
