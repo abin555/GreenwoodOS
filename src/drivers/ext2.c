@@ -163,8 +163,9 @@ int ext2_check_format(struct DRIVE *drive){
 	
 	ext2->block_size = 1024 << super_block->log_block_size;
 	ext2->sectors_per_block = ext2->block_size / 0x200;
-	ext2->buf = (char *) malloc(sizeof(char) * ext2->block_size);
-	memset(ext2->buf, 0, ext2->block_size);
+	//ext2->buf = (char *) malloc(sizeof(char) * ext2->block_size);
+	ext2->buf = (char *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(sizeof(char) * ext2->block_size), ext2->block_size, 0, SYSTEM));
+	memset(ext2->buf, 0, PAGE_SIZE/2);
 	ext2->block_count = super_block->blocks_count;
 	ext2->inode_count = super_block->inodes_count;
 	ext2->starting_block_number = super_block->first_data_block;
@@ -584,6 +585,7 @@ struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
 	dir = (struct EXT2_Directory *) directory_entries;
 
 	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
+	memset(listing.entries, 0, sizeof(struct DirectoryEntry) * listing.num_entries);
 	print_serial("There are %d entries\n", listing.num_entries);
 	
 	for(int i = 0; i < listing.num_entries; i++){

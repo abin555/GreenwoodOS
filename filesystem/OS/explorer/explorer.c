@@ -222,6 +222,9 @@ void setup_alloc(){
 void *alloc(int size){
     void *addr = alloc_mover;
     alloc_mover += size+1;
+    for(int i = 0; i < size+1;i++){
+        *(char *) addr = '\0';
+    }
     return addr;
 }
 void clean_alloc(){

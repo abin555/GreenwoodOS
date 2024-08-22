@@ -65,18 +65,9 @@ void kernel_task(int argc, char **argv){
 
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
-    char boot_program_path[] = "/A/OS/term/term.exe";
-
-
-    print_console(kernel_console, "Starting INIT Program: %s\n", boot_program_path);
-    //exec("/A/tune/tune.exe", 0, NULL);
-
     
+    print_console(kernel_console, "Loading Desktop Task...\n");
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
-
-    //exec(boot_program_path, 0, NULL);
-    listDirectory(&tasks[task_running_idx].currentDirectory, "/A/3D/");
-
 
     task_lock = 0;
 

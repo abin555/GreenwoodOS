@@ -1,0 +1,882 @@
+diff --git a/filesystem/OS/Makefile b/filesystem/OS/Makefile
+index 3d40bb8..e309f5e 100644
+--- a/filesystem/OS/Makefile
++++ b/filesystem/OS/Makefile
+@@ -2,6 +2,7 @@ SUBDIRS += echo
+ SUBDIRS += term
+ SUBDIRS += termvp
+ SUBDIRS += libc
++SUBDIRS += explorer
+ 
+ all: $(SUBDIRS)
+ $(SUBDIRS):
+diff --git a/filesystem/OS/explorer/Makefile b/filesystem/OS/explorer/Makefile
+new file mode 100644
+index 0000000..d1a8465
+--- /dev/null
++++ b/filesystem/OS/explorer/Makefile
+@@ -0,0 +1,16 @@
++CFLAGS = -I ../libc/ -g -m32 -no-pie -c -O0 -nostdlib -nodefaultlibs -nolibc -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector
++ASFLAGS = -f elf
++LDFLAGS = -T ../libc/link.ld -melf_i386
++
++FILES = explorer.c
++OBJ = explorer.o
++LIBS = ../libc/libc.o
++PROG = explorer
++
++all:
++	make -C ../libc
++	$(CC) $(CFLAGS) $(FILES) -o $(OBJ)
++	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
++	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
++	#rm $(OBJ)
++	#rm $(PROG).elf
+diff --git a/filesystem/OS/explorer/explorer.c b/filesystem/OS/explorer/explorer.c
+new file mode 100644
+index 0000000..bc80bab
+--- /dev/null
++++ b/filesystem/OS/explorer/explorer.c
+@@ -0,0 +1,272 @@
++#include "libc.h"
++
++int running;
++
++struct ViewportFunctions *vp_funcs;
++struct Viewport *vp;
++uint32_t *buf;
++#define WIDTH 500
++#define HEIGHT 300
++
++struct Bitmap{
++    uint8_t *file;
++    uint32_t *bitmap;
++    uint32_t width;
++    uint32_t height;
++};
++
++struct Bitmap folder;
++struct Bitmap file;
++
++void setup_alloc();
++void *alloc(int size);
++void clean_alloc();
++
++struct Bitmap loadBitmap(char *filename);
++void drawBitmap(int x, int y, struct Bitmap *bitmap);
++void explorer_event(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
++
++struct Vec2 {
++    int x;
++    int y;
++};
++
++struct Vec2 getRelativeMouse();
++struct MouseStatus *getMousePtr();
++struct MouseStatus *mouseStatus;
++
++void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected);
++void drawDirectoryContents(struct DirectoryListing dirs, int selected);
++
++int main(int argc, char **argv){
++    setup_alloc();
++    vp_funcs = viewport_get_funcs();
++	vp = vp_funcs->open(WIDTH, HEIGHT, "Explorer");
++	vp_funcs->add_event_handler(vp, explorer_event);
++    buf = alloc(WIDTH * HEIGHT * sizeof(uint32_t));
++    vp_funcs->set_buffer(vp, buf, WIDTH * HEIGHT * sizeof(uint32_t));
++    mouseStatus = getMousePtr();
++
++    folder = loadBitmap("/A/OS/icons/folder.tga");
++    file = loadBitmap("/A/OS/icons/file.tga");
++
++    struct DirectoryListing dir = getDirectoryListing(".");
++
++    running = 1;
++    int selection = 2;
++    int drawAgain = 0;
++
++    drawDirectoryContents(dir, selection);
++    vp_funcs->copy(vp);
++
++    char *work_buf = alloc(0x100);
++    
++    struct Vec2 relMousePos;
++    print("Explorer Open\n");
++	while(running){
++        relMousePos = getRelativeMouse();
++        buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
++        
++        if(vp->ascii){
++            char c = vp->ascii;
++            vp->ascii = 0;
++            switch(c){
++                case 0x33:
++                    selection = -1;
++                    drawAgain = 1;
++                    break;
++                case 0x11:
++                    selection--;
++                    if(selection==-1) selection = dir.num_entries - 2;
++                    drawAgain = 1;
++                    break;
++                case 0x12:
++                    selection++;
++                    if(selection==dir.num_entries-2) selection = 0;
++                    drawAgain = 1;
++                    break;
++                case 10:{
++                    if(!(selection != -1 && selection < dir.num_entries-2)) break;
++                    if(dir.entries[selection+2].type == 1){
++                        char *dir_str = getDirectory();
++                        print_arg("Path: %s\n", (uint32_t) dir_str);
++                        int i = 0;
++                        for(i = 0; i < 0x100; i++) work_buf[i] = 0;
++                        work_buf[0] = '/';
++                        for(i = 0; dir_str[i] != '\0'; i++){
++                            work_buf[i+1] = dir_str[i];
++                        }
++                        int walker = i+1;
++
++                        for(i = 0; i < dir.entries[selection+2].name_len; i++){
++                            work_buf[walker + i] = dir.entries[selection+2].filename[i];
++                        }
++
++                        print_arg("Changing Path to %s\n", (uint32_t) work_buf);
++
++                        changeDirectory(work_buf);
++                        dir = getDirectoryListing(".");
++                        drawAgain = 1;
++                        break;
++                    }
++                    else if(dir.entries[selection+2].type == 0){
++                        print_arg("Opening %s\n", (uint32_t) dir.entries[selection+2].filename);
++                        print_arg("Checking extension: %s\n", (uint32_t) dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4);
++                        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".tga")){
++                            char **arg = alloc(sizeof(char *) * 2);
++                            arg[0] = 0x0;
++                            arg[1] = alloc(dir.entries[selection+2].name_len);
++                            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
++                            exec("/A/image/image.exe", 2, arg);
++                            break;
++                        }
++                        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".exe")){
++                            exec(dir.entries[selection+2].filename, 0, NULL);
++                            break;
++                        }
++                        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".obj")){
++                            char **arg = alloc(sizeof(char *) * 2);
++                            arg[0] = 0x0;
++                            arg[1] = alloc(dir.entries[selection+2].name_len);
++                            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
++                            exec("/A/3D/3Dvp.exe", 2, arg);
++                            break;
++                        }
++                    }
++                    break;
++                }
++                case 8:
++                changeDirectory("..");
++                dir = getDirectoryListing(".");
++                drawAgain = 1;
++                break;
++            }
++        }
++
++        if(drawAgain){
++            for(int i = 0; i < WIDTH * HEIGHT; i++) buf[i] = 0;
++            drawDirectoryContents(dir, selection);
++            drawAgain = 0;
++        }
++
++        vp_funcs->copy(vp);
++	}
++    print("Explorer Close\n");
++    clean_alloc();
++}
++
++void explorer_event(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
++	if(event == VP_MAXIMIZE || event == VP_FOCUSED){
++        set_schedule(ALWAYS);
++    }
++    else if(event == VP_MINIMIZE || event == VP_UNFOCUSED){
++        set_schedule(NEVER);
++    }
++    else if(event == VP_EXIT){
++        running = 0;
++    }
++}
++
++typedef struct {
++  unsigned char magic1;             // must be zero
++  unsigned char colormap;           // must be zero
++  unsigned char encoding;           // must be 2
++  unsigned short cmaporig, cmaplen; // must be zero
++  unsigned char cmapent;            // must be zero
++  unsigned short x;                 // must be zero
++  unsigned short y;                 // image's height
++  unsigned short w;                 // image's height
++  unsigned short h;                 // image's width
++  unsigned char bpp;                // must be 32
++  unsigned char pixeltype;          // must be 40
++} __attribute__((packed)) tga_header_t;
++
++struct Bitmap loadBitmap(char *filename){
++    struct Bitmap bitmap = {0};
++    if(!fexists(filename)) return bitmap;
++    struct FILE *bitmap_file = fopen(filename);
++    int bitmap_size = fsize(bitmap_file);
++    bitmap.file = alloc(bitmap_size);
++    fcopy(bitmap_file, bitmap.file, bitmap_size);
++    fclose(bitmap_file);
++    tga_header_t *header = ((tga_header_t *) bitmap.file);
++    bitmap.width = header->w;
++    bitmap.height = header->h;
++    bitmap.bitmap = (uint32_t *) (bitmap.file + sizeof(tga_header_t) + header->magic1);
++    return bitmap;
++}
++
++void drawBitmap(int x, int y, struct Bitmap *bitmap){
++    if(bitmap->bitmap == NULL) return;
++    for(uint32_t ly = 0; ly < bitmap->height; ly++){
++        uint32_t yoff = ly*bitmap->width;
++        uint32_t byoff = (y + ly) * WIDTH;
++        for(uint32_t lx = 0; lx < bitmap->width; lx++){
++            uint32_t color = bitmap->bitmap[lx+yoff];
++            if(!(color & 0xFF000000)) continue;
++            buf[byoff + (x + lx)] = color;
++        }
++    }
++}
++
++
++void *alloc_base;
++uint32_t alloc_size;
++void *alloc_mover;
++
++void setup_alloc(){
++    alloc_size = 0x40000;
++    alloc_base = requestRegion(alloc_size);
++    alloc_mover = alloc_base;
++}
++void *alloc(int size){
++    void *addr = alloc_mover;
++    alloc_mover += size+1;
++    return addr;
++}
++void clean_alloc(){
++    freeRegion(alloc_base, alloc_size);
++}
++
++struct Vec2 getRelativeMouse(){
++    struct Vec2 pos;
++    pos.x = mouseStatus->pos.x - vp->loc.x;
++    pos.y = mouseStatus->pos.y - vp->loc.y - 8;
++    return pos;
++}
++
++struct MouseStatus *getMousePtr(){
++	struct MouseStatus *mousePtr;
++	register uint32_t eax asm("eax");
++	eax = 0x27;
++	asm("int 0x80");
++	mousePtr = (struct MouseStatus *) eax;
++	return mousePtr;
++}
++
++void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected){
++    if(entry == NULL) return;
++    struct Bitmap *bitmap;
++    if(entry->type == 0) bitmap = &file;
++    else if(entry->type == 1) bitmap = &folder;
++    
++    drawBitmap(x+8, y, bitmap);
++    int charY = y+24;
++    for(int i = 0; i < entry->name_len; i++){
++        if(i % 5 == 0) charY += 8;
++        vp_funcs->drawChar(vp, x+((i%5)*8), charY, entry->filename[i], selected ? 0xFFFFFF : 0, selected ? 0 : 0xFFFFFF);
++    }
++}
++
++void drawDirectoryContents(struct DirectoryListing dirs, int selected){
++    int iconY = 0;
++    int iconX = 0;
++    for(int i = 0; i < dirs.num_entries-2; i++){
++        drawIcon(6*8*iconX, iconY*(24+8*4), &dirs.entries[i+2], i == selected ? 1 : 0);
++        iconX++;
++        if(iconX >= 10){
++            iconX = 0;
++            iconY++;
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/filesystem/OS/icons/file.tga b/filesystem/OS/icons/file.tga
+new file mode 100644
+index 0000000..110d881
+Binary files /dev/null and b/filesystem/OS/icons/file.tga differ
+diff --git a/filesystem/OS/libc/libc.c b/filesystem/OS/libc/libc.c
+index 1eaa51e..5f81857 100644
+--- a/filesystem/OS/libc/libc.c
++++ b/filesystem/OS/libc/libc.c
+@@ -440,4 +440,13 @@ struct RealTimeClock *get_rtc(){
+ 	eax = 0x2F;
+ 	asm("int 0x80");
+ 	return (struct RealTimeClock *) eax;
++}
++
++struct DirectoryListing getDirectoryListing(char *path){
++	struct DirectoryListing (*listFunc)(char *);
++	register uint32_t eax asm("eax");
++	eax = 0x30;
++	asm("int 0x80");
++	listFunc = (struct DirectoryListing (*)(char *)) eax;
++	return listFunc(path);
+ }
+\ No newline at end of file
+diff --git a/filesystem/OS/libc/libc.h b/filesystem/OS/libc/libc.h
+index 2dc0aae..2fa581d 100644
+--- a/filesystem/OS/libc/libc.h
++++ b/filesystem/OS/libc/libc.h
+@@ -210,6 +210,21 @@ struct RealTimeClock {
+ 
+ struct RealTimeClock *get_rtc();
+ 
++struct DirectoryEntry{
++	char filename[50];
++	int name_len;
++	uint32_t type;
++};
++
++struct DirectoryListing{
++	char *directory_path;
++	int directory_path_len;
++	struct DirectoryEntry *entries;
++	int num_entries;
++};
++
++struct DirectoryListing getDirectoryListing(char *path);
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/include/utils.h b/include/utils.h
+index 50ef8f4..3adc41e 100644
+--- a/include/utils.h
++++ b/include/utils.h
+@@ -9,5 +9,8 @@ struct IVec2{
+ };
+ 
+ int strcmp(const char *s1, const char *s2);
++int strlen(char *s);
++char *strdup(char *s);
++char *strndup(char *s, int n);
+ 
+ #endif
+\ No newline at end of file
+diff --git a/src/allocator.c b/src/allocator.c
+index 5d8e960..4319e2b 100644
+--- a/src/allocator.c
++++ b/src/allocator.c
+@@ -14,7 +14,7 @@ void alloc_init(){
+ }
+ 
+ void *malloc(uint32_t size){
+-	size += 10;
++	size += 1;
+ 	//print_serial("[MALLOC] Alloc for size %x Total Remaining: %x\n", size, alloc_table_size - total_alloc);
+ 	struct ALLOC_TABLE *alloc_table = (struct ALLOC_TABLE *) alloc_base;
+ 	//Building initial head block
+diff --git a/src/desktop/desktop.c b/src/desktop/desktop.c
+index 2a2cf1d..3c9dd1a 100644
+--- a/src/desktop/desktop.c
++++ b/src/desktop/desktop.c
+@@ -46,6 +46,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
+ 
+     //exec("/A/tune/tune.exe", 0, NULL);
+     exec("/A/OS/termvp/term.exe", 0, NULL);
++    exec("/A/OS/explorer/explorer.exe", 0, NULL);
+ 
+     struct {
+         int startX;
+diff --git a/src/desktop/explorer.h b/src/desktop/explorer.h
+new file mode 100644
+index 0000000..a80b69d
+--- /dev/null
++++ b/src/desktop/explorer.h
+@@ -0,0 +1,9 @@
++#ifndef EXPLORER_H
++#define EXPLORER_H
++
++#include "viewport.h"
++#include "bitmap.h"
++
++void explorer_main(int argc, char **argv);
++
++#endif
+\ No newline at end of file
+diff --git a/src/drivers/ahci.c b/src/drivers/ahci.c
+index f8081f1..ffa06a8 100644
+--- a/src/drivers/ahci.c
++++ b/src/drivers/ahci.c
+@@ -7,7 +7,7 @@ int devicePortNums[32] = {0};
+ uint32_t AHCI_BASE;
+ 
+ void initialize_AHCI(struct PCI_driver *driver){
+-    print_serial("[AHCI Driver] AHCI DRIVER INIT\n");
++    print_serial("[AHCI Driver] AHCI DRIVER INIT %x\n", driver);
+ 	if(driver == NULL){
+ 		print_serial("[AHCI Driver] Fatal, NULL PCI Driver");
+ 		return;
+@@ -19,10 +19,12 @@ void initialize_AHCI(struct PCI_driver *driver){
+ 	//MEM_reserveRegion(AHCI_BASE, AHCI_BASE, DRIVER);
+ 	//MEM_reserveRegion(AHCI_BASE+0x400000, AHCI_BASE+0x400000, DRIVER);
+ 	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x400000, 0, DRIVER);//Identity Map AHCI_BASE
++	print_serial("[AHCI Driver] BAR: 0x%x New Base: 0x%x\n", driver->BAR[5], AHCI_BASE);
+ 	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
+ 	MEM_reserveRegion((uint32_t) driver->BAR[5]+0x400000, (uint32_t) driver->BAR[5]+0x400000, DRIVER);
++	MEM_printRegions();
+ 
+-    print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
++    //print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
+     ABAR = (volatile HBA_MEM *)driver->BAR[5];
+     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
+     AHCI_int_trigger = false;
+diff --git a/src/drivers/drive.c b/src/drivers/drive.c
+index 22e151c..d386dc3 100644
+--- a/src/drivers/drive.c
++++ b/src/drivers/drive.c
+@@ -459,7 +459,15 @@ int changeDirectory(struct DIRECTORY *dir, char *path){
+ 		}
+ 	}
+ 	else{//Relative Directory
+-		
++		print_serial("[DRIVE] CD: Relative %s\n", path);
++		if(path[0] == '.' && path[1] == '.' && path[2] == '\0'){
++			int last_slash = 0;
++			for(int i = 0; dir->path[i] != 0 && i < (int) sizeof(dir->path); i++) last_slash++;
++			for(int i = last_slash-2; dir->path[i] != '/'; i--) last_slash = i;
++			dir->path[last_slash] = '\0';
++			print_serial("[DRIVE] CD: Relative backup %s %d\n", dir->path, last_slash);
++			return 0;
++		}
+ 	}
+ 	return 1;
+ }
+@@ -538,4 +546,36 @@ int fextend(struct FILE *file, uint32_t extendAmount){
+ 		}
+ 	}
+ 	return 1;
++}
++
++struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path){
++	struct DirectoryListing listing = {0};
++	if(dir == NULL || path == NULL){
++		print_serial("[DRIVE] List Directory: Err: Invalid Args\n");
++		return listing;
++	}
++	char big_path[100];
++	expandPath(big_path, sizeof(big_path), dir, path);
++	char drive_letter = big_path[0];
++	path = big_path + 2;
++	struct DRIVE *drive = drive_get(drive_letter);
++	print_serial("[DRIVE] Directory Listing %s / %s\n", big_path, path);
++	if(drive->format == ISO9660){
++		//ISO9660_printFileList(console, drive->format_info.ISO, path);
++	}
++	else if(drive->format == EXT2){
++		//ext2_listDirectory(console, drive->format_info.ext2, path);
++		listing = ext2_advListDirectory(drive->format_info.ext2, path);
++	}
++	print_serial("%s:\n", listing.directory_path);
++	for(int i = 0; i < listing.num_entries; i++){
++		print_serial(" %s - %d %d\n", listing.entries[i].filename, listing.entries[i].type, listing.entries[i].name_len);
++	}
++	return listing;
++}
++
++
++#include "multitasking.h"
++struct DirectoryListing task_listDirectory(char *path){
++	return listDirectory(&tasks[task_running_idx].currentDirectory, path);
+ }
+\ No newline at end of file
+diff --git a/src/drivers/drive.h b/src/drivers/drive.h
+index 55c24ff..eae9e3b 100644
+--- a/src/drivers/drive.h
++++ b/src/drivers/drive.h
+@@ -56,6 +56,24 @@ struct FILE{
+ 	int head;
+ };
+ 
++enum DirEntryType{
++	ENTRY_FILE = 0,
++	ENTRY_DIRECTORY = 1
++};
++
++struct DirectoryEntry{
++	char filename[50];
++	int name_len;
++	uint32_t type;
++};
++
++struct DirectoryListing{
++	char *directory_path;
++	int directory_path_len;
++	struct DirectoryEntry *entries;
++	int num_entries;
++};
++
+ #define NUM_FILES 50
+ extern struct FILE files[NUM_FILES];
+ 
+@@ -92,4 +110,6 @@ int fmkdir(struct DIRECTORY *dir, char *path);
+ int fmkfile(struct DIRECTORY *dir, char *path, int size);
+ int fextend(struct FILE *file, uint32_t extendAmount);
+ 
++struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path); 
++struct DirectoryListing task_listDirectory(char *path);
+ #endif
+diff --git a/src/drivers/ext2.c b/src/drivers/ext2.c
+index aa16e2c..7ca9234 100644
+--- a/src/drivers/ext2.c
++++ b/src/drivers/ext2.c
+@@ -130,7 +130,7 @@ void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2,
+ 	ext2_debug_print_inode(&inode);
+ 
+ 	int i = 0;
+-	while(dir->entry_size != 0 && i < 20){
++	while(dir->entry_size != 0 && i < 50){
+ 		i++;
+ 		memset(work_buf, 0, sizeof(work_buf));
+ 		memcpy(work_buf, dir->name, dir->name_length <= 20 ? dir->name_length : 20);
+@@ -507,4 +507,95 @@ int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmou
+ 	}
+ 	ext2_write_inode_data(ext2, &inode, inodeIdx);
+ 	return 0;
++}
++
++/*
++void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, uint32_t inodeIdx){
++	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
++	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory){
++		print_console(console, "File of size %d\n", inode.lsbSize);
++		return;
++	};
++	if(*((int *) &inode.lsbSize) < 0){
++		//print_serial("[EXT2] Error reading directory!\n");
++		print_console(console, "[EXT2] Error reading directory!\n");
++		return;
++	}
++	
++	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
++	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
++
++	char work_buf[21];
++	//memset(work_buf, 0, sizeof(work_buf));
++
++	ext2_debug_print_inode(&inode);
++
++	int i = 0;
++	while(dir->entry_size != 0 && i < 20){
++		i++;
++		memset(work_buf, 0, sizeof(work_buf));
++		memcpy(work_buf, dir->name, dir->name_length <= 20 ? dir->name_length : 20);
++		//for(uint8_t i = 0; i < dir->name_length; i++){
++		//	print_serial("%c", dir->name[i]);
++		//}
++		//print_serial("\n");
++		print_serial("%s %d\n", work_buf, dir->entry_size);
++		print_console(console, "%s\n", work_buf);
++		//print_serial("[EXT2] [LS] Inode %d %s %x\n", inodeIdx, work_buf, (uint32_t) dir);
++		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
++	}
++}
++*/
++
++struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
++	struct DirectoryListing listing = {0};
++	//print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
++	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
++	//print_serial("[EXT2] entry is at inode %d\n", inodeIdx);
++	if(inodeIdx == 0){
++		print_serial("[EXT2] Adv Listing Failure, invalid inode\n");
++		return listing;
++	}
++	listing.directory_path_len = strlen(path);
++	listing.directory_path = strdup(path);
++	listing.entries = NULL;
++	listing.num_entries = 0;
++
++	struct EXT2_Inode inode = ext2_read_inode_data(ext2, inodeIdx);
++	if((inode.type_perms & 0xF000) != EXT2_InodeType_Directory || *((int *) &inode.lsbSize) < 0){
++		return listing;
++	};
++
++	void *directory_entries = ext2_read_block(ext2, inode.BlockPointers[0]);
++	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
++
++	//char work_buf[51];
++	//memset(work_buf, 0, sizeof(work_buf));
++
++	ext2_debug_print_inode(&inode);
++
++	int count = 0;
++	while(dir->entry_size != 0 && count < 50){
++		count++;
++		listing.num_entries++;
++		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
++	}
++
++	dir = (struct EXT2_Directory *) directory_entries;
++
++	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
++	print_serial("There are %d entries\n", listing.num_entries);
++	
++	for(int i = 0; i < listing.num_entries; i++){
++		//listing.entries[i].filename = strncpy(dir->name, dir->name_length);
++		memset(listing.entries[i].filename, 0, 50);
++		memcpy(listing.entries[i].filename, dir->name, dir->name_length);
++		
++		print_serial("%d - %s\n", i, listing.entries[i].filename);
++		listing.entries[i].name_len = dir->name_length;
++		if(dir->type == 2) listing.entries[i].type = ENTRY_DIRECTORY;
++		else if(dir->type == 1) listing.entries[i].type = ENTRY_FILE;
++		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
++	}
++	return listing;
+ }
+\ No newline at end of file
+diff --git a/src/drivers/ext2.h b/src/drivers/ext2.h
+index c8d98d4..df37156 100644
+--- a/src/drivers/ext2.h
++++ b/src/drivers/ext2.h
+@@ -174,6 +174,6 @@ int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size);
+ int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount);
+ 
+ int ext2_createDirectory(struct EXT2_FS *ext2, char *path);
+-
++struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path);
+ 
+ #endif
+\ No newline at end of file
+diff --git a/src/drivers/hda.c b/src/drivers/hda.c
+index e7e9195..1d4ebb2 100644
+--- a/src/drivers/hda.c
++++ b/src/drivers/hda.c
+@@ -47,6 +47,7 @@ void hda_init(struct PCI_driver *driver){
+ 	
+ 	MEM_reserveRegion((uint32_t) driver->BAR[0], (uint32_t) driver->BAR[0], DRIVER);
+ 	MEM_reserveRegion((uint32_t) driver->BAR[0]+0x400000, (uint32_t) driver->BAR[0]+0x400000, DRIVER);
++	return;
+ 
+ 	hdaDriver.base = driver->BAR[0];
+ 	hdaDriver.commType = HDA_UNINITALIZED;
+@@ -173,10 +174,12 @@ void hda_init(struct PCI_driver *driver){
+ 	}
+ 	mmio_outw(hdaDriver.base + 0x58, 0x8000); //reset write pointer
+ 	uint32_t sticks = timer_ticks;
+-	while(timer_ticks < sticks + 1000){}
++	while(timer_ticks < sticks + 10){}
+ 	mmio_outw(hdaDriver.base + 0x5A, 0); //disable interrupts
+ 	hdaDriver.rirb_pointer = 1;
+ 
++	print_serial("HDA: Starting CORB & RIRB\n");
++
+ 	//start CORB and RIRB
+ 	mmio_outb(hdaDriver.base + 0x4C, 0x2);
+ 	mmio_outb(hdaDriver.base + 0x5C, 0x2);
+@@ -185,7 +188,9 @@ void hda_init(struct PCI_driver *driver){
+ 	//TODO: find more codecs
+ 	for(uint32_t codec_number=0, codec_id=0; codec_number<16; codec_number++) {
+ 		hdaDriver.commType = HDA_CORB_RIRB;
++		print_serial("HDA: Finding Codec %d\n", codec_number);
+ 		codec_id = hda_send_verb(codec_number, 0, 0xF00, 0);
++		
+ 
+ 		if(codec_id!=0) {
+ 			print_serial("HDA: CORB/RIRB communication interface\n");
+@@ -225,7 +230,7 @@ int hda_send_verb(uint32_t codec, uint32_t node, uint32_t verb, uint32_t command
+ 		mmio_outw(hdaDriver.base + 0x48, hdaDriver.corb_pointer);
+ 
+ 		//wait for response
+-		uint32_t ticks = timer_ticks + 50000;
++		uint32_t ticks = timer_ticks + 100;
+ 		while(timer_ticks < ticks) {
+ 			asm("nop");
+ 			if(mmio_inw(hdaDriver.base + 0x58)==hdaDriver.corb_pointer) {
+diff --git a/src/main.c b/src/main.c
+index fb82fb5..fca7cf4 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -75,7 +75,7 @@ void kernel_task(int argc, char **argv){
+     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
+ 
+     //exec(boot_program_path, 0, NULL);
+-
++    listDirectory(&tasks[task_running_idx].currentDirectory, "/A/3D/");
+ 
+ 
+     task_lock = 0;
+diff --git a/src/memory.c b/src/memory.c
+index 9e9cb4a..d1ceb72 100644
+--- a/src/memory.c
++++ b/src/memory.c
+@@ -28,6 +28,7 @@ void memfcpy(void* target, void* source, uint32_t size){
+ }
+ 
+ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type){
++	physical &= 0xFFC00000;
+ 	uint32_t idx = physical >> 22;
+ 	uint32_t flag;
+ 	switch(type){
+@@ -43,7 +44,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
+ 	MEMORY_REGIONS[idx].available = 0;
+ 	MEMORY_REGIONS[idx].type = type;
+ 	MEMORY_REGIONS[idx].physical_addr = physical;
+-	MEMORY_REGIONS[idx].virtual_addr = virtual;
++	MEMORY_REGIONS[idx].virtual_addr = virtual & 0xFFC00000;
+ 
+ 	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
+ 	create_page_entry(physical, virtual, flag);
+@@ -51,6 +52,7 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
+ }
+ 
+ void MEM_freeRegion(uint32_t virtual){
++	virtual = virtual & 0xFFC00000;
+ 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
+ 		if(MEMORY_REGIONS[i].virtual_addr == virtual){
+ 			MEMORY_REGIONS[i].exists = 1;
+@@ -70,7 +72,7 @@ void MEM_populateRegions(){
+         MEMORY_REGIONS[i].physical_addr = i*0x400000;
+         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
+     }
+-	for(unsigned int i = 15; i < 0x300; i++){
++	for(unsigned int i = 10; i < 0x300; i++){
+ 		MEMORY_REGIONS[i].exists = 1;
+ 		MEMORY_REGIONS[i].available = 1;
+         MEMORY_REGIONS[i].type = AVAILABLE;
+@@ -207,7 +209,7 @@ int MEM_findRegionIdx(uint32_t size){
+ 		}
+ 		check_count++;
+ 		if(check_count == needed_blocks){
+-			print_serial("Found region of size %x at idx %x to %x\n");
++			print_serial("Found region of size %x at idx %x to %x\n", size, i, MEMORY_REGIONS[i].physical_addr);
+ 			return check_idx;
+ 		}
+ 	}
+diff --git a/src/paging.c b/src/paging.c
+index db40dde..d749330 100644
+--- a/src/paging.c
++++ b/src/paging.c
+@@ -21,13 +21,19 @@ void page_init(){
+ }
+ 
+ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+-    print_serial("\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d) \"%s\"\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot, tasks[task_running_idx].task_name);
++    register uint32_t eax asm("eax");
++    asm("mov eax, cr2");
++
++    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\"\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name);
+     print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
+     print_stack_trace(cpu.ebx, 10);
+     //asm("hlt");
+     stop_task(task_running_idx);
+     switch_to_task(&tasks[task_running_idx], &tasks[0]);
+     window_selected = 0;
++    if(task_running_idx == 0){
++        asm("hlt");
++    }
+     //print_console(kernel_console, "Returning to kernel Task\n");
+     return cpu;
+ }
+diff --git a/src/pci.c b/src/pci.c
+index 2e84eb2..5ef0ce6 100644
+--- a/src/pci.c
++++ b/src/pci.c
+@@ -85,7 +85,6 @@ void PCI_initDevice(struct PCI_device *pdev){
+ 			goto generic_installation;
+ 			break;
+ 		case 0x0403:
+-			if(!((pdev->vendorID == 0x8086 || pdev->vendorID == 0x1002) && (pdev->deviceID == 0x2668))) break;
+ 			print_serial("[PCI Device] Intel High Definition Audio Identified\n");
+ 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
+ 			pdriver->name = "Intel HDA";
+diff --git a/src/serial.c b/src/serial.c
+index f44442f..3ea6dbc 100644
+--- a/src/serial.c
++++ b/src/serial.c
+@@ -198,6 +198,6 @@ void print_serial(char str[], ...){
+     if(serial_debug_mode && fb_frontbuffer != 0x0){
+       fb_idxy++;
+       if(fb_idxy > (int) fb_height / 8) fb_idxy = 0;
+-      for(int j = 0; j < 0xFFFF; j++){}
++      for(int j = 0; j < 0xFFFFF; j++){}
+     }
+ }
+\ No newline at end of file
+diff --git a/src/system_calls.c b/src/system_calls.c
+index 2bcbe06..173702d 100644
+--- a/src/system_calls.c
++++ b/src/system_calls.c
+@@ -316,6 +316,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)),
+ 			cpu_state.eax = (uint32_t) &RTC;
+ 			break;
+ 		}
++		case 0x30:{
++			cpu_state.eax = (uint32_t) &task_listDirectory;
++			break;
++		}
+ 	}
+ 	IRQ_RES;
+ 	return cpu_state;
+diff --git a/src/utils.c b/src/utils.c
+index 2d836bf..4121a18 100644
+--- a/src/utils.c
++++ b/src/utils.c
+@@ -1,4 +1,5 @@
+ #include "utils.h"
++#include "allocator.h"
+ 
+ int strcmp(const char *s1, const char *s2){
+ 	while(*s1 && (*s1 == *s2)){
+@@ -6,4 +7,38 @@ int strcmp(const char *s1, const char *s2){
+ 		s2++;
+ 	}
+ 	return *(const unsigned char *)s1 - *(const unsigned char*)s2;
++}
++
++int strlen(char *s){
++	if(s == NULL) return 0;
++	int len = 0;
++	while(*s++) len++;
++	return len;
++}
++
++char *strdup(char *s){
++	if(s == NULL) return NULL;
++	int len = strlen(s);
++	char *newS = malloc(len+1);
++	for(int i = 0; i < len; i++){
++		newS[i] = s[i];
++	}
++	newS[len] = '\0';
++	return newS;
++}
++
++char *strndup(char *s, int n){
++	if(s == NULL){
++		print_serial("[STRNCPY] S is null\n");
++		return NULL;
++	}
++	int len = strlen(s);
++	if(len > n) len = n;
++	char *newS = malloc(len+1);
++	for(int i = 0; i < len; i++){
++		newS[i] = s[i];
++	}
++	newS[len] = '\0';
++	print_serial("[STRNCPY] Copied %d chars %s -> %s\n", len, s, newS);
++	return newS;
+ }
+\ No newline at end of file
