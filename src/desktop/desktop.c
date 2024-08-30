@@ -46,8 +46,8 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     viewport_init_sys(global_viewport_list);
 
     //exec("/A/tune/tune.exe", 0, NULL);
-    exec("/A/OS/termvp/term.exe", 0, NULL);
-    exec("/A/OS/explorer/explorer.exe", 0, NULL);
+    //exec("/A/OS/termvp/term.exe", 0, NULL);
+    //exec("/A/OS/explorer/explorer.exe", 0, NULL);
 
     struct {
         int startX;
@@ -142,6 +142,12 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
     if(KBD_flags.ctrl && ascii == 'T'){
         exec("/A/OS/termvp/term.exe", 0, NULL);
+    }
+    else if(KBD_flags.ctrl && ascii == 'E'){
+        exec("/A/OS/explorer/explorer.exe", 0, NULL);
+    }
+    else if(KBD_flags.ctrl && ascii == 'C'){
+        exec("/A/clock/clock.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){

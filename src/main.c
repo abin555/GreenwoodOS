@@ -40,12 +40,12 @@ void kernel_task(int argc, char **argv){
 
     drive_enumerate();
 
-    MEM_printRegions();
+    //MEM_printRegions();
 
 
     window_init();
     console_init();
-    MEM_printRegions();
+    //MEM_printRegions();
 
     rtc_init();
 
@@ -96,11 +96,11 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     MEM_populateRegions();
 
 	fb_init(GRUB_tagfb);    
-    MEM_printRegions();
+    //MEM_printRegions();
     serial_debug_mode = 1;
 
     alloc_init();
-    MEM_printRegions();
+    //MEM_printRegions();
 
     PCI_init();
     kbd_init(0xFF);

@@ -120,16 +120,24 @@ int main(int argc, char **argv){
                             exec("/A/image/image.exe", 2, arg);
                             break;
                         }
-                        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".exe")){
+                        else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".exe")){
                             exec(dir.entries[selection+2].filename, 0, NULL);
                             break;
                         }
-                        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".obj")){
+                        else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".obj")){
                             char **arg = alloc(sizeof(char *) * 2);
                             arg[0] = 0x0;
                             arg[1] = alloc(dir.entries[selection+2].name_len);
                             for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
                             exec("/A/3D/3Dvp.exe", 2, arg);
+                            break;
+                        }
+                        else {
+                            char **arg = alloc(sizeof(char *) * 2);
+                            arg[0] = 0x0;
+                            arg[1] = alloc(dir.entries[selection+2].name_len);
+                            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
+                            exec("/A/ed/ed.exe", 2, arg);
                             break;
                         }
                     }
