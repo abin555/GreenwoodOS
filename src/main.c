@@ -51,7 +51,7 @@ void kernel_task(int argc, char **argv){
 
     serial_debug_mode = 0;
 
-    struct WINDOW *kernel_win = window_open("KERNEL", true);
+    struct WINDOW *kernel_win = window_open("KERNEL", false);
     kernel_console = console_open(kernel_win);
     struct task_state *kernel_task = &tasks[task_running_idx];
     kernel_task->console = kernel_console;
@@ -67,14 +67,11 @@ void kernel_task(int argc, char **argv){
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     
     print_console(kernel_console, "Loading Desktop Task...\n");
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");    
+    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
+    window_close(kernel_win);  
 
     task_lock = 0;
-
-    while(1){
-        asm("hlt");
-    }
-    window_close(kernel_win);
+    return;
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){

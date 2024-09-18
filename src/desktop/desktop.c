@@ -45,10 +45,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     viewport_init_sys(global_viewport_list);
 
-    //exec("/A/tune/tune.exe", 0, NULL);
-    //exec("/A/OS/termvp/term.exe", 0, NULL);
-    //exec("/A/OS/explorer/explorer.exe", 0, NULL);
-
     struct {
         int startX;
         int startY;
@@ -64,7 +60,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     };
 
     set_schedule(ONFOCUS);
-    //serial_debug_mode = 1;
 
     while(1){
         task_lock = 1;

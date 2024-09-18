@@ -1,12 +1,6 @@
 OUTPUT_FORMAT(elf32-i386)
 ENTRY(loader)
 SECTIONS {
-	
-	. = 0x02000000;
-	program ALIGN (0x2000) :
-	{
-		*(program)
-	}
 	. = 0xC0000000;
 	kernel_start = .;
 	kernel_physical_start = . - 0xC0000000;

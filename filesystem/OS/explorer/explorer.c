@@ -65,7 +65,7 @@ int main(int argc, char **argv){
     print("Explorer Open\n");
 	while(running){
         relMousePos = getRelativeMouse();
-        buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
+        //buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
         
         if(vp->ascii){
             char c = vp->ascii;
@@ -107,6 +107,7 @@ int main(int argc, char **argv){
                         changeDirectory(work_buf);
                         dir = getDirectoryListing(".");
                         drawAgain = 1;
+                        selection = -1;
                         break;
                     }
                     else if(dir.entries[selection+2].type == 0){

@@ -135,7 +135,7 @@ void task_end(){
 	while(1){}
 }
 
-void __attribute__ ((optimize("-O2"))) switch_to_task(struct task_state* old_task, struct task_state* new_task){
+void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task){
     //Save current task's state
     old_task->registers.eip = most_recent_int_stack_state.eip;
     old_task->registers.eax = most_recent_int_cpu_state.eax;
@@ -164,7 +164,7 @@ void __attribute__ ((optimize("-O2"))) switch_to_task(struct task_state* old_tas
 }
 
 
-void __attribute__ ((optimize("-O2"))) task_callback(){
+void __attribute__ ((optimize("-O3"))) task_callback(){
     if(task_lock) return;
     ////printk("[TASK] Callback\n");
     int8_t running_idx=-1;
@@ -185,26 +185,7 @@ void __attribute__ ((optimize("-O2"))) task_callback(){
     if(!task_available){
         return;
     }
-    /*
-    //printk("Task end is at 0x%x\n", (uint32_t) &task_end);
-    //printk("Dumping Task #%d's Top of Stack:\n", task_running_idx);
-    for(unsigned int i = 0; i < (tasks[task_running_idx].stack_region + TASK_STACK_SIZE - tasks[task_running_idx].registers.esp)/4; i++){
-        uint32_t *stack = (uint32_t *) tasks[task_running_idx].registers.esp;
-        //printk("0x%x ", stack+i);
-        if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.ebp){
-            //printk("EBP ");
-        }
-        else if(4*i + tasks[task_running_idx].registers.esp == tasks[task_running_idx].registers.esp){
-            //printk("ESP ");
-        }
-        else{
-            //printk("    ");
-        }
-        //printk("%d 0x%x\n", i, stack[i]);
-    }
-    */
     int8_t next_idx = running_idx + 1;
-    //while(1){
     for(int checks = 0; checks < MAX_TASKS+5; checks++){
         if(next_idx == MAX_TASKS){
             next_idx = 0;

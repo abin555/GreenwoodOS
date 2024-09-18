@@ -1,5 +1,5 @@
 qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
--audiodev pa,id=Sound \
+-audiodev jack,id=Sound \
 -device intel-hda \
 -device hda-output,audiodev=Sound \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
@@ -9,7 +9,7 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -device ide-hd,drive=disk3,bus=ahci.0,bootindex=2 \
 -device ide-hd,drive=disk,bus=ahci.1,bootindex=1 \
 -device ide-hd,drive=disk2,bus=ahci.2,bootindex=3 \
--audiodev pa,id=speaker -machine pcspk-audiodev=speaker \
+-audiodev jack,id=speaker -machine pcspk-audiodev=speaker \
 -usb \
 -device usb-ehci,id=ehci \
 -rtc base=localtime,clock=host

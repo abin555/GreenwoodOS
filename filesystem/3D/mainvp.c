@@ -70,6 +70,8 @@ struct Viewport *vp;
 uint32_t *vp_buf;
 int running;
 
+uint32_t local_vp_buf[WIDTH * HEIGHT];
+
 int main(int argc, char** argv){
   set_schedule(ALWAYS);
   vp_funcs = viewport_get_funcs();
@@ -109,7 +111,7 @@ int main(int argc, char** argv){
   }
 
   vp = vp_funcs->open(WIDTH, HEIGHT, argv[1]);
-  vp_buf = requestRegion(WIDTH * HEIGHT * sizeof(uint32_t));
+  vp_buf = local_vp_buf;//requestRegion(WIDTH * HEIGHT * sizeof(uint32_t));
   vp_funcs->set_buffer(vp, vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
   vp_funcs->add_event_handler(vp, event_handler);
   vp_funcs->copy(vp);
@@ -376,7 +378,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 void endCallback(){
   print("3D render ending & cleaning\n");
   freeRegion(region, region_size);
-  freeRegion(vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
+  //freeRegion(vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
 }
 
 void rotateObjZ(Object *obj, float theta){
@@ -507,6 +509,7 @@ float cos(float x)
 {
   x = modd(x, PI2);
   return 1 - ((x * x) / (2)) + ((x * x * x * x) / (24)) - ((x * x * x * x * x * x) / (720)) + ((x * x * x * x * x * x * x * x) / (40320)) - ((x * x * x * x * x * x * x * x * x * x) / (3628800)) + ((x * x * x * x * x * x * x * x * x * x * x * x) / (479001600));
+
 }
 
 float sin(float x){

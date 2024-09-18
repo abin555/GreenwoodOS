@@ -57,7 +57,7 @@ uint32_t get_virtual(uint32_t address){
     return 0x68;
 }
 
-void create_page_entry(
+void __attribute__ ((optimize("-O3"))) create_page_entry(
 	uint32_t base_address,
 	uint32_t target_address,
 	uint16_t flag
@@ -72,7 +72,7 @@ void delete_page_entry(uint32_t target_address){
     update_page();
 }
 
-uint32_t get_page_index_from_addr(uint32_t address){
+inline uint32_t get_page_index_from_addr(uint32_t address){
     return (address >> 22);
 }
 

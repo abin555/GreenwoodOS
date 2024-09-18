@@ -76,7 +76,7 @@ void window_draw_cursor(int x, int y){
         for(int lx = 0; lx < cursor_width; lx++){
 			uint32_t color = cursor_bitmap[lx+ly*cursor_width];
 			if(!(color & 0xFF000000)) continue;
-            fb_frontbuffer[(y+ly)*fb_width + (x+lx)] = color;
+            windows[window_selected].backbuffer[(y+ly)*fb_width + (x+lx)] = color;
         }
     }
 }
@@ -99,21 +99,15 @@ void window_render_bar(){
 }
 
 void window_copy_buffer(struct WINDOW *window){
-	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
-
 	struct IVec2 mousePos = mouse_getPos();
 	window_draw_cursor(mousePos.x, mousePos.y);
-	//fb_putChar(mousePos.x, mousePos.y, 'M', 0xFFFFFFFF, 0);
+	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
 }
 
 void window_timer_callback(){
 
 	if(!windows[window_selected].copyOnPromptOnly && windows[window_selected].active){
 		window_copy_buffer(&windows[window_selected]);
-	}
-	else{
-		struct IVec2 mousePos = mouse_getPos();
-		window_draw_cursor(mousePos.x, mousePos.y);
 	}
 
 	window_render_bar();

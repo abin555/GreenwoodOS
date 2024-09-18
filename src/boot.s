@@ -49,18 +49,6 @@ section .data
 KERNEL_VIRTUAL_BASE equ 0xC0000000                  ; 3GB
 KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; Page directory index of kernel's 4MB PTE.
 
-MULTIBOOT_VIRTUAL_BASE equ 0x87400000
-MULTIBOOT_PAGE_NUMBER equ (MULTIBOOT_VIRTUAL_BASE >> 22)
-
-FB_VB equ 0xFE400000
-FB_PN equ (FB_VB >> 22)
-
-AHCI_VB equ 0xfe800000
-AHCI_PN equ (AHCI_VB >> 22)
-
-BACKBUF_VB equ 0x12000000
-BACKBUF_PN equ (BACKBUF_VB >> 22)
-
 align 0x1000
 
 global boot_page_directory

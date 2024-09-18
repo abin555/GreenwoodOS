@@ -46,7 +46,7 @@ struct ISO_Directory_Entry{
     uint8_t         gap_size;
     l9660_duint16   vol_seq_number;
     uint8_t         name_len;
-    char            name[/*name_len*/];
+    char            name[0];
 }__attribute__((packed));
 
 struct ISO_vdesc_header{
