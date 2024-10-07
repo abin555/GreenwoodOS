@@ -160,9 +160,11 @@ int fb_idxy = 0;
 int serial_debug_mode = 0;
 void write_serial(char a) {
   while (is_transmit_empty() == 0);
-  if(serial_debug_mode && fb_frontbuffer != 0x0){
+  #ifdef OS_DEBUG
+  if(fb_frontbuffer != 0x0){
     fb_putChar(8*(fb_idx++), 8*fb_idxy, a, 0xFFFFFF, 0x0);
   }
+  #endif
   outb(PORT,a);
 }
 
@@ -195,9 +197,11 @@ void print_serial(char str[], ...){
         i++;
     }
     va_end(listpd);
-    if(serial_debug_mode && fb_frontbuffer != 0x0){
+    #ifdef OS_DEBUG
+    if(fb_frontbuffer != 0x0){
       fb_idxy++;
       if(fb_idxy > (int) fb_height / 8) fb_idxy = 0;
       for(int j = 0; j < 0xFFFFF; j++){}
     }
+    #endif
 }

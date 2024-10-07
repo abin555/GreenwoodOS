@@ -94,7 +94,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
 	fb_init(GRUB_tagfb);    
     //MEM_printRegions();
-    serial_debug_mode = 1;
 
     alloc_init();
     //MEM_printRegions();
@@ -103,7 +102,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(1);
+    timer_init(2);
 
     multitask_init();
 
