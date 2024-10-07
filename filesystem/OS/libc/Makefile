@@ -4,3 +4,4 @@ LDFLAGS = -T ./link.ld -melf_i386
 
 all:
 	$(CC) $(CFLAGS) libc.c -o libc.o
+	nasm start.s -f elf -o start.o
