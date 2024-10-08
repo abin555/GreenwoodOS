@@ -23,6 +23,7 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.owner_task_id = task_running_idx;
     viewport.event_handler = NULL;
     viewport.ascii = '\0';
+    viewport.click_events_enabled = false;
     return viewport;
 }
 
@@ -328,6 +329,7 @@ struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_c
             interaction.clickType = VP_Body;
             interaction.vp = vp;
             viewport_move_element_to_front(viewport_list, i);
+            if(vp->click_events_enabled) viewport_send_event(vp, VP_CLICK);
             return interaction;
         }
     }

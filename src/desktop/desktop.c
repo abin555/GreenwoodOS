@@ -21,12 +21,11 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_console(kernel_console, "Starting Desktop Environment!\n");
 
     struct Bitmap background = loadBitmap(BACKGROUND_FILE);
-    struct Bitmap folder = loadBitmap("A/OS/icons/folder.tga\0");
-    struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
 
+    /*
     struct Icon icons[numIcons];
     memset(icons, 0, sizeof(struct Icon) * numIcons);
-
+    
     for(int i = 0; i < numIcons; i++){
         char folderLabel[5] = {'F','O','L','D',0};
         icons[i] = generateIcon(folder, 25 + i * 35, 25, folder.width, folder.height, folderLabel);
@@ -35,6 +34,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         char driveLabel[2] = {drives[i]->identity, 0};
         icons[i] = generateIcon(blockDevice, 25 + i * 35, 25, blockDevice.width, blockDevice.height, driveLabel);
     }
+    */
 
     print_serial("[DESKTOP] Global Viewport is at %x\n", &global_viewport_list);
     print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
@@ -64,8 +64,10 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     while(1){
         task_lock = 1;
         drawBackground(background, window);
+        /*
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
+        */
         viewport_draw_all(global_viewport_list, window);
         task_lock = 0;
 
@@ -78,16 +80,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 ClickDrag.selected_vp = vp_interaction.vp;
                 ClickDrag.selected_vp->oldLoc = ClickDrag.selected_vp->loc;
             }
-            else if(vp_interaction.clickType == VP_None){
-                for(int i = 0; i < numIcons; i++){
-                    if(getIconHover(&icons[i], mouseStatus.pos.x, mouseStatus.pos.y)){
-                        icons[i].selected = 1;
-                        icons[i].oldLoc = icons[i].loc;
-                        ClickDrag.dragType = 0;
-                        break;
-                    }
-                }
-            }
             
             ClickDrag.dragging = 1;
             ClickDrag.startX = mouseStatus.pos.x;
@@ -96,19 +88,10 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         if(!mouseStatus.buttons.left && ClickDrag.dragging) {
             ClickDrag.dragging = 0;
             ClickDrag.dragType = -1;
-            for(int i = 0; i < numIcons; i++){
-                icons[i].selected = 0;
-            }
             ClickDrag.selected_vp = NULL;
         }
 
         if(ClickDrag.dragging){
-            for(int i = 0; i < numIcons; i++){
-                if(icons[i].selected){
-                    icons[i].loc.x = icons[i].oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x);
-                    icons[i].loc.y = icons[i].oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y);
-                }
-            }
             if(ClickDrag.selected_vp != NULL){
                 viewport_set_position(ClickDrag.selected_vp, window,
                     ClickDrag.selected_vp->oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x),

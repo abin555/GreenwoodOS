@@ -164,7 +164,8 @@ typedef enum {
     VP_KEY,
     VP_EXIT,
     VP_MINIMIZE,
-    VP_MAXIMIZE
+    VP_MAXIMIZE,
+    VP_CLICK
 } VIEWPORT_EVENT_TYPE;
 
 struct Viewport {
@@ -184,6 +185,7 @@ struct Viewport {
 	char ascii;
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
+	bool click_events_enabled;
 };
 
 struct ViewportFunctions {
