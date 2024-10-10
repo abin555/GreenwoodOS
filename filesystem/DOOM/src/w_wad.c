@@ -332,7 +332,7 @@ int W_NumLumps(void)
     return numlumps;
 }
 
-
+extern void print_serial(char *msg);
 //
 // W_CheckNumForName
 // Returns -1 if name not found.
@@ -361,12 +361,16 @@ int W_CheckNumForName(char* name)
     v1 = name8.x[0];
     v2 = name8.x[1];
 
-
     // scan backwards so patch lump files take precedence
     lump_p = lumpinfo + numlumps;
-
     while (lump_p-- != lumpinfo)
     {
+        //print_serial(lump_p->name);
+        //print_serial(" @ 0x");
+        //print_serial(doom_itoa((unsigned int) lump_p, 16));
+        //print_serial(" - ");
+        //print_serial(doom_itoa(*(int*)lump_p->name, 16));
+        //print_serial("\n");
         if (*(int*)lump_p->name == v1
             && *(int*)&lump_p->name[4] == v2)
         {
