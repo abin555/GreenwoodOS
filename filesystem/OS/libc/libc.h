@@ -10,8 +10,8 @@ typedef unsigned char uint8_t;
 
 #ifndef __cplusplus
 typedef char bool;
-#define true 1;
-#define false 0;
+#define true 1
+#define false 0
 #endif
 
 #define NULL 0
@@ -226,6 +226,7 @@ struct DirectoryListing{
 };
 
 struct DirectoryListing getDirectoryListing(char *path);
+void print_serial(char *str);
 
 #ifdef __cplusplus
 }

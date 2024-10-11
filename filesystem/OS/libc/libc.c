@@ -450,3 +450,11 @@ struct DirectoryListing getDirectoryListing(char *path){
 	listFunc = (struct DirectoryListing (*)(char *)) eax;
 	return listFunc(path);
 }
+
+void print_serial(char *str){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) str;
+	eax = 0x31;
+	asm("int 0x80");
+}

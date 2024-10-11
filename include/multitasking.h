@@ -53,7 +53,7 @@ struct task_state{
 };
 
 #define MAX_TASKS 20
-#define TASK_STACK_SIZE 0x40000
+#define TASK_STACK_SIZE 0x80000
 extern uint8_t *task_stack_array[MAX_TASKS];
 
 extern int8_t task_running_idx;

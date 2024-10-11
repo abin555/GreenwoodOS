@@ -1,4 +1,5 @@
 #include "libc.h"
+#define DOOM_IMPLEMENTATION
 #include "PureDOOM.h"
 
 #define WIDTH 320
@@ -21,9 +22,16 @@ void *memcpy(void *dest, const void *src, int n){
 }
 
 void *malloc_impl(int size){
-    void *addr = malloc_walker;
-    malloc_walker += size;
-    return addr;
+  doom_print("MALLOC for ");
+  doom_print(doom_itoa(size, 10));
+  size += 0x10;
+  void *addr = malloc_walker;
+  malloc_walker += size;
+  doom_memset(addr, 0, size);
+  doom_print(" Walker at 0x");
+  doom_print(doom_itoa((unsigned int)malloc_walker, 16));
+  doom_print("\n");
+  return addr;
 }
 
 void free_impl(void *ptr){
@@ -116,42 +124,42 @@ void impl_gettime(int* sec, int* usec){
 }
 
 int main(int argc, char **argv){
-    private_region = requestRegion(0x800000);
-    malloc_walker = private_region;
-    rtc = get_rtc();
+  private_region = requestRegion(2*0x800000);
+  malloc_walker = private_region;
+  rtc = get_rtc();
 
-    doom_set_malloc(malloc_impl, free_impl);
-    doom_set_exit(exit);
-    doom_set_print((void (*)(const char *)) print_serial);
-    doom_set_getenv(getenv);
-    doom_set_file_io(
-      impl_fopen,
-      impl_fclose,
-      impl_fread,
-      impl_fwrite,
-      impl_fseek,
-      impl_ftell,
-      impl_feof
-    );
-    doom_set_gettime(impl_gettime);
+  doom_set_malloc(malloc_impl, free_impl);
+  doom_set_exit(exit);
+  doom_set_print((void (*)(const char *)) print_serial);
+  doom_set_getenv(getenv);
+  doom_set_file_io(
+    impl_fopen,
+    impl_fclose,
+    impl_fread,
+    impl_fwrite,
+    impl_fseek,
+    impl_ftell,
+    impl_feof
+  );
+  doom_set_gettime(impl_gettime);
 
-    print("DOOM starting init\n");
-    doom_init(argc, argv, 0);
+  print("DOOM starting init\n");
+  doom_init(argc, argv, 0);
 
-    running = 1;
-    vp_funcs = viewport_get_funcs();
-    window = vp_funcs->open(WIDTH, HEIGHT, "DOOM");
-    vp_funcs->add_event_handler(window, event_handler);
+  running = 1;
+  vp_funcs = viewport_get_funcs();
+  window = vp_funcs->open(WIDTH, HEIGHT, "DOOM");
+  vp_funcs->add_event_handler(window, event_handler);
 
-    uint32_t* framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
+  uint32_t* framebuffer;
+
+  while(running){
+    doom_update();
+    framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
     vp_funcs->set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
-
-    while(running){
-        doom_update();
-        framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
-        vp_funcs->copy(window);
-    }
+    vp_funcs->copy(window);
+  }
 
 
-    vp_funcs->close(window);
+  vp_funcs->close(window);
 }

@@ -229,6 +229,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x1F:{
+			print_serial("EXIT Syscall\n");
 			stop_task(task_running_idx);
 			break;
 		}
@@ -318,6 +319,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x30:{
 			cpu_state.eax = (uint32_t) &task_listDirectory;
+			break;
+		}
+		case 0x31:{
+			print_serial((char *) cpu.ebx);
 			break;
 		}
 	}
