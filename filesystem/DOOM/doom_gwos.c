@@ -24,13 +24,11 @@ void *memcpy(void *dest, const void *src, int n){
 void *malloc_impl(int size){
   doom_print("MALLOC for ");
   doom_print(doom_itoa(size, 10));
-  size += 0x10;
+  doom_print("\n");
   void *addr = malloc_walker;
   malloc_walker += size;
+
   doom_memset(addr, 0, size);
-  doom_print(" Walker at 0x");
-  doom_print(doom_itoa((unsigned int)malloc_walker, 16));
-  doom_print("\n");
   return addr;
 }
 

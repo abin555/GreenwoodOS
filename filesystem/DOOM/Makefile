@@ -4,7 +4,7 @@ INCLUDE_PATH = -I ../OS/libc/ -I./include/
 LIBS = ../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
-LDFLAGS = -T ./link.ld -melf_i386
+LDFLAGS = -melf_i386 -g
 PROG = DOOM
 
 #SRCS += src/am_map.o
@@ -82,9 +82,10 @@ START = start.o
 build: $(SRCS) $(START)
 	ld $(LDFLAGS) $(START) $(SRCS) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
+	objcopy --only-keep-debug $(PROG).elf $(PROG).sym
 
 build_linux:
-	gcc doom_linux.c -g -o doom_linux.elf
+	gcc doom_linux.c -o doom_linux.elf
 
 clean:
 	rm $(SRCS)

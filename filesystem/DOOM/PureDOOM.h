@@ -48203,6 +48203,7 @@ void Z_ClearZone(memzone_t* zone)
 //
 void Z_Init(void)
 {
+    doom_print("Z_INIT\n");
     memblock_t* block;
     int size;
 
@@ -48236,6 +48237,13 @@ void Z_Free(void* ptr)
     memblock_t* other;
 
     block = (memblock_t*)((byte*)ptr - sizeof(memblock_t));
+
+    
+    doom_print("Malloc Zone ID: ");
+    doom_print(doom_itoa(block->id, 10));
+    doom_print(" Region ");
+    doom_print(doom_ptoa(block));
+    doom_print("\n");
 
     if (block->id != ZONEID)
         I_Error("Error: Z_Free: freed a pointer without ZONEID");
@@ -48391,6 +48399,11 @@ void* Z_Malloc(int size, int tag, void* user)
     mainzone->rover = base->next;
 
     base->id = ZONEID;
+    doom_print("Malloc Zone ID: ");
+    doom_print(doom_itoa(base->id, 10));
+    doom_print(" Region ");
+    doom_print(doom_ptoa(base));
+    doom_print("\n");
 
     return (void*)((byte*)base + sizeof(memblock_t));
 }

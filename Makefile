@@ -56,10 +56,9 @@ all: build emulate
 
 kernel.elf: $(OBJECTS)
 	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
-	#~/copy_bin/ln $(LDFLAGS) $(OBJECTS) -o kernel.elf
 	cd ..	
 	objcopy --only-keep-debug kernel.elf kernel.sym
-#	objcopy --strip-debug kernel.elf
+	objcopy --strip-debug kernel.elf
 
 os.iso: kernel.elf
 	cp kernel.elf iso/boot/kernel.elf

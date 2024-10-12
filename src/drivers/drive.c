@@ -249,7 +249,7 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 		return 0;
 	}
 	else if(file->info.drive->format == EXT2){
-		//print_serial("[DRIVE] [EXT2] Copying File, buf size is %d, head is at %d\n", buf_size, file->head);
+		print_serial("[DRIVE] [EXT2] Copying File, buf size is %d, head is at %d\n", buf_size, file->head);
 		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
 		struct EXT2_Inode *inode = file->info.inode;
 		//char *block_buf = (char *) ext2_read_block(ext2, inode)
@@ -296,12 +296,12 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 
 		//print_serial("[DRIVE] [EXT2] block idx = %d, single indirect idx = %d, double indirect idx = %d, block head = %d\n", block_idx, single_indirect_idx, double_indirect_idx, block_head);
 
-		while((uint32_t) block_head < ext2->block_size && idx <= (uint32_t) buf_size){
-			buf[idx] = block[block_head];
+		while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) buf_size){
+			((unsigned char *)buf)[idx] = ((unsigned char *)block)[block_head];
 			//print_serial("%c", block[block_head]);
 			block_head++;
 			//print_serial("%c\n", buf[idx]);
-			//file->head++;
+			file->head++;
 			idx++;
 
 			if((uint32_t) block_head == ext2->block_size){
@@ -370,9 +370,10 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 		}
 
 		//print_serial("[DRIVE] Dump at 0x%x\n", buf);
-		//for(int i = 0; i < 100; i++){
-		//	print_serial("%c", buf[i]);
+		//for(int i = 0; i < buf_size; i++){
+		//	write_serial(buf[i]);
 		//}
+		//print_serial("[DRIVE] End dump\n");
 		//print_serial("\n");
 		//print_serial("[DRIVE][EXT2] Copied %d bytes, head is at %d\n", idx, file->head);
 		return 0;
