@@ -25,8 +25,7 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     asm("mov eax, cr2");
 
     print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\"\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name);
-    print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
-    print_stack_trace(cpu.ebx, 10);
+    //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     //asm("hlt");
     stop_task(task_running_idx);
     switch_to_task(&tasks[task_running_idx], &tasks[0]);

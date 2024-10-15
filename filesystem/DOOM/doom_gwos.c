@@ -126,6 +126,10 @@ int main(int argc, char **argv){
   malloc_walker = private_region;
   rtc = get_rtc();
 
+  print_serial("Z_Free is at 0x");
+  print_serial(doom_itoa((unsigned int) Z_Free, 16));
+  print_serial("\n");
+
   doom_set_malloc(malloc_impl, free_impl);
   doom_set_exit(exit);
   doom_set_print((void (*)(const char *)) print_serial);

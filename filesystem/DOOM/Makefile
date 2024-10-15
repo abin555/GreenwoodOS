@@ -4,7 +4,7 @@ INCLUDE_PATH = -I ../OS/libc/ -I./include/
 LIBS = ../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
-LDFLAGS = -melf_i386 -g
+LDFLAGS = -T link.ld -melf_i386 -g
 PROG = DOOM
 
 #SRCS += src/am_map.o

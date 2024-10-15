@@ -40,12 +40,8 @@ void kernel_task(int argc, char **argv){
 
     drive_enumerate();
 
-    //MEM_printRegions();
-
-
     window_init();
     console_init();
-    //MEM_printRegions();
 
     rtc_init();
 
@@ -92,17 +88,15 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     set_PAT();
     MEM_populateRegions();
 
-	fb_init(GRUB_tagfb);    
-    //MEM_printRegions();
+	fb_init(GRUB_tagfb);
 
     alloc_init();
-    //MEM_printRegions();
 
     PCI_init();
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(2);
+    timer_init(1);
 
     multitask_init();
 
