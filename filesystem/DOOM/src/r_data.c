@@ -686,7 +686,7 @@ int R_FlatNumForName(char* name)
     return i - firstflat;
 }
 
-extern void print_serial(char *msg);
+
 //
 // R_CheckTextureNumForName
 // Check whether texture is available.
@@ -700,14 +700,10 @@ int R_CheckTextureNumForName(char* name)
     if (name[0] == '-')
         return 0;
 
-    for (i = 0; i < numtextures; i++){
-        print_serial(textures[i]->name);
-        print_serial(" =? ");
-        print_serial(name);
-        print_serial("\n");
+    for (i = 0; i < numtextures; i++)
         if (!doom_strncasecmp(textures[i]->name, name, 8))
             return i;
-    }
+
     return -1;
 }
 

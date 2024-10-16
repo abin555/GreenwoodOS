@@ -362,7 +362,7 @@ static patch_t* bstar;
 static patch_t* p[MAXPLAYERS];
 
 // "gray P[1..MAXPLAYERS]"
-//static patch_t* bp[MAXPLAYERS];
+static patch_t* bp[MAXPLAYERS];
 
 // Name graphics of each level (centered)
 static patch_t** lnames;
@@ -460,7 +460,6 @@ void WI_drawOnLnode(int n, patch_t* c[])
         }
     } while (!fits && i != 2);
 
-    /*
     if (fits && i < 2)
     {
         V_DrawPatch(lnodes[wbs->epsd][n].x, lnodes[wbs->epsd][n].y,
@@ -473,7 +472,6 @@ void WI_drawOnLnode(int n, patch_t* c[])
         doom_print("Could not place patch on level ");
         doom_print(doom_itoa(n + 1, 10));
     }
-    */
 }
 
 
@@ -1646,9 +1644,9 @@ void WI_loadData(void)
 
         // "1,2,3,4"
         //doom_sprintf(name, "WIBP%d", i + 1);
-        //doom_strcpy(name, "WIBP");
-        //doom_concat(name, doom_itoa(i + 1, 10));
-        //bp[i] = W_CacheLumpName(name, PU_STATIC);
+        doom_strcpy(name, "WIBP");
+        doom_concat(name, doom_itoa(i + 1, 10));
+        bp[i] = W_CacheLumpName(name, PU_STATIC);
     }
 }
 
@@ -1713,8 +1711,8 @@ void WI_unloadData(void)
     for (i = 0; i < MAXPLAYERS; i++)
         Z_ChangeTag(p[i], PU_CACHE);
 
-    //for (i = 0; i < MAXPLAYERS; i++)
-    //    Z_ChangeTag(bp[i], PU_CACHE);
+    for (i = 0; i < MAXPLAYERS; i++)
+        Z_ChangeTag(bp[i], PU_CACHE);
 }
 
 

@@ -1,5 +1,5 @@
 #include "libc.h"
-#define DOOM_IMPLEMENTATION
+//#define DOOM_IMPLEMENTATION
 #include "PureDOOM.h"
 
 #define WIDTH 320
@@ -22,9 +22,6 @@ void *memcpy(void *dest, const void *src, int n){
 }
 
 void *malloc_impl(int size){
-  doom_print("MALLOC for ");
-  doom_print(doom_itoa(size, 10));
-  doom_print("\n");
   void *addr = malloc_walker;
   malloc_walker += size;
 
@@ -95,19 +92,7 @@ void impl_fclose(void *handle){
 }
 
 int impl_fread(void *handle, void *buf, int count){
-  fcopy(handle, buf, count);
-  
-  /*
-  doom_print("File Read for ");
-  doom_print(doom_itoa(count, 10));
-  doom_print(" at 0x");
-  doom_print(doom_itoa((unsigned int) buf, 16));
-  doom_print("\n");
-  for(int i = 0; i < count; i++){
-    write_serial(((char *) buf)[i]);
-  }*/
-  doom_print("\nFile Read Done\n");
-  
+  fcopy(handle, buf, count);  
   return count;
 }
 
@@ -145,9 +130,22 @@ int impl_feof(void *handle){
 
 struct RealTimeClock *rtc;
 
-void impl_gettime(int* sec, int* usec){
+unsigned int ticks = 0;
+
+void impl_gettime(int* sec, int* usec){  
   *sec = rtc->second;
   *usec = 0;
+
+  //ticks++;
+  //*sec = ticks / 1000;
+  //*usec = ticks % 1000;
+}
+
+void impl_exit(int code){
+  running = 0;
+  vp_funcs->close(window);
+  freeRegion(private_region, 2*0x800000);
+  exit(code);
 }
 
 int main(int argc, char **argv){
@@ -155,12 +153,8 @@ int main(int argc, char **argv){
   malloc_walker = private_region;
   rtc = get_rtc();
 
-  print_serial("Z_Free is at 0x");
-  print_serial(doom_itoa((unsigned int) Z_Free, 16));
-  print_serial("\n");
-
   doom_set_malloc(malloc_impl, free_impl);
-  doom_set_exit(exit);
+  doom_set_exit(impl_exit);
   doom_set_print((void (*)(const char *)) print_serial);
   doom_set_getenv(getenv);
   doom_set_file_io(
@@ -182,7 +176,10 @@ int main(int argc, char **argv){
   running = 1;
   vp_funcs = viewport_get_funcs();
   window = vp_funcs->open(WIDTH, HEIGHT, "DOOM");
+  window->loc.x = 400-160;
+  window->loc.y = 300-120;
   vp_funcs->add_event_handler(window, event_handler);
+  //addEndCallback(end_callback);
 
   uint32_t* framebuffer;
 
@@ -194,6 +191,6 @@ int main(int argc, char **argv){
     vp_funcs->copy(window);
   }
 
-
   vp_funcs->close(window);
+  freeRegion(private_region, 2*0x800000);
 }
