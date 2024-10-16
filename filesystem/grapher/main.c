@@ -61,6 +61,7 @@ int main(int argc, char **argv){
   window = vp_funcs->open(WIDTH, HEIGHT, "Grapher");
   editor_window = vp_funcs->open(ED_WIDTH, ED_HEIGHT, "Grapher Editor");
   editor_window->click_events_enabled = true;
+  editor_window->loc.y += window->loc.w;
   vp_funcs->add_event_handler(window, event_handler);
   vp_funcs->add_event_handler(editor_window, editor_event_handler);
   vp_funcs->set_buffer(window, win_buf, BUF_SIZE);

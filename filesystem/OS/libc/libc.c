@@ -458,3 +458,19 @@ void print_serial(char *str){
 	eax = 0x31;
 	asm("int 0x80");
 }
+
+void task_lock(int state){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) state;
+	eax = 0x32;
+	asm("int 0x80");
+}
+
+void write_serial(char c){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) c;
+	eax = 0x33;
+	asm("int 0x80");
+}

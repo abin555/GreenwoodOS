@@ -230,6 +230,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x1F:{
 			print_serial("EXIT Syscall\n");
+			task_lock = 0;
 			stop_task(task_running_idx);
 			break;
 		}
@@ -323,6 +324,14 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x31:{
 			print_serial((char *) cpu.ebx);
+			break;
+		}
+		case 0x32:{
+			task_lock = cpu.ebx & 1;
+			break;
+		}
+		case 0x33:{
+			write_serial((char) cpu.ebx);
 			break;
 		}
 	}

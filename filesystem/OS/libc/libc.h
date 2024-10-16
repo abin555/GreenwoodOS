@@ -227,6 +227,8 @@ struct DirectoryListing{
 
 struct DirectoryListing getDirectoryListing(char *path);
 void print_serial(char *str);
+void task_lock(int state);
+void write_serial(char c);
 
 #ifdef __cplusplus
 }

@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -g -m32 -c -O0 -nostdlib -nodefaultlibs -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector -fPIC
+CFLAGS = -g -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector
 INCLUDE_PATH = -I ../OS/libc/ -I./include/
 LIBS = ../OS/libc/libc.o
 AS = nasm

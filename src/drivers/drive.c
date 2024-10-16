@@ -249,7 +249,7 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 		return 0;
 	}
 	else if(file->info.drive->format == EXT2){
-		print_serial("[DRIVE] [EXT2] Copying File, buf size is %d, head is at %d\n", buf_size, file->head);
+		//print_serial("[DRIVE] [EXT2] Copying File, buf size is %d, head is at %d\n", buf_size, file->head);
 		struct EXT2_FS *ext2 = file->info.drive->format_info.ext2;
 		struct EXT2_Inode *inode = file->info.inode;
 		//char *block_buf = (char *) ext2_read_block(ext2, inode)
@@ -261,7 +261,16 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 
 		uint32_t block_offset = file->head / ext2->block_size;
 		uint32_t pointers_per_block = ext2->block_size / 4;
+		//uint32_t target_head = file->head % ext2->block_size;
 		block_head = file->head % ext2->block_size;
+
+		/*
+		bool pause_until = 0;
+		if(target_head > block_head && target_head < ext2->block_size){
+			pause_until = 1;
+			print_serial("Pausing until %d\n", target_head);
+		}
+		*/
 
 		char *block;
 		
@@ -276,7 +285,7 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 			single_indirect_idx = block_offset - 12;
 			block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
 			uint32_t *indirect_blocks = (uint32_t *) block;
-			uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+			uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
 			block = ext2_read_block(ext2, indirect_block);
 		}
 		else if(block_offset >= 12 + pointers_per_block){
@@ -290,21 +299,37 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 			
 			block = ext2_read_block(ext2, double_indirect_block);
 			uint32_t *indirect_blocks = (uint32_t *) block;
-			uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+			uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
 			block = ext2_read_block(ext2, indirect_block);
 		}
 
-		//print_serial("[DRIVE] [EXT2] block idx = %d, single indirect idx = %d, double indirect idx = %d, block head = %d\n", block_idx, single_indirect_idx, double_indirect_idx, block_head);
+		//print_serial("[DRIVE] [EXT2] START block idx = %d, single indirect idx = %d, double indirect idx = %d, block head = %d Block No. %d\n", block_idx, single_indirect_idx, double_indirect_idx, block_head, file->head / ext2->block_size);
 
 		while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) buf_size){
-			((unsigned char *)buf)[idx] = ((unsigned char *)block)[block_head];
-			//print_serial("%c", block[block_head]);
+			/*
+			if(!pause_until){
+				((uint8_t *)buf)[idx] = ((uint8_t *)block)[block_head];
+				//if(target_head != 0)
+				//	print_serial("%c @ %d\n", buf[idx], idx);
+				file->head++;
+				idx++;
+			}
+			else{
+				//print_serial("Skip %d\n", block_head);
+			}
 			block_head++;
-			//print_serial("%c\n", buf[idx]);
+			if(pause_until && block_head == target_head){
+				pause_until = 0;
+				//print_serial("Pause Clear\n");
+			}
+			*/
+			((uint8_t *)buf)[idx] = ((uint8_t *)block)[block_head];
 			file->head++;
 			idx++;
+			block_head++;
 
 			if((uint32_t) block_head == ext2->block_size){
+				//print_serial("[DRIVE] [EXT2] Update - Block No. %d Idx: %d\n", file->head / ext2->block_size, idx);
 				//print_serial("[DRIVE] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
 				if(block_idx == 12){
 					handle_first_indirect:;
@@ -363,6 +388,7 @@ int fcopy(struct FILE *file, char *buf, int buf_size){
 						goto handle_first_double_indirect;
 					}
 				}
+				//print_serial("[DRIVE] [EXT2] block idx = %d, single indirect idx = %d, double indirect idx = %d, block head = %d\n", block_idx, single_indirect_idx, double_indirect_idx, block_head);
 				//print_serial("[DRIVE] HEAD: %d IDX: %d Block head %d direct %d single %d double %d\n", file->head, idx, block_head, block_idx, single_indirect_idx, double_indirect_idx);
 
 				block_head = 0;

@@ -36,17 +36,34 @@ void free_impl(void *ptr){
     return;
 }
 
+void handle_key(char c){
+  switch(c){
+    case 'a':
+      doom_key_down(DOOM_KEY_LEFT_ARROW);
+      break;
+    case 'd':
+      doom_key_down(DOOM_KEY_RIGHT_ARROW);
+      break;
+    case 'w':
+      doom_key_down(DOOM_KEY_UP_ARROW);
+      break;
+    case 's':
+      doom_key_down(DOOM_KEY_DOWN_ARROW);
+      break;
+  }
+}
+
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
   switch(event){
     case VP_EXIT:
       running = 0;
       break;
     case VP_MAXIMIZE:
-    //case VP_FOCUSED:
+    case VP_FOCUSED:
       set_schedule(ALWAYS);
       break;
     case VP_MINIMIZE:
-    //case VP_UNFOCUSED:
+    case VP_UNFOCUSED:
       set_schedule(NEVER);
       break;
   }
@@ -79,6 +96,18 @@ void impl_fclose(void *handle){
 
 int impl_fread(void *handle, void *buf, int count){
   fcopy(handle, buf, count);
+  
+  /*
+  doom_print("File Read for ");
+  doom_print(doom_itoa(count, 10));
+  doom_print(" at 0x");
+  doom_print(doom_itoa((unsigned int) buf, 16));
+  doom_print("\n");
+  for(int i = 0; i < count; i++){
+    write_serial(((char *) buf)[i]);
+  }*/
+  doom_print("\nFile Read Done\n");
+  
   return count;
 }
 
@@ -146,7 +175,9 @@ int main(int argc, char **argv){
   doom_set_gettime(impl_gettime);
 
   print("DOOM starting init\n");
+  task_lock(1);
   doom_init(argc, argv, 0);
+  task_lock(0);
 
   running = 1;
   vp_funcs = viewport_get_funcs();
@@ -157,6 +188,7 @@ int main(int argc, char **argv){
 
   while(running){
     doom_update();
+    handle_key(window->ascii);
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
     vp_funcs->set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
     vp_funcs->copy(window);
