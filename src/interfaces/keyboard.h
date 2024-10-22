@@ -40,6 +40,7 @@ struct KBD_flags KBD_flags;
 
 uint32_t KBD_scancode_buffer_idx;
 uint32_t KBD_ascii_buffer_idx;
+extern char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size);
 

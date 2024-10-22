@@ -76,7 +76,7 @@ int I_GetTime(void)
     doom_gettime(&sec, &usec);
     if (!basetime)
         basetime = sec;
-    newtics = (sec - basetime) * TICRATE + usec * TICRATE / 1000000;
+    newtics = (sec - basetime) * TICRATE + usec * TICRATE / 100000;
     return newtics;
 }
 

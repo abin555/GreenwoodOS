@@ -103,7 +103,7 @@ typedef enum
 #if defined(DOOM_FAST_TICK)
 #define TICKMUL 2
 #else
-#define TICKMUL 2
+#define TICKMUL 1
 #endif
 #define TICRATE (35 * TICKMUL)
 

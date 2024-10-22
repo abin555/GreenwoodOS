@@ -8,6 +8,7 @@ struct RealTimeClock {
 	unsigned char day;
 	unsigned char month;
 	unsigned int year;
+	unsigned int msec;
 };
 
 extern struct RealTimeClock RTC;

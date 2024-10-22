@@ -568,18 +568,10 @@ void doom_init(int argc, char** argv, int flags)
 
 void doom_update()
 {
-    int now = I_GetTime();
-    int delta_time = now - last_update_time + 1;
-
-    while (delta_time-- > 0)
-    {
-        if (is_wiping_screen)
-            D_UpdateWipe();
-        else
-            D_DoomLoop();
-    }
-
-    last_update_time = now;
+    if (is_wiping_screen)
+        D_UpdateWipe();
+    else
+        D_DoomLoop();
 }
 
 

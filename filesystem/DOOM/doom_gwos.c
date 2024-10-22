@@ -33,21 +33,114 @@ void free_impl(void *ptr){
     return;
 }
 
-void handle_key(char c){
-  switch(c){
-    case 'a':
-      doom_key_down(DOOM_KEY_LEFT_ARROW);
-      break;
-    case 'd':
-      doom_key_down(DOOM_KEY_RIGHT_ARROW);
-      break;
-    case 'w':
-      doom_key_down(DOOM_KEY_UP_ARROW);
-      break;
-    case 's':
-      doom_key_down(DOOM_KEY_DOWN_ARROW);
-      break;
+struct KeyData{
+  char current_c;
+  char previous_c;
+};
+
+struct KeyData keyData;
+
+char key_pressed_map_back[0xFF];
+char *key_pressed_map;
+
+int skips;
+void handle_key(){
+  if(skips < 3){
+    skips++;
+    return;
   }
+  skips = 0;
+  for(int i = 0; i < 0xFF; i++){
+    int key_current = key_pressed_map[i];
+    int key_prev = key_pressed_map_back[i];
+
+    if(key_current != 0 && key_prev == 0){
+      switch((char) i){
+        case 'a':
+          doom_key_down(DOOM_KEY_LEFT_ARROW);
+          break;
+        case 'd':
+          doom_key_down(DOOM_KEY_RIGHT_ARROW);
+          break;
+        case 'w':
+          doom_key_down(DOOM_KEY_UP_ARROW);
+          break;
+        case 's':
+          doom_key_down(DOOM_KEY_DOWN_ARROW);
+          break;
+        case 'e':
+          doom_key_down(DOOM_KEY_SPACE);
+          break;
+        case 10:
+          doom_key_down(DOOM_KEY_ENTER);
+          break;
+        case 8:
+          doom_key_down(DOOM_KEY_BACKSPACE);
+          break;
+        case ' ':
+          doom_key_down(DOOM_KEY_CTRL);
+          break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case ',':
+        case '.':
+          doom_key_down(i);
+          break;
+      }
+    }
+    else if(key_current == 0 && key_prev != 0){
+      switch((char) i){
+        case 'a':
+          doom_key_up(DOOM_KEY_LEFT_ARROW);
+          break;
+        case 'd':
+          doom_key_up(DOOM_KEY_RIGHT_ARROW);
+          break;
+        case 'w':
+          doom_key_up(DOOM_KEY_UP_ARROW);
+          break;
+        case 's':
+          doom_key_up(DOOM_KEY_DOWN_ARROW);
+          break;
+        case 'e':
+          doom_key_up(DOOM_KEY_SPACE);
+          break;
+        case 10:
+          doom_key_up(DOOM_KEY_ENTER);
+          break;
+        case 8:
+          doom_key_up(DOOM_KEY_BACKSPACE);
+          break;
+        case ' ':
+          doom_key_up(DOOM_KEY_CTRL);
+          break;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case ',':
+        case '.':
+          doom_key_up(i);
+          break;
+      }
+    }
+  }
+
+  doom_memcpy(key_pressed_map_back, key_pressed_map, sizeof(key_pressed_map_back));
 }
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
@@ -133,9 +226,8 @@ struct RealTimeClock *rtc;
 unsigned int ticks = 0;
 
 void impl_gettime(int* sec, int* usec){  
-  *sec = rtc->second;
-  *usec = 0;
-
+  *sec = 60*rtc->minute + rtc->second;
+  *usec = rtc->msec;
   //ticks++;
   //*sec = ticks / 1000;
   //*usec = ticks % 1000;
@@ -152,6 +244,9 @@ int main(int argc, char **argv){
   private_region = requestRegion(2*0x800000);
   malloc_walker = private_region;
   rtc = get_rtc();
+
+  struct FEATURE_INFO keypressed_feature = getKernelFeature(FEAT_KEYPRESSMAP);
+  key_pressed_map = keypressed_feature.addr;
 
   doom_set_malloc(malloc_impl, free_impl);
   doom_set_exit(impl_exit);
@@ -184,11 +279,14 @@ int main(int argc, char **argv){
   uint32_t* framebuffer;
 
   while(running){
+    task_lock(1);
     doom_update();
-    handle_key(window->ascii);
+    task_lock(0);
+    handle_key();
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
     vp_funcs->set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
     vp_funcs->copy(window);
+    for(int i = 0; i < 0x8FFFFF; i++){}
   }
 
   vp_funcs->close(window);

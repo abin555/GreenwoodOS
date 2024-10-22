@@ -1,5 +1,6 @@
 #include "keyboard.h"
 
+char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;
@@ -71,7 +72,8 @@ void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD
 				keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = kbd_US[scancode];
 				KBD_flags.key = kbd_US[scancode];
 			}
-
+			*(key_pressed_map + KBD_flags.key) = 1;
+			//print_serial("[KBD] Pressed %c\n", KBD_flags.key);
 			fb_putChar(fb_width - 8, fb_height - 8, KBD_flags.key, 0xFFFFFF, 0x0);
 			
 			KBD_ascii_buffer_idx++;
@@ -161,6 +163,14 @@ void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD
 					break;
 			}
 			if(KBD_flags.release && !justRelease){
+				char c;
+				if(KBD_flags.shift){
+					c = kbd_US_shift[scancode];
+				}
+				else{
+					c = kbd_US[scancode];
+				}
+				*(key_pressed_map + c) = 0;
 				KBD_flags.release = false;
 				KBD_flags.key = 0;
 				if(KBD_flags.arrow != 0){

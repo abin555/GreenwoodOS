@@ -194,6 +194,13 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 				case 0x07:{
 					cpu_state.eax = (uint32_t) &timer_attached_functions;
 					cpu_state.ebx = timer_attached_functions_num;
+					break;
+				}
+				//Keyboard Pressed Buffer
+				case 0x08:{
+					cpu_state.eax = (uint32_t) &key_pressed_map;
+					cpu_state.ebx = sizeof(key_pressed_map);
+					break;
 				}
 			}
 			break;

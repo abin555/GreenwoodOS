@@ -25,6 +25,18 @@ void timer_init(uint32_t frequency){
 	IRQ_RES;
 }
 
+struct RealTimeClock {
+	unsigned char second;
+	unsigned char minute;
+	unsigned char hour;
+	unsigned char day;
+	unsigned char month;
+	unsigned int year;
+	unsigned int msec;
+};
+
+extern struct RealTimeClock RTC;
+
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
 	pic_acknowledge(32);
 	timer_ticks++;

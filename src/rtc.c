@@ -102,6 +102,7 @@ void read_rtc() {
             RTC.year += (CURRENT_YEAR / 100) * 100;
             if(RTC.year < CURRENT_YEAR) RTC.year += 100;
       }
+      RTC.msec += 100;
 }
 
 void rtc_callback(){

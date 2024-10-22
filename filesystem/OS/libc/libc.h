@@ -116,7 +116,8 @@ typedef enum {
 	FEAT_TASKTABLE = 0x04,
 	FEAT_PROGRAMBASE = 0x05,
 	FEAT_FRAMEBUFFER = 0x06,
-	FEAT_TIMER = 0x07
+	FEAT_TIMER = 0x07,
+	FEAT_KEYPRESSMAP = 0x08
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{
@@ -208,6 +209,7 @@ struct RealTimeClock {
 	unsigned char day;
 	unsigned char month;
 	unsigned int year;
+	unsigned int msec;
 };
 
 struct RealTimeClock *get_rtc();
