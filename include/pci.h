@@ -55,7 +55,7 @@ struct PCI_driver{
 	struct PCI_device *device;
 	uint32_t BAR[6];
 	uint8_t interrupt;
-
+	void *driver_data;
 	void (*init_driver)(struct PCI_driver *);
 	void (*exit_driver)(struct PCI_driver *);
 };

@@ -173,12 +173,20 @@ void print_serial(char str[], ...){
     fb_idx = 0;
     va_list listpd;
     va_start(listpd, str);
+    int set_len = 0;
     while(1){
         if(str[i] == '%'){
             i++;
+            set_len = 0;
+            do_again:
             switch(str[i]){
+                case '2':
+                  set_len = 1;
+                  i++;
+                  goto do_again;
+                  break;
                 case 'x':
-                    ser_printHex(va_arg(listpd, unsigned int), 0);
+                    ser_printHex(va_arg(listpd, unsigned int), set_len);
                     break;
                 case 's':
                     ser_printStr(va_arg(listpd, char*));

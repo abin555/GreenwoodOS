@@ -13,4 +13,5 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -usb \
 -device usb-ehci,id=ehci \
 -rtc base=localtime,clock=host \
--enable-kvm
+-enable-kvm \
+-nic user,model=e1000
