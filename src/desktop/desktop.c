@@ -45,6 +45,9 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     viewport_init_sys(global_viewport_list);
 
+    exec("/A/OS/explorer/explorer.exe", 0, NULL);
+    //exec("/A/clock/clock.exe", 0, NULL);
+
     struct {
         int startX;
         int startY;
@@ -98,18 +101,20 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                     ClickDrag.selected_vp->oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y)
                 );
             }
-            /*
-            drawRect(
-                0x0000FF,
-                0x0000DD,
-                ClickDrag.startX,
-                ClickDrag.startY,
-                mouseStatus.pos.x,
-                mouseStatus.pos.y,
-                window->backbuffer,
-                window->width
-            );
-            */
+            else{
+                drawRect(
+                    0x0000FF,
+                    0x0000DD,
+                    ClickDrag.startX,
+                    ClickDrag.startY,
+                    mouseStatus.pos.x,
+                    mouseStatus.pos.y,
+                    window->backbuffer,
+                    window->width
+                );
+            }
+            
+            
         }
 
         window_copy_buffer(window);
