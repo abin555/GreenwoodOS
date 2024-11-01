@@ -15,20 +15,20 @@ bool ethernet_assign_driver(struct ethernet_driver *driver) {
     return false;
 }
 
-void ethernet_init(struct PCI_driver *driver){
-    struct ethernet_driver *ether;
+void ethernet_init(struct PCI_driver *pci){
+    struct ethernet_driver *driver;
     if(
-        driver->device->vendorID == 0x8086 &&
-        driver->device->deviceID == 0x100E
+        pci->device->vendorID == 0x8086 &&
+        pci->device->deviceID == 0x100E
     ){
         print_serial("[ETHERNET] Init E1000 Driver\n");
-        ether = e1000_init(driver);
+        driver = e1000_init(pci);
     }
 
-    if(!ethernet_assign_driver(ether)){
+    if(!ethernet_assign_driver(driver)){
         print_serial("[ETHERNET] Unable to add ethernet device!\n");
         return;
     }
 
-    print_serial("[ETHERNET] MAC: %2x:%2x:%2x:%2x:%2x:%2x\n", ether->mac[0], ether->mac[1], ether->mac[2], ether->mac[3], ether->mac[4], ether->mac[5]);
+    print_serial("[ETHERNET] MAC: %2x:%2x:%2x:%2x:%2x:%2x\n", driver->mac[0], driver->mac[1], driver->mac[2], driver->mac[3], driver->mac[4], driver->mac[5]);
 }

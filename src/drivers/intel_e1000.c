@@ -211,7 +211,7 @@ void e1000_interrupt(struct cpu_state cpu  __attribute__((unused)), struct stack
 
 }
 
-int e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), void *data __attribute__((unused)), uint16_t len __attribute__((unused))){
+uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), struct ethernet_packet *packet __attribute__((unused)), uint32_t size __attribute__((unused))){
     return 0;
 }
 
@@ -220,46 +220,8 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     print_serial("[E1000] Init: \"%s\"\n", driver->name);
     print_serial("[E1000] Wants interrupt #%d\n", driver->interrupt);
     struct ethernet_driver *ether = malloc(sizeof(struct ethernet_driver));
-    /*
-    driver->driver_data = e1000;
+    ether->int_number = driver->interrupt;
 
-    if(driver->BAR[0] & 0x1){
-        ether->bar_type = 1;
-    }
-    else{
-        ether->bar_type = 0;
-    }
-
-    ether->io_base = driver->BAR[0] & ~1;
-    ether->mem_base = driver->BAR[0] & ~3;
-    MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
-
-    ether->eeprom_exists = false;
-
-    ether->writeCommand = e1000_writeCommand;
-    ether->readCommand = e1000_readCommand;
-    ether->detectEEProm = e1000_detectEEProm;
-    ether->eepromRead = e1000_eepromRead;
-    ether->readMACAddress = e1000_readMACAddress;
-    ether->startLink = e1000_startLink;
-    ether->rxinit = e1000_rxinit;
-    ether->txinit = e1000_txinit;
-    ether->enableInterrupt = e1000_enableInterrupt;
-    ether->handleReceive = e1000_handleReceive;
-    ether->getMACAddress = e1000_getMACAddress;
-    ether->interrupt = e1000_interrupt;
-    ether->sendPacket = e1000_sendPacket;
-
-    ether->detectEEProm(e1000);
-    if(!ether->readMACAddress(e1000)){
-        print_serial("[E1000] unable to read MAC address\n");
-    }
-    print_serial("[E1000] MAC: ");
-    for(int i = 0; i < 6; i++){
-        print_serial("%2x-", ether->mac[i]);
-    }
-    print_serial("\n");
-    */
     driver->driver_data = ether;
     ether->pci = driver;
 
@@ -286,6 +248,9 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     ether->ipv4.gateway[1] = 0;
     ether->ipv4.gateway[2] = 0;
     ether->ipv4.gateway[3] = 0;
+
+    ether->write = e1000_sendPacket;
+    
 
     uint16_t u16_pci_cmd_reg = PCI_read_word(
         ether->pci->device->bus,
@@ -320,7 +285,14 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     e1000_writeCommand(ether, E1000_REG_FCTTV, 0);
 
     // Auto-Speed Detection
-    e1000_write(driver, E1000_REG_CTRL, E1000_REGBIT_CTRL_ASDE | E1000_REGBIT_CTRL_SLU);
+    e1000_writeCommand(ether, E1000_REG_CTRL, E1000_REGBIT_CTRL_ASDE | E1000_REGBIT_CTRL_SLU);
+
+    e1000_rxinit(ether);
+    e1000_txinit(ether);
+
+    e1000_writeCommand(ether, E1000_REG_RADV, 0);
+    e1000_writeCommand(ether, E1000_REG_RDTR, E1000_REGBIT_RDT_RDTR_FPD | 0);
+    e1000_writeCommand(ether, E1000_REG_ITR, 5000);
 
     return ether;
 }
