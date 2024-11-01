@@ -1,6 +1,7 @@
 #include "pci.h"
 #include "hda.h"
-#include "intel_e1000.h"
+#include "ethernet.h"
+
 
 int PCI_numDevices;
 struct PCI_device *PCI_devices[50];
@@ -92,14 +93,11 @@ void PCI_initDevice(struct PCI_device *pdev){
 			goto generic_installation;
 			break;
 		case 0x0200:
-			if(pdev->vendorID == 0x8086 && pdev->deviceID == E1000_DEV){
-				print_serial("[PCI Device] Intel Ethernet E1000 Identified\n");
-				pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
-				pdriver->name = "Intel E1000";
-				pdriver->init_driver = e1000_init;
-				goto generic_installation;
-				break;
-			}
+			print_serial("[PCI Device] Ethernet Identified\n");
+			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
+			pdriver->name = "Ethernet";
+			pdriver->init_driver = ethernet_init;
+			goto generic_installation;
 			break;
 	}
 	return;

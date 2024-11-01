@@ -44,11 +44,12 @@ OBJECTS = \
 		src/stacktrace.o \
 		src/rtc.o \
 		src/drivers/hda.o \
-		src/drivers/intel_e1000.o
+		src/drivers/intel_e1000.o \
+		src/networking/ethernet.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf

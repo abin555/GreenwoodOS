@@ -28,6 +28,21 @@
 #define PCI_IO_CONF_FUNCNUM 8
 #define PCI_IO_CONF_REGNUM 2
 
+struct PCI_command_reg {
+    bool io_space: 1;
+    bool memory_space: 1;
+    bool bus_master: 1;
+    bool special_cycles: 1;
+    bool memory_write_and_invalidate: 1;
+    bool vga_palette_snoop: 1;
+    bool parity_error_response: 1;
+    bool reserved: 1;
+    bool serr_enable: 1;
+    bool fast_back_to_back_enable: 1;
+    bool interrupt_disable: 1;
+    uint8_t reserved2: 5;
+};
+
 struct PCI_device{
 	uint16_t vendorID;
 	uint16_t deviceID;
