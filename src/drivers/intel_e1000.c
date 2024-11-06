@@ -2,7 +2,7 @@
 
 #include "ethernet.h"
 
-/*
+#define ISSET_BIT_INT(reg, bit) (((reg) & (bit)) != 0)
 #define E1000_DEV 0x100E
 
 #define REG_CTRL        0x0000
@@ -93,9 +93,22 @@
 #define TSTA_LC                         (1 << 2)    // Late Collision
 #define LSTA_TU                         (1 << 3)    // Transmit Underrun
 
-*/
+
 #define E1000_NUM_RX_DESC 32
 #define E1000_NUM_TX_DESC 8
+
+#define RX_LEN 256
+#define TX_LEN 256
+
+void *e1000_calloc(struct ethernet_driver *ether, uint32_t num, uint32_t size, uint32_t align){
+    if(ether->private_page_base == NULL) return NULL;
+    void *addr = (ether->private_page_base + ether->private_page_offset) + align;
+    if(addr){
+        addr = (void *)(uint32_t *)addr + (align - (uint32_t)addr % align);
+    }
+    ether->private_page_offset += num * size + align;
+    return addr;
+}
 
 void e1000_writeCommand(struct ethernet_driver *ether, uint16_t p_address, uint32_t p_value){
     if(ether->bar_type == 0){
@@ -187,15 +200,93 @@ void e1000_startLink(struct ethernet_driver *ether __attribute__((unused))){
 }
 
 void e1000_rxinit(struct ethernet_driver *ether __attribute__((unused))){
+    for(int i = 0; i < 128; i++){
+        e1000_writeCommand(ether, E1000_REG_MTA + (i * 4), 0);
+    }
+    print_serial("[E1000] MTA: %x\n", e1000_readCommand(ether, E1000_REG_MTA));
 
+    struct e1000_rx_desc *buffer = e1000_calloc(ether, RX_LEN, sizeof(struct e1000_rx_desc), 16);
+    print_serial("[E1000] RX Buffer: %x\n", (uint32_t) buffer);
+
+    for(int i = 0; i < RX_LEN; i++)
+    {
+        void *addr = e1000_calloc(ether, 1, 8192, 16);
+        void *physical_addr = (void *) get_physical((uint32_t) addr);
+        buffer[i].addr = (uint32_t) physical_addr;
+        buffer[i].status = 0;
+        //print_serial("[E1000] RX buffer %d: 0x%x\n", i, buffer[i].addr);
+    }
+
+    ether->rx_buffer = (uint8_t *) buffer;
+    ether->rx_buffer_size = RX_LEN * sizeof(struct e1000_rx_desc);
+
+    e1000_writeCommand(ether, E1000_REG_RDBAL, (uint32_t)get_physical((uint32_t) buffer));
+    e1000_writeCommand(ether, E1000_REG_RDBAH, 0);
+
+    e1000_writeCommand(ether, E1000_REG_RDLEN, E1000_NUM_RX_DESC * 16);
+
+    e1000_writeCommand(ether, E1000_REG_RDH, 0);
+    e1000_writeCommand(ether, E1000_REG_RDT, E1000_NUM_RX_DESC-1);
+    ether->rx_buffer_end = 0;
+    e1000_writeCommand(ether, E1000_REG_RCTL, RCTL_EN| RCTL_SBP| RCTL_UPE | RCTL_MPE | RCTL_LBM_NONE | RTCL_RDMTS_HALF | RCTL_BAM | RCTL_SECRC  | RCTL_BSIZE_8192);
 }
 
 void e1000_txinit(struct ethernet_driver *ether __attribute__((unused))){
+    struct e1000_tx_desc *buffer = (struct e1000_tx_desc *) e1000_calloc(ether, TX_LEN, sizeof(struct e1000_tx_desc), 16);
+    for(int i = 0; i < TX_LEN; i++){
+        buffer[i].addr = 0;
+        buffer[i].cmd = 0;
+        buffer[i].status = E1000_REGBIT_TXD_STAT_DD;
+    }
+    ether->tx_buffer = (uint8_t *) buffer;
+    ether->tx_buffer_size = TX_LEN * sizeof(struct e1000_tx_desc);
+    e1000_writeCommand(ether, E1000_REG_TDBAL, (uint32_t)get_physical((uint32_t)buffer));
+    e1000_writeCommand(ether, E1000_REG_TDBAH, (uint32_t)((uint64_t)get_physical((uint32_t)buffer) >> 32));
 
+    e1000_writeCommand(ether, E1000_REG_TDLEN, ether->tx_buffer_size);
+
+    e1000_writeCommand(ether, E1000_REG_TDH, 0);
+    e1000_writeCommand(ether, E1000_REG_TDT, 0);
+    ether->tx_buffer_end = 0;
+
+    e1000_writeCommand(ether, E1000_REG_TCTL, E1000_REGBIT_TCTL_EN | E1000_REGBIT_TCTL_PSP | E1000_REGBIT_TCTL_CT_15 | E1000_REGBIT_TCTL_COLD_FULL | E1000_REGBIT_TCTL_RTLC);
+
+    e1000_writeCommand(ether, E1000_REG_TIPG, 10 << E1000_REGBITADDR_TIPG_IPGT | 10 << E1000_REGBITADDR_TIPG_IPGR1 | 10 << E1000_REGBITADDR_TIPG_IPGR2);
 }
 
 void e1000_enableInterrupt(struct ethernet_driver *ether __attribute__((unused))){
+    print_serial("[E1000] Enabling Interrupts\n");
+    e1000_writeCommand(
+        ether,
+        E1000_REG_IMS,
+        E1000_REGBIT_IMS_TXDW | E1000_REGBIT_ICR_TXQE | E1000_REGBIT_ICR_LSC | E1000_REGBIT_ICR_RXSEQ | E1000_REGBIT_ICR_RXDMT0 | E1000_REGBIT_ICR_RXO | E1000_REGBIT_ICR_RXT0 | E1000_REGBIT_IMS_MDAC | E1000_REGBIT_IMS_RXCFG | E1000_REGBIT_IMS_PHYINT | E1000_REGBIT_IMS_GPI | E1000_REGBIT_IMS_TXD_LOW | E1000_REGBIT_IMS_SRPD
+    );
+    e1000_readCommand(ether, E1000_REG_ICR);
+}
 
+void e1000_disableInterrupt(struct ethernet_driver *ether __attribute__((unused))){
+    print_serial("[E1000] Disabling Interrupts\n");
+    e1000_writeCommand(ether, E1000_REG_IMC, 0xFFFFFFFF);
+    e1000_writeCommand(ether, E1000_REG_ICR, 0xFFFFFFFF);
+    e1000_readCommand(ether, E1000_REG_STATUS);
+}
+
+void e1000_read_link_status(struct ethernet_driver *ether){
+    uint32_t status = e1000_readCommand(ether, E1000_REG_STATUS);
+    uint8_t duplex = (status >> 0) & 1;
+    uint8_t link_up = (status >> 1) & 1;
+    uint8_t speed = (status >> 6) & 3;
+
+    ether->up = link_up != 0;
+    ether->duplex = duplex != 0;
+    ether->speed = speed == 0 ? 10 : speed == 1 ? 100 : speed == 2 || speed == 3 ? 1000 : 0;
+
+    print_serial(
+        "[E1000] Link is %s, %s duplex, %d Mbps\n",
+        ether->up ? "up" : "down",
+        ether->duplex ? "full" : "half",
+        ether->speed
+    );
 }
 
 void e1000_handleReceive(struct ethernet_driver *ether __attribute__((unused))){
@@ -207,13 +298,73 @@ uint8_t *e1000_getMACAddress(struct ethernet_driver *ether){
     return ether->mac;
 }
 
-void e1000_interrupt(struct cpu_state cpu  __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void e1000_int_handler(struct ethernet_driver *ether __attribute__((unused))){
+    uint32_t icr = e1000_readCommand(ether, E1000_REG_ICR);
+    print_serial("e1000 int_handler: %x\n", icr);
 
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_TXDW)) {
+        print_serial("Transmit done\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_TXQE)) {
+        print_serial("Transmit queue empty\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_LSC)) {
+        print_serial("Link status changed\n");
+        e1000_read_link_status(ether);
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_RXSEQ)) {
+        print_serial("Receive sequence error\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_RXDMT0)) {
+        print_serial("Receive descriptor minimum threshold\n");
+        //e1000_read_packet(ether);
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_RXO)) {
+        print_serial("Receive overrun\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_RXT0)) {
+        print_serial("Receive done\n");
+        //e1000_read_packet(ether);
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_MDAC)) {
+        print_serial("MDIO access complete\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_RXCFG)) {
+        print_serial("Receive config\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_PHYINT)) {
+        print_serial("PHY interrupt\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_GPI)) {
+        print_serial("GPI\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_TXD_LOW)) {
+        print_serial("Transmit descriptor low\n");
+    }
+
+    if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_SRPD)) {
+        print_serial("Small receive packet detected\n");
+    }
+
+    e1000_readCommand(ether, E1000_REG_ICR);
 }
 
 uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), struct ethernet_packet *packet __attribute__((unused)), uint32_t size __attribute__((unused))){
     return 0;
 }
+
+
 
 
 struct ethernet_driver *e1000_init(struct PCI_driver *driver){
@@ -236,6 +387,9 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     ether->mem_base = driver->BAR[0] & ~3;
     MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
 
+    ether->private_page_base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, DRIVER);
+    ether->num_private_pages = 1;
+
     ether->ipv4.ip[0] = 0;
     ether->ipv4.ip[1] = 0;
     ether->ipv4.ip[2] = 0;
@@ -250,6 +404,9 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     ether->ipv4.gateway[3] = 0;
 
     ether->write = e1000_sendPacket;
+    ether->int_enable = e1000_enableInterrupt;
+    ether->int_disable = e1000_disableInterrupt;
+    ether->int_handler = e1000_int_handler;
     
 
     uint16_t u16_pci_cmd_reg = PCI_read_word(
@@ -293,6 +450,8 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     e1000_writeCommand(ether, E1000_REG_RADV, 0);
     e1000_writeCommand(ether, E1000_REG_RDTR, E1000_REGBIT_RDT_RDTR_FPD | 0);
     e1000_writeCommand(ether, E1000_REG_ITR, 5000);
+
+    e1000_read_link_status(ether);
 
     return ether;
 }

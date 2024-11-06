@@ -8,6 +8,9 @@
 
 #include "intel_e1000.h"
 
+#define E1000_NUM_RX_DESC 32
+#define E1000_NUM_TX_DESC 8
+
 struct ethernet_header {
     uint8_t destination_mac[6];
     uint8_t source_mac[6];
@@ -47,11 +50,15 @@ struct ethernet_driver{
     uint32_t rx_buffer_end;
 
     uint8_t *tx_buffer;
-    uint8_t tx_buffer_size;
-    uint8_t tx_buffer_end;
+    uint32_t tx_buffer_size;
+    uint32_t tx_buffer_end;
+
+    void *private_page_base;
+    uint32_t private_page_offset;
+    int num_private_pages;
 
     uint32_t (*write)(struct ethernet_driver *driver, struct ethernet_packet *packet, uint32_t size);
-    int int_number;
+    unsigned int int_number;
     void (*int_handler)(struct ethernet_driver *driver);
     void (*int_enable)(struct ethernet_driver *driver);
     void (*int_disable)(struct ethernet_driver *driver);

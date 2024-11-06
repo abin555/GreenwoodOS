@@ -7,6 +7,8 @@ struct IDT idt;
 unsigned int BUFFER_COUNT;
 struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state, struct stack_state);
 
+unsigned int INT_currentInterrupt;
+
 void pic_acknowledge(unsigned int interrupt){
 
 	if(interrupt >= 0x28){
@@ -162,6 +164,7 @@ bool override_state_return = false;
 void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack){
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
+	INT_currentInterrupt = interrupt;
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif

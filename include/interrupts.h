@@ -103,7 +103,7 @@ void interrupt_handler(
     struct cpu_state cpu, 
     unsigned int interrupt, 
     struct stack_state stack);  //add the number of the interrupt as an argument.
-
+extern unsigned int INT_currentInterrupt;
 void IDT_dump();
 
 extern void int_handler_0();
