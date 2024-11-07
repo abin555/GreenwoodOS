@@ -223,16 +223,19 @@ void e1000_rxinit(struct ethernet_driver *ether __attribute__((unused))){
     e1000_writeCommand(ether, E1000_REG_RDBAL, (uint32_t)get_physical((uint32_t) buffer));
     e1000_writeCommand(ether, E1000_REG_RDBAH, 0);
 
-    e1000_writeCommand(ether, E1000_REG_RDLEN, E1000_NUM_RX_DESC * 16);
+    e1000_writeCommand(ether, E1000_REG_RDLEN, ether->rx_buffer_size);
 
     e1000_writeCommand(ether, E1000_REG_RDH, 0);
-    e1000_writeCommand(ether, E1000_REG_RDT, E1000_NUM_RX_DESC-1);
+    e1000_writeCommand(ether, E1000_REG_RDT, RX_LEN - 1);
     ether->rx_buffer_end = 0;
     e1000_writeCommand(ether, E1000_REG_RCTL, RCTL_EN| RCTL_SBP| RCTL_UPE | RCTL_MPE | RCTL_LBM_NONE | RTCL_RDMTS_HALF | RCTL_BAM | RCTL_SECRC  | RCTL_BSIZE_8192);
 }
 
 void e1000_txinit(struct ethernet_driver *ether __attribute__((unused))){
     struct e1000_tx_desc *buffer = (struct e1000_tx_desc *) e1000_calloc(ether, TX_LEN, sizeof(struct e1000_tx_desc), 16);
+    if(buffer == NULL){
+        print_serial("[E1000] Unable to alloc tx buffer\n");
+    }
     for(int i = 0; i < TX_LEN; i++){
         buffer[i].addr = 0;
         buffer[i].cmd = 0;
@@ -241,17 +244,31 @@ void e1000_txinit(struct ethernet_driver *ether __attribute__((unused))){
     ether->tx_buffer = (uint8_t *) buffer;
     ether->tx_buffer_size = TX_LEN * sizeof(struct e1000_tx_desc);
     e1000_writeCommand(ether, E1000_REG_TDBAL, (uint32_t)get_physical((uint32_t)buffer));
-    e1000_writeCommand(ether, E1000_REG_TDBAH, (uint32_t)((uint64_t)get_physical((uint32_t)buffer) >> 32));
+    e1000_writeCommand(ether, E1000_REG_TDBAH, 0);
 
     e1000_writeCommand(ether, E1000_REG_TDLEN, ether->tx_buffer_size);
 
     e1000_writeCommand(ether, E1000_REG_TDH, 0);
     e1000_writeCommand(ether, E1000_REG_TDT, 0);
     ether->tx_buffer_end = 0;
-
+    /*
     e1000_writeCommand(ether, E1000_REG_TCTL, E1000_REGBIT_TCTL_EN | E1000_REGBIT_TCTL_PSP | E1000_REGBIT_TCTL_CT_15 | E1000_REGBIT_TCTL_COLD_FULL | E1000_REGBIT_TCTL_RTLC);
 
     e1000_writeCommand(ether, E1000_REG_TIPG, 10 << E1000_REGBITADDR_TIPG_IPGT | 10 << E1000_REGBITADDR_TIPG_IPGR1 | 10 << E1000_REGBITADDR_TIPG_IPGR2);
+    */
+
+    e1000_writeCommand(ether, REG_TCTRL,  TCTL_EN
+        | TCTL_PSP
+        | (15 << TCTL_CT_SHIFT)
+        | (64 << TCTL_COLD_SHIFT)
+        | TCTL_RTLC);
+
+    // This line of code overrides the one before it but I left both to highlight that the previous one works with e1000 cards, but for the e1000e cards 
+    // you should set the TCTRL register as follows. For detailed description of each bit, please refer to the Intel Manual.
+    // In the case of I217 and 82577LM packets will not be sent if the TCTRL is not configured using the following bits.
+    e1000_writeCommand(ether, REG_TCTRL,  0b0110000000000111111000011111010);
+    e1000_writeCommand(ether, REG_TIPG,  0x0060200A);
+
 }
 
 void e1000_enableInterrupt(struct ethernet_driver *ether __attribute__((unused))){
@@ -358,6 +375,7 @@ void e1000_int_handler(struct ethernet_driver *ether __attribute__((unused))){
     }
 
     e1000_readCommand(ether, E1000_REG_ICR);
+    print_serial("[E1000] Interrupt Complete\n");
 }
 
 uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), struct ethernet_packet *packet __attribute__((unused)), uint32_t size __attribute__((unused))){
@@ -388,6 +406,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
 
     ether->private_page_base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, DRIVER);
+    ether->private_page_offset = 0;
     ether->num_private_pages = 1;
 
     ether->ipv4.ip[0] = 0;
@@ -406,7 +425,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     ether->write = e1000_sendPacket;
     ether->int_enable = e1000_enableInterrupt;
     ether->int_disable = e1000_disableInterrupt;
-    ether->int_handler = e1000_int_handler;
+    ether->int_handler = NULL;
     
 
     uint16_t u16_pci_cmd_reg = PCI_read_word(
@@ -415,6 +434,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
         ether->pci->device->device,
         0x04
     );
+    
     struct PCI_command_reg pci_cmd_reg = *((struct PCI_command_reg *) &u16_pci_cmd_reg);
     pci_cmd_reg.bus_master = 1;
     pci_cmd_reg.memory_space = 1;
