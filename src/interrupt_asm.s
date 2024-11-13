@@ -93,7 +93,7 @@ no_err_int 39 ;EHCI IRQ: 7
 no_err_int 40 ;XHCI IRQ: 8
 no_err_int 41 ;AHCI IRQ: 9
 no_err_int 42
-no_err_int 43
+no_err_int 43 ; interrupt 11 - e1000(?)
 no_err_int 44 ; handler for interrupt 12 (mouse)
 no_err_int 45
 no_err_int 46

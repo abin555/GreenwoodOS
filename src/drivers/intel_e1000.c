@@ -104,13 +104,15 @@ void *e1000_calloc(struct ethernet_driver *ether, uint32_t num, uint32_t size, u
     if(ether->private_page_base == NULL) return NULL;
     void *addr = (ether->private_page_base + ether->private_page_offset) + align;
     if(addr){
-        addr = (void *)(uint32_t *)addr + (align - (uint32_t)addr % align);
+        //addr = (void *)(uint32_t *)addr + (align - (uint32_t)addr % align);
+        addr = (void *)((uint32_t)((void *)addr + (align - 1)) & ~(align - 1));
     }
     ether->private_page_offset += num * size + align;
     return addr;
 }
 
 void e1000_writeCommand(struct ethernet_driver *ether, uint16_t p_address, uint32_t p_value){
+    //print_serial("[E1000] WriteCommand\n");
     if(ether->bar_type == 0){
         uint32_t *addr = (uint32_t *) (ether->mem_base + p_address);
         *addr = p_value;
@@ -273,11 +275,17 @@ void e1000_txinit(struct ethernet_driver *ether __attribute__((unused))){
 
 void e1000_enableInterrupt(struct ethernet_driver *ether __attribute__((unused))){
     print_serial("[E1000] Enabling Interrupts\n");
+    /*
     e1000_writeCommand(
         ether,
         E1000_REG_IMS,
-        E1000_REGBIT_IMS_TXDW | E1000_REGBIT_ICR_TXQE | E1000_REGBIT_ICR_LSC | E1000_REGBIT_ICR_RXSEQ | E1000_REGBIT_ICR_RXDMT0 | E1000_REGBIT_ICR_RXO | E1000_REGBIT_ICR_RXT0 | E1000_REGBIT_IMS_MDAC | E1000_REGBIT_IMS_RXCFG | E1000_REGBIT_IMS_PHYINT | E1000_REGBIT_IMS_GPI | E1000_REGBIT_IMS_TXD_LOW | E1000_REGBIT_IMS_SRPD
+        //E1000_REGBIT_IMS_TXDW | E1000_REGBIT_ICR_TXQE | E1000_REGBIT_ICR_LSC | E1000_REGBIT_ICR_RXSEQ | E1000_REGBIT_ICR_RXDMT0 | E1000_REGBIT_ICR_RXO | E1000_REGBIT_ICR_RXT0 | E1000_REGBIT_IMS_MDAC | E1000_REGBIT_IMS_RXCFG | E1000_REGBIT_IMS_PHYINT | E1000_REGBIT_IMS_GPI | E1000_REGBIT_IMS_TXD_LOW | E1000_REGBIT_IMS_SRPD
+        E1000_REGBIT_IMS_TXDW | E1000_REGBIT_IMS_RXDMT0
     );
+    e1000_readCommand(ether, E1000_REG_ICR);
+    */
+    e1000_writeCommand(ether, E1000_REG_IMS ,0x1F6DC);
+    e1000_writeCommand(ether, E1000_REG_IMS ,0xff & ~4);
     e1000_readCommand(ether, E1000_REG_ICR);
 }
 
@@ -316,7 +324,10 @@ uint8_t *e1000_getMACAddress(struct ethernet_driver *ether){
 }
 
 void e1000_int_handler(struct ethernet_driver *ether __attribute__((unused))){
+    print_serial("[E1000] Ether @ 0x%x\n", (uint32_t) ether);
     uint32_t icr = e1000_readCommand(ether, E1000_REG_ICR);
+    e1000_writeCommand(ether, E1000_REG_ICR, 0xFFFFFFFF);
+    //return;
     print_serial("e1000 int_handler: %x\n", icr);
 
     if (ISSET_BIT_INT(icr, E1000_REGBIT_ICR_TXDW)) {
@@ -382,7 +393,23 @@ uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)),
     return 0;
 }
 
+static void e1000_reset(struct ethernet_driver *driver) {
+    print_serial("[E1000] Resetting...\n");
+    e1000_writeCommand(driver, E1000_REG_RCTL, 0);
+    e1000_writeCommand(driver, E1000_REG_TCTL, E1000_REGBIT_TCTL_PSP);
+    e1000_readCommand(driver, E1000_REG_STATUS);
 
+    uint32_t ctrl = e1000_readCommand(driver, E1000_REG_CTRL);
+    ctrl |= E1000_REGBIT_CTRL_RST;
+    e1000_writeCommand(driver, E1000_REG_CTRL, ctrl);
+
+    do {
+        for(int i = 0; i < 0xFFFF; i++){
+
+        }
+    } while (e1000_readCommand(driver, E1000_REG_CTRL) & E1000_REGBIT_CTRL_RST);
+    print_serial("[E1000] Reset Complete\n");
+}
 
 
 struct ethernet_driver *e1000_init(struct PCI_driver *driver){
@@ -400,6 +427,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     else{
         ether->bar_type = 0;
     }
+    print_serial("[E1000] BAR Type: %d\n", ether->bar_type);
 
     ether->io_base = driver->BAR[0] & ~1;
     ether->mem_base = driver->BAR[0] & ~3;
@@ -425,7 +453,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     ether->write = e1000_sendPacket;
     ether->int_enable = e1000_enableInterrupt;
     ether->int_disable = e1000_disableInterrupt;
-    ether->int_handler = NULL;
+    ether->int_handler = e1000_int_handler;
     
 
     uint16_t u16_pci_cmd_reg = PCI_read_word(
@@ -446,6 +474,8 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
         0x04,
         *(uint16_t *)&pci_cmd_reg
     );
+
+    e1000_reset(ether);
 
     e1000_writeCommand(ether, E1000_REG_EECD, E1000_REGBIT_EECD_SK | E1000_REGBIT_EECD_CS | E1000_REGBIT_EECD_DI);
 

@@ -28,9 +28,9 @@ struct cpu_state exception_gpf(struct cpu_state cpu __attribute__((unused)), str
 	print_console(tasks[task_running_idx].console, "ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
 	print_stack_trace(cpu.ebx, 10);
 	//asm volatile ("hlt");
-	stop_task(task_running_idx);
-	override_state_return = true;
-	most_recent_int_stack_state.eip = (uint32_t) &exception_holding;
+	//stop_task(task_running_idx);
+	//override_state_return = true;
+	//most_recent_int_stack_state.eip = (uint32_t) &exception_holding;
 	return cpu;
 }
 

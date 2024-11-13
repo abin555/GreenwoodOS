@@ -132,7 +132,7 @@ void interrupts_install_idt()
 	interrupts_init_descriptor(36,  int_handler_36);
 	interrupts_init_descriptor(37,  int_handler_37);
 	interrupts_init_descriptor(38,  int_handler_38);
-	//interrupts_init_descriptor(39,  int_handler_39);
+	interrupts_init_descriptor(39,  int_handler_39);
 	interrupts_init_descriptor(40,  int_handler_40);
 	interrupts_init_descriptor(41,  int_handler_41);
 	interrupts_init_descriptor(42,  int_handler_42);

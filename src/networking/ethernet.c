@@ -51,10 +51,12 @@ void ethernet_init(struct PCI_driver *pci){
     print_serial("[ETHERNET] MAC: %2x:%2x:%2x:%2x:%2x:%2x\n", driver->mac[0], driver->mac[1], driver->mac[2], driver->mac[3], driver->mac[4], driver->mac[5]);
     print_serial("[ETHERNET] Interrupt Line: %d\n", pci->interrupt);
 
+    
     IRQ_clear_mask(pci->interrupt);
     interrupt_add_handle(32 + pci->interrupt, ethernet_handler);
     if(driver->int_enable){
-        //driver->int_enable(driver);
+        driver->int_enable(driver);
     }
+    
     print_serial("[ETHERNET] Init Complete\n");
 }
