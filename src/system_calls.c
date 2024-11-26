@@ -263,9 +263,9 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		//Request Memory Block of size to be alloced to requested virtual memory region
 		case 0x23:{
 			int block = MEM_findRegionIdx(cpu.ebx);
-			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
-			//MEM_printRegions();
-			cpu_state.eax = addr;
+			MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
+			MEM_printRegions();
+			cpu_state.eax = cpu.ecx;
 			break;
 		}
 		//Add timer callback
@@ -339,6 +339,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x33:{
 			write_serial((char) cpu.ebx);
+			break;
+		}
+		case 0x34:{
+			task_yield();
 			break;
 		}
 	}

@@ -221,3 +221,7 @@ void list_tasks(){
         }
     }
 }
+
+void task_yield(){
+    task_callback();
+}

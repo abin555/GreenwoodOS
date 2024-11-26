@@ -55,7 +55,7 @@ void ethernet_init(struct PCI_driver *pci){
     IRQ_clear_mask(pci->interrupt);
     interrupt_add_handle(32 + pci->interrupt, ethernet_handler);
     if(driver->int_enable){
-        driver->int_enable(driver);
+        //driver->int_enable(driver);
     }
     
     print_serial("[ETHERNET] Init Complete\n");

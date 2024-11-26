@@ -96,7 +96,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(1);
+    timer_init(2);
 
     multitask_init();
 

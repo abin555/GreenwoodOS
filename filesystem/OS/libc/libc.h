@@ -117,7 +117,8 @@ typedef enum {
 	FEAT_PROGRAMBASE = 0x05,
 	FEAT_FRAMEBUFFER = 0x06,
 	FEAT_TIMER = 0x07,
-	FEAT_KEYPRESSMAP = 0x08
+	FEAT_KEYPRESSMAP = 0x08,
+
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{
@@ -231,6 +232,8 @@ struct DirectoryListing getDirectoryListing(char *path);
 void print_serial(char *str);
 void task_lock(int state);
 void write_serial(char c);
+
+void yield();
 
 #ifdef __cplusplus
 }

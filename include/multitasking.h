@@ -76,4 +76,6 @@ void multitask_start();
 void list_tasks();
 void set_schedule(ScheduleType type);
 
+void task_yield();
+
 #endif

@@ -474,3 +474,9 @@ void write_serial(char c){
 	eax = 0x33;
 	asm("int 0x80");
 }
+
+void yield(){
+	register uint32_t eax asm("eax");
+	eax = 0x34;
+	asm("int 0x80");
+}
