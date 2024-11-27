@@ -65,7 +65,9 @@ int main(int argc, char **argv){
     print("Explorer Open\n");
 	while(running){
         relMousePos = getRelativeMouse();
-        //buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
+        if(relMousePos.x > 0 && relMousePos.x < WIDTH && relMousePos.y > 0 && relMousePos.y < HEIGHT){
+            buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
+        }
         
         if(vp->ascii){
             char c = vp->ascii;
