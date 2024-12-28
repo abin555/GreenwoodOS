@@ -194,7 +194,7 @@ int main(int argc, char **argv){
 		freeRegion(heap, REGION_SIZE);
 		return 1;
 	}
-	gif_err = DGifSlurp(gif);
+	//gif_err = DGifSlurp(gif);
 	
 	vp = vp_funcs->open(gif->SWidth, gif->SHeight, argv[1]);
 	viewbuf = malloc(gif->SWidth * gif->SHeight * 4);
