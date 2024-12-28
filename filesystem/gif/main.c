@@ -1,5 +1,5 @@
 #include "libc.h"
-#include "gifdec.h"
+typedef unsigned int size_t;
 
 char *heap;
 int heap_idx = 0;
@@ -80,24 +80,12 @@ int main(int argc, char **argv){
 	}
 	vp_funcs = viewport_get_funcs();
 
-	gd_GIF *gif;
-
-	gif = gd_open_gif(argv[1]);
-	if(gif == NULL){
-		print_serial("[GIF] Unable to open GIF!\n");
-		return 1;
-	}
-
-	uint8_t *frame = alloc(gif->width * gif->height * 3);
-	uint32_t *image_buf = alloc(gif->width * gif->height * 4);
 	
-	vp = vp_funcs->open(gif->width, gif->height, argv[1]);
-	vp_funcs->set_buffer(vp, image_buf, gif->width * gif->height * 4);
+	vp = vp_funcs->open(150, 150, argv[1]);
+	//vp_funcs->set_buffer(vp, image_buf, 150 * 150 * 4);
 	vp_funcs->add_event_handler(vp, event_handler);
 
-	uint8_t *color = &gif->gct.colors[gif->bgindex * 3];
-	uint32_t background_color = make_color(color[0], color[1], color[2], 0x00);
-	vp_clear(vp, background_color);
+	vp_clear(vp, 0x000000);
 	vp_funcs->copy(vp);
 
 	int ret;
@@ -107,33 +95,8 @@ int main(int argc, char **argv){
 	int i, j;
 
 	while(running){
-		ret = gd_get_frame(gif);
-		if(ret == -1) break;
-
-		gd_render_frame(gif, frame);
-		color = frame;
-
-		for (i = 0; i < gif->height; i++) {
-            for (j = 0; j < gif->width; j++) {
-                if (!gd_is_bgcolor(gif, color))
-                    pixel = make_color(color[0], color[1], color[2], 0x00);
-                else if (((i >> 2) + (j >> 2)) & 1)
-                    pixel = make_color(0x7F, 0x7F, 0x7F, 0x00);
-                else
-                    pixel = make_color(0x00, 0x00, 0x00, 0x00);
-                addr = image_buf + (i * gif->width + j * sizeof(pixel));
-                memcpy(addr, &pixel, sizeof(pixel));
-                color += 3;
-            }
-        }
-
-		vp_funcs->copy(vp);
-
-		if(ret == 0){
-			gd_rewind(gif);
-		}
+		
 	}
-	gd_close_gif(gif);
 	vp_funcs->close(vp);
 
 }
