@@ -34,8 +34,7 @@ static int InternalRead(GifFileType *gif, GifByteType *buf, int len) {
 	// fprintf(stderr, "### Read: %d\n", len);
 	return (((GifFilePrivateType *)gif->Private)->Read
 	            ? ((GifFilePrivateType *)gif->Private)->Read(gif, buf, len)
-	            : fread(buf, 1, len,
-	                    ((GifFilePrivateType *)gif->Private)->File));
+	            : 0);
 }
 
 static int DGifGetWord(GifFileType *GifFile, GifWord *Word);
@@ -47,119 +46,6 @@ static int DGifGetPrefixChar(const GifPrefixType *Prefix, int Code,
 static int DGifDecompressInput(GifFileType *GifFile, int *Code);
 static int DGifBufferedInput(GifFileType *GifFile, GifByteType *Buf,
                              GifByteType *NextByte);
-
-/******************************************************************************
- Open a new GIF file for read, given by its name.
- Returns dynamically allocated GifFileType pointer which serves as the GIF
- info record.
-******************************************************************************/
-GifFileType *DGifOpenFileName(const char *FileName, int *Error) {
-	int FileHandle;
-	GifFileType *GifFile;
-
-	if ((FileHandle = open(FileName, O_RDONLY)) == -1) {
-		if (Error != NULL) {
-			*Error = D_GIF_ERR_OPEN_FAILED;
-		}
-		return NULL;
-	}
-
-	GifFile = DGifOpenFileHandle(FileHandle, Error);
-	return GifFile;
-}
-
-/******************************************************************************
- Update a new GIF file, given its file handle.
- Returns dynamically allocated GifFileType pointer which serves as the GIF
- info record.
-******************************************************************************/
-GifFileType *DGifOpenFileHandle(int FileHandle, int *Error) {
-	char Buf[GIF_STAMP_LEN + 1];
-	GifFileType *GifFile;
-	GifFilePrivateType *Private;
-	FILE *f;
-
-	GifFile = (GifFileType *)malloc(sizeof(GifFileType));
-	if (GifFile == NULL) {
-		if (Error != NULL) {
-			*Error = D_GIF_ERR_NOT_ENOUGH_MEM;
-		}
-		(void)close(FileHandle);
-		return NULL;
-	}
-
-	/*@i1@*/ memset(GifFile, '\0', sizeof(GifFileType));
-
-	/* Belt and suspenders, in case the null pointer isn't zero */
-	GifFile->SavedImages = NULL;
-	GifFile->SColorMap = NULL;
-
-	Private = (GifFilePrivateType *)calloc(1, sizeof(GifFilePrivateType));
-	if (Private == NULL) {
-		if (Error != NULL) {
-			*Error = D_GIF_ERR_NOT_ENOUGH_MEM;
-		}
-		(void)close(FileHandle);
-		free((char *)GifFile);
-		return NULL;
-	}
-
-	/*@i1@*/ memset(Private, '\0', sizeof(GifFilePrivateType));
-
-#ifdef _WIN32
-	_setmode(FileHandle, O_BINARY); /* Make sure it is in binary mode. */
-#endif                                  /* _WIN32 */
-
-	f = fdopen(FileHandle, "rb"); /* Make it into a stream: */
-
-	/*@-mustfreeonly@*/
-	GifFile->Private = (void *)Private;
-	Private->FileHandle = FileHandle;
-	Private->File = f;
-	Private->FileState = FILE_STATE_READ;
-	Private->Read = NULL;     /* don't use alternate input method (TVT) */
-	GifFile->UserData = NULL; /* TVT */
-	/*@=mustfreeonly@*/
-
-	/* Let's see if this is a GIF file: */
-	/* coverity[check_return] */
-	if (InternalRead(GifFile, (unsigned char *)Buf, GIF_STAMP_LEN) !=
-	    GIF_STAMP_LEN) {
-		if (Error != NULL) {
-			*Error = D_GIF_ERR_READ_FAILED;
-		}
-		(void)fclose(f);
-		free((char *)Private);
-		free((char *)GifFile);
-		return NULL;
-	}
-
-	/* Check for GIF prefix at start of file */
-	Buf[GIF_STAMP_LEN] = 0;
-	if (strncmp(GIF_STAMP, Buf, GIF_VERSION_POS) != 0) {
-		if (Error != NULL) {
-			*Error = D_GIF_ERR_NOT_GIF_FILE;
-		}
-		(void)fclose(f);
-		free((char *)Private);
-		free((char *)GifFile);
-		return NULL;
-	}
-
-	if (DGifGetScreenDesc(GifFile) == GIF_ERROR) {
-		(void)fclose(f);
-		free((char *)Private);
-		free((char *)GifFile);
-		return NULL;
-	}
-
-	GifFile->Error = 0;
-
-	/* What version of GIF? */
-	Private->gif89 = (Buf[GIF_VERSION_POS + 1] == '9');
-
-	return GifFile;
-}
 
 /******************************************************************************
  GifFileType constructor with user supplied input function (TVT)

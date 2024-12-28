@@ -1,6 +1,6 @@
 CC = gcc
 CFLAGS = -g -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector
-INCLUDE_PATH = -I ../OS/libc/ -I./include/
+INCLUDE_PATH = -I ../OS/libc/ -I./libgif
 LIBS = ../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
@@ -8,7 +8,14 @@ LDFLAGS = -T ../OS/libc/link.ld -melf_i386 -g
 PROG = gif
 
 SRCS += main.o
-SRCS += gifdec.o
+SRCS += utils.o
+SRCS += libgif/dgif_lib.o
+SRCS += libgif/gif_err.o
+SRCS += libgif/gif_font.o
+SRCS += libgif/gif_hash.o
+SRCS += libgif/gifalloc.o
+SRCS += libgif/openbsd-reallocarray.o
+
 START = start.o
 
 %.o : %.c
