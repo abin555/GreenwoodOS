@@ -115,7 +115,6 @@ int main(int argc, char **argv){
             }
         }
         if(mouseStatus->buttons.left && !last_mouse_left && isFocus){
-            print_serial("[EXPLORER] Click!\n");
             last_mouse_left = 1;
             if(selection != -1 ){
                 task_lock(1);
