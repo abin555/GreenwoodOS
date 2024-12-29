@@ -1,10 +1,10 @@
 CC = gcc
 CFLAGS = -g -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector
-INCLUDE_PATH = -I ../OS/libc/ -I./libgif
-LIBS = ../OS/libc/libc.o
+INCLUDE_PATH = -I ../../OS/libc/ -I./libgif
+LIBS = ../../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
-LDFLAGS = -T ../OS/libc/link.ld -melf_i386 -g
+LDFLAGS = -T ../../OS/libc/link.ld -melf_i386 -g
 PROG = gif
 
 SRCS += main.o
