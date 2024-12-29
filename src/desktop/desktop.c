@@ -1,6 +1,6 @@
 #include "desktop.h"
 
-#define BACKGROUND_FILE "A/image/norway.tga\0"
+#define BACKGROUND_FILE "A/Pictures/norway.tga\0"
 //#define BACKGROUND_FILE "A/image/bliss.tga\0"
 //#define BACKGROUND_FILE "A/image/Eibsee.tga\0"
 

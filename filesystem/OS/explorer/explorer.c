@@ -120,7 +120,7 @@ int main(int argc, char **argv){
                             arg[0] = 0x0;
                             arg[1] = alloc(dir.entries[selection+2].name_len);
                             for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-                            exec("/A/image/image.exe", 2, arg);
+                            exec("/A/utils/image/image.exe", 2, arg);
                             break;
                         }
                         else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".exe")){
@@ -132,7 +132,7 @@ int main(int argc, char **argv){
                             arg[0] = 0x0;
                             arg[1] = alloc(dir.entries[selection+2].name_len);
                             for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-                            exec("/A/3D/3Dvp.exe", 2, arg);
+                            exec("/A/utils/3D/3Dvp.exe", 2, arg);
                             break;
                         }
                         else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".gif")){
@@ -140,7 +140,7 @@ int main(int argc, char **argv){
                             arg[0] = 0x0;
                             arg[1] = alloc(dir.entries[selection+2].name_len);
                             for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-                            exec("/A/gif/gif.exe", 2, arg);
+                            exec("/A/utils/gif/gif.exe", 2, arg);
                             break;
                         }
                         else {
@@ -148,7 +148,7 @@ int main(int argc, char **argv){
                             arg[0] = 0x0;
                             arg[1] = alloc(dir.entries[selection+2].name_len);
                             for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-                            exec("/A/ed/ed.exe", 2, arg);
+                            exec("/A/utils/ed/ed.exe", 2, arg);
                             break;
                         }
                     }

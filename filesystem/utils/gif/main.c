@@ -70,7 +70,7 @@ void GIF_CopyImageToViewport(GifFileType *gif, int image_idx){
 					viewbuf[(y+desc->Top)*gif->SWidth + (x+desc->Left)] = make_color(rgb.Red, rgb.Green, rgb.Blue, 0);
 				}
 				else if(gcb.DisposalMode == DISPOSE_PREVIOUS){
-					continue;
+					viewbuf[(y+desc->Top)*gif->SWidth + (x+desc->Left)] = vp->frontbuf[(y+desc->Top)*gif->SWidth + (x+desc->Left)];
 				}
 
 				if(transparent_idx != -1 && c == transparent_idx){
@@ -80,6 +80,12 @@ void GIF_CopyImageToViewport(GifFileType *gif, int image_idx){
 				uint32_t color = make_color(rgb.Red, rgb.Green, rgb.Blue, 0);
 				viewbuf[(y+desc->Top)*gif->SWidth + (x+desc->Left)] = color;
 			}
+		}
+	}
+
+	for(int i = 0; i < 0xFFFFF; i++){
+		for(int j = 0; j < 4*gcb.DelayTime; j++){
+
 		}
 	}
 }
@@ -111,11 +117,9 @@ int main(int argc, char **argv){
 	vp_funcs->set_buffer(vp, viewbuf, gif->SWidth * gif->SHeight * 4);
 	vp_funcs->add_event_handler(vp, event_handler);
 
-	uint32_t *timer_ticks = getTimerTickHandle();
 
 	int image_idx = 0;
 	running = 1;
-	unsigned char last_tick = *timer_ticks;
 	while(running){
 		GIF_CopyImageToViewport(gif, image_idx);
 		vp_funcs->copy(vp);
