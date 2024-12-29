@@ -246,7 +246,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			int block = MEM_findRegionIdx(cpu.ebx);
 			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, 0, PROGRAM);
 			cpu_state.eax = addr;
-			MEM_printRegions();
+			//MEM_printRegions();
 			break;
 		}
 		//Add Keyboard Event Listener
@@ -264,7 +264,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x23:{
 			int block = MEM_findRegionIdx(cpu.ebx);
 			MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
-			MEM_printRegions();
+			//MEM_printRegions();
 			cpu_state.eax = cpu.ecx;
 			break;
 		}

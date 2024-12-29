@@ -633,7 +633,7 @@ struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path){
 	char drive_letter = big_path[0];
 	path = big_path + 2;
 	struct DRIVE *drive = drive_get(drive_letter);
-	print_serial("[DRIVE] Directory Listing %s / %s\n", big_path, path);
+	//print_serial("[DRIVE] Directory Listing %s / %s\n", big_path, path);
 	if(drive->format == ISO9660){
 		//ISO9660_printFileList(console, drive->format_info.ISO, path);
 	}
@@ -641,10 +641,12 @@ struct DirectoryListing listDirectory(struct DIRECTORY *dir, char *path){
 		//ext2_listDirectory(console, drive->format_info.ext2, path);
 		listing = ext2_advListDirectory(drive->format_info.ext2, path);
 	}
+	/*
 	print_serial("%s:\n", listing.directory_path);
 	for(int i = 0; i < listing.num_entries; i++){
 		print_serial(" %s - %d %d\n", listing.entries[i].filename, listing.entries[i].type, listing.entries[i].name_len);
 	}
+	*/
 	return listing;
 }
 

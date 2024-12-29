@@ -47,24 +47,29 @@ void kernel_task(int argc, char **argv){
 
     serial_debug_mode = 0;
 
-    struct WINDOW *kernel_win = window_open("KERNEL", false);
-    kernel_console = console_open(kernel_win);
+    kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
+
+    /*
+    struct WINDOW *kernel_win = window_open("KERNEL", false);
+    kernel_console = console_open(kernel_win);    
     kernel_task->console = kernel_console;
     kernel_task->window = kernel_win;
     set_schedule(ONFOCUS);
+    */
 
     char kernel_path[] = "A/";
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
-
+    /*
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     
     print_console(kernel_console, "Loading Desktop Task...\n");
+    */
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
-    window_close(kernel_win);  
+    //window_close(kernel_win);  
 
     task_lock = 0;
     return;

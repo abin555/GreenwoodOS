@@ -393,6 +393,9 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 
 		}
 	}*/
+	if(console->view_type == CONSOLE_VIEWPORT){
+		viewport_copy_buffer(console->viewport);
+	}
 }
 
 char quadToHex(uint8_t quad){

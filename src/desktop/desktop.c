@@ -45,6 +45,14 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     viewport_init_sys(global_viewport_list);
 
+    /*
+    struct Viewport *kernel_console_vp = viewport_indirect_open(20*8, 40*8, "Kernel Console");
+    viewport_set_buffer(kernel_console_vp, malloc(20*8*40*8*sizeof(uint32_t)), 20*8*40*8);
+    console_close(kernel_console);
+    kernel_console = console_open_vp(kernel_console_vp);
+    print_console(kernel_console, "TEST CONSOLE!\n");
+    */
+
     exec("/A/OS/explorer/explorer.exe", 0, NULL);
     //exec("/A/clock/clock.exe", 0, NULL);
 
@@ -130,7 +138,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/OS/explorer/explorer.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'C'){
-        exec("/A/clock/clock.exe", 0, NULL);
+        exec("/A/utils/clock/clock.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){

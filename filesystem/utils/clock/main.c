@@ -216,11 +216,13 @@ int drawDecimal(int data, int x, int y){
     while(pow * 10 <= data)
         pow *= 10;
     while(pow != 0){
+        if(pow == 0) return 0;
         int d = data / pow;
         putChar(x, y, '0' + d, 0xFFFFFF, 0x0);
 		x+=8;
         data = data - d * pow;
         pow /= 10;
+        if(pow == 0) return 0;
         idx++;
     }
     return idx;

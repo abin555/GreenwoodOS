@@ -573,7 +573,7 @@ struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
 	//char work_buf[51];
 	//memset(work_buf, 0, sizeof(work_buf));
 
-	ext2_debug_print_inode(&inode);
+	//ext2_debug_print_inode(&inode);
 
 	int count = 0;
 	while(dir->entry_size != 0 && count < 50){
@@ -586,14 +586,14 @@ struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
 
 	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
 	memset(listing.entries, 0, sizeof(struct DirectoryEntry) * listing.num_entries);
-	print_serial("There are %d entries\n", listing.num_entries);
+	//print_serial("There are %d entries\n", listing.num_entries);
 	
 	for(int i = 0; i < listing.num_entries; i++){
 		//listing.entries[i].filename = strncpy(dir->name, dir->name_length);
 		memset(listing.entries[i].filename, 0, 50);
 		memcpy(listing.entries[i].filename, dir->name, dir->name_length);
 		
-		print_serial("%d - %s\n", i, listing.entries[i].filename);
+		//print_serial("%d - %s\n", i, listing.entries[i].filename);
 		listing.entries[i].name_len = dir->name_length;
 		if(dir->type == 2) listing.entries[i].type = ENTRY_DIRECTORY;
 		else if(dir->type == 1) listing.entries[i].type = ENTRY_FILE;
