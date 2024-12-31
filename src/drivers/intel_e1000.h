@@ -7,6 +7,8 @@
 #include "memory.h"
 #include "paging.h"
 
+#define E1000_NUM_RX_DESC 32
+#define E1000_NUM_TX_DESC 8
 
 enum E1000GeneralRegisters {
     /** Device Control */

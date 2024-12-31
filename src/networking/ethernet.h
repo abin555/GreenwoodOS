@@ -6,21 +6,19 @@
 #include "serial.h"
 #include "stdint.h"
 
+#include "network_utils.h"
 #include "intel_e1000.h"
+#include "rtl8139.h"
 
-#define E1000_NUM_RX_DESC 32
-#define E1000_NUM_TX_DESC 8
+#define ETHERNET_TYPE_ARP 0x0806
+#define ETHERNET_TYPE_IP  0x0800
 
 struct ethernet_header {
     uint8_t destination_mac[6];
     uint8_t source_mac[6];
     uint16_t ethertype;
+    uint8_t data[];
 } __attribute__((packed));
-
-struct ethernet_packet{
-    struct ethernet_header header;
-    void *data;
-};
 
 struct ipv4_config {
     uint8_t ip[4];
@@ -52,12 +50,13 @@ struct ethernet_driver{
     uint8_t *tx_buffer;
     uint32_t tx_buffer_size;
     uint32_t tx_buffer_end;
+    bool tx_lock;
 
     void *private_page_base;
     uint32_t private_page_offset;
     int num_private_pages;
 
-    uint32_t (*write)(struct ethernet_driver *driver, struct ethernet_packet *packet, uint32_t size);
+    uint32_t (*write)(struct ethernet_driver *driver, void *packet, uint32_t size);
     unsigned int int_number;
     void (*int_handler)(struct ethernet_driver *driver);
     void (*int_enable)(struct ethernet_driver *driver);
@@ -65,5 +64,7 @@ struct ethernet_driver{
 };
 
 void ethernet_init(struct PCI_driver *driver);
-
+int ethernet_send_packet(struct ethernet_driver *ether, uint8_t *dst_mac_addr, uint8_t *data, int len, uint16_t protocol);
+void ethernet_handle_packet(struct ethernet_header *packet, int len);
+void ethernet_demo();
 #endif

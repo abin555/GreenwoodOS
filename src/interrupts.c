@@ -62,7 +62,7 @@ void IRQ_set_mask(unsigned char IRQline) {
 }
  
 void IRQ_clear_mask(unsigned char IRQline) {
-    print_serial("IRQ Clear Mask %x\n", IRQline);
+    print_serial("IRQ Clear Mask %d\n", IRQline);
         uint16_t port;
     uint8_t value;
  

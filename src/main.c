@@ -24,6 +24,7 @@
 #include "desktop.h"
 #include "ext2.h"
 #include "rtc.h"
+#include "ethernet.h"
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -50,6 +51,8 @@ void kernel_task(int argc, char **argv){
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
 
+    ethernet_demo();
+
     /*
     struct WINDOW *kernel_win = window_open("KERNEL", false);
     kernel_console = console_open(kernel_win);    
@@ -62,6 +65,7 @@ void kernel_task(int argc, char **argv){
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
+    
     /*
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);

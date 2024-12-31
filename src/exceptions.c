@@ -26,7 +26,7 @@ struct cpu_state exception_gpf(struct cpu_state cpu __attribute__((unused)), str
 	print_serial("ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
 	print_console(tasks[task_running_idx].console, "General Protection Fault @ 0x%x Task %s\n", stack.eip, tasks[task_running_idx].task_name);
 	print_console(tasks[task_running_idx].console, "ESP: 0x%x\nEBP: 0x%x\n", cpu.esp, cpu.ebp);
-	print_stack_trace(cpu.ebx, 10);
+	//print_stack_trace(cpu.ebx, 10);
 	//asm volatile ("hlt");
 	//stop_task(task_running_idx);
 	//override_state_return = true;

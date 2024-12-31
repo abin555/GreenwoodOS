@@ -45,7 +45,9 @@ OBJECTS = \
 		src/rtc.o \
 		src/drivers/hda.o \
 		src/drivers/intel_e1000.o \
-		src/networking/ethernet.o
+		src/drivers/rtl8139.o \
+		src/networking/ethernet.o \
+		src/networking/network_utils.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

@@ -112,7 +112,7 @@ void *e1000_calloc(struct ethernet_driver *ether, uint32_t num, uint32_t size, u
 }
 
 void e1000_writeCommand(struct ethernet_driver *ether, uint16_t p_address, uint32_t p_value){
-    //print_serial("[E1000] WriteCommand\n");
+    print_serial("[E1000] WriteCommand Addr: %x Value: %x\n", p_address, p_value);
     if(ether->bar_type == 0){
         uint32_t *addr = (uint32_t *) (ether->mem_base + p_address);
         *addr = p_value;
@@ -275,15 +275,15 @@ void e1000_txinit(struct ethernet_driver *ether __attribute__((unused))){
 
 void e1000_enableInterrupt(struct ethernet_driver *ether __attribute__((unused))){
     print_serial("[E1000] Enabling Interrupts\n");
-    /*
+    
     e1000_writeCommand(
         ether,
         E1000_REG_IMS,
-        //E1000_REGBIT_IMS_TXDW | E1000_REGBIT_ICR_TXQE | E1000_REGBIT_ICR_LSC | E1000_REGBIT_ICR_RXSEQ | E1000_REGBIT_ICR_RXDMT0 | E1000_REGBIT_ICR_RXO | E1000_REGBIT_ICR_RXT0 | E1000_REGBIT_IMS_MDAC | E1000_REGBIT_IMS_RXCFG | E1000_REGBIT_IMS_PHYINT | E1000_REGBIT_IMS_GPI | E1000_REGBIT_IMS_TXD_LOW | E1000_REGBIT_IMS_SRPD
-        E1000_REGBIT_IMS_TXDW | E1000_REGBIT_IMS_RXDMT0
+        E1000_REGBIT_IMS_TXDW | E1000_REGBIT_ICR_TXQE | E1000_REGBIT_ICR_LSC | E1000_REGBIT_ICR_RXSEQ | E1000_REGBIT_ICR_RXDMT0 | E1000_REGBIT_ICR_RXO | E1000_REGBIT_ICR_RXT0 | E1000_REGBIT_IMS_MDAC | E1000_REGBIT_IMS_RXCFG | E1000_REGBIT_IMS_PHYINT | E1000_REGBIT_IMS_GPI | E1000_REGBIT_IMS_TXD_LOW | E1000_REGBIT_IMS_SRPD
+        //E1000_REGBIT_IMS_TXDW | E1000_REGBIT_IMS_RXDMT0
     );
     e1000_readCommand(ether, E1000_REG_ICR);
-    */
+    
     e1000_writeCommand(ether, E1000_REG_IMS ,0x1F6DC);
     e1000_writeCommand(ether, E1000_REG_IMS ,0xff & ~4);
     e1000_readCommand(ether, E1000_REG_ICR);
@@ -386,10 +386,12 @@ void e1000_int_handler(struct ethernet_driver *ether __attribute__((unused))){
     }
 
     e1000_readCommand(ether, E1000_REG_ICR);
+
+    pic_acknowledge(32 + ether->int_number);
     print_serial("[E1000] Interrupt Complete\n");
 }
 
-uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), struct ethernet_packet *packet __attribute__((unused)), uint32_t size __attribute__((unused))){
+uint32_t e1000_sendPacket(struct ethernet_driver *ether __attribute__((unused)), void *packet __attribute__((unused)), uint32_t size __attribute__((unused))){
     return 0;
 }
 
@@ -434,6 +436,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
 
     ether->private_page_base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, DRIVER);
+    MEM_printRegions();
     ether->private_page_offset = 0;
     ether->num_private_pages = 1;
 

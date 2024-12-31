@@ -11,6 +11,16 @@ uint32_t inportl(uint16_t portid)
 	return ret;
 }
 
+uint16_t inports(uint16_t _port) {
+    uint16_t rv;
+    asm volatile ("in ax, dx" : "=a" (rv) : "d" (_port));
+    return rv;
+}
+
+void outports(uint16_t _port, uint16_t _data) {
+    asm volatile ("out dx, ax" : : "d" (_port), "a" (_data));
+}
+
 void mmio_outb(uint32_t base, uint8_t value) {
  uint8_t *mem = (uint8_t *) (base);
  *mem = value;
