@@ -28,9 +28,12 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     //asm("hlt");
     stop_task(task_running_idx);
-    switch_to_task(&tasks[task_running_idx], &tasks[0]);
+    switch_to_task(&tasks[task_running_idx], &tasks[1]);
     window_selected = 0;
-    if(task_running_idx == 0){
+    if(tasks[task_running_idx].program_slot == -1){
+        asm("hlt");
+        asm("hlt");
+        asm("hlt");
         asm("hlt");
     }
     //print_console(kernel_console, "Returning to kernel Task\n");

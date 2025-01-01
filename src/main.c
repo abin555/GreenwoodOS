@@ -76,7 +76,15 @@ void kernel_task(int argc, char **argv){
     //window_close(kernel_win);  
 
     task_lock = 0;
-    return;
+    while(1){
+        asm("nop");
+        asm("nop");
+        asm("nop");
+        asm("nop");
+        asm("nop");
+        asm("nop");
+        asm("nop");
+    }
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){

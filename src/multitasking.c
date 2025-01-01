@@ -11,6 +11,8 @@ struct task_state tasks[MAX_TASKS];
 void multitask_init(){
 	print_serial("[TASK] Init Multitasking\n");
     task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, 0, STACK));
+    //tasks = (struct task_state *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(sizeof(struct task_state) * MAX_TASKS), sizeof(struct task_state) * MAX_TASKS, 0, KERNEL));
+    memset(tasks, 0, sizeof(struct task_state) * MAX_TASKS);
     MEM_printRegions();
     print_serial("[TASK] Setting Stack!\n");
     for(int i = 0; i < MAX_TASKS; i++){
@@ -200,6 +202,10 @@ void __attribute__ ((optimize("-O3"))) task_callback(){
             || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
             && (tasks[next_idx].schedule_type != NEVER)
         ){
+            if(tasks[next_idx].registers.eip == 0x400000){
+                print_serial("[TASK] Funny thing... the next program is at the end of executable space...\n");
+                print_serial("[TASK] %s\n", tasks[next_idx].task_name);
+            }
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx]);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;
