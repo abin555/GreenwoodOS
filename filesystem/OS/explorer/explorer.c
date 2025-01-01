@@ -36,7 +36,8 @@ struct MouseStatus *getMousePtr();
 struct MouseStatus *mouseStatus;
 
 void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected);
-void drawDirectoryContents(struct DirectoryListing dirs, int selected);
+void drawDirectoryContents(struct DirectoryListing *dirs, int selected);
+int identify_selection(struct DirectoryListing *dirs);
 void drawRect(
     uint32_t outerColor,
     uint32_t innerColor,
@@ -47,7 +48,7 @@ void drawRect(
     uint32_t *buf,
     uint32_t buf_width
 );
-void HandleSelection(char *work_buf);
+void HandleSelection(char *work_buf, int sel);
 
 struct DirectoryListing dir;
 struct Vec2 relMousePos;
@@ -73,7 +74,7 @@ int main(int argc, char **argv){
     selection = 2;
 
     for(int i = 0; i < WIDTH * HEIGHT; i++) buf[i] = 0;
-    drawDirectoryContents(dir, selection);
+    drawDirectoryContents(&dir, selection);
     vp_funcs->copy(vp);
 
     char *work_buf = alloc(0x100);
@@ -85,6 +86,8 @@ int main(int argc, char **argv){
         if(relMousePos.x > 0 && relMousePos.x < WIDTH && relMousePos.y > 0 && relMousePos.y < HEIGHT){
             buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
         }
+        selection = identify_selection(&dir);
+        int temp;
         
         if(vp->ascii){
             char c = vp->ascii;
@@ -102,8 +105,9 @@ int main(int argc, char **argv){
                     if(selection==dir.num_entries-2) selection = 0;
                     break;
                 case 10:{
+                    temp = selection;
                     task_lock(1);
-                    HandleSelection(work_buf);
+                    HandleSelection(work_buf, temp);
                     selection = -1;
                     task_lock(0);
                     break;
@@ -117,8 +121,10 @@ int main(int argc, char **argv){
         if(mouseStatus->buttons.left && !last_mouse_left && isFocus){
             last_mouse_left = 1;
             if(selection != -1 ){
+                temp = selection;
+                selection = -1;
                 task_lock(1);
-                HandleSelection(work_buf);
+                HandleSelection(work_buf, temp);
                 selection = -1;
                 task_lock(0);
             }
@@ -128,7 +134,7 @@ int main(int argc, char **argv){
         }
 
         for(int i = 0; i < WIDTH * HEIGHT; i++) buf[i] = 0;
-        drawDirectoryContents(dir, selection);
+        drawDirectoryContents(&dir, selection);
 
         vp_funcs->copy(vp);
 	}
@@ -136,9 +142,12 @@ int main(int argc, char **argv){
     clean_alloc();
 }
 
-void HandleSelection(char *work_buf){
-    if(!(selection != -1 && selection < dir.num_entries-2)) return;
-    if(dir.entries[selection+2].type == 1){
+void HandleSelection(char *work_buf, int sel){
+    char *application_string = NULL;
+    char **arg = alloc(sizeof(char *) * 2);
+
+    if(!(sel != -1 && sel < dir.num_entries-2)) return;
+    if(dir.entries[sel+2].type == 1){
         char *dir_str = getDirectory();
         print_arg("Path: %s\n", (uint32_t) dir_str);
         int i = 0;
@@ -149,62 +158,67 @@ void HandleSelection(char *work_buf){
         }
         int walker = i+1;
 
-        for(i = 0; i < dir.entries[selection+2].name_len; i++){
-            work_buf[walker + i] = dir.entries[selection+2].filename[i];
+        for(i = 0; i < dir.entries[sel+2].name_len; i++){
+            work_buf[walker + i] = dir.entries[sel+2].filename[i];
         }
 
         print_arg("Changing Path to %s\n", (uint32_t) work_buf);
 
         changeDirectory(work_buf);
         dir = getDirectoryListing(".");
-        selection = -1;
+        sel = -1;
         return;
     }
-    else if(dir.entries[selection+2].type == 0){
-        print_arg("Opening %s\n", (uint32_t) dir.entries[selection+2].filename);
-        print_arg("Checking extension: %s\n", (uint32_t) dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4);
-        if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".tga")){
-            char **arg = alloc(sizeof(char *) * 2);
+
+    else if(dir.entries[sel+2].type == 0){
+        print_arg("Opening %s\n", (uint32_t) dir.entries[sel+2].filename);
+        print_arg("Checking extension: %s\n", (uint32_t) dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4);
+        if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".tga")){
+            
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[selection+2].name_len);
-            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-            selection = -1;
+            arg[1] = alloc(dir.entries[sel+2].name_len);
+            for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
+            sel = -1;
             exec("/A/utils/image/image.exe", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".exe")){
-            exec(dir.entries[selection+2].filename, 0, NULL);
-            selection = -1;
+        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".exe")){
+            exec(dir.entries[sel+2].filename, 0, NULL);
+            sel = -1;
             return;
         }
-        else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".obj")){
+        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".obj")){
             char **arg = alloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[selection+2].name_len);
-            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-            selection = -1;
+            arg[1] = alloc(dir.entries[sel+2].name_len);
+            for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
+            sel = -1;
             exec("/A/utils/3D/3Dvp.exe", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[selection+2].filename+dir.entries[selection+2].name_len-4, ".gif")){
+        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".gif")){
             char **arg = alloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[selection+2].name_len);
-            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-            selection = -1;
+            arg[1] = alloc(dir.entries[sel+2].name_len);
+            for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
+            sel = -1;
             exec("/A/utils/gif/gif.exe", 2, arg);
             return;
         }
         else {
             char **arg = alloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[selection+2].name_len);
-            for(int i = 0; i < dir.entries[selection+2].name_len; i++) arg[1][i] = dir.entries[selection+2].filename[i];
-            selection = -1;
+            arg[1] = alloc(dir.entries[sel+2].name_len);
+            for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
+            sel = -1;
             exec("/A/utils/ed/ed.exe", 2, arg);
             return;
         }
     }
+    
+    if(application_string != NULL && arg != NULL){
+        exec(application_string, 2, arg);
+    }    
 }
 
 void explorer_event(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
@@ -219,9 +233,11 @@ void explorer_event(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     }
     else if(event == VP_FOCUSED){
         isFocus = 1;
+        set_schedule(ALWAYS);
     }
     else if(event == VP_UNFOCUSED){
         isFocus = 0;
+        set_schedule(NEVER);
     }
 }
 
@@ -319,25 +335,17 @@ void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected){
     }
 }
 
-void drawDirectoryContents(struct DirectoryListing dirs, int selected){
+int identify_selection(struct DirectoryListing *dirs){
     int iconY = 0;
     int iconX = 0;
     int found_selection = 0;
-    for(int i = 0; i < dirs.num_entries-2; i++){
-        drawIcon(6*8*iconX, iconY*(24+8*4), &dirs.entries[i+2], i == selected ? 1 : 0);
+    for(int i = 0; i < dirs->num_entries-2; i++){
         if(
             relMousePos.x > 6*8*iconX && relMousePos.x < (6*8*iconX + 4*8) &&
             relMousePos.y > iconY*(24+8*4) && relMousePos.y < (iconY*(24+8*4) + 4*8) &&
             isFocus
         ){
-            selection = i;
-            drawRect(
-                0x0000FF, 0x000033,
-                6*8*iconX, iconY*(24+8*4),
-                6*8*iconX+4*8, iconY*(24+8*4)+4*8,
-                buf, WIDTH
-            );
-            found_selection = 1;
+            return i;
         }
         iconX++;
         if(iconX >= 10){
@@ -345,8 +353,31 @@ void drawDirectoryContents(struct DirectoryListing dirs, int selected){
             iconY++;
         }
     }
-    if(!found_selection){
-        selection = -1;
+    return -1;
+}
+
+void drawDirectoryContents(struct DirectoryListing *dirs, int selected){
+    int iconY = 0;
+    int iconX = 0;
+    for(int i = 0; i < dirs->num_entries-2; i++){
+        drawIcon(6*8*iconX, iconY*(24+8*4), &dirs->entries[i+2], i == selected ? 1 : 0);
+        if(
+            relMousePos.x > 6*8*iconX && relMousePos.x < (6*8*iconX + 4*8) &&
+            relMousePos.y > iconY*(24+8*4) && relMousePos.y < (iconY*(24+8*4) + 4*8) &&
+            isFocus
+        ){
+            drawRect(
+                0x0000FF, 0x000033,
+                6*8*iconX, iconY*(24+8*4),
+                6*8*iconX+4*8, iconY*(24+8*4)+4*8,
+                buf, WIDTH
+            );
+        }
+        iconX++;
+        if(iconX >= 10){
+            iconX = 0;
+            iconY++;
+        }
     }
 }
 

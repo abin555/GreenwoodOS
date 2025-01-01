@@ -101,6 +101,7 @@ int main(int argc, char **argv){
 	struct FILE *gif_file = fopen(argv[1]);
 	if(gif_file == NULL) return 1;
 	heap = requestRegion(REGION_SIZE);
+	memset(heap, 0, REGION_SIZE);
 	addEndCallback(end_callback);
 
 	Ifile.rawfile = malloc(fsize(gif_file));
@@ -141,6 +142,9 @@ int main(int argc, char **argv){
 
 void *malloc(int size){
 	//print_serial("[GIF] Alloc!\n");
+	if(heap_idx > REGION_SIZE){
+		return NULL;
+	}
 	void *address = (void *) &heap[heap_idx];
 	heap_idx += size;
 	return address;
