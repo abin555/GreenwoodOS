@@ -19,3 +19,4 @@ kernel.elf
 iso/*
 *.exe
 *.disassemble
+filesystem/AJB
