@@ -51,7 +51,7 @@ void kernel_task(int argc, char **argv){
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
 
-    ethernet_demo();
+    //ethernet_demo();
 
     /*
     struct WINDOW *kernel_win = window_open("KERNEL", false);
@@ -76,15 +76,7 @@ void kernel_task(int argc, char **argv){
     //window_close(kernel_win);  
 
     task_lock = 0;
-    while(1){
-        asm("nop");
-        asm("nop");
-        asm("nop");
-        asm("nop");
-        asm("nop");
-        asm("nop");
-        asm("nop");
-    }
+    return;
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
