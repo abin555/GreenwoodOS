@@ -16,20 +16,21 @@ typedef char bool;
 
 #define NULL 0
 
+struct IVec2{
+    int x;
+    int y;
+};
+
+struct MouseButtons{
+    uint8_t right : 1;
+    uint8_t left : 1;
+    uint8_t middle : 1;
+};
+
 struct MouseStatus{
-	struct {
-		int x;
-		int y;
-	} pos;
-	struct {
-		uint8_t right : 1;
-		uint8_t left : 1;
-		uint8_t middle : 1;
-	} buttons;
-	struct {
-		int x;
-		int y;
-	} lastDelta;
+    struct IVec2 pos;
+    struct MouseButtons buttons;
+    struct IVec2 lastDelta;
 };
 
 struct PCSpeaker_Handle{
@@ -146,7 +147,7 @@ void *requestRegionAt(unsigned int bytes, unsigned int addr);
 void attachTimerCallback(unsigned int timer, void *callback);
 void dprint(char *msg);
 void start_manual_task(void *addr, char *name);
-struct MouseStatus getMouse();
+struct MouseStatus *getMouse();
 struct PCSpeaker_Handle *getPCSpeaker();
 uint32_t *getTimerTickHandle();
 void addMouseEventHandler(void (*handler)(void));

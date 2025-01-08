@@ -363,15 +363,13 @@ void start_manual_task(void *addr, char *name){
 	asm("int 0x80");
 }
 
-struct MouseStatus getMouse(){
+struct MouseStatus *getMouse(){
 	struct MouseStatus *mousePtr;
-	struct MouseStatus mouse;
 	register uint32_t eax asm("eax");
 	eax = 0x27;
 	asm("int 0x80");
 	mousePtr = (struct MouseStatus *) eax;
-	mouse = *mousePtr;
-	return mouse;
+	return mousePtr;
 }
 
 struct PCSpeaker_Handle *getPCSpeaker(){

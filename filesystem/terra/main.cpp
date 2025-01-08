@@ -18,7 +18,7 @@ void keyboard_handler(unsigned char keycode);
 void mouse_handler();
 
 int main(int argc, char **argv){
-    print((char *) "Opening Terrain Application\n");
+    print_serial((char *) "Opening Terrain Application\n");
     sys.setup();
     sys.window = Window((char *)"Terra");
     sys.window.clear(0xFF0000);
@@ -26,7 +26,7 @@ int main(int argc, char **argv){
 
     set_schedule(ONFOCUS);
     addKbdEventHandler(keyboard_handler);
-    addMouseEventHandler(mouse_handler);
+    //addMouseEventHandler(mouse_handler);
     
     print_arg("Width: %d\n", sys.window.getWidth());
     print_arg("Height: %d\n", sys.window.getHeight());
@@ -87,7 +87,7 @@ int main(int argc, char **argv){
     
     char c;
     float amt = 0.1;
-    print("Starting Game\n");
+    print_serial("Starting Game\n");
     while(1){
         (*world.getCamera()) = player.getCamera();
         //terra.getMesh()->rotateX(0.02f);
@@ -112,9 +112,9 @@ int main(int argc, char **argv){
 }
 
 void mouse_handler(){
-    struct MouseStatus mouse = getMouse();
-    player.getRotation()->x -= 0.01f * ((float) mouse.lastDelta.y);
-    player.getRotation()->y -= 0.01f * ((float) mouse.lastDelta.x);
+    struct MouseStatus *mouse = getMouse();
+    player.getRotation()->x -= 0.01f * ((float) mouse->lastDelta.y);
+    player.getRotation()->y -= 0.01f * ((float) mouse->lastDelta.x);
     return;
 }
 

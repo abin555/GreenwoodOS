@@ -94,8 +94,8 @@ int main(int argc, char **argv){
 
     float angle = 0;
     while(1){
-        struct MouseStatus mouse = getMouse();
-        drawCircle(&angle, mouse.pos.x, mouse.pos.y, fb, 800);
+        struct MouseStatus *mouse = getMouse();
+        drawCircle(&angle, mouse->pos.x, mouse->pos.y, fb, 800);
         //drawLine(400,300,mouse.pos.x,mouse.pos.y, 0xFFFFFF, fb, 800);
     }
 }
