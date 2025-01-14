@@ -17,8 +17,12 @@ Player player;
 void keyboard_handler(unsigned char keycode);
 void mouse_handler();
 
+struct MouseStatus *mouse;
+
 int main(int argc, char **argv){
     print_serial((char *) "Opening Terrain Application\n");
+
+    mouse = getMouse();
     sys.setup();
     sys.window = Window((char *)"Terra");
     sys.window.clear(0xFF0000);
@@ -26,7 +30,6 @@ int main(int argc, char **argv){
 
     set_schedule(ONFOCUS);
     addKbdEventHandler(keyboard_handler);
-    //addMouseEventHandler(mouse_handler);
     
     print_arg("Width: %d\n", sys.window.getWidth());
     print_arg("Height: %d\n", sys.window.getHeight());
@@ -88,7 +91,7 @@ int main(int argc, char **argv){
     char c;
     float amt = 0.1;
     print_serial("Starting Game\n");
-    while(1){
+    while(sys.running){
         (*world.getCamera()) = player.getCamera();
         //terra.getMesh()->rotateX(0.02f);
         //terra.getMesh()->rotateY(0.01f);
@@ -106,15 +109,16 @@ int main(int argc, char **argv){
         sys.window.update();
         
     }
-    print((char *)"Exit!\n");
-    
+    print_serial((char *)"Exit!\n");
+    sys.window.close();
+    sys.cleanup();
     return 0;
 }
 
 void mouse_handler(){
-    struct MouseStatus *mouse = getMouse();
-    player.getRotation()->x -= 0.01f * ((float) mouse->lastDelta.y);
-    player.getRotation()->y -= 0.01f * ((float) mouse->lastDelta.x);
+    struct Vec2 relMouse = sys.window.getRelativeMouse();
+    player.getRotation()->x -= (float) ((relMouse.x - 150) / 150) * 3.1415f;
+    player.getRotation()->y -= (float) ((relMouse.x - 150) / 150) * 3.1415f;
     return;
 }
 
@@ -177,6 +181,12 @@ void System::setup(){
     this->memory_region = requestRegion(0xD00000);
     this->nextAlloc = this->memory_region;
     print_arg("Memory Region is 0x%x\n", (uint32_t) this->memory_region);
+    this->vp_funcs = viewport_get_funcs();
+    this->running = 1;
+}
+
+void System::cleanup(){
+    freeRegion(this->memory_region, 0xD00000);
 }
 
 void *System::malloc(unsigned int size){

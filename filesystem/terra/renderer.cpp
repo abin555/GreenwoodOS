@@ -99,7 +99,7 @@ void World::render(){
             //float ymin = min3(projectedTri.v0.y, projectedTri.v1.y, projectedTri.v2.y);
             //float xmax = max3(projectedTri.v0.x, projectedTri.v1.x, projectedTri.v2.x);
             //float ymax = max3(projectedTri.v0.y, projectedTri.v1.y, projectedTri.v2.y);
-            //if (xmin > sys.window.window->width - 1 || xmax < 0 || ymin > sys.window.window->height - 1 || ymax < 0) continue;
+            //if (xmin > sys.window.getWidth() - 1 || xmax < 0 || ymin > sys.window.getHeight() - 1 || ymax < 0) continue;
             
             if(this->FillFaces) fillTriangle(this, &projectedTri, &tri, tri.color - ~color_mod);
             if(this->DrawOutlines){
@@ -532,7 +532,7 @@ void drawTriangle(TriangleExpl triangle, uint32_t color){
 }
 
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color){
-  if(!(x1 >= 0 && x1 <= sys.window.window->width && y1 >= 0 && y1 <= sys.window.window->height)){
+  if(!(x1 >= 0 && x1 <= sys.window.getWidth() && y1 >= 0 && y1 <= sys.window.getHeight())){
     return;
   }
   int dx = abs(x2 - x1);
@@ -543,8 +543,8 @@ void drawLine(int x1, int y1, int x2, int y2, uint32_t color){
   int e2;
 
   for(;;){
-    if(x1 >= 0 && x1 <= sys.window.window->width && y1 >= 0 && y1 <= sys.window.window->height){
-      sys.window.window->backbuffer[x1 + y1 * sys.window.window->width] = color;
+    if(x1 >= 0 && x1 <= sys.window.getWidth() && y1 >= 0 && y1 <= sys.window.getHeight()){
+      sys.window.vp->backbuf[x1 + y1 * sys.window.getWidth()] = color;
     }    
     if(x1 == x2 && y1 == y2) break;
     e2 = 2 * err;
@@ -571,8 +571,8 @@ int calculateZBuffer(World *world, int x, int y, TriangleExpl *projectedTri, Tri
   //ZBuffType z = (ZBuffType) (calcZ(workTri.v0, workTri.v1, workTri.v2, (float) x, (float) y) * 100);
   ZBuffType z = (ZBuffType) (((unProjectedTri->v0.z + unProjectedTri->v1.z + unProjectedTri->v2.z) / 3) * 100);
   //print_arg("Z: %x\n", z);
-  if(z > world->ZBuff[x + y * 640]){
-    world->ZBuff[x + y * 640] = z;
+  if(z > world->ZBuff[x + y * 300]){
+    world->ZBuff[x + y * 300] = z;
     return 1;
   }
   //print("Blocked!\n");
@@ -581,22 +581,22 @@ int calculateZBuffer(World *world, int x, int y, TriangleExpl *projectedTri, Tri
 
 void drawHline(World *world, int x1, int x2, int y, uint32_t color, TriangleExpl *projectedTri, TriangleExpl *unProjectedTri){
   //if(x1 < 0) x1 = 0;
-  //if(x1 > sys.window->width) x1 = sys.window->width;
+  //if(x1 > sys.getWidth()) x1 = sys.getWidth();
   //if(x2 < 0) x2 = 0;
-  //if(x2 > sys.window->width) x2 = sys.window->width;
-  //if(y < 0 || y >= sys.window->height) return;
+  //if(x2 > sys.getWidth()) x2 = sys.getWidth();
+  //if(y < 0 || y >= sys.getHeight()) return;
   //print_arg("Z0: %d ", (int) (tri->v0.z * 1000));
   //print_arg("Z1: %d ", (int) (tri->v1.z * 1000));
   //print_arg("Z2: %d\n", (int) (tri->v2.z * 1000));
   for(int x = x1; x < x2; x++){
     if(world->ZBuffering){
-      if(x < sys.window.window->width && x > 0 && y > 0 && y < sys.window.window->height && calculateZBuffer(world, x, y, projectedTri, unProjectedTri)){
-        sys.window.window->backbuffer[x + y*sys.window.window->width] = color;
+      if(x < sys.window.getWidth() && x > 0 && y > 0 && y < sys.window.getHeight() && calculateZBuffer(world, x, y, projectedTri, unProjectedTri)){
+        sys.window.vp->backbuf[x + y*sys.window.getWidth()] = color;
       }
     }
     else{
-      if(x < sys.window.window->width && x > 0 && y > 0 && y < sys.window.window->height){
-        sys.window.window->backbuffer[x + y*sys.window.window->width] = color;
+      if(x < sys.window.getWidth() && x > 0 && y > 0 && y < sys.window.getHeight()){
+        sys.window.vp->backbuf[x + y*sys.window.getWidth()] = color;
       }
     }
   }
@@ -611,7 +611,7 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
   y2 = triangle->v1.y;
   x3 = triangle->v2.x;
   y3 = triangle->v2.y;
-  //if((x1 > sys.window.window->width || x2 > sys.window.window->width) || (x1 < 0 || x2 < 0) || (y1 > sys.window.window->height || y2 > sys.window.window->height) || (y1 < 0 || y2 < 0)) return;
+  //if((x1 > sys.window.getWidth() || x2 > sys.window.getWidth()) || (x1 < 0 || x2 < 0) || (y1 > sys.window.getHeight() || y2 > sys.window.getHeight()) || (y1 < 0 || y2 < 0)) return;
   //else{
   //if(x1 < 0) x1 = 0;
   //if(x2 < 0) x2 = 0;
@@ -619,12 +619,12 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
   //if(y1 < 0) y1 = 0;
   //if(y2 < 0) y2 = 0;
   //if(y3 < 0) y3 = 0;
-  //if(x1 > sys.window.window->width) x1 =  sys.window.window->width;
-  //if(x2 > sys.window.window->width) x2 =  sys.window.window->width;
-  //if(x3 > sys.window.window->width) x3 =  sys.window.window->width;
-  //if(y1 > sys.window.window->height) y1 = sys.window.window->height;
-  //if(y2 > sys.window.window->height) y2 = sys.window.window->height;
-  //if(y3 > sys.window.window->height) y3 = sys.window.window->height;
+  //if(x1 > sys.window.getWidth()) x1 =  sys.window.getWidth();
+  //if(x2 > sys.window.getWidth()) x2 =  sys.window.getWidth();
+  //if(x3 > sys.window.getWidth()) x3 =  sys.window.getWidth();
+  //if(y1 > sys.window.getHeight()) y1 = sys.window.getHeight();
+  //if(y2 > sys.window.getHeight()) y2 = sys.window.getHeight();
+  //if(y3 > sys.window.getHeight()) y3 = sys.window.getHeight();
   //}
 
   int t1x,t2x,y,minx,maxx,t1xp,t2xp;
@@ -636,7 +636,7 @@ void fillTriangle(World *world, TriangleExpl *triangle, TriangleExpl *unprojecte
 	if (y1>y2) { SWAP(y1,y2); SWAP(x1,x2); }
 	if (y1>y3) { SWAP(y1,y3); SWAP(x1,x3); }
 	if (y2>y3) { SWAP(y2,y3); SWAP(x2,x3); }
-  //if(abs(x3 - x1) > sys.window->width) return;  
+  //if(abs(x3 - x1) > sys.getWidth()) return;  
   
   int maxsteps = 1000;
 
