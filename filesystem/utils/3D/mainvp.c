@@ -355,7 +355,7 @@ int main(int argc, char** argv){
     if(c != '\0') vp->ascii = '\0';
 
     if(spinning){
-      rotateObjY(&obj, -0.1f);
+      rotateObjY(&obj, -0.01f);
     }
 
   }
