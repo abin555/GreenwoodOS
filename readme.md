@@ -46,3 +46,13 @@ make -C filesystem
 make make_ext2
 #/\ mounts an image to the filesystem, will ask for sudo
 ```
+
+# Programs
+
+* [DOOM](./filesystem/DOOM/) (It runs doom)
+* [3D OBJ Renderer](./filesystem/utils/3D)
+* [Image Viewer](./filesystem/utils/image/)
+* [GIF Player](./filesystem/utils/gif/)
+* [LISP Interpreter](./filesystem/lisp/)
+* [Barebones Minecraft Clone](./filesystem/terra/)
+
