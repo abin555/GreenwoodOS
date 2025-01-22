@@ -1,26 +1,26 @@
 # Greenwood Operating System
 
-### Why the name?
-
-I don't know, I think it sounds cool.
+![Example Image](./docs/images/info_example_photo.png)
 
 ### Whats it for?
 
-My own personal exploration of low level system concepts.
+My own personal exploration of low level system concepts.   
+Built using the idea of "what if your computer had no rules."  
 
 ### So you've got questions
 * Is it good? - Probably not.
 * Should I use it? - Absolutely not.
 * Will it beat Linux? - I sure hope it won't.
-* What does it do? - Definitely will try to nuke your hard drive on virtual hardware. Maybe overheat your CPU. Otherwise, terrible UI, program management, and awful memory manager.
+* What does it do? - Definitely will try to nuke your hard drive on physical hardware. Maybe overheat your CPU. Otherwise, terrible UI, program management, and awful memory manager.
+
 
 # Requirements
 
 * grub-mkrescue
 * xorriso
-* gcc
+* gcc/g++
 * qemu
-* make (gnu version)
+* make
 
 # How to build
 
@@ -34,10 +34,15 @@ Compile and run in Qemu:
 make
 ```
 
+Clean build files:
+```bash
+make clean
+```
+
 Building the filesystem
 ```bash
 make -C filesystem
 
-sudo make make_ext2
-#/\ mounts an image to the filesystem, needs sudo
+make make_ext2
+#/\ mounts an image to the filesystem, will ask for sudo
 ```
