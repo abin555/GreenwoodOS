@@ -47,7 +47,8 @@ OBJECTS = \
 		src/drivers/intel_e1000.o \
 		src/drivers/rtl8139.o \
 		src/networking/ethernet.o \
-		src/networking/network_utils.o
+		src/networking/network_utils.o \
+		src/test.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
@@ -55,6 +56,9 @@ CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf
+
+ZIGC = zig build-obj
+ZIGC_FLAGS = -target x86-freestanding
 
 all: build emulate
 
@@ -78,6 +82,9 @@ emulate:
 	$(CC) $(CFLAGS) $< -o $@
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@
+%.o: %.zig
+	$(ZIGC) $< $(ZIGC_FLAGS) -femit-bin=$@
+
 clean:
 	rm -rf src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
 	rm -rf $(OBJECTS)

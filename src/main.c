@@ -26,6 +26,8 @@
 #include "rtc.h"
 #include "ethernet.h"
 
+extern void zig_test();
+
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
