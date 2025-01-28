@@ -58,7 +58,7 @@ AS = nasm
 ASFLAGS = -f elf -gdwarf
 
 ZIGC = zig build-obj
-ZIGC_FLAGS = -target x86-freestanding
+ZIGC_FLAGS = -target x86-freestanding -I ./include/
 
 all: build emulate
 

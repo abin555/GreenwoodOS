@@ -1,5 +1,5 @@
 const serial = @cImport({
-    @cInclude("/home/aidanb/Greenwood-OS/include/serial.h");
+    @cInclude("serial.h");
 });
 
 export fn zig_test() void {
