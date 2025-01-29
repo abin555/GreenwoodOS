@@ -21,6 +21,7 @@ pub fn close(win: Window) void {
     if (win.vp_functions.close) |vp_close| {
         vp_close(win.Viewport);
     }
+    win.alloc.free(win.buffer);
 }
 
 pub fn add_event_handler(win: Window, function: *const fn (*libc.struct_Viewport, libc.VIEWPORT_EVENT_TYPE) callconv(.C) void) void {
@@ -30,17 +31,19 @@ pub fn add_event_handler(win: Window, function: *const fn (*libc.struct_Viewport
 }
 
 pub fn setPixel(win: Window, x: u32, y: u32) void {
-    libc.dprint(@constCast("Check\n"));
     const w: u32 = @intCast(@as(i32, win.Viewport.loc.w));
-    libc.dprint(@constCast("Check\n"));
     const offset: u32 = ((w * y) + x);
-    libc.dprint(@constCast("Check\n"));
     win.buffer[offset] = 0xFFFFFF;
-    libc.dprint(@constCast("Check\n"));
 }
 
 pub fn show(win: Window) void {
     if (win.vp_functions.copy) |copy| {
         copy(win.Viewport);
+    }
+}
+
+pub fn clear(win: Window, color: u32) void {
+    for (0..(win.Viewport.buf_size / @sizeOf(u32))) |i| {
+        win.buffer[i] = color;
     }
 }

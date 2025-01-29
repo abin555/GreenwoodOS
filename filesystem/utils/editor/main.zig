@@ -1,15 +1,20 @@
 const std = @import("std");
 const libc = @import("libc.zig");
 const Window = @import("window.zig");
+const Text = @import("text.zig");
+const Editor = @import("editor.zig");
 
+const heap_size: usize = 2 * 0x400000;
 pub var global_heap: *anyopaque = undefined;
 
-export fn main() void {
-    if (libc.requestRegion(0x40000)) |heap| {
+export fn main(argc: c_int, argv: [*c][*c]u8) void {
+    if (argc != 2) return;
+    const filename = argv[1];
+    if (libc.requestRegion(heap_size)) |heap| {
         global_heap = heap;
     }
-    @call(.auto, main_zig, .{});
-    libc.freeRegion(global_heap, 0x40000);
+    @call(.auto, main_zig, .{filename});
+    libc.freeRegion(global_heap, heap_size);
 }
 
 pub var running = true;
@@ -21,19 +26,24 @@ export fn event_handler(vp: *libc.Viewport, vp_event: libc.VIEWPORT_EVENT_TYPE) 
     }
 }
 
-pub fn main_zig() void {
+pub fn main_zig(filename: [*c]u8) void {
     libc.dprint(@constCast("ZIG Editor Opening\n"));
-    var fba = std.heap.FixedBufferAllocator.init(@as([*]u8, @ptrCast(global_heap))[0..0x40000]);
+    libc.dprint(filename);
+    var fba = std.heap.FixedBufferAllocator.init(@as([*]u8, @ptrCast(global_heap))[0..heap_size]);
     defer fba.reset();
     const allocator = fba.allocator();
 
-    const window = Window.open(150, 150, "Zig Editor", allocator);
-    libc.dprint(@constCast("Open\n"));
+    const window = Window.open(8 * 50, 8 * 30, "Zig Editor", allocator);
     Window.add_event_handler(window, &event_handler);
-    libc.dprint(@constCast("Event\n"));
-    Window.setPixel(window, 50, 50);
-    libc.dprint(@constCast("Set Pixel\n"));
+    Window.clear(window, 0);
+    Window.setPixel(window, 75, 50);
+    const mainFont = Text.getOSFont();
+    Text.putChar(window, mainFont, 8, 8, 'C', 0xFF00FF, 0x00FF00);
     Window.show(window);
-    while (running) {}
+
+    const editor: Editor.Editor = Editor.openEditor(filename, allocator);
+
+    Editor.runEditor(window, editor, mainFont, &running);
+
     Window.close(window);
 }

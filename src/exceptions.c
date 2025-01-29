@@ -34,10 +34,19 @@ struct cpu_state exception_gpf(struct cpu_state cpu __attribute__((unused)), str
 	return cpu;
 }
 
+struct cpu_state exception_3(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+	print_serial("Exception #3 from %s @ %x\n", tasks[task_running_idx].task_name, stack.eip);
+	//print_stack_trace(cpu.ebx, 10);
+	stop_task(task_running_idx);
+	switch_to_task(&tasks[task_running_idx], &tasks[0]);
+	return cpu;
+}
+
 void exceptions_init(){
 	interrupt_add_handle(0x0, exception_divide_by_zero);
 	interrupt_add_handle(0x6, exception_invalid_opcode);
 	interrupt_add_handle(0xD, exception_gpf);
+	interrupt_add_handle(0x3, exception_3);
 	print_serial("[EXCEPTION] Handler Init Complete\n");
 }
 

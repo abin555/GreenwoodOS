@@ -186,7 +186,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		
 	}
 	else{
-		print_serial("[CPU INT] Uninitialized Interrupt %d\n", interrupt);
+		print_serial("[CPU INT] Uninitialized Interrupt %d from 0x%x\n", interrupt, stack.eip);
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}

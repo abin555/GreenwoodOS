@@ -23,7 +23,7 @@ int main(int argc, char **argv){
 
 	if(rtc == NULL || vp_funcs == NULL){
 		print("CLOCK FATAL ERROR: RTC OR VP IS NULL!\n");
-        return;
+        return 0;
 	}
 
 	backbuffer = (uint32_t *) 0x6000;
