@@ -25,6 +25,8 @@
 #include "ext2.h"
 #include "rtc.h"
 #include "ethernet.h"
+#include "acpi.h"
+#include "apic.h"
 
 extern void zig_test();
 
@@ -98,10 +100,20 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
+    //enable_apic();
 
 	fb_init(GRUB_tagfb);
 
     alloc_init();
+    
+    if(GRUB_ACPI_NEW){
+        acpi_init(GRUB_ACPI_NEW->rsdp);
+    }
+    else{
+        acpi_init(GRUB_ACPI_OLD->rsdp);
+    }
+    acpi_initFADT();
+    acpi_parseMADT();
 
     PCI_init();
     kbd_init(0xFF);

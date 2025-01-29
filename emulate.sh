@@ -14,4 +14,5 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -device usb-ehci,id=ehci \
 -rtc base=localtime,clock=host \
 -enable-kvm \
--nic user,model=rtl8139
+-nic user,model=rtl8139 \
+-smp sockets=1,cores=4,threads=1

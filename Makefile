@@ -48,7 +48,9 @@ OBJECTS = \
 		src/drivers/rtl8139.o \
 		src/networking/ethernet.o \
 		src/networking/network_utils.o \
-		src/test.o
+		src/test.o \
+		src/acpi.o \
+		src/apic.o
 		
 CC = gcc
 CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \

@@ -3,7 +3,8 @@
 struct multiboot_tag_framebuffer *GRUB_tagfb = NULL;
 struct multiboot_tag_apm *GRUB_APM = NULL;
 struct multiboot_tag_mmap *GRUB_MMAP = NULL;
-
+struct multiboot_tag_new_acpi *GRUB_ACPI_NEW = NULL;
+struct multiboot_tag_old_acpi *GRUB_ACPI_OLD = NULL;
 
 struct multiboot_tag* GRUB_multiboot_table;
 
@@ -50,8 +51,28 @@ void parse_multiboot2(unsigned long magic_addr){
 				print_serial("MMAP Table Identified\n");
 				break;
 			}
+			case MULTIBOOT_TAG_TYPE_ACPI_NEW:
+			{
+				GRUB_ACPI_NEW = (struct multiboot_tag_new_acpi *) tag;
+				print_serial("ACPI NEW Table Identified @ 0x%x\n", &((struct multiboot_tag_new_acpi *) tag)->rsdp);
+				break;
+			}
+			case MULTIBOOT_TAG_TYPE_ACPI_OLD:
+			{
+				GRUB_ACPI_OLD = (struct multiboot_tag_old_acpi *) tag;
+				print_serial("ACPI OLD Table Identified @ 0x%x\n", &((struct multiboot_tag_old_acpi *) tag)->rsdp);
+				break;
+			}
+			case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
+			{
+				struct multiboot_tag_basic_meminfo *meminfo = (struct multiboot_tag_basic_meminfo *) tag;
+				print_serial("MEMORY INFO:\n");
+				print_serial("KB Lower: 0x%x\n", meminfo->mem_lower);
+				print_serial("KB Upper: 0x%x\n", meminfo->mem_upper);
+				break;
+			}
 			default:
-				print_serial("Tag ID: %x\n", tag->type);
+				print_serial("Tag ID: %d\n", tag->type);
 				break;
         }
     }
