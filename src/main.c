@@ -57,25 +57,33 @@ void kernel_task(int argc, char **argv){
 
     //ethernet_demo();
 
-    /*
+
     struct WINDOW *kernel_win = window_open("KERNEL", false);
     kernel_console = console_open(kernel_win);    
     kernel_task->console = kernel_console;
     kernel_task->window = kernel_win;
     set_schedule(ONFOCUS);
-    */
+    
 
     char kernel_path[] = "A/";
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
     
-    /*
+    
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     
     print_console(kernel_console, "Loading Desktop Task...\n");
-    */
+    print_console(kernel_console, "There are %d drives\n", drive_count);
+    for(int i = 0; i < drive_count; i++){
+        print_console(kernel_console, "Drive %d is type %d and format %d\n", i, drives[i]->type, drives[i]->format);
+    }
+    struct DirectoryListing ls = listDirectory(&kernel_task->currentDirectory, "/A/Pictures");
+    for(int i = 0; i < ls.num_entries; i++){
+        print_console(kernel_console, "%s\n", ls.entries[i].filename);
+    }
+    
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  
 
@@ -106,14 +114,14 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     alloc_init();
     
-    if(GRUB_ACPI_NEW){
-        acpi_init(GRUB_ACPI_NEW->rsdp);
-    }
-    else{
-        acpi_init(GRUB_ACPI_OLD->rsdp);
-    }
-    acpi_initFADT();
-    acpi_parseMADT();
+    //if(GRUB_ACPI_NEW){
+    //    acpi_init(GRUB_ACPI_NEW->rsdp);
+    //}
+    //else{
+    //    acpi_init(GRUB_ACPI_OLD->rsdp);
+    //}
+    //acpi_initFADT();
+    //acpi_parseMADT();
 
     PCI_init();
     kbd_init(0xFF);

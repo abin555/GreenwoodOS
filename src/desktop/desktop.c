@@ -21,20 +21,22 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_console(kernel_console, "Starting Desktop Environment!\n");
 
     struct Bitmap background = loadBitmap(BACKGROUND_FILE);
-
-    /*
+    struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
+    
     struct Icon icons[numIcons];
     memset(icons, 0, sizeof(struct Icon) * numIcons);
     
+    /*
     for(int i = 0; i < numIcons; i++){
         char folderLabel[5] = {'F','O','L','D',0};
         icons[i] = generateIcon(folder, 25 + i * 35, 25, folder.width, folder.height, folderLabel);
     }
+    */
     for(int i = 0; i < drive_count && i < numIcons; i++){
         char driveLabel[2] = {drives[i]->identity, 0};
         icons[i] = generateIcon(blockDevice, 25 + i * 35, 25, blockDevice.width, blockDevice.height, driveLabel);
     }
-    */
+    
 
     print_serial("[DESKTOP] Global Viewport is at %x\n", &global_viewport_list);
     print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
@@ -53,7 +55,9 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_console(kernel_console, "TEST CONSOLE!\n");
     */
 
-    exec("/A/OS/explorer/explorer.exe", 0, NULL);
+    exec("/A/utils/explorer/explorer.exe", 0, NULL);
+    //exec("/A/utils/clock/clock.exe", 0, NULL);
+
     //exec("/A/clock/clock.exe", 0, NULL);
 
     struct {
@@ -75,10 +79,10 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     while(1){
         task_lock = 1;
         drawBackground(background, window);
-        /*
+        
         for(int i = 0; i < numIcons; i++)  
             drawIcon(&icons[i], window);
-        */
+        
         viewport_draw_all(global_viewport_list, window);
         task_lock = 0;
 
@@ -135,7 +139,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/OS/termvp/term.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'E'){
-        exec("/A/OS/explorer/explorer.exe", 0, NULL);
+        exec("/A/utils/explorer/explorer.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'C'){
         exec("/A/utils/clock/clock.exe", 0, NULL);

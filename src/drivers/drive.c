@@ -166,8 +166,12 @@ struct FILE *fopen(char *path){
 	}
 	if(drive->format == EXT2){
 		print_serial("[EXT2] Opening File %s\n", path);
+		print_console(kernel_console, "[EXT2] Opening File %s\n", path);
 		uint32_t inodeIdx = ext2_get_inodeIdx_from_path(drive->format_info.ext2, path);
-		if(inodeIdx == 0) return NULL;
+		if(inodeIdx == 0){
+			print_console(kernel_console, "[EXT2] Inode is Zero???\n");
+			return NULL;
+		}
 		file->info.drive = drive;
 		file->info.inode = (struct EXT2_Inode *) malloc(sizeof(struct EXT2_Inode));
 		*file->info.inode = ext2_read_inode_data(drive->format_info.ext2, inodeIdx);

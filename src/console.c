@@ -1,7 +1,7 @@
 #include "console.h"
 
 struct CONSOLE consoles[MAX_CONSOLE] = {0};
-struct CONSOLE *kernel_console;
+struct CONSOLE *kernel_console = NULL;
 
 void console_init(){
 	print_serial("[CONSOLE] Initialization\n");
