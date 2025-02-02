@@ -23,8 +23,8 @@ libc_header = ../../OS/libc/libc.h
 %.o: %.zig
 	$(ZIGC) build-obj $< $(ZIGFLAGS)
 
-build: $(SRCS)
+build:# $(SRCS)
 	#zig translate-c $(libc_header) > libc.zig
-	ld $(LDFLAGS) $(START) $(SRCS) $(LIBC) -o $(PROG).elf
-	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
+	#ld $(LDFLAGS) $(START) $(SRCS) $(LIBC) -o $(PROG).elf
+	#objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
 	#rm *.o *.elf
