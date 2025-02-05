@@ -79,10 +79,12 @@ void kernel_task(int argc, char **argv){
     for(int i = 0; i < drive_count; i++){
         print_console(kernel_console, "Drive %d is type %d and format %d\n", i, drives[i]->type, drives[i]->format);
     }
+    /*
     struct DirectoryListing ls = listDirectory(&kernel_task->currentDirectory, "/A/Pictures");
     for(int i = 0; i < ls.num_entries; i++){
         print_console(kernel_console, "%s\n", ls.entries[i].filename);
     }
+    */
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  

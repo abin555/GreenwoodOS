@@ -65,7 +65,7 @@ void ext2_print_directory(struct EXT2_FS *ext2, uint32_t inodeIdx){
 
 uint32_t ext2_get_direntry_inode(struct EXT2_FS *ext2, uint32_t parent_inodeIdx, char *name){
 	print_serial("[EXT2] Looking for %s from inode %d\n", name, parent_inodeIdx);
-	print_console(kernel_console, "[EXT2] Looking for %s from inode %d\n", name, parent_inodeIdx);
+	//print_console(kernel_console, "[EXT2] Looking for %s from inode %d\n", name, parent_inodeIdx);
 	struct EXT2_Inode parent_inode = ext2_read_inode_data(ext2, parent_inodeIdx);
 	void *directory_entries = ext2_read_block(ext2, parent_inode.BlockPointers[0]);
 	struct EXT2_Directory *dir = (struct EXT2_Directory *) directory_entries;
@@ -76,7 +76,7 @@ uint32_t ext2_get_direntry_inode(struct EXT2_FS *ext2, uint32_t parent_inodeIdx,
 		memset(work_buf, 0, sizeof(work_buf));
 		memcpy(work_buf, dir->name, dir->name_length);
 		print_serial("[EXT2] Inode %d Type %d - ", dir->inode, dir->type);
-		print_console(kernel_console, "[EXT2] Inode %d Type %d - %s\n", dir->inode, dir->type, work_buf);
+		//print_console(kernel_console, "[EXT2] Inode %d Type %d - %s\n", dir->inode, dir->type, work_buf);
 
 		if(strcmp(name, work_buf) == 0){
 			return dir->inode;
@@ -233,7 +233,7 @@ uint32_t ext2_get_inodeIdx_from_path(struct EXT2_FS *ext2, char *path){
 			return 0;
 		}
 		print_serial("[EXT2] Solving Path Iter %d Partial Path: %s Working Inode Idx: %d\n", iterations, work_buf, working_idx);
-		print_console(kernel_console, "[EXT2] Solving Path Iter %d Partial Path: %s Working Inode Idx: %d\n", iterations, work_buf, working_idx);
+		//print_console(kernel_console, "[EXT2] Solving Path Iter %d Partial Path: %s Working Inode Idx: %d\n", iterations, work_buf, working_idx);
 		path += path_component_size + 1;
 		iterations++;
 	}
