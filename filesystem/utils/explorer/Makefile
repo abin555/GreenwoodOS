@@ -1,14 +1,14 @@
-CFLAGS = -I ../libc/ -g -m32 -no-pie -c -O0 -nostdlib -nodefaultlibs -nolibc -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector
+CFLAGS = -I ../../OS/libc/ -g -m32 -no-pie -c -O0 -nostdlib -nodefaultlibs -nolibc -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector
 ASFLAGS = -f elf
-LDFLAGS = -T ../libc/link.ld -melf_i386
+LDFLAGS = -T ../../OS/libc/link.ld -melf_i386
 
 FILES = explorer.c
 OBJ = explorer.o
-LIBS = ../libc/libc.o
+LIBS = ../../OS/libc/libc.o
 PROG = explorer
 
 all:
-	make -C ../libc
+	make -C ../../OS/libc
 	$(CC) $(CFLAGS) $(FILES) -o $(OBJ)
 	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe

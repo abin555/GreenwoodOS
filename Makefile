@@ -52,8 +52,8 @@ OBJECTS = \
 		src/acpi.o \
 		src/apic.o
 		
-CC = gcc
-CFLAGS = -m32 -nostdlib -fno-builtin -fno-stack-protector \
+CC = i386-elf-gcc
+CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I. -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
@@ -81,9 +81,9 @@ emulate:
 	./emulate.sh
 
 %.o: %.c
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $< $(CFLAGS) -o $@
 %.o: %.s
-	$(AS) $(ASFLAGS) $< -o $@
+	$(AS) $< $(ASFLAGS) -o $@
 %.o: %.zig
 	$(ZIGC) $< $(ZIGC_FLAGS) -femit-bin=$@
 

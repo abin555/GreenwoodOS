@@ -17,8 +17,14 @@
 
 #ifdef Greenwood_OS
 
+#define WIDTH 400
+#define HEIGHT 400
+
 void draw_cursor(int i);
 struct WINDOW *window;
+struct ViewportFunctions *vp_funcs;
+struct Viewport *vp;
+uint32_t *backbuf;
 struct CONSOLE *console;
 int term_width;
 int term_height;
@@ -40,7 +46,8 @@ char *defaultlib[] = {
     "(defmacro (quasiquote x) (if (pair? x) (if (eq? (car x) 'unquote) (cadr x) (if (eq? (caar x) 'unquote-splicing) (list 'append (cadr (car x)) (list 'quasiquote (cdr x))) (list 'cons (list 'quasiquote (car x)) (list 'quasiquote (cdr x))))) (list 'quote x)))",
     "(defmacro (let defs . body) `((lambda ,(map car defs) ,@body) ,@(map cadr defs)))"
 };
-
+void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
+int running;
 #endif
 
 //static char input[2048];
@@ -49,11 +56,16 @@ int main(int argc, int argv[]){
 
     #ifdef Greenwood_OS
     print("Opening Greenwood LISP\n");
-    window = window_open("GreenwoodLISP", true);
-    console = console_open();
+    vp_funcs = viewport_get_funcs();
+    vp = vp_funcs->open(400, 400, "Greenwood LISP");
+    backbuf = (uint32_t *) requestRegion(WIDTH * HEIGHT *sizeof(uint32_t));
+	vp_funcs->set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
+    vp_funcs->add_event_handler(vp, event_handler);
+    //window = window_open("GreenwoodLISP", true);
+    console = console_open_vp(vp);
 
-	term_width = window->width / 8;
-	term_height = window->height / 8;
+	term_width = WIDTH / 8;
+	term_height = HEIGHT / 8;
 
     init_heap(0x2000);
 
@@ -89,7 +101,7 @@ int main(int argc, int argv[]){
     #ifndef Greenwood_OS
     load_file(env, "library.lisp");
 
-    
+
     while(1){
         char *input = readline("Greenwood LISP> ");
         add_history(input);      
@@ -158,10 +170,10 @@ int main(int argc, int argv[]){
     memset(termbuf, 0, term_width);
     set_schedule(ONFOCUS);
 
-
-    while(1){
-        window_update();
-		char c = getc();
+    running = 1;
+    while(running){
+        vp_funcs->copy(vp);
+		char c = vp_funcs->getc(vp);
         draw_cursor(idx);
 		if(c == '\0') continue;
 		if(c == 8){
@@ -174,7 +186,7 @@ int main(int argc, int argv[]){
 			
 		}
 		for(int i = 0; i < term_width; i++){
-			drawChar(8*i,(term_height-1)*8, termbuf[i]);
+			vp_funcs->drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
 		}
 
         if(c == 10){
@@ -206,18 +218,32 @@ int main(int argc, int argv[]){
         }
 
         draw_cursor(idx);
-        window_update();
+        //window_update();
+        vp_funcs->copy(vp);
     }
+    console_close();
+    vp_funcs->close(vp);
+    freeRegion(backbuf, WIDTH * HEIGHT *sizeof(uint32_t));
     #endif
     return 0;
 }
 
 #ifdef Greenwood_OS
 void draw_cursor(int i){
-	uint32_t *buf = window->backbuffer;
 	for(int x = 0; x < 8; x++){
-		buf[window->width * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+		backbuf[WIDTH * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
 	}
 }
-
+void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
+    if(event == VP_FOCUSED || event == VP_MAXIMIZE){
+        set_schedule(ALWAYS);
+    }
+    else if(event == VP_MINIMIZE){
+        set_schedule(NEVER);
+    }
+    else if(event == VP_EXIT){
+        running = 0;
+		set_schedule(ALWAYS);
+    }
+}
 #endif
