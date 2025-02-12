@@ -85,6 +85,8 @@ void kernel_task(int argc, char **argv){
         print_console(kernel_console, "%s\n", ls.entries[i].filename);
     }
     */
+
+    zig_test();
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  
@@ -110,20 +112,20 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-    //enable_apic();
+    enable_apic();
 
 	fb_init(GRUB_tagfb);
 
     alloc_init();
     
-    //if(GRUB_ACPI_NEW){
-    //    acpi_init(GRUB_ACPI_NEW->rsdp);
-    //}
-    //else{
-    //    acpi_init(GRUB_ACPI_OLD->rsdp);
-    //}
-    //acpi_initFADT();
-    //acpi_parseMADT();
+    if(GRUB_ACPI_NEW){
+        acpi_init(GRUB_ACPI_NEW->rsdp);
+    }
+    else{
+        acpi_init(GRUB_ACPI_OLD->rsdp);
+    }
+    acpi_initFADT();
+    acpi_parseMADT();
 
     PCI_init();
     kbd_init(0xFF);

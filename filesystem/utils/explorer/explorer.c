@@ -528,7 +528,7 @@ void popupFilename(char *filebuf, int filebuf_size){
                     break;
                 case 8:
                     mover--;
-                    if(mover < 0) break;
+                    if(mover < 0) mover = 0;
                     filebuf[mover] = 0;
                     break;
                 default:
