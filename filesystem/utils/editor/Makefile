@@ -1,6 +1,6 @@
-CC = gcc
-CFLAGS = -g -m32 -c -O0 -m32 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
-INCLUDE_PATH = -I ../../OS/libc/ -I./libgif
+CC = i386-elf-gcc
+CFLAGS = -g -c -O0 -m32 -nostdlib -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
+INCLUDE_PATH = -I ../../OS/libc/
 LIBS = ../../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
