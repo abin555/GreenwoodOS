@@ -8,22 +8,29 @@ typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
 
+#ifndef __cplusplus
+typedef char bool;
+#define true 1
+#define false 0
+#endif
+
 #define NULL 0
 
+struct IVec2{
+    int x;
+    int y;
+};
+
+struct MouseButtons{
+    uint8_t right : 1;
+    uint8_t left : 1;
+    uint8_t middle : 1;
+};
+
 struct MouseStatus{
-	struct {
-		int x;
-		int y;
-	} pos;
-	struct {
-		uint8_t right : 1;
-		uint8_t left : 1;
-		uint8_t middle : 1;
-	} buttons;
-	struct {
-		int x;
-		int y;
-	} lastDelta;
+    struct IVec2 pos;
+    struct MouseButtons buttons;
+    struct IVec2 lastDelta;
 };
 
 struct PCSpeaker_Handle{
@@ -110,7 +117,9 @@ typedef enum {
 	FEAT_TASKTABLE = 0x04,
 	FEAT_PROGRAMBASE = 0x05,
 	FEAT_FRAMEBUFFER = 0x06,
-	FEAT_TIMER = 0x07
+	FEAT_TIMER = 0x07,
+	FEAT_KEYPRESSMAP = 0x08,
+
 } KERNEL_FEATURE;
 
 struct FEATURE_INFO{
@@ -138,7 +147,7 @@ void *requestRegionAt(unsigned int bytes, unsigned int addr);
 void attachTimerCallback(unsigned int timer, void *callback);
 void dprint(char *msg);
 void start_manual_task(void *addr, char *name);
-struct MouseStatus getMouse();
+struct MouseStatus *getMouse();
 struct PCSpeaker_Handle *getPCSpeaker();
 uint32_t *getTimerTickHandle();
 void addMouseEventHandler(void (*handler)(void));
@@ -202,6 +211,7 @@ struct RealTimeClock {
 	unsigned char day;
 	unsigned char month;
 	unsigned int year;
+	unsigned int msec;
 };
 
 struct RealTimeClock *get_rtc();
@@ -221,6 +231,10 @@ struct DirectoryListing{
 
 struct DirectoryListing getDirectoryListing(char *path);
 void print_serial(char *str);
+void task_lock(int state);
+void write_serial(char c);
+
+void yield();
 
 #ifdef __cplusplus
 }

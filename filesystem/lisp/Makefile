@@ -1,8 +1,8 @@
 FILES := src/main.c src/greenwood-lisp.c src/builtin.c
 CFLAGS_linux := -I ./include -ledit -g
-CFLAGS_gwos := -I ./include -DGreenwood_OS -m32 -no-pie -c -O0 -nostdlib -nodefaultlibs -nolibc -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector
+CFLAGS_gwos := -I ./include -DGreenwood_OS -g -c -O0 -m32 -nostdlib -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
 LDFLAGS = -T ./GWOS_lib/link.ld -melf_i386
-CC := gcc
+CC := i386-elf-gcc
 
 OUTDIR = ./bin/
 OUTPUT = greenwoodLISP

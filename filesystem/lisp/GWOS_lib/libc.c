@@ -363,15 +363,13 @@ void start_manual_task(void *addr, char *name){
 	asm("int 0x80");
 }
 
-struct MouseStatus getMouse(){
+struct MouseStatus *getMouse(){
 	struct MouseStatus *mousePtr;
-	struct MouseStatus mouse;
 	register uint32_t eax asm("eax");
 	eax = 0x27;
 	asm("int 0x80");
 	mousePtr = (struct MouseStatus *) eax;
-	mouse = *mousePtr;
-	return mouse;
+	return mousePtr;
 }
 
 struct PCSpeaker_Handle *getPCSpeaker(){
@@ -456,5 +454,27 @@ void print_serial(char *str){
 	register uint32_t ebx asm("ebx");
 	ebx = (uint32_t) str;
 	eax = 0x31;
+	asm("int 0x80");
+}
+
+void task_lock(int state){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) state;
+	eax = 0x32;
+	asm("int 0x80");
+}
+
+void write_serial(char c){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) c;
+	eax = 0x33;
+	asm("int 0x80");
+}
+
+void yield(){
+	register uint32_t eax asm("eax");
+	eax = 0x34;
 	asm("int 0x80");
 }

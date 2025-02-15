@@ -1,10 +1,10 @@
-CC = i386-elf-gcc
-CFLAGS = -g -c -O0 -m32 -nostdlib -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
+CC = i386-gwos-gcc
+CFLAGS = -g -c -O0 -nostdlib -nodefaultlibs -masm=intel
 INCLUDE_PATH = -I ../../OS/libc/
 LIBS = ../../OS/libc/libc.o
 AS = nasm
 ASFLAGS = -f elf
-LDFLAGS = -T ../../OS/libc/link.ld -melf_i386 -g
+LDFLAGS = 
 PROG = editor
 
 SRCS += main.o
@@ -19,9 +19,9 @@ START = start.o
 	$(AS) $(ASFLAGS) $< -o $@
 
 build: $(SRCS) $(START)
-	ld $(LDFLAGS) $(START) $(SRCS) $(LIBS) -o $(PROG).elf
-	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
-	objcopy --only-keep-debug $(PROG).elf $(PROG).sym
+	i386-gwos-gcc $(START) $(SRCS) $(LIBS) -o $(PROG).elf
+	i386-gwos-objcopy -O binary $(PROG).elf $(PROG).exe
+	i386-gwos-objcopy --only-keep-debug $(PROG).elf $(PROG).sym
 
 clean:
 	rm $(SRCS)
