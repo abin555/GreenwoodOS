@@ -144,6 +144,9 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
     else if(KBD_flags.ctrl && ascii == 'C'){
         exec("/A/utils/clock/clock.exe", 0, NULL);
     }
+    else if(KBD_flags.ctrl && ascii == 'L'){
+        exec("/A/lisp/LISP.exe", 0, NULL);
+    }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
             if(global_viewport_list->elements[i].inUse){
