@@ -9,7 +9,7 @@
 
 #ifndef _SIZET
 #define _SIZET
-typedef unsigned int size_t;
+typedef long unsigned int size_t;
 #endif
 
 void *memchr(const void *, int, size_t);

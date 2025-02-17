@@ -1,6 +1,8 @@
 #ifndef _STDIO_H
 #define _STDIO_H
 
+struct FILE **fileListing;
+
 #define stdin ((FILE *) 0)
 #define stdout ((FILE *) 0)
 #define stderr ((FILE *) 0)
