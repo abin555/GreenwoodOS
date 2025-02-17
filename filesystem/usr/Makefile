@@ -4,14 +4,14 @@ CFLAGS = -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-prot
 INCLUDE_PATH = -I../OS/libc/ -I./include
 LIBS = ../OS/libc/libc.o
 
-C_FILES := ctype.c errno.c stdlib.c xassert.c
+C_FILES := $(wildcard ./src/*.c)
 SRCS := $(patsubst %.c,%.o,$(C_FILES))
 
 output_lib := libc
 
-%.o : ./src/%.c
+%.o : %.c
 	$(CC) $(INCLUDE_PATH) -c $(CFLAGS) $< -o $@
-%.o : ./src/*.s
+%.o : *.s
 	$(AS) $< -o $@
 
 build: clean $(SRCS)
