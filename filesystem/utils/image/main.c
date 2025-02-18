@@ -35,16 +35,17 @@ int main(int argc, char **argv){
     heap = (char *) 0x4000;    
     
     print_arg("Opening Image %s\n", (uint32_t) argv[1]);
-    struct FILE *image = fopen(argv[1]);
-    if(image == NULL){
+    int image = open(argv[1]);
+    if(image == -1){
         print("Image Does Not Exist\n");
         return 1;
     }
-    int size = fsize(image);
+    int size = lseek(image, 0, 2);
+    lseek(image, 0, 0);
     print_arg("Image File Size is %d\n", size);
     char *file_buf = alloc(size);
-    fcopy(image, file_buf, size);
-    fclose(image);
+    read(image, file_buf, size);
+    close(image);
 
     tga_header_t *header = (tga_header_t *) file_buf;
     print_arg("Image Width is %d\n", header->w);

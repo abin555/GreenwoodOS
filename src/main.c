@@ -27,6 +27,7 @@
 #include "ethernet.h"
 #include "acpi.h"
 #include "apic.h"
+#include "vfs.h"
 
 extern void zig_test();
 
@@ -44,6 +45,7 @@ void kernel_task(int argc, char **argv){
     }
 
     drive_enumerate();
+    vfs_init();
 
     window_init();
     console_init();
@@ -79,14 +81,30 @@ void kernel_task(int argc, char **argv){
     for(int i = 0; i < drive_count; i++){
         print_console(kernel_console, "Drive %d is type %d and format %d\n", i, drives[i]->type, drives[i]->format);
     }
-    /*
-    struct DirectoryListing ls = listDirectory(&kernel_task->currentDirectory, "/A/Pictures");
-    for(int i = 0; i < ls.num_entries; i++){
-        print_console(kernel_console, "%s\n", ls.entries[i].filename);
-    }
-    */
 
     zig_test();
+
+    int fd_test = vfs_open("A/test.txt\0");
+    print_serial("[VFS] opened fd %d\n", fd_test);
+    if(fd_test != -1){
+        char buf[12];
+        memset(buf, 0, 12);
+        int numb = vfs_read(fd_test, buf, 10);
+        print_serial("Read: %s (%d bytes)\n", buf, numb);
+        vfs_read(fd_test, buf, 1);
+        numb = vfs_read(fd_test, buf, 10);
+        print_serial("Read: %s (%d bytes)\n", buf, numb);
+
+        print_serial("Seeked to %d\n", vfs_seek(fd_test, 0, 0));
+        vfs_write(fd_test, "GOOF", 4);
+        print_serial("Now at %d\n", vfs_seek(fd_test, 0, 1));
+        print_serial("Seeked to %d\n", vfs_seek(fd_test, 0, 0));
+        memset(buf, 0, 12);
+        numb = vfs_read(fd_test, buf, 6);
+        print_serial("Read: %s (%d bytes)\n", buf, numb);
+
+        vfs_close(fd_test);
+    }
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  

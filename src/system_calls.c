@@ -345,6 +345,30 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			task_yield();
 			break;
 		}
+		case 0x35:{
+			cpu_state.eax = (unsigned int) vfs_openRel(&task->currentDirectory, (char *) cpu.ebx);
+			break;
+		}
+		case 0x36:{
+			vfs_close((int) cpu.ebx);
+			break;
+		}
+		case 0x37:{
+			cpu_state.eax = (unsigned int) vfs_read((int) cpu.ebx, (void *) cpu.ecx, (int) cpu.edx);
+			break;
+		}
+		case 0x38:{
+			cpu_state.eax = (unsigned int) vfs_write((int) cpu.ebx, (void *) cpu.ecx, (int) cpu.edx);
+			break;
+		}
+		case 0x39:{
+			cpu_state.eax = (unsigned int) vfs_seek((int) cpu.ebx, cpu.ecx, (int) cpu.edx);
+			break;
+		}
+		case 0x3A:{
+			cpu_state.eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) cpu.ebx);
+			break;
+		}
 	}
 	IRQ_RES;
 	return cpu_state;

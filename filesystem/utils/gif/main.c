@@ -98,16 +98,18 @@ int main(int argc, char **argv){
 
 	vp_funcs = viewport_get_funcs();
 
-	struct FILE *gif_file = fopen(argv[1]);
-	if(gif_file == NULL) return 1;
+	int gif_file = open(argv[1]);
+	if(gif_file == -1) return 1;
 	heap = requestRegion(REGION_SIZE);
 	memset(heap, 0, REGION_SIZE);
 	addEndCallback(end_callback);
 
-	Ifile.rawfile = malloc(fsize(gif_file));
+	int size = lseek(gif_file, 0, 2);
+    lseek(gif_file, 0, 0);
+	Ifile.rawfile = malloc(size);
 	Ifile.headidx = 0;
-	fcopy(gif_file, Ifile.rawfile, fsize(gif_file));
-	fclose(gif_file);
+	read(gif_file, Ifile.rawfile, size);
+	close(gif_file);
 
 	int gif_err;
 	GifFileType *gif = DGifOpen(&Ifile, readgif, &gif_err);

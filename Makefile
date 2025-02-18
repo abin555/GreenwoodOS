@@ -50,7 +50,8 @@ OBJECTS = \
 		src/networking/network_utils.o \
 		src/test.o \
 		src/acpi.o \
-		src/apic.o
+		src/apic.o \
+		src/vfs.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \

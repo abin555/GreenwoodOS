@@ -162,7 +162,7 @@ struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path){
 			if(path[idx] == '\0'){//Last entry on path should be a file, and thus the string is null terminated;
 				isFile = 1;
 				idx++;
-				//print_serial("This is a file %s\n", work_buf);
+				print_serial("This is a file %s\n", work_buf);
 				goto OpenFile;
 			}
 		}

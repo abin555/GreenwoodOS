@@ -236,6 +236,14 @@ void write_serial(char c);
 
 void yield();
 
+
+int open(char *path);
+void close(int fd);
+int read(int fd, void *buf, int nbytes);
+int write(int fd, void *buf, int nbytes);
+int lseek(int fd, int off, int whence);
+int creat(char *path);
+
 #ifdef __cplusplus
 }
 #endif

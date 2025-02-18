@@ -14,6 +14,7 @@
 #include "pcspeaker.h"
 #include "viewport.h"
 #include "rtc.h"
+#include "vfs.h"
 
 void init_syscalls();
 
