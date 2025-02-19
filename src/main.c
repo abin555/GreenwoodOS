@@ -84,7 +84,7 @@ void kernel_task(int argc, char **argv){
 
     zig_test();
 
-    int fd_test = vfs_open("A/test.txt\0");
+    int fd_test = vfs_open("A/test.txt\0", VFS_FLAG_READ | VFS_FLAG_WRITE);
     print_serial("[VFS] opened fd %d\n", fd_test);
     if(fd_test != -1){
         char buf[12];
@@ -105,6 +105,27 @@ void kernel_task(int argc, char **argv){
 
         vfs_close(fd_test);
     }
+
+
+    print_serial("VFS Pipe test\n");
+    int pipe_read, pipe_write;
+    vfs_mkpipe(&pipe_write, &pipe_read);
+    char buf1[10];
+    char buf2[10];
+    memset(buf1, 0, 10);
+    memset(buf2, 0, 10);
+    int n;
+    n = vfs_write(pipe_write, "Hello There", 11);
+    print_serial("Wrote %d bytes to pipe\n", n);
+    n = vfs_read(pipe_read, buf1, 5);
+    print_serial("Read %d bytes from pipe \"%s\"\n", n, buf1);
+    vfs_read(pipe_read, NULL, 1);
+    memset(buf1, 0, sizeof(buf1));
+    n = vfs_read(pipe_read, buf1, 6);
+    print_serial("Read %d bytes from pipe \"%s\"\n", n, buf1);
+
+    vfs_close(pipe_read);
+    vfs_close(pipe_write);
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  

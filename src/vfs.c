@@ -168,7 +168,7 @@ int vfs_open(char *path, int flags){
 void vfs_close(int fd){
     if(fd == -1) return;
     struct VFS_File *file_idx = &VFS_fileTable[fd];
-    if(file_idx->inode.type == VFS_PIPE){
+    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
         pipe_close(file_idx->inode.fs.pipe);
     }
     file_idx->status = 1;
@@ -555,8 +555,9 @@ int vfs_creat(char *path){
 int vfs_mkpipe(int *writer_fd, int *reader_fd){
     if(writer_fd == NULL || reader_fd == NULL) return -1;
     *writer_fd = vfs_allocFileD();
-    *reader_fd = vfd_allocFileD();
+    *reader_fd = vfs_allocFileD();
     if(*writer_fd == -1 || *reader_fd == -1) return -1;
+    print_serial("[VFS] Making Pipe Write FD = %d, Read FD = %d\n", *writer_fd, *reader_fd);
 
     struct Pipe *pipe = pipe_create(200);
     
