@@ -51,7 +51,8 @@ OBJECTS = \
 		src/test.o \
 		src/acpi.o \
 		src/apic.o \
-		src/vfs.o
+		src/vfs.o \
+		src/drivers/pipe.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \

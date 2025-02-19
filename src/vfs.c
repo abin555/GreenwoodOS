@@ -125,14 +125,14 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     return result;
 }
 
-int vfs_openRel(struct DIRECTORY *dir, char *path){
+int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
     char big_path[200];
 	memset(big_path, 0, sizeof(big_path));
 	expandPath(big_path, sizeof(big_path), dir, path);
-    return vfs_open(big_path);
+    return vfs_open(big_path, flags);
 }
 
-int vfs_open(char *path){
+int vfs_open(char *path, int flags){
     print_serial("[VFS] Opening %s\n", path);
     if(path == NULL) return -1;
     char driveLetter = path[0];
@@ -144,6 +144,7 @@ int vfs_open(char *path){
         goto fail;
     }
     struct VFS_Inode inode = vfs_followLink(root, path);
+    inode.flags = flags;
     if(inode.isValid == 0){
         print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
         goto fail;
@@ -167,6 +168,9 @@ int vfs_open(char *path){
 void vfs_close(int fd){
     if(fd == -1) return;
     struct VFS_File *file_idx = &VFS_fileTable[fd];
+    if(file_idx->inode.type == VFS_PIPE){
+        pipe_close(file_idx->inode.fs.pipe);
+    }
     file_idx->status = 1;
     file_idx->head = 0;
     memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
@@ -315,6 +319,7 @@ int vfs_read(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
 
     struct VFS_File *file_idx = &VFS_fileTable[fd];
+    if(!(file_idx->inode.flags & VFS_FLAG_READ)) return -1;
     switch(file_idx->inode.type){
         case VFS_ISO9660:
             return vfs_readISO9660(file_idx, buf, nbytes);
@@ -323,6 +328,9 @@ int vfs_read(int fd, void *buf, uint32_t nbytes){
             return vfs_readExt2(file_idx, buf, nbytes);
             break;
         case VFS_SYS:
+            break;
+        case VFS_PIPE:
+            return pipe_read(file_idx->inode.fs.pipe, buf, nbytes);
             break;
     }
     return -1;
@@ -473,6 +481,7 @@ int vfs_write(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
 
     struct VFS_File *file_idx = &VFS_fileTable[fd];
+    if(!(file_idx->inode.flags & VFS_FLAG_WRITE)) return -1;
     switch(file_idx->inode.type){
         case VFS_ISO9660:
             break;
@@ -480,6 +489,9 @@ int vfs_write(int fd, void *buf, uint32_t nbytes){
             return vfs_writeExt2(file_idx, buf, nbytes);
             break;
         case VFS_SYS:
+            break;
+        case VFS_PIPE:
+            return pipe_write(file_idx->inode.fs.pipe, buf, nbytes);
             break;
     }
     return -1;
@@ -538,4 +550,31 @@ int vfs_creat(char *path){
             return -1;
             break;
     }
+}
+
+int vfs_mkpipe(int *writer_fd, int *reader_fd){
+    if(writer_fd == NULL || reader_fd == NULL) return -1;
+    *writer_fd = vfs_allocFileD();
+    *reader_fd = vfd_allocFileD();
+    if(*writer_fd == -1 || *reader_fd == -1) return -1;
+
+    struct Pipe *pipe = pipe_create(200);
+    
+    struct VFS_File *writer_file = &VFS_fileTable[*writer_fd];
+    struct VFS_File *reader_file = &VFS_fileTable[*reader_fd];
+
+    writer_file->inode.flags = VFS_FLAG_WRITE;
+    writer_file->inode.type = VFS_PIPE;
+    writer_file->inode.fs.pipe = pipe;
+    writer_file->inode.root = NULL;
+    writer_file->inode.drive = NULL;
+    writer_file->inode.isValid = 1;
+
+    reader_file->inode.flags = VFS_FLAG_READ;
+    reader_file->inode.type = VFS_PIPE;
+    reader_file->inode.fs.pipe = pipe;
+    reader_file->inode.root = NULL;
+    reader_file->inode.drive = NULL;
+    reader_file->inode.isValid = 1;
+    return 0;
 }

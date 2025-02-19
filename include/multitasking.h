@@ -34,6 +34,8 @@ typedef enum {
     NEVER = 4
 } ScheduleType;
 
+#define MT_maxDescriptors 10
+
 struct task_state{
     struct task_registers registers;
     int8_t program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
@@ -50,6 +52,8 @@ struct task_state{
     void (*end_callback)(void);
     bool own_window;
     bool own_console;
+    int file_descs[MT_maxDescriptors];
+    int num_used;
 };
 
 #define MAX_TASKS 20
@@ -77,5 +81,10 @@ void list_tasks();
 void set_schedule(ScheduleType type);
 
 void task_yield();
+
+int task_getFD(struct task_state *task);
+int task_allocFD(struct task_state *task, int sysfd);
+int task_getSysFD(struct task_state *task, int fd);
+void task_freeFD(struct task_state *task, int fd);
 
 #endif

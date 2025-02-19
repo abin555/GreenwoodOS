@@ -22,6 +22,9 @@ struct SysFS_Inode {
         } dir;
         struct SysFS_Chardev chardev;
     } data;
+    struct SysFS_Inode *parent;
 };
+
+
 
 #endif

@@ -70,6 +70,9 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].keyboard_event_handler = NULL;
             tasks[i].mouse_event_handler = NULL;
             tasks[i].end_callback = NULL;
+            for(int j = 0; j < MT_maxDescriptors; j++){
+                tasks[i].file_descs[j] = -1;
+            }
             break;
         }
     }
@@ -230,4 +233,27 @@ void list_tasks(){
 
 void task_yield(){
     task_callback();
+}
+
+int task_getFD(struct task_state *task){
+    for(int i = 0; i < MT_maxDescriptors; i++){
+        if(task->file_descs[i] == -1){
+            return i;
+        }
+    }
+    return -1;
+}
+
+int task_allocFD(struct task_state *task, int sysfd){
+    int fd = task_getFD(task);
+    task->file_descs[fd] = sysfd;
+    return fd;
+}
+
+int task_getSysFD(struct task_state *task, int fd){
+    return task->file_descs[fd];
+}
+
+void task_freeFD(struct task_state *task, int fd){
+    task->file_descs[fd] = -1;
 }
