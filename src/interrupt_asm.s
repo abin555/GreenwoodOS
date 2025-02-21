@@ -1,12 +1,31 @@
 ;Produce Interrupt Call System | interrupts_new.c
 extern interrupt_handler
 
+global saved_stack_ebp
+saved_stack_ebp:
+	dd 0
+global saved_stack_esp
+saved_stack_esp:
+	dd 0
+
+extern kernel_stack_base
+
+%macro stack_switch 0
+	mov [saved_stack_ebp], ebp
+	mov [saved_stack_esp], esp
+	mov ebp, [kernel_stack_base]
+	add ebp, 0x80000-(1*4)
+	mov esp, ebp
+	sub esp, (2*4)
+
+%endmacro
 
 %macro no_err_int 1
 global int_handler_%1
 int_handler_%1:
 	cli
 	push dword 0 	;Give a 0 for an errorless interrupt, prevents kernel panics
+	stack_switch
 	push dword %1	;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
@@ -15,6 +34,7 @@ int_handler_%1:
 global int_handler_%1
 int_handler_%1:
 	cli
+	stack_switch
 	push dword %1 ;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
@@ -44,9 +64,12 @@ common_interrupt_handler:
 	pop edi
 	pop esp
 
+	mov ebp, [saved_stack_ebp]
+	mov esp, [saved_stack_esp]
 
 	;restore stack pointer
-	add esp, 8
+	add esp, 4
+
 	;return the system
 	iret
 

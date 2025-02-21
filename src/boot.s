@@ -69,8 +69,12 @@ boot_page_directory:
 	times (1024 - KERNEL_PAGE_NUMBER - 10) dd 0
 
 
-KERNEL_STACK_SIZE equ 0x4000
+KERNEL_STACK_SIZE equ 0x400
 SECTION .bss
 align 4
 kernel_stack:
 	resb KERNEL_STACK_SIZE
+
+global kernel_stack_base
+kernel_stack_base:
+	dw kernel_stack

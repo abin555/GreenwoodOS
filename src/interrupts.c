@@ -9,6 +9,9 @@ struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_st
 
 unsigned int INT_currentInterrupt;
 
+extern uint32_t saved_stack_ebp;
+extern uint32_t saved_stack_esp;
+
 void pic_acknowledge(unsigned int interrupt){
 
 	if(interrupt >= 0x28){
@@ -165,9 +168,17 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
 	INT_currentInterrupt = interrupt;
+
+	struct stack_state *funny_stack = (struct stack_state *) saved_stack_esp;
+	stack.eip = funny_stack->eip;
+	stack.error_code = funny_stack->error_code;
+	stack.cs = funny_stack->cs;
+	stack.eflags = funny_stack->eflags;
+
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
+	print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
 		
@@ -190,6 +201,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
+	print_serial("[Interrupt] Return\n");
 }
 
 void IDT_dump(){
