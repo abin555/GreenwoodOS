@@ -9,6 +9,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 	IRQ_OFF;
 	struct cpu_state cpu_state = cpu;
 	struct task_state *task = &tasks[task_running_idx];
+	//save_task_state(task, cpu, stack);
 	switch(cpu.eax){
 		//Open Window
 		case 0x01:{
@@ -346,7 +347,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x35:{
-			cpu_state.eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu.ebx));
+			cpu_state.eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu.ebx, (int) cpu.ecx));
 			break;
 		}
 		case 0x36:{
@@ -369,6 +370,13 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x3A:{
 			cpu_state.eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) cpu.ebx);
 			break;
+		}
+		case 0x3B:{
+			cpu_state.eax = (unsigned int) task_dupFD(task, (int) cpu.ebx);
+			break;
+		}
+		case 0x3C:{
+			cpu_state.eax = (unsigned int) fork();
 		}
 	}
 	IRQ_RES;
