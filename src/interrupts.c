@@ -185,12 +185,10 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		if(override_state_return == true){
 			stack = most_recent_int_stack_state;
 			cpu = most_recent_int_cpu_state;
-			uint32_t *fix_the_dang_stack = (uint32_t *) cpu.esp;
-			fix_the_dang_stack[0] = interrupt;
-			fix_the_dang_stack[1] = stack.error_code;
-			fix_the_dang_stack[2] = stack.eip;
-			fix_the_dang_stack[3] = stack.cs;
-			fix_the_dang_stack[4] = stack.eflags;
+			uint32_t *fix_the_dang_stack = (uint32_t *) saved_stack_esp;
+			fix_the_dang_stack[0] = stack.eip;
+			fix_the_dang_stack[1] = stack.cs;
+			fix_the_dang_stack[2] = stack.eflags;
 			override_state_return = false;
 			return;
 		}

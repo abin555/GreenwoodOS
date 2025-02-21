@@ -276,7 +276,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
 
 void task_callback(){
     if(task_lock) return;
-    ////printk("[TASK] Callback\n");
+    print_serial("[TASK] Callback\n");
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){
@@ -288,7 +288,7 @@ void task_callback(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active && i != running_idx){
             task_available = true;
-            ////printk("Task is available\n");
+            print_serial("Task is available - %d\n", i);
             break;
         }
     }
