@@ -53,6 +53,9 @@ common_interrupt_handler:
 	;Call C function handler
 	call interrupt_handler
 
+	mov ebp, [saved_stack_ebp]
+	mov esp, [saved_stack_esp]
+
 	;restore registers
 	pop eax
 	pop ebx
@@ -62,9 +65,6 @@ common_interrupt_handler:
 	pop edi
 	pop ebp
 	pop esp
-
-;	mov ebp, [saved_stack_ebp]
-;	mov esp, [saved_stack_esp]
 
 	;restore stack pointer
 	add esp, 8
