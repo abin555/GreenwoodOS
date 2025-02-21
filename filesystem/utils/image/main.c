@@ -35,7 +35,7 @@ int main(int argc, char **argv){
     heap = (char *) 0x4000;    
     
     print_arg("Opening Image %s\n", (uint32_t) argv[1]);
-    int image = open(argv[1]);
+    int image = open(argv[1], O_READ);
     if(image == -1){
         print("Image Does Not Exist\n");
         return 1;

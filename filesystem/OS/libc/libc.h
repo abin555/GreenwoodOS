@@ -236,13 +236,19 @@ void write_serial(char c);
 
 void yield();
 
+typedef enum {
+    O_READ = 0b1,
+    O_WRITE = 0b10
+} OPENFLAGS;
 
-int open(char *path);
+int open(char *path, OPENFLAGS flags);
 void close(int fd);
 int read(int fd, void *buf, int nbytes);
 int write(int fd, void *buf, int nbytes);
 int lseek(int fd, int off, int whence);
 int creat(char *path);
+int dup(int fd);
+int fork();
 
 #ifdef __cplusplus
 }

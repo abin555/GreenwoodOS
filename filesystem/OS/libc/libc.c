@@ -479,11 +479,12 @@ void yield(){
 	asm("int 0x80");
 }
 
-int open(char *path){
+int open(char *path, OPENFLAGS flags){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	register uint32_t ecx asm("ecx");
 	register uint32_t edx asm("edx");
+	ecx = (uint32_t) flags;
 	ebx = (uint32_t) path;
 	eax = 0x35;
 	asm("int 0x80");
@@ -548,4 +549,22 @@ int creat(char *path){
 	eax = 0x3A;
 	asm("int 0x80");
 	return (int) eax;
+}
+
+int dup(int fd){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	register uint32_t edx asm("edx");
+	ebx = (uint32_t) fd;
+	eax = 0x3B;
+	asm("int 0x80");
+	return (int) eax;
+}
+
+int fork(){
+	register uint32_t eax asm("eax");
+	eax = 0x3C;	
+	asm("int 0x80");
+	return (int) eax;	
 }

@@ -98,7 +98,7 @@ int main(int argc, char **argv){
 
 	vp_funcs = viewport_get_funcs();
 
-	int gif_file = open(argv[1]);
+	int gif_file = open(argv[1], O_READ);
 	if(gif_file == -1) return 1;
 	heap = requestRegion(REGION_SIZE);
 	memset(heap, 0, REGION_SIZE);
