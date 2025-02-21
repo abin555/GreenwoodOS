@@ -13,10 +13,10 @@ extern kernel_stack_base
 %macro stack_switch 0
 	mov [saved_stack_ebp], ebp
 	mov [saved_stack_esp], esp
-	mov ebp, [kernel_stack_base]
-	add ebp, 0x80000-(1*4)
-	mov esp, ebp
-	sub esp, (2*4)
+;	mov ebp, [kernel_stack_base]
+;	add ebp, 0x80000-(1*4)
+;	mov esp, ebp
+;	sub esp, (2*4)
 
 %endmacro
 
@@ -25,7 +25,6 @@ global int_handler_%1
 int_handler_%1:
 	cli
 	push dword 0 	;Give a 0 for an errorless interrupt, prevents kernel panics
-	stack_switch
 	push dword %1	;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
@@ -34,7 +33,6 @@ int_handler_%1:
 global int_handler_%1
 int_handler_%1:
 	cli
-	stack_switch
 	push dword %1 ;Pass ID of interrupt to interrupt handler
 	jmp common_interrupt_handler ;jump to the interrupt handler
 %endmacro
@@ -42,14 +40,15 @@ int_handler_%1:
 common_interrupt_handler:
 	;save registers
 	push esp
+	push ebp
 	push edi
 	push esi
-	push ebp
 	push edx
 	push ecx
 	push ebx
 	push eax
 
+	stack_switch
 
 	;Call C function handler
 	call interrupt_handler
@@ -59,16 +58,16 @@ common_interrupt_handler:
 	pop ebx
 	pop ecx
 	pop edx
-	pop ebp
 	pop esi
 	pop edi
+	pop ebp
 	pop esp
 
-	mov ebp, [saved_stack_ebp]
-	mov esp, [saved_stack_esp]
+;	mov ebp, [saved_stack_ebp]
+;	mov esp, [saved_stack_esp]
 
 	;restore stack pointer
-	add esp, 4
+	add esp, 8
 
 	;return the system
 	iret

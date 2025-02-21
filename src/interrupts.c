@@ -169,26 +169,32 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	most_recent_int_stack_state = stack;
 	INT_currentInterrupt = interrupt;
 
-	struct stack_state *funny_stack = (struct stack_state *) saved_stack_esp;
-	stack.eip = funny_stack->eip;
-	stack.error_code = funny_stack->error_code;
-	stack.cs = funny_stack->cs;
-	stack.eflags = funny_stack->eflags;
+	uint32_t *funny_stack = (uint32_t *) saved_stack_esp;
+	for(int i = 0; i < 10; i++){
+		print_serial("%d - 0x%x\n", i, funny_stack[i]);
+	}
+	//stack.eip = funny_stack->eip;
+	//stack.error_code = funny_stack->error_code;
+	//stack.cs = funny_stack->cs;
+	//stack.eflags = funny_stack->eflags;
 
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
-	print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
+	print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip);
+	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
 		
 		if(override_state_return == true){
 			stack = most_recent_int_stack_state;
 			cpu = most_recent_int_cpu_state;
-			uint32_t *fix_the_dang_stack = (uint32_t *) saved_stack_esp;
-			fix_the_dang_stack[0] = stack.eip;
-			fix_the_dang_stack[1] = stack.cs;
-			fix_the_dang_stack[2] = stack.eflags;
+			uint32_t *fix_the_dang_stack = (uint32_t *) cpu.esp;
+			fix_the_dang_stack[0] = interrupt;
+			fix_the_dang_stack[1] = stack.error_code;
+			fix_the_dang_stack[2] = stack.eip;
+			fix_the_dang_stack[3] = stack.cs;
+			fix_the_dang_stack[4] = stack.eflags;
 			override_state_return = false;
 			return;
 		}
@@ -199,7 +205,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
-	print_serial("[Interrupt] Return\n");
+	//print_serial("[Interrupt] Return\n");
 }
 
 void IDT_dump(){
