@@ -26,11 +26,11 @@ void page_holding_pen(){
     }
 }
 
-struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
     register uint32_t eax asm("eax");
     asm("mov eax, cr2");
 
-    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name, task_running_idx);
+    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", stack->eip, stack->error_code, eax, tasks[task_running_idx].task_name, task_running_idx);
     //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     fb_print(0,0,"PAGE FAULT!");
     //asm("hlt");
@@ -38,7 +38,7 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     override_state_return = true;
     most_recent_int_stack_state.eip = (uint32_t) &page_holding_pen;
     //print_console(kernel_console, "Returning to kernel Task\n");
-    return cpu;
+    return;
 }
 
 uint32_t get_physical(uint32_t address){

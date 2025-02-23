@@ -164,6 +164,7 @@ struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
 extern uint32_t kernel_stack_base;
+extern void *task_stack_base;
 
 void interrupt_handler(){
 	struct cpu_state *cpu = (struct cpu_state *) saved_stack_esp; 
@@ -188,10 +189,9 @@ void interrupt_handler(){
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
-	register unsigned int esp asm("esp");
-	register unsigned int ebp asm("ebp");
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
+	print_serial("Saved ESP: 0x%x Saved EBP: 0x%x\n", saved_stack_esp, saved_stack_ebp);
 	if((uint32_t) interrupt_handlers[interrupt]){
 		interrupt_handlers[interrupt](cpu, stack);
 		
@@ -207,7 +207,6 @@ void interrupt_handler(){
 			fix_the_dang_stack[3] = stack->cs;
 			fix_the_dang_stack[4] = stack->eflags;
 			override_state_return = false;
-			return;
 		}
 		
 	}
@@ -216,10 +215,15 @@ void interrupt_handler(){
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
-	if(cpu->esp < kernel_stack_base){
+	if(cpu->esp < (unsigned int) task_stack_base || cpu->ebp < (unsigned int) task_stack_base){
+		register unsigned int esp asm("esp");
+		register unsigned int ebp asm("ebp");
         print_serial("[INT] WTF? The ESP is below the allowed base... INT #%d\n", interrupt);
 		print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
     }
+	if(interrupt != 32){
+		print_serial("Interrupt %d\n", interrupt);
+	}
 	//print_serial("[Interrupt] Return\n");
 }
 

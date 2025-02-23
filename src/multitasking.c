@@ -11,7 +11,7 @@ extern uint32_t kernel_stack_base;
 #define TASK_STACK_VIRTUAL_BASE 0x40000000
 
 void tasking_setup_kernel_stack(){
-    kernel_stack_base = get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, STACK));
+    kernel_stack_base = get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0x30000000, STACK));
     print_serial("[KERNEL] Setup Kernel Stack at 0x%x\n", kernel_stack_base);
     MEM_printRegions();
 }
@@ -245,7 +245,7 @@ void select_stack(int next, int current){
 void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id){
     //new_id = old_id;
     old_id = new_id;
-    if(new_task->registers.esp < kernel_stack_base){
+    if(new_task->registers.esp < (uint32_t) task_stack_base){
         print_serial("[TASK] WTF? The ESP is below the allowed base... TASK #%d\n", old_id);
     }
     //Save current task's state
@@ -279,7 +279,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
 
 void task_callback(){
     if(task_lock) return;
-    //print_serial("[TASK] Callback\n");
+    print_serial("[TASK] Callback\n");
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){
@@ -291,7 +291,7 @@ void task_callback(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active && i != running_idx){
             task_available = true;
-            //print_serial("Task is available - %d\n", i);
+            print_serial("Task is available - %d\n", i);
             break;
         }
     }

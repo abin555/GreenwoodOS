@@ -16,6 +16,7 @@ void program_init(){
 uint8_t program_active_slot = 0;
 
 void __attribute__ ((optimize("-O3"))) select_program(uint8_t program_slot){
+	print_serial("[PROGRAM] Selecting %d\n", program_slot);
     create_page_entry(program_region_phys_base + 0x400000*program_active_slot, program_region_virt_base + 0x400000*program_active_slot, 0x83);
     create_page_entry(program_region_phys_base + 0x400000*program_slot, 0, 0x83);
     program_active_slot = program_slot;

@@ -67,9 +67,9 @@ struct cpu_state {
 	unsigned int ebx;
 	unsigned int ecx;
 	unsigned int edx;
+	unsigned int ebp; 
 	unsigned int esi; 
-	unsigned int edi;
-	unsigned int ebp;  
+	unsigned int edi; 
 	unsigned int esp;
 } __attribute__((packed));
 
