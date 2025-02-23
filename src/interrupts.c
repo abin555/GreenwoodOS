@@ -5,7 +5,7 @@ struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
 
 unsigned int BUFFER_COUNT;
-struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state, struct stack_state);
+void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state*, struct stack_state*);
 
 unsigned int INT_currentInterrupt;
 
@@ -163,13 +163,14 @@ void interrupts_install_idt()
 struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
+extern uint32_t kernel_stack_base;
 
-void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack){
-	//struct cpu_state *cpu = (struct cpu_state *) saved_stack_esp; 
-	//unsigned int interrupt = *(unsigned int *)(saved_stack_esp+sizeof(struct cpu_state)); 
-	//struct stack_state *stack = (struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int));
-	most_recent_int_cpu_state = cpu;
-	most_recent_int_stack_state = stack;
+void interrupt_handler(){
+	struct cpu_state *cpu = (struct cpu_state *) saved_stack_esp; 
+	unsigned int interrupt = *(unsigned int *)(saved_stack_esp+sizeof(struct cpu_state)); 
+	struct stack_state *stack = (struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int));
+	most_recent_int_cpu_state = *cpu;
+	most_recent_int_stack_state = *stack;
 	INT_currentInterrupt = interrupt;
 
 	/*
@@ -187,33 +188,38 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
-	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip);
+	register unsigned int esp asm("esp");
+	register unsigned int ebp asm("ebp");
+	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
-	
 	if((uint32_t) interrupt_handlers[interrupt]){
-		cpu = interrupt_handlers[interrupt](cpu, stack);
+		interrupt_handlers[interrupt](cpu, stack);
 		
 		if(override_state_return == true){
-			*(struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int)) = most_recent_int_stack_state;
-			*(struct cpu_state *) saved_stack_esp = most_recent_int_cpu_state;
+			*stack = most_recent_int_stack_state;
+			*cpu = most_recent_int_cpu_state;
 			//stack = most_recent_int_stack_state;
 			//cpu = most_recent_int_cpu_state;
-			uint32_t *fix_the_dang_stack = (uint32_t *) cpu.esp;
+			uint32_t *fix_the_dang_stack = (uint32_t *) cpu->esp;
 			fix_the_dang_stack[0] = interrupt;
-			fix_the_dang_stack[1] = stack.error_code;
-			fix_the_dang_stack[2] = stack.eip;
-			fix_the_dang_stack[3] = stack.cs;
-			fix_the_dang_stack[4] = stack.eflags;
+			fix_the_dang_stack[1] = stack->error_code;
+			fix_the_dang_stack[2] = stack->eip;
+			fix_the_dang_stack[3] = stack->cs;
+			fix_the_dang_stack[4] = stack->eflags;
 			override_state_return = false;
 			return;
 		}
 		
 	}
 	else{
-		print_serial("[CPU INT] Uninitialized Interrupt %d from 0x%x\n", interrupt, stack.eip);
+		print_serial("[CPU INT] Uninitialized Interrupt %d from 0x%x\n", interrupt, stack->eip);
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
+	if(cpu->esp < kernel_stack_base){
+        print_serial("[INT] WTF? The ESP is below the allowed base... INT #%d\n", interrupt);
+		print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
+    }
 	//print_serial("[Interrupt] Return\n");
 }
 

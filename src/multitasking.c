@@ -243,8 +243,11 @@ void select_stack(int next, int current){
 }
 
 void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id){
-    new_id = old_id;
+    //new_id = old_id;
     old_id = new_id;
+    if(new_task->registers.esp < kernel_stack_base){
+        print_serial("[TASK] WTF? The ESP is below the allowed base... TASK #%d\n", old_id);
+    }
     //Save current task's state
     old_task->registers.eip = most_recent_int_stack_state.eip;
     old_task->registers.eax = most_recent_int_cpu_state.eax;

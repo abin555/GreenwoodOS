@@ -13,9 +13,9 @@ extern kernel_stack_base
 %macro stack_switch 0
 	mov [saved_stack_ebp], ebp
 	mov [saved_stack_esp], esp
-;	mov ebp, [kernel_stack_base]
-;	add ebp, 0x80000-(1*4)
-;	mov esp, ebp
+	mov ebp, [kernel_stack_base]
+	add ebp, 0x40000-(1*4)
+	mov esp, ebp
 ;	sub esp, (2*4)
 
 %endmacro
@@ -53,8 +53,8 @@ common_interrupt_handler:
 	;Call C function handler
 	call interrupt_handler
 
-;	mov ebp, [saved_stack_ebp]
-;	mov esp, [saved_stack_esp]
+	mov ebp, [saved_stack_ebp]
+	mov esp, [saved_stack_esp]
 
 	;restore registers
 	pop eax
@@ -68,7 +68,7 @@ common_interrupt_handler:
 
 	;restore stack pointer
 	add esp, 8
-
+	sti
 	;return the system
 	iret
 
