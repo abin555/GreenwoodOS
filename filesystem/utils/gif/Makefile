@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -g -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector
+CFLAGS = -g -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -std=c17
 INCLUDE_PATH = -I ../../OS/libc/ -I./libgif
 LIBS = ../../OS/libc/libc.o
 AS = nasm
