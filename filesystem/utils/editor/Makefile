@@ -22,7 +22,8 @@ build: $(SRCS) $(START)
 #	i386-gwos-gcc $(START) $(SRCS) $(LIBS) -o $(PROG).elf
 #	i386-gwos-objcopy -O binary $(PROG).elf $(PROG).exe
 #	i386-gwos-objcopy --only-keep-debug $(PROG).elf $(PROG).sym
-
+	echo "nope"
+	
 clean:
 	rm $(SRCS)
 	rm $(START)
