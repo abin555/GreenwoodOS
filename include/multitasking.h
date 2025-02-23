@@ -65,7 +65,7 @@ extern struct task_state tasks[MAX_TASKS];
 extern bool task_lock;
 
 //Switch from active task to passed task pointer.
-void switch_to_task(struct task_state* old_task, struct task_state* new_task);
+void switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id);
 //Create new task instance and execute it.
 void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name);
 //Remove task from the run queue
@@ -86,5 +86,10 @@ int task_getFD(struct task_state *task);
 int task_allocFD(struct task_state *task, int sysfd);
 int task_getSysFD(struct task_state *task, int fd);
 void task_freeFD(struct task_state *task, int fd);
+int task_dupFD(struct task_state *task, int fd);
 
+int fork();
+int task_fork(struct task_state *task);
+void save_task_state(struct task_state *task, struct cpu_state cpu, struct stack_state stack);
+void tasking_setup_kernel_stack();
 #endif

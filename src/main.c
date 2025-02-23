@@ -166,7 +166,10 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     acpi_initFADT();
     acpi_parseMADT();
 
+    tasking_setup_kernel_stack();
+
     PCI_init();
+    
     kbd_init(0xFF);
     mouse_init();
     ps2_init();

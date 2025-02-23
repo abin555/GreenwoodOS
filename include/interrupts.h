@@ -67,9 +67,9 @@ struct cpu_state {
 	unsigned int ebx;
 	unsigned int ecx;
 	unsigned int edx;
-	unsigned int ebp; 
 	unsigned int esi; 
-	unsigned int edi; 
+	unsigned int edi;
+	unsigned int ebp;  
 	unsigned int esp;
 } __attribute__((packed));
 
@@ -99,10 +99,7 @@ extern void load_idt(unsigned int idt_address);
 extern struct cpu_state most_recent_int_cpu_state;
 extern struct stack_state most_recent_int_stack_state;
 extern bool override_state_return;
-void interrupt_handler(
-    struct cpu_state cpu, 
-    unsigned int interrupt, 
-    struct stack_state stack);  //add the number of the interrupt as an argument.
+void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack);  //add the number of the interrupt as an argument.
 extern unsigned int INT_currentInterrupt;
 void IDT_dump();
 

@@ -7,7 +7,7 @@ struct cpu_state exception_divide_by_zero(struct cpu_state cpu __attribute__((un
 	print_console(tasks[task_running_idx].console, "Divide by zero, terminating.\n");
 	//print_stack_trace(cpu.ebx, 10);
 	stop_task(task_running_idx);
-	switch_to_task(&tasks[task_running_idx], &tasks[0]);
+	switch_to_task(&tasks[task_running_idx], &tasks[0], task_running_idx, 0);
 	return cpu;
 }
 
@@ -38,7 +38,7 @@ struct cpu_state exception_3(struct cpu_state cpu __attribute__((unused)), struc
 	print_serial("Exception #3 from %s @ %x\n", tasks[task_running_idx].task_name, stack.eip);
 	//print_stack_trace(cpu.ebx, 10);
 	stop_task(task_running_idx);
-	switch_to_task(&tasks[task_running_idx], &tasks[0]);
+	switch_to_task(&tasks[task_running_idx], &tasks[0], task_running_idx, 0);
 	return cpu;
 }
 
