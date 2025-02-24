@@ -129,8 +129,8 @@ void kernel_task(int argc, char **argv){
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  
-
     task_lock = 0;
+    //while(1){}
     return;
 }
 
@@ -173,7 +173,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    timer_init(2);
+    timer_init(100);
 
     multitask_init();
 

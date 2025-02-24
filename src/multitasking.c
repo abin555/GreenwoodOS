@@ -74,8 +74,8 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].registers.esi = esi;
             
             tasks[i].stack_region = (uint32_t) task_stack_array[i];
-            tasks[i].registers.ebp = (uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4);
-            //tasks[i].registers.ebp = (uint32_t) TASK_STACK_VIRTUAL_BASE+TASK_STACK_SIZE-(3*4);
+            //tasks[i].registers.ebp = (uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4);
+            tasks[i].registers.ebp = (uint32_t) TASK_STACK_VIRTUAL_BASE+TASK_STACK_SIZE-(3*4);
             tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
 
             uint32_t *return_instruction = (uint32_t *) ((uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4));
@@ -244,7 +244,7 @@ void select_stack(int next, int current){
 
 void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id){
     //new_id = old_id;
-    old_id = new_id;
+    //old_id = new_id;
     if(new_task->registers.esp < (uint32_t) task_stack_base){
         print_serial("[TASK] WTF? The ESP is below the allowed base... TASK #%d\n", old_id);
     }
@@ -260,7 +260,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
     old_task->registers.esp = most_recent_int_cpu_state.esp;
 
     //Load next task's state
-    //select_stack(new_id, old_id);
+    select_stack(new_id, old_id);
     if(new_task->program_slot != -1){
         select_program(new_task->program_slot);
     }
@@ -274,6 +274,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
     most_recent_int_cpu_state.esi = new_task->registers.esi;
     most_recent_int_cpu_state.edi = new_task->registers.edi;
     most_recent_int_cpu_state.esp = new_task->registers.esp;
+    print_serial("New Task - ESP: 0x%x EBP: 0x%x\n", most_recent_int_cpu_state.esp, most_recent_int_cpu_state.ebp);
 }
 
 

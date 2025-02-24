@@ -173,7 +173,7 @@ void interrupt_handler(){
 	most_recent_int_cpu_state = *cpu;
 	most_recent_int_stack_state = *stack;
 	INT_currentInterrupt = interrupt;
-
+	print_serial("[INTERRUPT] -------- START -------- \n");
 	/*
 	uint32_t *funny_stack = (uint32_t *) saved_stack_esp;
 	for(int i = 0; i < 13; i++){
@@ -189,13 +189,22 @@ void interrupt_handler(){
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
+
+	register unsigned int esp asm("esp");
+	register unsigned int ebp asm("ebp");
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
-	print_serial("Saved ESP: 0x%x Saved EBP: 0x%x\n", saved_stack_esp, saved_stack_ebp);
+	print_serial("%d - Saved ESP: 0x%x Saved EBP: 0x%x (0x%x) C ESP: 0x%x C EBP: 0x%x (0x%x) EIP: 0x%x\n", interrupt, saved_stack_esp, saved_stack_ebp, saved_stack_ebp - saved_stack_esp, esp, ebp, ebp - esp, stack->eip);
 	if((uint32_t) interrupt_handlers[interrupt]){
 		interrupt_handlers[interrupt](cpu, stack);
 		
 		if(override_state_return == true){
+			print_serial("Override\n");
+			saved_stack_ebp = most_recent_int_cpu_state.esp;
+			saved_stack_esp = saved_stack_ebp+(4*10);
+			cpu = (struct cpu_state *) saved_stack_esp; 
+			stack = (struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int));
+
 			*stack = most_recent_int_stack_state;
 			*cpu = most_recent_int_cpu_state;
 			//stack = most_recent_int_stack_state;
@@ -216,14 +225,13 @@ void interrupt_handler(){
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
 	if(cpu->esp < (unsigned int) task_stack_base || cpu->ebp < (unsigned int) task_stack_base){
-		register unsigned int esp asm("esp");
-		register unsigned int ebp asm("ebp");
         print_serial("[INT] WTF? The ESP is below the allowed base... INT #%d\n", interrupt);
 		print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Kernel Stack: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, ebp, esp, stack->eip, kernel_stack_base);
     }
 	if(interrupt != 32){
 		print_serial("Interrupt %d\n", interrupt);
 	}
+	print_serial("[INTERRUPT] ------- FINISH -------- \n");
 	//print_serial("[Interrupt] Return\n");
 }
 
