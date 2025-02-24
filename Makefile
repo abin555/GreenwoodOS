@@ -52,7 +52,9 @@ OBJECTS = \
 		src/acpi.o \
 		src/apic.o \
 		src/vfs.o \
-		src/drivers/pipe.o
+		src/drivers/pipe.o \
+		src/audio/audio.o \
+		src/drivers/ac97.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \

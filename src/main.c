@@ -28,6 +28,7 @@
 #include "acpi.h"
 #include "apic.h"
 #include "vfs.h"
+#include "audio.h"
 
 extern void zig_test();
 
@@ -58,6 +59,7 @@ void kernel_task(int argc, char **argv){
     struct task_state *kernel_task = &tasks[task_running_idx];
 
     //ethernet_demo();
+    //audio_init();
 
 
     struct WINDOW *kernel_win = window_open("KERNEL", false);
@@ -84,6 +86,9 @@ void kernel_task(int argc, char **argv){
 
     zig_test();
 
+    audio_init();
+
+    
     int fd_test = vfs_open("A/test.txt\0", VFS_FLAG_READ | VFS_FLAG_WRITE);
     print_serial("[VFS] opened fd %d\n", fd_test);
     if(fd_test != -1){
@@ -126,6 +131,16 @@ void kernel_task(int argc, char **argv){
 
     vfs_close(pipe_read);
     vfs_close(pipe_write);
+    
+
+    int wav_fd = vfs_open("A/Audio/Macintosh.mp3\0", VFS_FLAG_READ);
+    if(wav_fd != -1){
+        int wav_size = vfs_seek(wav_fd, 0, 2);
+        vfs_seek(wav_fd, 0, 0);
+        void *file_buf = (void*) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(wav_size), wav_size, 0, OTHER));
+        vfs_read(wav_fd, file_buf, wav_size);
+    }
+
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  

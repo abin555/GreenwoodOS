@@ -19,6 +19,8 @@ extern struct timer_function timer_attached_functions[0xFF];
 
 void timer_init(uint32_t frequency);
 void timer_attach(int divisor, void* callback);
+void timer_detach(void *callback);
 struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused)));
+void wait(int ticks);
 
 #endif

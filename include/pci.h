@@ -98,6 +98,7 @@ uint16_t PCI_getDeviceClass(uint16_t bus, uint16_t device, uint16_t function);
 uint8_t PCI_getDeviceProgIF(uint16_t bus, uint16_t device, uint16_t function);
 uint8_t PCI_getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function);
 uint32_t PCI_getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint16_t bar);
+void pci_enable_io_busmastering(uint32_t bus, uint32_t device, uint32_t function);
 
 void PCI_load_BAR(struct PCI_driver *driver);
 #endif

@@ -1,6 +1,7 @@
 #include "pci.h"
 #include "hda.h"
 #include "ethernet.h"
+#include "audio.h"
 
 
 int PCI_numDevices;
@@ -97,6 +98,13 @@ void PCI_initDevice(struct PCI_device *pdev){
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "Ethernet";
 			pdriver->init_driver = ethernet_init;
+			goto generic_installation;
+			break;
+		case 0x0401:
+			print_serial("[PCI Device] AC97 Audio Identified\n");
+			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
+			pdriver->name = "Audio";
+			pdriver->init_driver = audio_driver_init;
 			goto generic_installation;
 			break;
 	}
@@ -200,6 +208,10 @@ void PCI_write_dword(uint32_t bus, uint32_t slot, uint32_t device, uint32_t offs
         PCI_write_byte(bus, slot, device, offset+0, (value & 0xFF));
         PCI_write_byte(bus, slot, device, offset+1, (value >> 8));
     }
+}
+
+void pci_enable_io_busmastering(uint32_t bus, uint32_t device, uint32_t function) {
+ PCI_write_dword(bus, device, function, 0x04, ((PCI_read_dword(bus, device, function, 0x04) & ~(1<<10)) | (1<<2) | (1<<0))); //enable interrupts, enable bus mastering, enable IO space
 }
 
 uint16_t PCI_getVendorID(uint16_t bus, uint16_t device, uint16_t function){
