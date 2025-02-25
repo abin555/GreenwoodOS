@@ -165,7 +165,6 @@ struct ethernet_driver *rtl8139_init(struct PCI_driver *driver){
 
     ether->io_base = driver->BAR[0] & (~0x3);
     ether->mem_base = driver->BAR[0] & (~0xf);
-    MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
 
     print_serial("[RTL8139] Use %s based access (base: 0x%x)\n", (ether->bar_type) ? "mem" : "port", (ether->bar_type != 0) ? ether->io_base : ether->mem_base);
 

@@ -54,8 +54,8 @@ OBJECTS = \
 		src/vfs.o \
 		src/drivers/pipe.o \
 		src/audio/audio.o \
-		src/drivers/ac97.o
-		
+		src/drivers/ac97.o \
+		src/audio/wav.o 
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I./src/audio/ -I. -masm=intel -g -c

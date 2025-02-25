@@ -29,6 +29,7 @@
 #include "apic.h"
 #include "vfs.h"
 #include "audio.h"
+#include "wav.h"
 
 extern void zig_test();
 
@@ -59,7 +60,7 @@ void kernel_task(int argc, char **argv){
     struct task_state *kernel_task = &tasks[task_running_idx];
 
     //ethernet_demo();
-    //audio_init();
+    audio_init();
 
 
     struct WINDOW *kernel_win = window_open("KERNEL", false);
@@ -132,15 +133,17 @@ void kernel_task(int argc, char **argv){
     vfs_close(pipe_read);
     vfs_close(pipe_write);
     
-
-    int wav_fd = vfs_open("A/Audio/Macintosh.mp3\0", VFS_FLAG_READ);
+    
+    int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
     if(wav_fd != -1){
-        int wav_size = vfs_seek(wav_fd, 0, 2);
+        int wav_size = vfs_seek(wav_fd, 0, 2) / 4;
         vfs_seek(wav_fd, 0, 0);
         void *file_buf = (void*) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(wav_size), wav_size, 0, OTHER));
         vfs_read(wav_fd, file_buf, wav_size);
+        audio_set_volume(100);
+        wav_play(wav_read_info(file_buf, wav_size), wav_size);
     }
-
+    
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //window_close(kernel_win);  
@@ -166,12 +169,12 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-    enable_apic();
+    //enable_apic();
 
 	fb_init(GRUB_tagfb);
 
     alloc_init();
-    
+    /*
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
     }
@@ -180,19 +183,27 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
+    */
 
-    tasking_setup_kernel_stack();
+    //tasking_setup_kernel_stack();
 
     PCI_init();
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     
     kbd_init(0xFF);
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     mouse_init();
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     ps2_init();
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     timer_init(2);
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 
     multitask_init();
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     multitask_start();
 
     while(1){}

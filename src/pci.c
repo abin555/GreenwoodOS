@@ -74,6 +74,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 					break;
 			}
 			print_serial("\n");
+			break;
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "USB Device";
 			pdriver->init_driver = NULL;
@@ -88,6 +89,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 			break;
 		case 0x0403:
 			print_serial("[PCI Device] Intel High Definition Audio Identified\n");
+			break;
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "Intel HDA";
 			pdriver->init_driver = hda_init;
@@ -95,6 +97,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 			break;
 		case 0x0200:
 			print_serial("[PCI Device] Ethernet Identified\n");
+			break;
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "Ethernet";
 			pdriver->init_driver = ethernet_init;
@@ -123,10 +126,13 @@ void PCI_initDevice(struct PCI_device *pdev){
 	for(int i = 0; i < 6; i++){
 		print_serial("[PCI BARs] 0x%x\n", pdriver->BAR[i]);
 	}
-	
+
 	PCI_drivers[PCI_numDrivers] = pdriver;
 	print_serial("[PCI Driver] Added Driver ID 0x%x\n", PCI_numDrivers);
 	PCI_numDrivers++;
+
+	print_serial("[PCI BAR1] 0x%x\n", pdriver->BAR[1]);
+    print_serial("[PCI0 BAR1] 0x%x\n", (PCI_drivers[0] != NULL) ? PCI_drivers[0]->BAR[1] : 0x999);
 }
 
 uint8_t PCI_read_byte(uint32_t bus, uint32_t slot, uint32_t device, uint32_t offset){

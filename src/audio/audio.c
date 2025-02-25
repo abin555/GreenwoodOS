@@ -15,7 +15,7 @@ struct sound_buffer_refilling_info_t *sound_buffer_refilling_info;
 bool audio_assign_driver(struct audio_driver *driver) {
     if(driver == NULL) return false;
     for (int i = 0; i < 4; i++) {
-        if (!audio_drivers[i]) {
+        if (audio_drivers[i] == NULL) {
             audio_drivers[i] = driver;
             print_serial("[AUDIO] Assigned audio driver to interface %d\n", i);
             return true;
@@ -58,7 +58,7 @@ void audio_init(){
 }
 
 void audio_set_volume(uint8_t volume){
-    print_serial("[AUDIO] Set volume to %d\n", volume);
+    print_serial("[AUDIO] Set volume to %d (Dev %d)\n", volume, selected_dev);
     if(selected_dev != -1){
         if(audio_drivers[selected_dev]->deviceType == AUDIO_AC97){
             ac97_set_volume(audio_drivers[selected_dev], volume);
@@ -118,6 +118,7 @@ void audio_play_refilling(uint8_t *source, uint32_t source_len, uint32_t pcmFull
 }
 
 void task_refill_sound_buffer(){
+    //print_serial("[AUDIO] Refilling Buffer\n");
     // calculate how many bytes were played
     if (sound_buffer_refilling_info->actually_playing_buffer == SOUND_BUFFER_0){
         if (audio_get_actual_stream_position() < sound_buffer_refilling_info->buffer_size){
@@ -152,10 +153,12 @@ void task_refill_sound_buffer(){
     // fill buffer with new data
     if (sound_buffer_refilling_info->actually_playing_buffer == sound_buffer_refilling_info->last_filled_buffer){
         if (sound_buffer_refilling_info->last_filled_buffer == SOUND_BUFFER_0){
+            print_serial("[AUDIO] Fill A\n");
             sound_buffer_refilling_info->fill_buffer((uint8_t *)((uint32_t)pcm_data + sound_buffer_refilling_info->buffer_size));
             sound_buffer_refilling_info->last_filled_buffer = SOUND_BUFFER_1;
         }
         else{
+            print_serial("[AUDIO] Fill B\n");
             sound_buffer_refilling_info->fill_buffer(pcm_data);
             sound_buffer_refilling_info->last_filled_buffer = SOUND_BUFFER_0;
         }

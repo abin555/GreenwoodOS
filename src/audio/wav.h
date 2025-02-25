@@ -21,6 +21,23 @@ struct WAV_header {
     uint16_t bitsPerSample;
 };
 
-void play_wav(void *wav_file_buffer);
+struct WAV_audio {
+    struct WAV_header header;
+    
+    uint32_t pcm_start;
+    uint32_t pcm_len;
+    uint8_t pcm_num_channels;
+    uint16_t sample_rate;
+    uint8_t bits_per_sample;
+
+    uint32_t len_out_data;
+    uint16_t output_sample_rate;
+}__attribute__((packed));
+
+extern struct WAV_audio *playing_audio;
+
+struct WAV_audio *wav_read_info(uint8_t *wav_memory, uint32_t length);
+uint32_t wav_play(struct WAV_audio *wav, uint32_t offset);
+void wav_refill_buffer(uint8_t *buffer);
 
 #endif
