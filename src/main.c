@@ -174,6 +174,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 	fb_init(GRUB_tagfb);
 
     alloc_init();
+    
     /*
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
@@ -184,26 +185,20 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     acpi_initFADT();
     acpi_parseMADT();
     */
+    
 
     //tasking_setup_kernel_stack();
 
     PCI_init();
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     
     kbd_init(0xFF);
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     mouse_init();
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     ps2_init();
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     timer_init(2);
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 
     multitask_init();
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
     multitask_start();
 
     while(1){}

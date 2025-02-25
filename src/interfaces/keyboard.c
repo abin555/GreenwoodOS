@@ -3,16 +3,11 @@
 char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size){
-	print_serial("[KBD] Init\n");
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 	keyboard_buffer_size = buffer_size;
 	keyboard_KEYBuffer = (uint8_t *) malloc(keyboard_buffer_size);
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 	memset(keyboard_KEYBuffer, 0, keyboard_buffer_size);
 	keyboard_ASCIIBuffer = (char *) malloc(keyboard_buffer_size);
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 	memset(keyboard_ASCIIBuffer, 0, keyboard_buffer_size);
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
 	KBD_scancode_buffer_idx = 0;
 	KBD_ascii_buffer_idx = 0;
 	KBD_last_key_idx = 0;
@@ -22,8 +17,6 @@ void kbd_init(uint32_t buffer_size){
 	KBD_flags.release = 0;
 	KBD_flags.backspace = 0;
 	KBD_flags.special = 0;
-    print_serial("[PCI0 BAR1] 0x%x\n", PCI_drivers[0]->BAR[1]);
-	print_serial("[KBD] Init Complete\n");
 }
 
 void kbd_callEventHandler(unsigned char ascii){
