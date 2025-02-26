@@ -133,7 +133,7 @@ void kernel_task(int argc, char **argv){
     vfs_close(pipe_read);
     vfs_close(pipe_write);
     
-    
+    /*
     int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
     if(wav_fd != -1){
         int wav_size = vfs_seek(wav_fd, 0, 2) / 4;
@@ -143,6 +143,7 @@ void kernel_task(int argc, char **argv){
         audio_set_volume(100);
         wav_play(wav_read_info(file_buf, wav_size), wav_size);
     }
+    */
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
