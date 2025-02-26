@@ -170,7 +170,7 @@ void ac97_set_volume(struct audio_driver *audio, uint8_t volume){
     
     if(ac97->selected_output==AC97_SPEAKER_OUTPUT) {
         ac97_set_volume_in_register(audio, AC97_NAM_IO_MASTER_VOLUME, ac97->aux_out_number_of_volume_steps, volume);
-        print_serial("[AC97] Speaker Volume set to %d\n", volume);
+        print_serial("[AC97] Speaker Volume set to %d %d\n", volume);
     }
     else if(ac97->selected_output==AC97_HEADPHONE_OUTPUT) {
         ac97_set_volume_in_register(audio, AC97_NAM_IO_AUX_OUT_VOLUME, AC97_SPEAKER_OUTPUT_NUMBER_OF_VOLUME_STEPS, volume);
@@ -262,8 +262,9 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
     outdw(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_BUFFER_BASE_ADDRESS, (uint32_t) ac97->buffer_memory_pointer);
 
     // fill buffer entries
-    uint32_t sound_memory = (uint32_t)pcm_data;
+    uint32_t sound_memory = get_physical((uint32_t)pcm_data);
     uint32_t sound_length = (sound_buffer_refilling_info->buffer_size * 2);
+    print_serial("[AC97] Sound length is %d\n", sound_length);
     for (uint32_t i = 0; i < 32; i++)
     {
         if (sound_length > 0x2000 * 2)
@@ -272,29 +273,33 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
             ac97->buffer_memory_pointer[i].number_of_samples = 0x2000;
             sound_memory += 0x2000 * 2;
             sound_length -= 0x2000 * 2;
+            print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
         }
         else
         {
             ac97->buffer_memory_pointer[i].sample_memory = sound_memory;
             ac97->buffer_memory_pointer[i].number_of_samples = ((sound_length / 2) & 0xFFFE);
+            print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
             break;
         }
     }
+
+    print_serial("[AC97] Start stream position: 0x%x\n", ac97_get_actual_stream_position(audio));
 
     // clear status
     outports(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_STATUS, 0x1C);
 
     // start streaming
-    outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL, 0x5);
+    outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL, 0x1);
 
     // add task for playing buffer in loop
-    timer_attach(1, task_ac97_play_buffer_in_loop);
+    timer_attach(10, task_ac97_play_buffer_in_loop);
 }
 
 void task_ac97_play_buffer_in_loop() {
     struct audio_driver *audio = audio_drivers[selected_dev];
     if(audio == NULL || audio->deviceType != AUDIO_AC97) return;
-    print_serial("[AC97] Playing\n");
+    //print_serial("[AC97] Playing\n");
     //struct AC97_driver *ac97 = audio->device.ac97;
 
     //update Last Valid Entry register for all entries to be valid
@@ -307,15 +312,17 @@ uint32_t ac97_get_actual_stream_position(struct audio_driver *audio){
     uint32_t number_of_processed_bytes = 0;
 
     //add already played buffers
-    for(uint32_t i=0; i< inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY); i++) {
+    uint32_t current_entry = inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY);
+    for(uint32_t i=0; i< current_entry; i++) {
         number_of_processed_bytes += ac97->buffer_memory_pointer[i].number_of_samples*2;
     }
-
+    uint32_t current_entry_position = indw(audio->nabm_base + 0x8);
+    //print_serial("[AC97] Current Entry is %d Current Position is %d\n", current_entry, current_entry_position);
     //add actual entry position
-    number_of_processed_bytes += (ac97->buffer_memory_pointer[inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY)].number_of_samples*2 - indw(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENT_ENTRY_POSITION)*2);
+    number_of_processed_bytes += (ac97->buffer_memory_pointer[current_entry].number_of_samples*2 - current_entry_position*2);
 
 
-    print_serial("[AC97] Stream Position: %d\n", number_of_processed_bytes);
+    //print_serial("[AC97] Stream Position: 0x%x\n", number_of_processed_bytes);
     return number_of_processed_bytes;
 }
 

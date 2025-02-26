@@ -92,6 +92,22 @@ int ser_printDecimal(int data){
     return idx;
 }
 
+unsigned int ser_printUDecimal(unsigned int data){
+    write_serial('U');
+    unsigned int idx = 0;
+    unsigned int pow = 1;
+    while(pow * 10 <= data)
+        pow *= 10;
+    while(pow != 0){
+        unsigned int d = data / pow;
+        write_serial((char)((int)'0' + d));
+        data = data - d * pow;
+        pow /= 10;
+        idx++;
+    }
+    return idx;
+}
+
 int ser_printHex(unsigned int data, int setlength){
     for(int i = (setlength ? setlength : 7); i >= 0; i--){
         write_serial(quadToHex((data >> 4*i) & 0xF));
@@ -196,6 +212,10 @@ void print_serial(char str[], ...){
                     break;
                 case 'd':
                   ser_printDecimal(va_arg(listpd, int));
+                  break;
+                case 'u':
+                  ser_printUDecimal(va_arg(listpd, unsigned int));
+                  break;
             }
         }
         else{

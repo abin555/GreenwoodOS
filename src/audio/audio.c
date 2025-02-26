@@ -143,7 +143,7 @@ void task_refill_sound_buffer(){
 
     // if is everything played, stop sound
     if (sound_buffer_refilling_info->played_bytes >= sound_buffer_refilling_info->size_of_full_pcm_output_in_bytes){
-        audio_stop();
+        //audio_stop();
         sound_buffer_refilling_info->played_bytes = sound_buffer_refilling_info->size_of_full_pcm_output_in_bytes;
     }
 

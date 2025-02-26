@@ -133,17 +133,17 @@ void kernel_task(int argc, char **argv){
     vfs_close(pipe_read);
     vfs_close(pipe_write);
     
-    /*
+    
     int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
     if(wav_fd != -1){
-        int wav_size = vfs_seek(wav_fd, 0, 2) / 4;
+        int wav_size = vfs_seek(wav_fd, 0, 2);
         vfs_seek(wav_fd, 0, 0);
         void *file_buf = (void*) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(wav_size), wav_size, 0, OTHER));
         vfs_read(wav_fd, file_buf, wav_size);
-        audio_set_volume(100);
-        wav_play(wav_read_info(file_buf, wav_size), wav_size);
+        audio_set_volume(50);
+        wav_play(wav_read_info(file_buf, wav_size), wav_size / 4);
     }
-    */
+    
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
