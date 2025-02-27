@@ -110,8 +110,8 @@ void wav_refill_buffer(uint8_t *buffer)
 {
     // clear buffer
     //clear_memory((uint32_t)buffer, sound_buffer_refilling_info->buffer_size);
-    memset(buffer, 0, sound_buffer_refilling_info->buffer_size);
-    print_serial("[WAV] Refilling Buffer\n");
+    //memset(buffer, 0, sound_buffer_refilling_info->buffer_size);
+    //print_serial("[WAV] Refilling Buffer\n");
 
     // exit if we already converted all file
     if (sound_buffer_refilling_info->source_data_length == 0)
@@ -131,6 +131,8 @@ void wav_refill_buffer(uint8_t *buffer)
     {
         number_of_frames_to_convert = playing_audio->sample_rate;
     }
+
+    print_serial("[WAV] There are %d frames to convert\n", number_of_frames_to_convert);
 
     for (uint32_t i = 0; i < number_of_frames_to_convert; i++)
     {

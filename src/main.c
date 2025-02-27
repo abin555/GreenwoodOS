@@ -140,8 +140,8 @@ void kernel_task(int argc, char **argv){
         vfs_seek(wav_fd, 0, 0);
         void *file_buf = (void*) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(wav_size), wav_size, 0, OTHER));
         vfs_read(wav_fd, file_buf, wav_size);
-        audio_set_volume(50);
-        wav_play(wav_read_info(file_buf, wav_size), wav_size / 4);
+        audio_set_volume(100);
+        wav_play(wav_read_info(file_buf, wav_size), 0);
     }
     
     

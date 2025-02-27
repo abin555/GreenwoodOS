@@ -114,7 +114,7 @@ void audio_play_refilling(uint8_t *source, uint32_t source_len, uint32_t pcmFull
         }
     }
 
-    timer_attach(10, task_refill_sound_buffer);
+    timer_attach(1, task_refill_sound_buffer);
 }
 
 void task_refill_sound_buffer(){
@@ -143,7 +143,7 @@ void task_refill_sound_buffer(){
 
     // if is everything played, stop sound
     if (sound_buffer_refilling_info->played_bytes >= sound_buffer_refilling_info->size_of_full_pcm_output_in_bytes){
-        //audio_stop();
+        audio_stop();
         sound_buffer_refilling_info->played_bytes = sound_buffer_refilling_info->size_of_full_pcm_output_in_bytes;
     }
 
@@ -153,12 +153,12 @@ void task_refill_sound_buffer(){
     // fill buffer with new data
     if (sound_buffer_refilling_info->actually_playing_buffer == sound_buffer_refilling_info->last_filled_buffer){
         if (sound_buffer_refilling_info->last_filled_buffer == SOUND_BUFFER_0){
-            print_serial("[AUDIO] Fill A\n");
+            //print_serial("[AUDIO] Fill A\n");
             sound_buffer_refilling_info->fill_buffer((uint8_t *)((uint32_t)pcm_data + sound_buffer_refilling_info->buffer_size));
             sound_buffer_refilling_info->last_filled_buffer = SOUND_BUFFER_1;
         }
         else{
-            print_serial("[AUDIO] Fill B\n");
+            //print_serial("[AUDIO] Fill B\n");
             sound_buffer_refilling_info->fill_buffer(pcm_data);
             sound_buffer_refilling_info->last_filled_buffer = SOUND_BUFFER_0;
         }

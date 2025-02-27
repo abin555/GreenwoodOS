@@ -279,6 +279,7 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
         {
             ac97->buffer_memory_pointer[i].sample_memory = sound_memory;
             ac97->buffer_memory_pointer[i].number_of_samples = ((sound_length / 2) & 0xFFFE);
+            //ac97->buffer_memory_pointer[i].interrupt_on_completion = 1;
             print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
             break;
         }
@@ -293,7 +294,7 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
     outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL, 0x1);
 
     // add task for playing buffer in loop
-    timer_attach(10, task_ac97_play_buffer_in_loop);
+    timer_attach(1, task_ac97_play_buffer_in_loop);
 }
 
 void task_ac97_play_buffer_in_loop() {
