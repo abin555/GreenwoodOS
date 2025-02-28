@@ -70,7 +70,7 @@ void kernel_task(int argc, char **argv){
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
 
-    //ethernet_demo();
+    ethernet_demo();
     audio_init();
 
 
@@ -151,6 +151,7 @@ void kernel_task(int argc, char **argv){
         n = vfs_read(sysfs_test, &audio, sizeof(audio));
         print_serial("Read %d bytes from sysfile\n", n);
         audio.set_volume(50);
+        /*
         int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
         int wav_size = vfs_seek(wav_fd, 0, 2);
         wav_size = 44100*8;
@@ -159,11 +160,20 @@ void kernel_task(int argc, char **argv){
         vfs_read(wav_fd, file_buf, wav_size);
         audio.wav_play(audio.wav_read(file_buf, wav_size), 0);
         vfs_close(wav_fd);
+        */
         //wait(500);
         //audio.stop();
     }
     vfs_close(sysfs_test);
     
+    int sysserial = vfs_open("-/dev/serial", VFS_FLAG_WRITE);
+    if(sysserial != -1){
+        char Testbuf[] = "\n\nSERIAL BUFFER TEST\n\n";
+        vfs_write(sysserial, Testbuf, sizeof(Testbuf));
+        vfs_write(sysserial, Testbuf, sizeof(Testbuf));
+        vfs_close(sysserial);
+    }
+
     /*
     int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
     if(wav_fd != -1){

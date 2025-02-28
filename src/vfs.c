@@ -145,6 +145,7 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     }
     else if(root->type == VFS_SYS){
         struct SysFS_Inode *sysinode = sysfs_find(root->fs.sysfs, path);
+        if(sysinode == NULL) return result;
         result.fs.sysfs = sysinode;
         result.isValid = 1;
         return result;
@@ -178,7 +179,9 @@ int vfs_open(char *path, int flags){
     struct VFS_Inode inode = vfs_followLink(root, path);
     inode.flags = flags;
     if(inode.isValid == 0){
-        print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
+        if(inode.drive != NULL){
+            print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
+        }
         goto fail;
     }
     int fd = vfs_allocFileD();
@@ -525,6 +528,7 @@ int vfs_write(int fd, void *buf, uint32_t nbytes){
             return vfs_writeExt2(file_idx, buf, nbytes);
             break;
         case VFS_SYS:
+            return sysfs_write(file_idx, buf, nbytes);
             break;
         case VFS_PIPE:
             return pipe_write(file_idx->inode.fs.pipe, buf, nbytes);

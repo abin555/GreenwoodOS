@@ -75,7 +75,7 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     return cdev;
 }
 
-void sysfs_setCallbacks(struct SysFS_Chardev *cdev, void (*write_callback)(void *, int offset, int nbytes), void (*read_callback)(void *, int offset, int nbytes)){
+void sysfs_setCallbacks(struct SysFS_Chardev *cdev, void (*write_callback)(void *, int offset, int nbytes, int *head), void (*read_callback)(void *, int offset, int nbytes, int *head)){
     if(cdev == NULL) return;
     cdev->write_callback = write_callback;
     cdev->read_callback = read_callback;
@@ -106,6 +106,29 @@ int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
     int i = 0;
     for(; i < nbytes && file->head < cdev->buf_size; i++){
         ((char *)buf)[i] = cdev->buf[file->head++];
+    }
+    if(cdev->read_callback != NULL){
+        cdev->read_callback(cdev, file->head-i, i, &file->head);
+    }
+    return i;
+}
+
+int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
+    print_serial("[SYSFS] Writing %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
+    if(file == NULL || buf == NULL || nbytes == 0) return 0;
+    if(file->inode.type != VFS_SYS) return 0;
+    
+    struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
+    if(sysfs->type != SysFS_Chardev) return 0;
+    struct SysFS_Chardev *cdev = sysfs->data.chardev;
+    if((cdev->perms & CDEV_WRITE) == 0) return 0;
+    
+    int i = 0;
+    for(; i < nbytes && file->head < cdev->buf_size; i++){
+        cdev->buf[file->head++] = ((char *)buf)[i];
+    }
+    if(cdev->write_callback != NULL){
+        cdev->write_callback(cdev, file->head-i, i, &file->head);
     }
     return i;
 }

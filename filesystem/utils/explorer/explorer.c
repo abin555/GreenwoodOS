@@ -235,6 +235,15 @@ void HandleSelection(char *work_buf, int sel){
             exec("/A/utils/gif/gif.exe", 2, arg);
             return;
         }
+        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".wav")){
+            char **arg = alloc(sizeof(char *) * 2);
+            arg[0] = 0x0;
+            arg[1] = alloc(dir.entries[sel+2].name_len);
+            for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
+            sel = -1;
+            exec("/A/utils/Music/music.exe", 2, arg);
+            return;
+        }
         else {
             char **arg = alloc(sizeof(char *) * 2);
             arg[0] = 0x0;

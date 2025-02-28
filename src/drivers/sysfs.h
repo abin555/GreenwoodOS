@@ -9,8 +9,8 @@ typedef enum {
 struct SysFS_Chardev {
     char *buf;
     int buf_size;
-    void (*write_callback)(void *, int offset, int nbytes);
-    void (*read_callback)(void *, int offset, int nbytes);
+    void (*write_callback)(void *, int offset, int nbytes, int *head);
+    void (*read_callback)(void *, int offset, int nbytes, int *head);
     CDEV_PERMS perms;
 };
 
@@ -37,11 +37,12 @@ int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child);
 struct SysFS_Inode *sysfs_mkdir(char *dirname);
 struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev);
 struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS perms);
-void sysfs_setCallbacks(struct SysFS_Chardev *cdev, void (*write_callback)(void *, int offset, int nbytes), void (*read_callback)(void *, int offset, int nbytes));
+void sysfs_setCallbacks(struct SysFS_Chardev *cdev, void (*write_callback)(void *, int offset, int nbytes, int *head), void (*read_callback)(void *, int offset, int nbytes, int *head));
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth);
 
 struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path);
 
 struct VFS_File;
 int sysfs_read(struct VFS_File *file, void *buf, int nbytes);
+int sysfs_write(struct VFS_File *file, void *buf, int nbytes);
 #endif
