@@ -140,7 +140,7 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
     print_serial("[SYSFS] Finding \"%s\" in \"%s\"\n", path, root->name);
     sysfs_debugTree(root, 0);
     if(path[0] == 0){
-        return NULL;
+        return root;
     }
 
     if(!strcmp(root->name, path)){
@@ -161,7 +161,7 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
     if(root->type == SysFS_Directory){
         for(int i = 0; i < root->data.dir.numChildren; i++){
             if(root->data.dir.children[i] == NULL) continue;
-            print_serial("[SYSFS] Checking #%d - %s\n", i, root->data.dir.children[i]->name);
+            print_serial("[SYSFS] Checking #%d - %s=%s\n", i, root->data.dir.children[i]->name, buf);
             if(!strcmp(buf, root->data.dir.children[i]->name)){
                 if(root->data.dir.children[i]->type == SysFS_Directory){
                     struct SysFS_Inode *inode_candidate = sysfs_find(root->data.dir.children[i], path+part_len+1);

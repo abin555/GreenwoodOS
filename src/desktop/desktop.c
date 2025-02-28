@@ -1,4 +1,6 @@
 #include "desktop.h"
+#include "vfs.h"
+#include "sysfs.h"
 
 #define BACKGROUND_FILE "A/Pictures/norway.tga\0"
 //#define BACKGROUND_FILE "A/image/bliss.tga\0"
@@ -8,8 +10,21 @@
 
 void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, struct WINDOW *window){
     if(bitmap.bitmap == NULL || window == NULL) return;
-    memfcpy(window->backbuffer, bitmap.bitmap, bitmap.width * bitmap.height * sizeof(uint32_t));
+    if(bitmap.width == window->width){
+        memfcpy(window->backbuffer, bitmap.bitmap, bitmap.width * bitmap.height * sizeof(uint32_t));
+    }
+    else{
+        for(uint32_t i = 0; i < bitmap.height; i++){
+            memfcpy(
+                window->backbuffer + i*window->width, 
+                bitmap.bitmap + i*bitmap.width,
+                bitmap.width * sizeof(uint32_t)
+            );
+        }
+    }
 }
+
+struct Bitmap background;
 
 int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
@@ -20,9 +35,24 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     set_schedule(ALWAYS);
     print_console(kernel_console, "Starting Desktop Environment!\n");
 
-    struct Bitmap background = loadBitmap(BACKGROUND_FILE);
+    background = loadBitmap(BACKGROUND_FILE);
     struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
     
+    struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
+    if(vfs_sysroot->type == VFS_SYS){
+        struct SysFS_Inode *sysfs = vfs_sysroot->fs.sysfs;
+        struct SysFS_Inode *desktopCDEV = sysfs_mkcdev(
+            "desktopBG",
+            sysfs_createCharDevice(
+                (char *) &background,
+                sizeof(background),
+                CDEV_READ | CDEV_WRITE
+            )
+        );
+        sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
+        sysfs_debugTree(sysfs, 0);        
+    }
+
     struct Icon icons[numIcons];
     memset(icons, 0, sizeof(struct Icon) * numIcons);
     
