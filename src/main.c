@@ -28,8 +28,11 @@
 #include "acpi.h"
 #include "apic.h"
 #include "vfs.h"
+#include "sysfs.h"
 #include "audio.h"
 #include "wav.h"
+#include "sysroot.h"
+#include "audio_cdev.h"
 
 extern void zig_test();
 
@@ -48,6 +51,14 @@ void kernel_task(int argc, char **argv){
 
     drive_enumerate();
     vfs_init();
+
+    struct SysFS_Inode *sysroot = sysroot_init();
+    sysfs_debugTree(sysroot, 0);
+
+    vfs_addSysRoot(
+        sysroot,
+        '-'
+    );
 
     window_init();
     console_init();
@@ -132,8 +143,28 @@ void kernel_task(int argc, char **argv){
 
     vfs_close(pipe_read);
     vfs_close(pipe_write);
+
+    int sysfs_test = vfs_open("-/sys/audio", VFS_FLAG_READ | VFS_FLAG_WRITE);
+    if(sysfs_test != -1){
+        print_serial("Found sysfile!\n");
+        struct AudioInterface audio;
+        n = vfs_read(sysfs_test, &audio, sizeof(audio));
+        print_serial("Read %d bytes from sysfile\n", n);
+        audio.set_volume(50);
+        int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
+        int wav_size = vfs_seek(wav_fd, 0, 2);
+        wav_size = 44100*8;
+        vfs_seek(wav_fd, 0, 0);
+        void *file_buf = (void*) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(wav_size), wav_size, 0, OTHER));
+        vfs_read(wav_fd, file_buf, wav_size);
+        audio.wav_play(audio.wav_read(file_buf, wav_size), 0);
+        vfs_close(wav_fd);
+        //wait(500);
+        //audio.stop();
+    }
+    vfs_close(sysfs_test);
     
-    
+    /*
     int wav_fd = vfs_open("A/Audio/Macintosh.wav\0", VFS_FLAG_READ);
     if(wav_fd != -1){
         int wav_size = vfs_seek(wav_fd, 0, 2);
@@ -143,7 +174,7 @@ void kernel_task(int argc, char **argv){
         audio_set_volume(100);
         wav_play(wav_read_info(file_buf, wav_size), 0);
     }
-    
+    */
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  

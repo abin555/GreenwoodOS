@@ -36,6 +36,7 @@ struct VFS_Inode {
     int flags;
 
     struct DRIVE *drive;
+    char nonDriveLetter;
 };
 
 struct VFS_File {
@@ -46,6 +47,7 @@ struct VFS_File {
 
 void vfs_init();
 void vfs_addRoot(struct DRIVE *drive);
+void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter);
 
 struct VFS_Inode vfs_followLink(struct VFS_Inode *parent, char *path);
 

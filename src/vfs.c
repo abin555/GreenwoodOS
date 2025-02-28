@@ -61,6 +61,27 @@ void vfs_addRoot(struct DRIVE *drive){
     print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", drive->identity, label);
 }
 
+void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter){
+    if(VFS.num_inodes == VFS_maxRootInodes) return;
+    if(sysfs == NULL) return;
+
+    char *label;
+
+    struct VFS_Inode *inode = &VFS.inodes[VFS.num_inodes++];
+    inode->isRoot = 1;
+    inode->root = inode;
+    inode->isValid = 1;
+    
+    inode->drive = NULL;
+    inode->nonDriveLetter = letter;
+    inode->type = VFS_SYS;
+    inode->fs.sysfs = sysfs;
+
+    label = "SYSFS";  
+
+    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->nonDriveLetter, label);
+}
+
 int vfs_allocFileD(){
     for(int i = 0; i < VFS_maxFiles; i++){
         if(VFS_fileTable[i].status == 1){
@@ -78,7 +99,10 @@ void vfs_freeFileD(int fd){
 
 struct VFS_Inode *vfs_findRoot(char driveLetter){
     for(int i = 0; i < VFS.num_inodes; i++){
-        if(VFS.inodes[i].drive->identity == driveLetter){
+        if(
+            (VFS.inodes[i].type != VFS_SYS && VFS.inodes[i].drive->identity == driveLetter) ||
+            (VFS.inodes[i].type == VFS_SYS && VFS.inodes[i].nonDriveLetter == driveLetter)
+        ){
             return &VFS.inodes[i];
         }
     }
@@ -120,7 +144,10 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
         return result;
     }
     else if(root->type == VFS_SYS){
-
+        struct SysFS_Inode *sysinode = sysfs_find(root->fs.sysfs, path);
+        result.fs.sysfs = sysinode;
+        result.isValid = 1;
+        return result;
     }
     return result;
 }
@@ -138,7 +165,12 @@ int vfs_open(char *path, int flags){
     char driveLetter = path[0];
     path += 2;
     struct VFS_Inode *root = vfs_findRoot(driveLetter);
-    print_serial("[VFS] Drive root: %c\n", root->drive->identity);
+    if(root->drive != NULL){
+        print_serial("[VFS] Drive root: %c\n", root->drive->identity);
+    }
+    else{
+        print_serial("[VFS] Drive root: %c\n", root->nonDriveLetter);
+    }
     if(root == NULL){
         print_serial("[VFS] Unable to find root: \"%s\"\n", path);
         goto fail;
@@ -328,6 +360,7 @@ int vfs_read(int fd, void *buf, uint32_t nbytes){
             return vfs_readExt2(file_idx, buf, nbytes);
             break;
         case VFS_SYS:
+            return sysfs_read(file_idx, buf, nbytes);
             break;
         case VFS_PIPE:
             return pipe_read(file_idx->inode.fs.pipe, buf, nbytes);
