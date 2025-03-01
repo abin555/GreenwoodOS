@@ -111,6 +111,7 @@ int main(int argc, char** argv){
   }
 
   vp = vp_funcs->open(WIDTH, HEIGHT, argv[1]);
+  vp->transparent = 1;
   vp_buf = local_vp_buf;//requestRegion(WIDTH * HEIGHT * sizeof(uint32_t));
   vp_funcs->set_buffer(vp, vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
   vp_funcs->add_event_handler(vp, event_handler);
@@ -366,7 +367,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     if(event == VP_FOCUSED || event == VP_MAXIMIZE){
         set_schedule(ALWAYS);
     }
-    else if(event == VP_UNFOCUSED || event == VP_MINIMIZE){
+    else if(/*event == VP_UNFOCUSED ||*/ event == VP_MINIMIZE){
         set_schedule(NEVER);
     }
     else if(event == VP_EXIT){

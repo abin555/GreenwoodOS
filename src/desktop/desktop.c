@@ -26,6 +26,12 @@ void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, stru
 
 struct Bitmap background;
 
+void desktopbg_write_callback(void *cdev, int offset, int nbytes, int *head){
+    struct SysFS_Chardev *bg = cdev;
+    print_serial("[DESKTOP] Write to background of size %d at offset %d @ 0x%x\n", nbytes, offset, bg->buf);
+    *head = 0;
+}
+
 int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
@@ -49,6 +55,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 CDEV_READ | CDEV_WRITE
             )
         );
+        sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL);
         sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
         sysfs_debugTree(sysfs, 0);        
     }
@@ -184,6 +191,9 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
                     viewport_toggle_size(global_viewport_list->elements[i].vp);
             }
         }
+    }
+    else if(KBD_flags.ctrl && ascii == 'V'){
+        exec("/A/utils/vaporwave/vaporwave.exe", 0, NULL);
     }
     else if(global_viewport_list->elements[0].inUse){
         if(global_viewport_list->elements[0].vp == NULL) return;

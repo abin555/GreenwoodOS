@@ -14,10 +14,10 @@ int click = 0;
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     if(event == VP_FOCUSED || event == VP_MAXIMIZE){
-        set_schedule(ALWAYS);
+        //set_schedule(ALWAYS);
     }
     else if(event == VP_UNFOCUSED || event == VP_MINIMIZE){
-        set_schedule(NEVER);
+        //set_schedule(NEVER);
     }
     else if(event == VP_EXIT){
         dprint("Exit!\n");
@@ -64,13 +64,14 @@ int main(int argc, char **argv){
     close(vp_fd);
 
     struct Viewport *vp = vp_funcs.open(120, 300, "Music Player");
+    set_schedule(ALWAYS);
     running = 1;
     vp_funcs.add_event_handler(vp, event_handler);
     void *file_buf;
     int size;
     int music_fd = open(argv[1], O_READ);
     if(music_fd != -1){
-        size = lseek(music_fd, 0, 2) / 4;
+        size = lseek(music_fd, 0, 2) / 2;
         lseek(music_fd, 0, 0);
         file_buf = (void*) requestRegion(size);
         read(music_fd, file_buf, size);
@@ -82,12 +83,6 @@ int main(int argc, char **argv){
     }
     running = 1;
     stop = 0;
-
-    int mouse_held = 0;
-    vp->click_events_enabled = 1;
-    while(1){
-        if(vp->)
-    }
 
     set_schedule(NEVER);
     yield();

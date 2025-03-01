@@ -119,10 +119,16 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
     if(file->inode.type != VFS_SYS) return 0;
     
     struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
-    if(sysfs->type != SysFS_Chardev) return 0;
+    if(sysfs->type != SysFS_Chardev){
+        print_serial("[SYSFS] Wrong FS device\n");
+        return 0;
+    }
     struct SysFS_Chardev *cdev = sysfs->data.chardev;
-    if((cdev->perms & CDEV_WRITE) == 0) return 0;
-    
+    if((cdev->perms & CDEV_WRITE) == 0){
+        print_serial("[SYSFS] No write permission");
+        return 0;
+    };
+    print_serial("[SYSFS] Start Writing\n");
     int i = 0;
     for(; i < nbytes && file->head < cdev->buf_size; i++){
         cdev->buf[file->head++] = ((char *)buf)[i];

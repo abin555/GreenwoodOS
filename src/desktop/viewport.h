@@ -35,6 +35,7 @@ struct Viewport {
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 	bool click_events_enabled;
+    bool transparent;
 };
 
 #define MAX_VIEWPORTS 100

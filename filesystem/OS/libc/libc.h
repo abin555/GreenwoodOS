@@ -184,11 +184,12 @@ struct Viewport {
     int minimized_h;
     char *title;
     int owner_program_slot;
-	int owner_task_id;
-	char ascii;
+    int owner_task_id;
+    char ascii;
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 	bool click_events_enabled;
+    bool transparent;
 };
 
 struct ViewportFunctions {

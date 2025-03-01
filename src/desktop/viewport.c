@@ -24,6 +24,7 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.event_handler = NULL;
     viewport.ascii = '\0';
     viewport.click_events_enabled = false;
+    viewport.transparent = false;
     return viewport;
 }
 
@@ -367,19 +368,31 @@ void __attribute__ ((optimize("-O3"))) viewport_draw_buf(struct Viewport *viewpo
     uint32_t w = (uint32_t) viewport->loc.w;
     uint32_t h = (uint32_t) viewport->loc.h;
 
-    uint32_t wbytes = sizeof(uint32_t) * w;
-    uint32_t wy = y*window->width;
-
-    for(uint32_t ly = 0; ly < h; ly++){
-        uint32_t yoff = (ly)*window->width;
-        //uint32_t wyoff = yoff + wy;
-        memfcpy(window->backbuffer + wy + yoff + x, viewport->frontbuf + ly*w, wbytes);
-        /*
-        for(int lx = 0; lx < (int) w; lx++){
-            window->backbuffer[(y+ly)*window->width + (x+lx)] = viewport->frontbuf[ly*w+lx];
+    if(viewport->transparent){
+        uint32_t wy = y*window->width;
+        for(uint32_t ly = 0; ly < h; ly++){
+            uint32_t yoff = (ly)*window->width;
+            //uint32_t wyoff = yoff + wy;
+            //memfcpy(window->backbuffer + wy + yoff + x, viewport->frontbuf + ly*w, wbytes);
+            
+            for(uint32_t lx = 0; lx < w; lx++){
+                uint32_t color = *(viewport->frontbuf + ly*w + lx);
+                if(color){
+                    *(window->backbuffer + wy + yoff + x + lx) = color;
+                }
+            }
+            
         }
-        */
     }
+    else{
+        uint32_t wbytes = sizeof(uint32_t) * w;
+        uint32_t wy = y*window->width;
+        for(uint32_t ly = 0; ly < h; ly++){
+            uint32_t yoff = (ly)*window->width;
+            memfcpy(window->backbuffer + wy + yoff + x, viewport->frontbuf + ly*w, wbytes);
+        }
+    }
+    
     return;
 }
 

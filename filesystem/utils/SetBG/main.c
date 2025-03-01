@@ -41,6 +41,7 @@ int main(int argc, char **argv){
     tga_header_t *tga = (tga_header_t*) desktopBG.file;
     desktopBG.width = tga->w;
     desktopBG.height = tga->h;
+    lseek(desktop_bg_fd, 0, 0);
     write(desktop_bg_fd, &desktopBG, sizeof(desktopBG));
 
     close(desktop_bg_fd);
