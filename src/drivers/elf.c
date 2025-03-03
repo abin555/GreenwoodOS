@@ -1,11 +1,11 @@
 #include "elf.h"
 
-bool elf_check_file(struct FILE *file) {
-	int head = file->head;
-	fseek(file, 0);
+bool elf_check_file(int file) {
+	int head = vfs_seek(file, 0, 1);
+	vfs_seek(file, 0, 0);
 	Elf32_Ehdr hdr;
-	fcopy(file, (char *) &hdr, sizeof(Elf32_Ehdr));
-	fseek(file, head);
+	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
+	vfs_seek(file, head, 0);
 	//if(!hdr) return false;
 	if(hdr.e_ident[EI_MAG0] != ELFMAG0) {
 		print_serial("ELF Header EI_MAG0 incorrect.\n");
@@ -27,12 +27,12 @@ bool elf_check_file(struct FILE *file) {
 	return true;
 }
 
-bool elf_check_supported(struct FILE *file) {
-	int head = file->head;
-	fseek(file, 0);
+bool elf_check_supported(int file) {
+	int head = vfs_seek(file, 0, 1);
+	vfs_seek(file, 0, 0);
 	Elf32_Ehdr hdr;
-	fcopy(file, (char *) &hdr, sizeof(Elf32_Ehdr));
-	fseek(file, head);
+	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
+	vfs_seek(file, head, 0);
 
 	if(!elf_check_file(file)) {
 		print_serial("[ELF] Invalid ELF File.\n");

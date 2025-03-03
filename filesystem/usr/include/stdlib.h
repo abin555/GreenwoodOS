@@ -9,5 +9,12 @@ typedef long unsigned int size_t;
 void abort(void);
 void *malloc(size_t size);
 void free(void *);
+void *calloc(size_t n, size_t size);
+void *realloc(void  *ptr, size_t size);
+void *reallocarray(void *ptr, size_t n, size_t size);
+char *getenv(const char *name);
+int atoi(const char *nptr);
+int abs(int i);
+
 
 #endif

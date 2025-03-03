@@ -7,7 +7,7 @@
 #include "multitasking.h"
 #include "program.h"
 #include "allocator.h"
-#include "drive.h"
+#include "vfs.h"
 
 typedef uint16_t Elf32_Half;	// Unsigned half int
 typedef uint32_t Elf32_Off;	// Unsigned offset
@@ -64,8 +64,8 @@ enum Elf_Type {
 # define EM_386		(3)  // x86 Machine Type
 # define EV_CURRENT	(1)  // ELF Current Version
 
-bool elf_check_file(struct FILE *file);
-bool elf_check_supported(struct FILE *file);
+bool elf_check_file(int file);
+bool elf_check_supported(int file);
 
 
 #endif

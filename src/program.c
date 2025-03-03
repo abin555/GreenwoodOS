@@ -34,19 +34,22 @@ void exec(char *filename, int argc, char **argv){
 	if(slot == -1) return;
 	print_serial("Loading Program %s to slot %d\n", filename, slot);
 
-	struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
-	if(file == NULL) return;
+	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
+	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);
+	int size = vfs_seek(file, 0, 2);
+	vfs_seek(file, 0, 0);
+	if(file == -1) return;
 	if(elf_check_supported(file)){
 		print_serial("[PROGRAM] Is ELF Format!\n");
-		fcopy(file, (char *) (program_region_virt_base + 0x400000*slot), fsize(file));
+		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
 		//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
-		fclose(file);
-		start_task((void *)0x1000, slot, argc, argv, filename);
+		vfs_close(file);
+		start_task((void *)0x0074, slot, argc, argv, filename);
 	}
 	else {
-		fseek(file, 0);
-		fcopy(file, (char *) (program_region_virt_base + 0x400000*slot), fsize(file));	
-		fclose(file);
+		vfs_seek(file, 0, 0);
+		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);	
+		vfs_close(file);
 		start_task(0, slot, argc, argv, filename);
 	}
 	print_serial("[EXEC] Program started!\n\n");
