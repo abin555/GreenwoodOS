@@ -2,9 +2,10 @@ CC = i386-elf-gcc
 AS = i386-elf-as
 CFLAGS = -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
 INCLUDE_PATH = -I../OS/libc/ -I./include
-LIBS = ../OS/libc/libc.o
+LIBS =
 
 C_FILES := $(wildcard ./src/*.c)
+C_FILES += $(wildcard ./src/sys/*.c)
 SRCS := $(patsubst %.c,%.o,$(C_FILES))
 
 output_lib := libc
@@ -19,4 +20,4 @@ build: clean $(SRCS)
 	ar -rcs lib/$(output_lib).a $(SRCS) $(LIBS)
 
 clean:
-	-rm $(SRCS) $(output_lib).a
+	-rm $(SRCS) lib/$(output_lib).a

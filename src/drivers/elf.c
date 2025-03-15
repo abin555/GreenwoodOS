@@ -107,8 +107,10 @@ bool elf_load(int file, void *buffer){
 	Elf32_Ehdr hdr;
 	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
 
-	for(int i = 0; i < hdr.e_shnum; i++){
-		elf_load_section(file, hdr, i, buffer);
+	for(int i = 1; i < hdr.e_shnum; i++){
+		if(!elf_load_section(file, hdr, i, buffer)){
+			break;
+		}
 	}
 	return true;
 }
