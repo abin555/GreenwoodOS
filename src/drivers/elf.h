@@ -83,8 +83,8 @@ bool elf_check_file(Elf32_Ehdr hdr);
 bool elf_check_supported(int file);
 uint32_t elf_get_entry_addr(int file);
 int elf_get_section_idx(int file, char *section);
-bool elf_load_section(int file, int sectionIdx, void *buffer);
-
+bool elf_load_section(int file, Elf32_Ehdr hdr, int sectionIdx, void *buffer);
+bool elf_load(int file, void *buffer);
 
 
 #endif

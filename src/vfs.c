@@ -214,7 +214,7 @@ void vfs_close(int fd){
 int vfs_readExt2(struct VFS_File *file, void *buf, uint32_t nbytes){
     struct EXT2_FS *ext2 = file->inode.drive->format_info.ext2;
     struct EXT2_Inode *inode = file->inode.fs.ext2;
-    print_serial("[VFS] [EXT2] Reading file\n");
+    //print_serial("[VFS] [EXT2] Reading file\n");
     uint32_t block_idx = 0;
     uint32_t single_indirect_idx = 0;
     uint32_t double_indirect_idx = 0;
@@ -352,7 +352,7 @@ int vfs_readISO9660(struct VFS_File *file, void *buf, int nbytes){
 
 int vfs_read(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
-    print_serial("[VFS] Read %d bytes\n", nbytes);
+    //print_serial("[VFS] Read %d bytes\n", nbytes);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(!(file_idx->inode.flags & VFS_FLAG_READ)) return -1;
     switch(file_idx->inode.type){

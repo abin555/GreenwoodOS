@@ -70,28 +70,45 @@ uint32_t elf_get_entry_addr(int file){
 	return hdr.e_entry;
 }
 
-bool elf_load_section(int file, int sectionIdx, void *buffer){
+bool elf_load_section(int file, Elf32_Ehdr hdr, int sectionIdx, void *buffer){
 	if(file == -1) return false;
-	int head = vfs_seek(file, 0, 1);
 	vfs_seek(file, 0, 0);
-	Elf32_Ehdr hdr;
-	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
-	vfs_seek(file, head, 0);
 
 	Elf32_Shdr shdr;
 	vfs_seek(file, hdr.e_shoff+hdr.e_shentsize*sectionIdx, 0);
-	vfs_read(file, (char *) &shdr, hdr.e_shentsize);
-	print_serial("[ELF] Section Load\n Name Idx: %d\n Type: %d\n Flags: %d\n Addr: %d\n Offset: %d\n Size: %d\n",
-		shdr.sh_name,
-		shdr.sh_type,
-		shdr.sh_flags,
-		shdr.sh_addr,
-		shdr.sh_offset,
-		shdr.sh_size
-	);
+	vfs_read(file, (char *) &shdr, hdr.e_shentsize);	
 
-	vfs_seek(file, shdr.sh_offset, 0);
-	vfs_read(file, ((char *) buffer) + shdr.sh_addr, shdr.sh_size);
+	if(shdr.sh_type == 1){	
+		print_serial("[ELF] Section Load %d\n Name Idx: %d\n Type: %d\n Flags: %d\n Addr: %d\n Offset: %d\n Size: %d\n",
+			sectionIdx,
+			shdr.sh_name,
+			shdr.sh_type,
+			shdr.sh_flags,
+			shdr.sh_addr,
+			shdr.sh_offset,
+			shdr.sh_size
+		);
+		vfs_seek(file, shdr.sh_offset, 0);
+		vfs_read(file, ((char *) buffer) + shdr.sh_addr, shdr.sh_size);
+		vfs_seek(file, 0, 0);
+		return true;
+	}
+	else{
+		print_serial("[ELF] Section %d is not PROGBITS\n", sectionIdx);
+		return false;
+	}
+	return false;
+}
+
+bool elf_load(int file, void *buffer){
+	if(file == -1) return false;
+
 	vfs_seek(file, 0, 0);
+	Elf32_Ehdr hdr;
+	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
+
+	for(int i = 0; i < hdr.e_shnum; i++){
+		elf_load_section(file, hdr, i, buffer);
+	}
 	return true;
 }

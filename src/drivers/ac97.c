@@ -302,7 +302,7 @@ void task_ac97_play_buffer_in_loop() {
     if(audio == NULL || audio->deviceType != AUDIO_AC97) return;
     //print_serial("[AC97] Playing\n");
     //struct AC97_driver *ac97 = audio->device.ac97;
-    print_serial("[AC97] Index %d\n", inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY));
+    //print_serial("[AC97] Index %d\n", inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY));
     //update Last Valid Entry register for all entries to be valid
     outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_LAST_VALID_ENTRY, (inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY)-1) & 0x1F);
 }
