@@ -1,11 +1,6 @@
 #include "elf.h"
 
-bool elf_check_file(int file) {
-	int head = vfs_seek(file, 0, 1);
-	vfs_seek(file, 0, 0);
-	Elf32_Ehdr hdr;
-	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
-	vfs_seek(file, head, 0);
+bool elf_check_file(Elf32_Ehdr hdr) {
 	//if(!hdr) return false;
 	if(hdr.e_ident[EI_MAG0] != ELFMAG0) {
 		print_serial("ELF Header EI_MAG0 incorrect.\n");
@@ -28,13 +23,14 @@ bool elf_check_file(int file) {
 }
 
 bool elf_check_supported(int file) {
+	print_serial("[ELF] Checking Support\n");
 	int head = vfs_seek(file, 0, 1);
 	vfs_seek(file, 0, 0);
 	Elf32_Ehdr hdr;
 	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
 	vfs_seek(file, head, 0);
 
-	if(!elf_check_file(file)) {
+	if(!elf_check_file(hdr)) {
 		print_serial("[ELF] Invalid ELF File.\n");
 		return false;
 	}
@@ -54,9 +50,48 @@ bool elf_check_supported(int file) {
 		print_serial("[ELF] Unsupported ELF File version.\n");
 		return false;
 	}
+	print_serial("%d\n", hdr.e_type);
 	if(hdr.e_type != ET_REL && hdr.e_type != ET_EXEC) {
 		print_serial("[ELF] Unsupported ELF File type.\n");
 		return false;
 	}
+
+	return true;
+}
+
+uint32_t elf_get_entry_addr(int file){
+	if(file == -1) return 0;
+	int head = vfs_seek(file, 0, 1);
+	vfs_seek(file, 0, 0);
+	Elf32_Ehdr hdr;
+	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
+	vfs_seek(file, head, 0);
+	print_serial("Entry Point Address: 0x%x\n", hdr.e_entry);
+	return hdr.e_entry;
+}
+
+bool elf_load_section(int file, int sectionIdx, void *buffer){
+	if(file == -1) return false;
+	int head = vfs_seek(file, 0, 1);
+	vfs_seek(file, 0, 0);
+	Elf32_Ehdr hdr;
+	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
+	vfs_seek(file, head, 0);
+
+	Elf32_Shdr shdr;
+	vfs_seek(file, hdr.e_shoff+hdr.e_shentsize*sectionIdx, 0);
+	vfs_read(file, (char *) &shdr, hdr.e_shentsize);
+	print_serial("[ELF] Section Load\n Name Idx: %d\n Type: %d\n Flags: %d\n Addr: %d\n Offset: %d\n Size: %d\n",
+		shdr.sh_name,
+		shdr.sh_type,
+		shdr.sh_flags,
+		shdr.sh_addr,
+		shdr.sh_offset,
+		shdr.sh_size
+	);
+
+	vfs_seek(file, shdr.sh_offset, 0);
+	vfs_read(file, ((char *) buffer) + shdr.sh_addr, shdr.sh_size);
+	vfs_seek(file, 0, 0);
 	return true;
 }

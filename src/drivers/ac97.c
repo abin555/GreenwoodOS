@@ -279,7 +279,7 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
         {
             ac97->buffer_memory_pointer[i].sample_memory = sound_memory;
             ac97->buffer_memory_pointer[i].number_of_samples = ((sound_length / 2) & 0xFFFE);
-            //ac97->buffer_memory_pointer[i].interrupt_on_completion = 1;
+            ac97->buffer_memory_pointer[i].interrupt_on_completion = 1;
             print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
             break;
         }
@@ -302,7 +302,7 @@ void task_ac97_play_buffer_in_loop() {
     if(audio == NULL || audio->deviceType != AUDIO_AC97) return;
     //print_serial("[AC97] Playing\n");
     //struct AC97_driver *ac97 = audio->device.ac97;
-
+    print_serial("[AC97] Index %d\n", inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY));
     //update Last Valid Entry register for all entries to be valid
     outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_LAST_VALID_ENTRY, (inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY)-1) & 0x1F);
 }

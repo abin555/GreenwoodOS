@@ -1,6 +1,6 @@
 CC = i386-elf-gcc
 AS = i386-elf-as
-CFLAGS = -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
+CFLAGS = -m32 -c -O0 -nodefaultlibs -fcf-protection=none -fno-builtin -fno-stack-protector -masm=intel
 INCLUDE_PATH = -I../OS/libc/ -I./include
 LIBS = ../OS/libc/libc.o
 

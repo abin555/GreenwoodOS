@@ -38,7 +38,7 @@ int main(int argc, char **argv){
     dprint("\n");
     exec("/A/utils/SetBG/setbg.exe", 2, bg_argv);
 
-    char **md_argv = alloc(sizeof(char *)*2);
+    char **md_argv = alloc(sizeof(char *)*3);
     md_argv[0] = NULL;
     md_argv[1] = alloc(sizeof(MODEL));
     for(int i = 0; i < sizeof(MODEL); i++){
@@ -46,7 +46,7 @@ int main(int argc, char **argv){
     }
     dprint(md_argv[1]);
     dprint("\n");
-    exec("/A/utils/3D/3Dvp.exe", 2, md_argv);
+    exec("/A/utils/3D/3Dvp.exe", 3, md_argv);
 
     char **wv_argv = alloc(sizeof(char *)*2);
     wv_argv[0] = NULL;

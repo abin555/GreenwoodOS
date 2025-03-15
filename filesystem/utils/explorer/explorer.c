@@ -212,7 +212,7 @@ void HandleSelection(char *work_buf, int sel){
             exec("/A/utils/image/image.exe", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".exe")){
+        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".exe") || !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".elf")){
             exec(dir.entries[sel+2].filename, 0, NULL);
             sel = -1;
             return;

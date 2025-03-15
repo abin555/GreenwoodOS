@@ -100,7 +100,7 @@ int main(int argc, char** argv){
 
   TriangleRef *triangleBuf;
 
-  if(argc == 2){
+  if(argc >= 2){
     if(!fexists(argv[1])){
       return 1;
     }
@@ -122,6 +122,13 @@ int main(int argc, char** argv){
   //window->backbuffer = obj.ZBuff;
   int spinning = 0;
   running = 1;
+
+  if(argc == 3){
+    spinning = 1;
+    vp->loc.x+=50;
+    vp->loc.y+=50;
+  }
+
   while(running){
 
     memset(vp_buf, 0, WIDTH * HEIGHT * sizeof(uint32_t));

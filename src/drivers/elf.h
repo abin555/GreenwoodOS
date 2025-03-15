@@ -47,25 +47,44 @@ enum Elf_Ident {
 	EI_PAD		= 9  // Padding
 };
  
-# define ELFMAG0	0x7F // e_ident[EI_MAG0]
-# define ELFMAG1	'E'  // e_ident[EI_MAG1]
-# define ELFMAG2	'L'  // e_ident[EI_MAG2]
-# define ELFMAG3	'F'  // e_ident[EI_MAG3]
+#define ELFMAG0	0x7F // e_ident[EI_MAG0]
+#define ELFMAG1	'E'  // e_ident[EI_MAG1]
+#define ELFMAG2	'L'  // e_ident[EI_MAG2]
+#define ELFMAG3	'F'  // e_ident[EI_MAG3]
  
-# define ELFDATA2LSB	(1)  // Little Endian
-# define ELFCLASS32	(1)  // 32-bit Architecture
+#define ELFDATA2LSB	(1)  // Little Endian
+#define ELFCLASS32	(1)  // 32-bit Architecture
 
 enum Elf_Type {
 	ET_NONE		= 0, // Unkown Type
 	ET_REL		= 1, // Relocatable File
-	ET_EXEC		= 2  // Executable File
+	ET_EXEC		= 2, // Executable File
+	ET_DYN		= 3, // Shared Object File
+	ET_CORE 	= 4  // Core File
 };
- 
-# define EM_386		(3)  // x86 Machine Type
-# define EV_CURRENT	(1)  // ELF Current Version
 
-bool elf_check_file(int file);
+#define EM_386		(3)  // x86 Machine Type
+#define EV_CURRENT	(1)  // ELF Current Version
+
+typedef struct {
+	Elf32_Word sh_name;
+	Elf32_Word sh_type;
+	Elf32_Word sh_flags;
+	Elf32_Addr sh_addr;
+	Elf32_Off sh_offset;
+	Elf32_Word sh_size;
+	Elf32_Word sh_link;
+	Elf32_Word sh_info;
+	Elf32_Word sh_addralign;
+	Elf32_Word sh_entsize;
+} Elf32_Shdr;
+
+bool elf_check_file(Elf32_Ehdr hdr);
 bool elf_check_supported(int file);
+uint32_t elf_get_entry_addr(int file);
+int elf_get_section_idx(int file, char *section);
+bool elf_load_section(int file, int sectionIdx, void *buffer);
+
 
 
 #endif
