@@ -15,6 +15,8 @@ _start:
 	# Prepare signals, memory allocation, stdio and such.
 	# call initialize_standard_library
 
+	call init_stdlib
+
 	# Run the global constructors.
 	call _init
 
@@ -24,6 +26,8 @@ _start:
 
 	# Run main
 	call main
+
+	call clean_stdlib
 
 	# Terminate the process with the exit code.
 	movl %eax, %edi

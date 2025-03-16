@@ -32,6 +32,9 @@ typedef long long          intmax_t;
 typedef unsigned long long uintmax_t;
 
 //typedef unsigned char bool;
-typedef unsigned int size_t;
+#ifndef _SIZET
+#define _SIZET
+typedef long unsigned int size_t;
+#endif
 
 #endif

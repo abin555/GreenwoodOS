@@ -92,7 +92,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_console(kernel_console, "TEST CONSOLE!\n");
     */
 
-    exec("/A/utils/explorer/explorer.exe", 0, NULL);
+    exec("/A/utils/explorer/explorer.elf", 0, NULL);
     //exec("/A/utils/clock/clock.exe", 0, NULL);
 
     //exec("/A/clock/clock.exe", 0, NULL);
@@ -176,7 +176,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/OS/termvp/term.exe", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'E'){
-        exec("/A/utils/explorer/explorer.exe", 0, NULL);
+        exec("/A/utils/explorer/explorer.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'C'){
         exec("/A/utils/clock/clock.exe", 0, NULL);

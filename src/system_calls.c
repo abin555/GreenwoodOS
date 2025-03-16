@@ -302,6 +302,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x2B:{
+			print_serial("[SYSCALL] Free Region\n");
 			MEM_freeRegionBlock(cpu.ebx, cpu.ecx);
 			//MEM_printRegions();
 			break;
@@ -316,6 +317,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x2E:{
+			print_serial("Syscall 0x2E\n");
 			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu.ebx);
 			cpu_state.eax = (uint32_t) console;
 			task->console = console;
@@ -377,6 +379,16 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x3C:{
 			cpu_state.eax = (unsigned int) fork();
+			break;
+		}
+		//Print to console
+		case 0x3D:{
+			print_console((struct CONSOLE *) cpu.ebx, (char*) cpu.ecx);
+			break;
+		}
+		case 0x3E:{
+			cpu_state.eax = (unsigned int) task->console;
+			break;
 		}
 	}
 	IRQ_RES;

@@ -99,3 +99,12 @@ char *strcpy(char *s1, const char *s2){
 
 	return s1;
 }
+
+size_t strlen(const char *str){
+	size_t len = 0;
+	while(*str != '\0'){
+		len++;
+		str++;
+	}
+	return len;
+}

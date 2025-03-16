@@ -6,6 +6,10 @@
 typedef long unsigned int size_t;
 #endif
 
+#ifndef NULL
+#define NULL _NULL
+#endif
+
 void abort(void);
 void *malloc(size_t size);
 void free(void *);

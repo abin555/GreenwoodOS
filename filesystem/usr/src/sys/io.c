@@ -1,7 +1,7 @@
 #include <sys/io.h>
 #include <stdint.h>
 
-int open(char *path, GWOS_FS_FLAGS flags){
+int open(char *path, int flags){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	register uint32_t ecx asm("ecx");
@@ -49,7 +49,7 @@ int write(int fd, void *buf, int nbytes){
 	return (int) eax;
 }
 
-int lseek(int fd, int off, GWOS_FS_SEEK whence){
+int lseek(int fd, int off, int whence){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	register uint32_t ecx asm("ecx");

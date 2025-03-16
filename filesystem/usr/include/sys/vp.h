@@ -41,7 +41,7 @@ struct Viewport {
     bool transparent;
 };
 
-void vp_open(int w, int h, char *title);
+struct Viewport *vp_open(int w, int h, char *title);
 void vp_close(struct Viewport *vp);
 void vp_set_buffer(struct Viewport *vp, uint32_t *buf, uint32_t size);
 void vp_copy(struct Viewport *vp);

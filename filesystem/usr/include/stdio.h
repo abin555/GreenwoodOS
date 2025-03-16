@@ -34,7 +34,7 @@ int feof(FILE *stream);
 
 int printf(const char *format, ...);
 int sprintf(char *str, const char *format, ...);
-
+int fputs(const char *s, FILE *file);
 int puts(const char *s);
 
 #include <stdarg.h>

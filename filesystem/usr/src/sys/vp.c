@@ -22,9 +22,9 @@ void vp_init(){
     close(vp_file);
 }
 
-void vp_open(int w, int h, char *title){
+struct Viewport *vp_open(int w, int h, char *title){
     if(!vp_initialized) vp_init();
-    vp_functions.open(w, h, title);
+    return vp_functions.open(w, h, title);
 }
 
 void vp_close(struct Viewport *vp){
