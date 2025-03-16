@@ -1,11 +1,13 @@
 .section .text
 
+argc: .long 0
+argv: .long 0
+
 .global _start
 _start:
 	# Set up end of the stack frame linked list.
-	push %eax
-    push %ebx
-
+    mov %eax, argc
+    mov %ebx, argv
 	# Prepare signals, memory allocation, stdio and such.
 	# call initialize_standard_library
 	call init_stdlib
@@ -15,11 +17,12 @@ _start:
 	call _init
 
 	# Restore argc and argv.
-	popl %eax
-	popl %eax
 
 	# Run main
-	call main
+	pushl argv
+    pushl argc
+    call main
+    # jmp main
 
 	call clean_stdlib
 

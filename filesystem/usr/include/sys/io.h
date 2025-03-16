@@ -1,10 +1,8 @@
 #ifndef SYS_IO_H
 #define SYS_IO_H
 
-typedef enum {
-    O_READ = 0b1,
-    O_WRITE = 0b10
-} GWOS_FS_FLAGS;
+#define O_READ 0b1
+#define O_WRITE 0b10
 
 int open(char *file, int flags);
 void close(int fd);

@@ -39,6 +39,7 @@ void init_stdio(){
 	fileListing[1] = internal_createFileConsole(console_get_current());
 	fileListing[2] = fileListing[1];
 	openFiles = 3;
+	puts("Stdio setup\n");
 }
 
 int fprintf(FILE *file, const char *fmt, ...){
