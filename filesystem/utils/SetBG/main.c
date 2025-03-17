@@ -28,13 +28,10 @@ typedef struct {
 } __attribute__((packed)) tga_header_t;
 
 int main(int argc, char **argv){
-    char msg[] = "Is 0\n";
-    msg[3] += argc;
-    puts(msg);
     if(argc != 2 && argv != NULL){
         return 1;
     }
-    puts(argv[1]);
+    puts("Setting Background!\n");
 
     int desktop_bg_fd = open("/-/sys/desktopBG\0", O_READ | O_WRITE);
     int image_fd = open(argv[1], O_READ);

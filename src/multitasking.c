@@ -63,8 +63,8 @@ void save_task_state(struct task_state *task, struct cpu_state cpu __attribute__
 void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
 	for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
-            tasks[i].registers.eax = argc;
-            tasks[i].registers.ebx = (uint32_t) argv;
+            tasks[i].registers.eax = 0;
+            tasks[i].registers.ebx = 0;
             tasks[i].registers.ecx = 0;
             tasks[i].registers.edx = 0;
             tasks[i].registers.eip = (uint32_t) address;

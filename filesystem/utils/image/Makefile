@@ -1,16 +1,10 @@
-CFLAGS = -I ../../OS/libc/ -m32 -no-pie -c -O0 -nostdlib -nodefaultlibs -nolibc -masm=intel -fno-asynchronous-unwind-tables -fcf-protection=none -fno-builtin -fno-stack-protector
-ASFLAGS = -f elf
-LDFLAGS = -T ../../OS/libc/link.ld -melf_i386
-
+CC = i386-gwos-gcc
+CFLAGS := 
 FILES = main.c
 OBJ = image.o
-LIBS = ../../OS/libc/libc.o
+LIBS :=
 PROG = image
 
 all:
-	make -C ../../OS/libc
-	$(CC) $(CFLAGS) $(FILES) -o $(OBJ)
-	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
-	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
-	rm $(OBJ)
-	rm $(PROG).elf
+	$(CC) -c $(CFLAGS) $(FILES) -o $(OBJ)
+	$(CC) $(OBJ) -o $(PROG).elf

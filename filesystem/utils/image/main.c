@@ -1,10 +1,11 @@
-#include "libc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/io.h>
+#include <sys/vp.h>
+#include <sys/window.h>
+#include <sys/task.h>
 
 struct WINDOW *win;
-
-char *heap;
-int heap_idx = 0;
-void *alloc(int size);
 
 typedef struct {
   unsigned char magic1;             // must be zero
@@ -20,7 +21,6 @@ typedef struct {
   unsigned char pixeltype;          // must be 40
 } __attribute__((packed)) tga_header_t;
 
-struct ViewportFunctions *vp_funcs;
 struct Viewport *vp;
 int running = 1;
 
@@ -28,28 +28,29 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 
 int main(int argc, char **argv){
     if(argc < 2){
-        print("Not enough arguments!\n");
+        puts("Not enough arguments!\n");
         return 1;
     }
-    print("Opening Image Viewer\n");
-    heap = (char *) 0x4000;    
+    puts("Opening Image Viewer\n");
     
-    print_arg("Opening Image %s\n", (uint32_t) argv[1]);
+    //print_arg("Opening Image %s\n", (uint32_t) argv[1]);
     int image = open(argv[1], O_READ);
     if(image == -1){
-        print("Image Does Not Exist\n");
+        puts("Image Does Not Exist\n");
         return 1;
     }
     int size = lseek(image, 0, 2);
     lseek(image, 0, 0);
-    print_arg("Image File Size is %d\n", size);
-    char *file_buf = alloc(size);
+    //print_arg("Image File Size is %d\n", size);
+    char *file_buf = malloc(size);
     read(image, file_buf, size);
     close(image);
 
     tga_header_t *header = (tga_header_t *) file_buf;
+    /*
     print_arg("Image Width is %d\n", header->w);
     print_arg("Image Height is %d\n", header->h);
+    */
 
     if(header->w >= 800 || header->h >= 600){
         struct WINDOW *window = window_open("Image Viewer", 0);
@@ -69,30 +70,23 @@ int main(int argc, char **argv){
         }
     }
     else{
-        vp_funcs = viewport_get_funcs();
-        vp = vp_funcs->open(header->w, header->h, argv[1]);
+        vp = vp_open(header->w, header->h, argv[1]);
 
         uint32_t *image_buf = (uint32_t *) (file_buf + sizeof(tga_header_t));
 
-        vp_funcs->set_buffer(vp, image_buf, header->w * header->h * sizeof(uint32_t));
-        vp_funcs->add_event_handler(vp, event_handler);
-        vp_funcs->copy(vp);
+        vp_set_buffer(vp, image_buf, header->w * header->h * sizeof(uint32_t));
+        vp_add_event_handler(vp, event_handler);
+        vp_copy(vp);
 
         set_schedule(NEVER);
 
         while(running){
 
         }
-        vp_funcs->close(vp);
-        print("Image Viewer Exiting\n");
+        vp_close(vp);
+        puts("Image Viewer Exiting\n");
     }
     return 0;
-}
-
-void *alloc(int size){
-	void *address = (void *) &heap[heap_idx];
-	heap_idx += size;
-	return address;
 }
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){

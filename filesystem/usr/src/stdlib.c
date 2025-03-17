@@ -25,7 +25,7 @@ void init_stdlib(){
 }
 
 void clean_stdlib(){
-    //memory_returnRegion(memory.region_base, memory.region_size);
+    memory_returnRegion(memory.region_base, memory.region_size);
 }
 
 void *malloc(size_t size){
