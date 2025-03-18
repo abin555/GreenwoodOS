@@ -7,7 +7,7 @@ typedef long unsigned int size_t;
 #endif
 
 #ifndef NULL
-#define NULL _NULL
+#define NULL 0
 #endif
 
 void abort(void);

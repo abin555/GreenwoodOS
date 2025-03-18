@@ -232,7 +232,7 @@ void HandleSelection(char *work_buf, int sel){
             arg[1] = alloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
-            exec("/A/utils/gif/gif.exe", 2, arg);
+            exec("/A/utils/gif/gif.elf", 2, arg);
             return;
         }
         else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".wav")){

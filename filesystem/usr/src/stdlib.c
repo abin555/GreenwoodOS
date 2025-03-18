@@ -18,7 +18,7 @@ struct Heap heap;
 
 
 void init_stdlib(){
-    memory.region_size = 0x40000;
+    memory.region_size = 0x40000*10;
     memory.region_base = memory_requestRegion(memory.region_size);
     memory.region_head = memory.region_base;
     heap.head = memory.region_head;
@@ -29,8 +29,18 @@ void clean_stdlib(){
 }
 
 void *malloc(size_t size){
-    puts("Malloc?\n");
     void *addr = heap.head;
     heap.head += size;
     return addr;
+}
+
+void *calloc(size_t nmemb, size_t size){
+	return malloc(nmemb * size);
+}
+
+#include <string.h>
+void *realloc(void *ptr, size_t size){
+	void *new_alloc = malloc(size);
+	memcpy(new_alloc, ptr, size);
+	return new_alloc;
 }

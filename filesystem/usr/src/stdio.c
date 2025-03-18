@@ -70,3 +70,10 @@ int puts(const char *s){
 	return fputs(s, stdout);
 }
 
+FILE *fopen(const char *pathname, const char *mode){
+
+}
+
+int fclose(FILE *stream){
+	
+}

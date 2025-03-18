@@ -19,3 +19,9 @@ void set_schedule(ScheduleType type){
 	eax = 0x07;
 	asm("int 0x80");
 }
+
+void yield(){
+	register uint32_t eax asm("eax");
+	eax = 0x34;
+	asm("int 0x80");
+}

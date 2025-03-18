@@ -1,22 +1,17 @@
-#include "libc.h"
-#include "utils.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/io.h>
+#include <sys/vp.h>
+#include <sys/task.h>
 
 #include "gif_lib.h"
-#define REGION_SIZE (0x400000 * 12)
 
-char *heap;
-int heap_idx = 0;
-
-struct ViewportFunctions *vp_funcs;
 struct Viewport *vp;
 int running = 1;
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
-
-void end_callback(){
-	freeRegion(heap, REGION_SIZE);
-	print_serial("[GIF] Freed requested kernel region!\n");
-}
 
 uint32_t make_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a){
 	return (a << 24) | (r << 16) | (g << 8) | (b << 0);
@@ -95,37 +90,34 @@ int main(int argc, char **argv){
 		return 1;
 	}
 
-
-	vp_funcs = viewport_get_funcs();
-
 	int gif_file = open(argv[1], O_READ);
 	if(gif_file == -1) return 1;
-	heap = requestRegion(REGION_SIZE);
-	memset(heap, 0, REGION_SIZE);
-	addEndCallback(end_callback);
-
+	puts("Open\n");
 	int size = lseek(gif_file, 0, 2);
     lseek(gif_file, 0, 0);
 	Ifile.rawfile = malloc(size);
 	Ifile.headidx = 0;
 	read(gif_file, Ifile.rawfile, size);
 	close(gif_file);
+	puts("Read\n");
 
 	int gif_err;
 	GifFileType *gif = DGifOpen(&Ifile, readgif, &gif_err);
 	gif_err = DGifSlurp(gif);
+	puts("GIF Open\n");
 	
-	vp = vp_funcs->open(gif->SWidth, gif->SHeight, argv[1]);
+	vp = vp_open(gif->SWidth, gif->SHeight, argv[1]);
 	viewbuf = malloc(gif->SWidth * gif->SHeight * 4);
-	vp_funcs->set_buffer(vp, viewbuf, gif->SWidth * gif->SHeight * 4);
-	vp_funcs->add_event_handler(vp, event_handler);
+	vp_set_buffer(vp, viewbuf, gif->SWidth * gif->SHeight * 4);
+	vp_add_event_handler(vp, event_handler);
 
+	puts("VP Open\n");
 
 	int image_idx = 0;
 	running = 1;
 	while(running){
 		GIF_CopyImageToViewport(gif, image_idx);
-		vp_funcs->copy(vp);
+		vp_copy(vp);
 
 		image_idx++;
 		if(image_idx >= gif->ImageCount){
@@ -135,25 +127,9 @@ int main(int argc, char **argv){
 		yield();
 	}
 	DGifCloseFile(gif, &gif_err);
-	terminate:;
-	vp_funcs->close(vp);
-	freeRegion(heap, REGION_SIZE);
-	print_serial("[GIF] Terminated\n");
+	vp_close(vp);
+	printf("[GIF] Terminated\n");
 	return 0;
-}
-
-void *malloc(int size){
-	//print_serial("[GIF] Alloc!\n");
-	if(heap_idx > REGION_SIZE){
-		return NULL;
-	}
-	void *address = (void *) &heap[heap_idx];
-	heap_idx += size;
-	return address;
-}
-
-void *calloc(size_t nmemb, size_t size){
-	return malloc(nmemb * size);
 }
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){

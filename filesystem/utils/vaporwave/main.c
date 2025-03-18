@@ -36,7 +36,7 @@ int main(int argc, char **argv){
     }
     dprint(bg_argv[1]);
     dprint("\n");
-    exec("/A/utils/SetBG/setbg.exe", 2, bg_argv);
+    exec("/A/utils/SetBG/setbg.elf", 2, bg_argv);
 
     char **md_argv = alloc(sizeof(char *)*3);
     md_argv[0] = NULL;

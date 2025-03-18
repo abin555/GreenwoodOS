@@ -5,7 +5,9 @@
 #include <yvals.h>
 #endif
 
-#define NULL _NULL
+#ifndef NULL
+#define NULL 0
+#endif
 
 #ifndef _SIZET
 #define _SIZET

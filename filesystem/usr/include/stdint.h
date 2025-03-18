@@ -37,5 +37,6 @@ typedef unsigned long long uintmax_t;
 typedef long unsigned int size_t;
 #endif
 
+typedef void* ptr_t;
 
 #endif
