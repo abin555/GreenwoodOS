@@ -88,8 +88,8 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
 
             tasks[i].program_slot = program_slot;
             tasks[i].schedule_type = ALWAYS;
-            tasks[i].task_name = name; //"Task\0";
-            /*
+            //tasks[i].task_name = name; //"Task\0";
+            
             if(name == NULL){
                 tasks[i].task_name = "UNKNOWN TASK NAME\0";
             }
@@ -101,7 +101,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
                 print_serial("Name len: %d - %s\n", len, namebuf);
                 tasks[i].task_name = namebuf;
             }
-            */
+            
             
             tasks[i].window = tasks[task_running_idx].window;
             tasks[i].own_window = false;

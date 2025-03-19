@@ -79,6 +79,7 @@ bool elf_load_section(int file, Elf32_Ehdr hdr, int sectionIdx, void *buffer){
 	vfs_read(file, (char *) &shdr, hdr.e_shentsize);	
 
 	if(shdr.sh_type == 1){	
+		/*
 		print_serial("[ELF] Section Load %d\n Name Idx: %d\n Type: %d\n Flags: %d\n Addr: %d\n Offset: %d\n Size: %d\n",
 			sectionIdx,
 			shdr.sh_name,
@@ -88,6 +89,7 @@ bool elf_load_section(int file, Elf32_Ehdr hdr, int sectionIdx, void *buffer){
 			shdr.sh_offset,
 			shdr.sh_size
 		);
+		*/
 		vfs_seek(file, shdr.sh_offset, 0);
 		vfs_read(file, ((char *) buffer) + shdr.sh_addr, shdr.sh_size);
 		vfs_seek(file, 0, 0);
