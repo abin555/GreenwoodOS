@@ -9,7 +9,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 	IRQ_OFF;
 	struct cpu_state cpu_state = cpu;
 	struct task_state *task = &tasks[task_running_idx];
-	save_task_state(task, &cpu, &stack);
+	//save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
 	switch(cpu.eax){
 		//Open Window
