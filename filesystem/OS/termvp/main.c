@@ -1,11 +1,14 @@
-#include "libc.h"
-
-char heap[400] = {0};
-int heap_idx = 0;
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/io.h>
+#include <sys/task.h>
+#include <sys/vp.h>
+#include <sys/console.h>
+#include <sys/dir.h>
 
 #define WIDTH 400
 #define HEIGHT 400
-
 
 char **args;
 void *alloc(int size);
@@ -14,30 +17,27 @@ int term_height;
 
 void run_command(char *string);
 
-struct ViewportFunctions *vp_funcs;
 struct Viewport *vp;
 struct CONSOLE *console;
 uint32_t *backbuf;
 int running;
 
 void draw_cursor(int idx);
-void memset(void *dest, char v, int size);
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 
 int main(int argc, char **argv){
-	print("Terminal!\n");
+	puts("Terminal!\n");
 	set_schedule(ALWAYS);
-	vp_funcs = viewport_get_funcs();
-	vp = vp_funcs->open(WIDTH, HEIGHT, "GWOS Terminal");
-	backbuf = (uint32_t *) requestRegion(WIDTH * HEIGHT *sizeof(uint32_t));
-	vp_funcs->set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
-	vp_funcs->add_event_handler(vp, event_handler);
+	vp = vp_open(WIDTH, HEIGHT, "GWOS Terminal");
+	backbuf = (uint32_t *) malloc(WIDTH * HEIGHT *sizeof(uint32_t));
+	vp_set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
+	vp_add_event_handler(vp, event_handler);
 	term_width = WIDTH / 8;
 	term_height = HEIGHT / 8;
 	console = console_open_vp(vp);
-	print("Greenwood OS Terminal\n");
-	vp_funcs->copy(vp);
+	puts("Greenwood OS Terminal\n");
+	vp_copy(vp);
 
 	char termbuf[50];
 	memset(termbuf, 0, 50);
@@ -49,14 +49,14 @@ int main(int argc, char **argv){
 		char *path = getDirectory();
 		int i;
 		for(i = 0; path[i] != 0; i++){
-			vp_funcs->drawChar(vp, 8*i,(term_height-2)*8, path[i], 0xFFFFFF, 0x0);
+			vp_drawChar(vp, 8*i,(term_height-2)*8, path[i], 0xFFFFFF, 0x0);
 		}
-		vp_funcs->drawChar(vp, 8*i,(term_height-2)*8,'>', 0xFFFFFF, 0x0);
+		vp_drawChar(vp, 8*i,(term_height-2)*8,'>', 0xFFFFFF, 0x0);
 		for(i++; i < term_width; i++){
-			vp_funcs->drawChar(vp, 8*i,(term_height-2)*8,' ', 0xFFFFFF, 0x0);
+			vp_drawChar(vp, 8*i,(term_height-2)*8,' ', 0xFFFFFF, 0x0);
 		}
-		vp_funcs->copy(vp);
-		char c = vp_funcs->getc(vp);
+		vp_copy(vp);
+		char c = vp_getc(vp);
 		if(c == 0x11) idx-=2;
 		else if(c == 0x12) idx++;
 		else{
@@ -71,7 +71,7 @@ int main(int argc, char **argv){
 				
 			}
 			if(c == 10){
-				print_arg("$ %s\n", (uint32_t) termbuf);
+				printf("$ %s\n", (uint32_t) termbuf);
 				termbuf[idx-1] = 0;
 				//exec(termbuf, 0, 0);
 				run_command(termbuf);
@@ -81,31 +81,18 @@ int main(int argc, char **argv){
 				}
 				idx = 0;
 				for(int i = 0; i < term_width; i++){
-					vp_funcs->drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
+					vp_drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
 				}
 			}
 		}
 		for(int i = 0; i < term_width; i++){
-			vp_funcs->drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
+			vp_drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
 		}
 		draw_cursor(idx);
-		vp_funcs->copy(vp);
+		vp_copy(vp);
 	}
 	console_close();
-	vp_funcs->close(vp);
-	freeRegion(backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
-}
-
-void *alloc(int size){
-	void *address = (void *) &heap[heap_idx];
-	heap_idx += size;
-	return address;
-}
-
-void mcpy(void *dest, void *src, int size){
-	for(int i = 0; i < size; i++){
-		((char *) dest)[i] = ((char *) src)[i]; 
-	}
+	vp_close(vp);
 }
 
 void run_command(char *cmd){
@@ -117,22 +104,22 @@ void run_command(char *cmd){
 		return;
 	}
 	fullsize++;
-	vp_funcs->copy(vp);
+	vp_copy(vp);
 	char *command;
 	int argc = 1;
 	for(int i = 0; cmd[i] != 0 && i < 50; i++){
 		if(cmd[i] == ' ') argc++;
 	}
-	args = (char **) kmalloc(sizeof(char *) * argc);
+	args = (char **) malloc(sizeof(char *) * argc);
 	int idx = 0;
 	for(int i = 0; i < argc && cmd[idx] != 0; i++){
 		int size = 0;
 		for(int j = 0; cmd[idx+j] != ' ' && cmd[idx+j] != 0; j++){
 			size++;
 		}
-		args[i] = (char *) kmalloc(size+1);
+		args[i] = (char *) malloc(size+1);
 		memset(args[i], 0, size+1);
-		mcpy(args[i], cmd+idx, size);
+		memcpy(args[i], cmd+idx, size);
 		idx = idx + size + 1;
 	}
 	for(int i = 0; i < fullsize; i++){
@@ -150,15 +137,15 @@ void run_command(char *cmd){
 		}
 	}
 	else if(!strcmp(args[0], "mkdir")){
-		print_arg("Making dir %s\n", (uint32_t) args[1]);
+		printf("Making dir %s\n", (uint32_t) args[1]);
 		if(argc >= 1){
-			fmkdir(args[1]);
+			//fmkdir(args[1]);
 		}
 	}
 	else if(!strcmp(args[0], "mkfile")){
-		print_arg("Making file %s\n", (uint32_t) args[1]);
+		printf("Making file %s\n", (uint32_t) args[1]);
 		if(argc >= 1){
-			fmkfile(args[1], 100);
+			creat(args[1]);
 		}
 	}
 	else{
@@ -170,11 +157,6 @@ void draw_cursor(int i){
 	uint32_t *buf = vp->backbuf;
 	for(int x = 0; x < 8; x++){
 		buf[WIDTH * ((term_height) * 8 - 1) + (i*8) + x] = 0xFF7FFF;
-	}
-}
-void memset(void *dest, char v, int size){
-	for(int i = 0; i < size; i++){
-		((char *)dest)[i] = v;
 	}
 }
 

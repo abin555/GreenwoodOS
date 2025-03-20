@@ -15,5 +15,6 @@ struct WINDOW {
 struct WINDOW *window_open(char *name, uint32_t copyOnPrompt);
 void window_close(struct WINDOW *window);
 void window_update();
+char window_getc();
 
 #endif

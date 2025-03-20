@@ -9,6 +9,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 	IRQ_OFF;
 	struct cpu_state cpu_state = cpu;
 	struct task_state *task = &tasks[task_running_idx];
+	save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
 	switch(cpu.eax){
 		//Open Window
@@ -378,7 +379,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x3C:{
-			cpu_state.eax = (unsigned int) fork();
+			//print_serial("EIP: 0x%x\n", stack.eip);
+			//task->registers.eip = stack.eip;
+			print_serial("[SYSCALL] Fork\n");
+			cpu_state.eax = 0;//(unsigned int) fork();
 			break;
 		}
 		//Print to console

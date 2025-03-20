@@ -173,7 +173,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
     if(KBD_flags.ctrl && ascii == 'T'){
-        exec("/A/OS/termvp/term.exe", 0, NULL);
+        exec("/A/OS/termvp/term.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'E'){
         exec("/A/utils/explorer/explorer.elf", 0, NULL);

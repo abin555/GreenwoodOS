@@ -26,3 +26,24 @@ void window_update(){
 	eax = 0x03;
 	asm("int 0x80");
 }
+
+char window_getc(){
+	
+	char (*getc_blk)(void);
+	register uint32_t eax asm("eax");
+	eax = 0x05;
+	asm("int 0x80");
+	getc_blk = (char (*)(void)) eax;
+	//return ((char (*)(void))eax)();
+	return getc_blk();
+	/*
+	uint32_t c = 0;
+	while(!c){
+		register uint32_t eax asm("eax");
+		eax = 0x05;
+		asm("int 0x80");
+		c = eax;
+	}
+	return (char) c;
+	*/
+}

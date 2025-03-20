@@ -37,27 +37,28 @@ void multitask_start(){
 void print_tasks(){
     print_serial("[TASKS] Task Status:\n");
     for(int i = 0; i < MAX_TASKS; i++){
-        print_serial("PID %d - EAX: 0x%x Slot: %d EIP: 0x%x Running: %d Active: %d\n",
+        print_serial("PID %d - EAX: 0x%x Slot: %d EIP: 0x%x Running: %d Active: %d [\"%s\"]\n",
             i,
             tasks[i].registers.eax,
             tasks[i].program_slot,
             tasks[i].registers.eip,
             tasks[i].slot_running,
-            tasks[i].slot_active
+            tasks[i].slot_active,
+            tasks[i].task_name
         );
     }
 }
 
-void save_task_state(struct task_state *task, struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    task->registers.eip = stack.eip;
-    task->registers.eax = cpu.eax;
-    task->registers.ebx = cpu.ebx;
-    task->registers.ecx = cpu.ecx;
-    task->registers.edx = cpu.edx;
-    task->registers.ebp = cpu.ebp;
-    task->registers.esi = cpu.esi;
-    task->registers.edi = cpu.edi;
-    task->registers.esp = cpu.esp;
+void save_task_state(struct task_state *task, struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+    task->registers.eip = stack->eip;
+    task->registers.eax = cpu->eax;
+    task->registers.ebx = cpu->ebx;
+    task->registers.ecx = cpu->ecx;
+    task->registers.edx = cpu->edx;
+    task->registers.ebp = cpu->ebp;
+    task->registers.esi = cpu->esi;
+    task->registers.edi = cpu->edi;
+    task->registers.esp = cpu->esp;
 }
 
 void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
@@ -122,8 +123,8 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
     }
 }
 
-void fork_ret(){
-    return;
+int fork_ret(){
+    return 0;
 }
 
 int fork(){
@@ -155,6 +156,11 @@ int task_fork(struct task_state *task){
         new_task,
         task,
         sizeof(struct task_state)
+    );
+    memcpy(
+        task_stack_array[pid],
+        task_stack_array[task_running_idx],
+        TASK_STACK_SIZE
     );
 
     new_task->registers.eip = (uint32_t) &fork_ret;

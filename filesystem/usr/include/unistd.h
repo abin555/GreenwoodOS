@@ -13,5 +13,6 @@ typedef int pid_t;
 #endif
 
 pid_t getpid(void);
+pid_t fork(void);
 
 #endif

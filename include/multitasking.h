@@ -90,6 +90,6 @@ int task_dupFD(struct task_state *task, int fd);
 
 int fork();
 int task_fork(struct task_state *task);
-void save_task_state(struct task_state *task, struct cpu_state cpu, struct stack_state stack);
+void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stack_state *stack);
 void tasking_setup_kernel_stack();
 #endif

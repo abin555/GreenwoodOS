@@ -1,18 +1,19 @@
-#include "libc.h"
+#include <stdio.h>
+#include <unistd.h>
 
 int main(int argc, char **argv){
-    dprint("Fork Test!\n");
+    puts("Fork Test!\n");
     int pid = fork();
     if(pid != 0){
-        dprint("Child Process!\n");
+        puts("Child Process!\n");
     }
     else{
-        dprint("Parent Process!\n");
+        puts("Parent Process!\n");
     }
     char buf[2] = "0\0";
     buf[0] += pid;
-    dprint("PID: ");
-    dprint(buf);
-    dprint("\n");
+    puts("PID: ");
+    puts(buf);
+    puts("\n");
     return 0;
 }

@@ -1,4 +1,7 @@
-#include "libc.h"
+#include <stdio.h>
+#include <string.h>
+#include <sys/window.h>
+#include <sys/task.h>
 
 #define PI 3.1415
 #define PI2 6.283
@@ -63,7 +66,6 @@ uint32_t colors[] = {
 };
 
 void render();
-void memset(void *mem, char v, int size);
 void drawVertLine(int x, int y1, int y2, uint32_t color);
 float fabsf(float x);
 float sqrtf(float x);
@@ -72,7 +74,7 @@ float sin(float x);
 void rotate(float rot);
 
 int main(int argc, char **argv){
-    print("Opening Wolfenstein Style Renderer");
+    puts("Opening Wolfenstein Style Renderer");
     window = window_open("MapRender", 1);
     win_buf = window->backbuffer;
     memset(win_buf, 0, window->width * window->height * sizeof(uint32_t));
@@ -91,7 +93,7 @@ int main(int argc, char **argv){
         render();
         window_update();
 
-        char c = getc();
+        char c = window_getc();
         switch(c){
             case 'a':
                 rotate(+rotspeed);
@@ -186,12 +188,6 @@ void render(){
         drawVertLine(x, y0, y1, color);
         drawVertLine(x, y1, window->height - 1, 0xFF505050);
     }
-}
-
-void memset(void *mem, char v, int size){
-	for(int i = 0; i < size; i++){
-		((char *) mem)[i] = v;
-	}
 }
 
 void drawVertLine(int x, int y1, int y2, uint32_t color){
