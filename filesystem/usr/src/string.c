@@ -458,3 +458,18 @@ char *strchr (const char *s, int c_in)
 
   return NULL;
 }
+
+char* strncpy(char* dst, const char* src, size_t num)
+{
+    int i = 0;
+
+    for (; i < num; ++i)
+    {
+        if (!src[i]) break;
+        dst[i] = src[i];
+    }
+
+    while (i < num) dst[i++] = '\0';
+
+    return dst;
+}

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/io.h>
 #include <sys/task.h>
 #include <sys/vp.h>
@@ -40,13 +41,14 @@ int main(int argc, char **argv){
 	vp_copy(vp);
 
 	char termbuf[50];
+	char dirBuf[20];
 	memset(termbuf, 0, 50);
 	
 	int idx = 0;
 	
 	running = 1;
 	while(running){
-		char *path = getDirectory();
+		char *path = getcwd(dirBuf, sizeof(dirBuf));
 		int i;
 		for(i = 0; path[i] != 0; i++){
 			vp_drawChar(vp, 8*i,(term_height-2)*8, path[i], 0xFFFFFF, 0x0);

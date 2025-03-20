@@ -99,7 +99,7 @@ clean:
 	rm -rf src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso
 	rm -rf $(OBJECTS)
 
-build: os.iso debug #make_fs
+build: os.iso #make_fs
 
 
 debug: build make_fs
@@ -118,3 +118,5 @@ make_ext2:
 	sudo cp -r ./filesystem/* fs_ext2/
 	sudo umount fs_ext2
 	rmdir fs_ext2
+
+fs: make_fs make_ext2
