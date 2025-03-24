@@ -24,3 +24,12 @@ void printDirectoryContents(char *path){
 	eax = 0x14;
 	asm("int 0x80");
 }
+
+struct DirectoryListing getDirectoryListing(char *path){
+	struct DirectoryListing (*listFunc)(char *);
+	register uint32_t eax asm("eax");
+	eax = 0x30;
+	asm("int 0x80");
+	listFunc = (struct DirectoryListing (*)(char *)) eax;
+	return listFunc(path);
+}

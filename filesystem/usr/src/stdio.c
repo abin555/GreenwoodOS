@@ -3,17 +3,7 @@
 #include <string.h>
 #include <sys/io.h>
 #include <sys/console.h>
-
-struct FILE {
-	enum {
-		FILE_console,
-		FILE_fd
-	} file_type;
-	union {
-		struct CONSOLE *console;
-		int fd;
-	};
-};
+#include <internal/stdio.h>
 
 #define MAX_FILE_LISTING 10
 struct FILE **fileListing;

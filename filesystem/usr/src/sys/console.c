@@ -1,4 +1,7 @@
 #include <sys/console.h>
+#include <internal/stdio.h>
+#include <stdio.h>
+
 
 struct CONSOLE *console_open(){
 	register uint32_t eax asm("eax");
@@ -21,6 +24,8 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	eax = 0x2E;
 	asm("int 0x80");
 	struct CONSOLE *console = (struct CONSOLE *) eax;
+	stdout->console = console;
+	stderr->console = console;
 	return console;
 }
 

@@ -15,5 +15,6 @@ typedef int pid_t;
 pid_t getpid(void);
 pid_t fork(void);
 char *getcwd(char *buf, int size);
+int chdir(const char *path);
 
 #endif

@@ -7,6 +7,7 @@
 #include <sys/vp.h>
 #include <sys/console.h>
 #include <sys/dir.h>
+#include <sys/stat.h>
 
 #define WIDTH 400
 #define HEIGHT 400
@@ -128,20 +129,26 @@ void run_command(char *cmd){
 		if(cmd[i] == ' ') cmd[i] = 0;
 	}
 	if(!strcmp(args[0], "cd")){
-		changeDirectory(args[1]);
+		chdir(args[1]);
 	}
 	else if(!strcmp(args[0], "ls")){
+		char *path;
 		if(argc == 1){
-			printDirectoryContents(".");
+			path = ".";
 		}
 		else{
-			printDirectoryContents(args[1]);
+			path = args[1];
+		}
+		struct DirectoryListing dir = getDirectoryListing(path);
+		for(int i = 0; i < dir.num_entries; i++){
+			puts(dir.entries[i].filename);
+			puts("\n");
 		}
 	}
 	else if(!strcmp(args[0], "mkdir")){
 		printf("Making dir %s\n", (uint32_t) args[1]);
 		if(argc >= 1){
-			//fmkdir(args[1]);
+			mkdir(args[1], 0);
 		}
 	}
 	else if(!strcmp(args[0], "mkfile")){
