@@ -94,7 +94,7 @@ void sysfs_debugTree(struct SysFS_Inode *fs, int depth){
 }
 
 int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
-    print_serial("[SYSFS] Reading %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
+    //print_serial("[SYSFS] Reading %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
     if(file == NULL || buf == NULL || nbytes == 0) return 0;
     if(file->inode.type != VFS_SYS) return 0;
 
@@ -114,7 +114,7 @@ int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
 }
 
 int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
-    print_serial("[SYSFS] Writing %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
+    //print_serial("[SYSFS] Writing %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
     if(file == NULL || buf == NULL || nbytes == 0) return 0;
     if(file->inode.type != VFS_SYS) return 0;
     
@@ -128,7 +128,7 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
         print_serial("[SYSFS] No write permission");
         return 0;
     };
-    print_serial("[SYSFS] Start Writing\n");
+    //print_serial("[SYSFS] Start Writing\n");
     int i = 0;
     for(; i < nbytes && file->head < cdev->buf_size; i++){
         cdev->buf[file->head++] = ((char *)buf)[i];

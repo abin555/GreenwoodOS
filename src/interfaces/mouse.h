@@ -20,6 +20,7 @@ struct MouseStatus{
 extern struct MouseStatus mouseStatus;
 
 void mouse_init();
+void *mouse_createCDEV();
 
 void mouse_update(int deltaX, int deltaY, struct MouseButtons btns);
 

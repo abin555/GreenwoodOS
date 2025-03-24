@@ -33,3 +33,11 @@ struct DirectoryListing getDirectoryListing(char *path){
 	listFunc = (struct DirectoryListing (*)(char *)) eax;
 	return listFunc(path);
 }
+
+void creatdir(char *path){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) path;
+	eax = 0x1A;
+	asm("int 0x80");
+}

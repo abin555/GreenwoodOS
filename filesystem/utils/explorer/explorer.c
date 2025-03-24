@@ -1,8 +1,15 @@
-#include "libc.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <sys/io.h>
+#include <sys/vp.h>
+#include <sys/dir.h>
+#include <sys/task.h>
+#include <sys/mouse.h>
+#include <string.h>
 
 int running;
 
-struct ViewportFunctions *vp_funcs;
 struct Viewport *vp;
 uint32_t *buf;
 #define WIDTH 500
@@ -17,10 +24,6 @@ struct Bitmap{
 
 struct Bitmap folder;
 struct Bitmap file;
-
-void setup_alloc();
-void *alloc(int size);
-void clean_alloc();
 
 struct Bitmap loadBitmap(char *filename);
 void drawBitmap(int x, int y, struct Bitmap *bitmap);
@@ -38,8 +41,7 @@ struct RightClickMenu {
 };
 
 struct Vec2 getRelativeMouse();
-struct MouseStatus *getMousePtr();
-struct MouseStatus *mouseStatus;
+struct MouseStatus mouseStatus;
 
 void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected);
 void drawDirectoryContents(struct DirectoryListing *dirs, int selected, struct RightClickMenu *rightClickMenu);
@@ -65,14 +67,12 @@ void drawRightClickMenu(struct RightClickMenu *rightClickMenu);
 int handleRightClickMenu(struct RightClickMenu *rightClickMenu);
 
 int main(int argc, char **argv){
-    setup_alloc();
-    vp_funcs = viewport_get_funcs();
-	vp = vp_funcs->open(WIDTH, HEIGHT, "Explorer");
+	vp = vp_open(WIDTH, HEIGHT, "Explorer");
     isFocus = 1;
-	vp_funcs->add_event_handler(vp, explorer_event);
-    buf = alloc(WIDTH * HEIGHT * sizeof(uint32_t));
-    vp_funcs->set_buffer(vp, buf, WIDTH * HEIGHT * sizeof(uint32_t));
-    mouseStatus = getMousePtr();
+	vp_add_event_handler(vp, explorer_event);
+    buf = malloc(WIDTH * HEIGHT * sizeof(uint32_t));
+    vp_set_buffer(vp, buf, WIDTH * HEIGHT * sizeof(uint32_t));
+    //mouseStatus = getMousePtr();
 
     folder = loadBitmap("/A/OS/icons/folder.tga");
     file = loadBitmap("/A/OS/icons/file.tga");
@@ -87,12 +87,20 @@ int main(int argc, char **argv){
 
     for(int i = 0; i < WIDTH * HEIGHT; i++) buf[i] = 0;
     drawDirectoryContents(&dir, selection, &rightClickMenu);
-    vp_funcs->copy(vp);
+    vp_copy(vp);
 
-    char *work_buf = alloc(0x100);
+    char *work_buf = malloc(0x100);
+
+    int mouse_fd = open("/-/sys/mouse", O_READ);
+    if(mouse_fd == -1){
+        puts("Unable to open mouse file\n");
+        return 1;
+    }
     
-    print("Explorer Open\n");
+    puts("Explorer Open\n");
 	while(running){
+        read(mouse_fd, &mouseStatus, sizeof(struct MouseStatus));
+        lseek(mouse_fd, 0, SEEK_SET);
         relMousePos = getRelativeMouse();
         if(relMousePos.x > 0 && relMousePos.x < WIDTH && relMousePos.y > 0 && relMousePos.y < HEIGHT){
             buf[relMousePos.x + relMousePos.y*WIDTH] = 0xFF00FF;
@@ -129,7 +137,7 @@ int main(int argc, char **argv){
                 break;
             }
         }
-        if(mouseStatus->buttons.left && !last_mouse_left && isFocus){
+        if(mouseStatus.buttons.left && !last_mouse_left && isFocus){
             last_mouse_left = 1;
             if(selection != -1 && !rightClickMenu.isVisible){
                 temp = selection;
@@ -144,18 +152,18 @@ int main(int argc, char **argv){
                 dir = getDirectoryListing(".");
             }
         }
-        if(!mouseStatus->buttons.left && last_mouse_left){
+        if(!mouseStatus.buttons.left && last_mouse_left){
             last_mouse_left = 0;
         }
 
-        if(mouseStatus->buttons.right && !last_mouse_right && isFocus){
+        if(mouseStatus.buttons.right && !last_mouse_right && isFocus){
             last_mouse_right = 1;
             rightClickMenu.isVisible = 1;
-            rightClickMenu.x = mouseStatus->pos.x - vp->loc.x;
-            rightClickMenu.y = mouseStatus->pos.y - vp->loc.y;
+            rightClickMenu.x = mouseStatus.pos.x - vp->loc.x;
+            rightClickMenu.y = mouseStatus.pos.y - vp->loc.y;
 
         }
-        if(!mouseStatus->buttons.right && last_mouse_right){
+        if(!mouseStatus.buttons.right && last_mouse_right){
             last_mouse_right = 0;
             //rightClickMenu.isVisible = 0;
         }
@@ -166,20 +174,19 @@ int main(int argc, char **argv){
             drawRightClickMenu(&rightClickMenu);
         }
 
-        vp_funcs->copy(vp);
+        vp_copy(vp);
 	}
-    print("Explorer Close\n");
-    clean_alloc();
+    puts("Explorer Close\n");
 }
 
 void HandleSelection(char *work_buf, int sel){
     char *application_string = NULL;
-    char **arg = alloc(sizeof(char *) * 2);
+    char **arg = malloc(sizeof(char *) * 2);
 
     if(!(sel != -1 && sel < dir.num_entries-2)) return;
     if(dir.entries[sel+2].type == 1){
         char *dir_str = getDirectory();
-        print_arg("Path: %s\n", (uint32_t) dir_str);
+        printf("Path: %s\n", (uint32_t) dir_str);
         int i = 0;
         for(i = 0; i < 0x100; i++) work_buf[i] = 0;
         work_buf[0] = '/';
@@ -192,7 +199,7 @@ void HandleSelection(char *work_buf, int sel){
             work_buf[walker + i] = dir.entries[sel+2].filename[i];
         }
 
-        print_arg("Changing Path to %s\n", (uint32_t) work_buf);
+        printf("Changing Path to %s\n", (uint32_t) work_buf);
 
         changeDirectory(work_buf);
         dir = getDirectoryListing(".");
@@ -201,12 +208,12 @@ void HandleSelection(char *work_buf, int sel){
     }
 
     else if(dir.entries[sel+2].type == 0){
-        print_arg("Opening %s\n", (uint32_t) dir.entries[sel+2].filename);
-        print_arg("Checking extension: %s\n", (uint32_t) dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4);
+        printf("Opening %s\n", (uint32_t) dir.entries[sel+2].filename);
+        printf("Checking extension: %s\n", (uint32_t) dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4);
         if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".tga")){
             
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[sel+2].name_len);
+            arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
             exec("/A/utils/image/image.elf", 2, arg);
@@ -218,36 +225,36 @@ void HandleSelection(char *work_buf, int sel){
             return;
         }
         else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".obj")){
-            char **arg = alloc(sizeof(char *) * 2);
+            char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[sel+2].name_len);
+            arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
             exec("/A/utils/3D/3Dvp.exe", 2, arg);
             return;
         }
         else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".gif")){
-            char **arg = alloc(sizeof(char *) * 2);
+            char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[sel+2].name_len);
+            arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
             exec("/A/utils/gif/gif.elf", 2, arg);
             return;
         }
         else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".wav")){
-            char **arg = alloc(sizeof(char *) * 2);
+            char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[sel+2].name_len);
+            arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
             exec("/A/utils/Music/music.exe", 2, arg);
             return;
         }
         else {
-            char **arg = alloc(sizeof(char *) * 2);
+            char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
-            arg[1] = alloc(dir.entries[sel+2].name_len);
+            arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
             exec("/A/utils/ed/ed.exe", 2, arg);
@@ -296,12 +303,13 @@ typedef struct {
 
 struct Bitmap loadBitmap(char *filename){
     struct Bitmap bitmap = {0};
-    if(!fexists(filename)) return bitmap;
-    struct FILE *bitmap_file = fopen(filename);
-    int bitmap_size = fsize(bitmap_file);
-    bitmap.file = alloc(bitmap_size);
-    fcopy(bitmap_file, bitmap.file, bitmap_size);
-    fclose(bitmap_file);
+    int bitmap_file = open(filename, O_READ);
+    if(bitmap_file == -1) return bitmap;
+    int bitmap_size = lseek(bitmap_file, 0, SEEK_END);
+    lseek(bitmap_file, 0, SEEK_SET);
+    bitmap.file = malloc(bitmap_size);
+    read(bitmap_file, bitmap.file, bitmap_size);
+    close(bitmap_file);
     tga_header_t *header = ((tga_header_t *) bitmap.file);
     bitmap.width = header->w;
     bitmap.height = header->h;
@@ -322,42 +330,11 @@ void drawBitmap(int x, int y, struct Bitmap *bitmap){
     }
 }
 
-
-void *alloc_base;
-uint32_t alloc_size;
-void *alloc_mover;
-
-void setup_alloc(){
-    alloc_size = 0x40000;
-    alloc_base = requestRegion(alloc_size);
-    alloc_mover = alloc_base;
-}
-void *alloc(int size){
-    void *addr = alloc_mover;
-    alloc_mover += size+1;
-    for(int i = 0; i < size+1;i++){
-        *(char *) addr = '\0';
-    }
-    return addr;
-}
-void clean_alloc(){
-    freeRegion(alloc_base, alloc_size);
-}
-
 struct Vec2 getRelativeMouse(){
     struct Vec2 pos;
-    pos.x = mouseStatus->pos.x - vp->loc.x;
-    pos.y = mouseStatus->pos.y - vp->loc.y - 8;
+    pos.x = mouseStatus.pos.x - vp->loc.x;
+    pos.y = mouseStatus.pos.y - vp->loc.y - 8;
     return pos;
-}
-
-struct MouseStatus *getMousePtr(){
-	struct MouseStatus *mousePtr;
-	register uint32_t eax asm("eax");
-	eax = 0x27;
-	asm("int 0x80");
-	mousePtr = (struct MouseStatus *) eax;
-	return mousePtr;
 }
 
 void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected){
@@ -370,7 +347,7 @@ void drawIcon(int x, int y, struct DirectoryEntry *entry, int selected){
     int charY = y+24;
     for(int i = 0; i < entry->name_len; i++){
         if(i % 5 == 0) charY += 8;
-        vp_funcs->drawChar(vp, x+((i%5)*8), charY, entry->filename[i], selected ? 0xFFFFFF : 0, selected ? 0 : 0xFFFFFF);
+        vp_drawChar(vp, x+((i%5)*8), charY, entry->filename[i], selected ? 0xFFFFFF : 0, selected ? 0 : 0xFFFFFF);
     }
 }
 
@@ -467,38 +444,29 @@ void drawRightClickMenu(struct RightClickMenu *rightClickMenu){
     static char newFolder[] = "New Folder";
     int mouse_entry_hover = -1;
     if(
-        mouseStatus->pos.x - vp->loc.x >= rightClickMenu->x-2 &&
-        mouseStatus->pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
-        mouseStatus->pos.y - vp->loc.y >= rightClickMenu->y-2 &&
-        mouseStatus->pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
+        mouseStatus.pos.x - vp->loc.x >= rightClickMenu->x-2 &&
+        mouseStatus.pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
+        mouseStatus.pos.y - vp->loc.y >= rightClickMenu->y-2 &&
+        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
     ){
-        mouse_entry_hover = ((mouseStatus->pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
+        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
         if(mouse_entry_hover != 1 && mouse_entry_hover != 2) mouse_entry_hover = -1;
     }
     for(int i = 0; i < sizeof(newFile)-1; i++){
-        vp_funcs->drawChar(
+        vp_drawChar(
             vp, rightClickMenu->x+(8*i)+1, rightClickMenu->y+0+1, newFile[i], mouse_entry_hover == 1 ? 0xFFFFFF : 0x0, mouse_entry_hover == 1 ? 0x0 : 0xbfbfbf
         );
     }
     for(int i = 0; i < sizeof(newFolder)-1; i++){
-        vp_funcs->drawChar(
+        vp_drawChar(
             vp, rightClickMenu->x+(8*i)+1, rightClickMenu->y+8+1, newFolder[i], mouse_entry_hover == 2 ? 0xFFFFFF : 0x0, mouse_entry_hover == 2 ? 0x0 : 0xbfbfbf
         );
     }
 }
 
-void memset(void* ptr, int value, int num)
-{
-    unsigned char* p = ptr;
-    for (int i = 0; i < num; ++i, ++p)
-    {
-        *p = (unsigned char)value;
-    }
-}
-
 void popupFilename(char *filebuf, int filebuf_size){
     if(filebuf == NULL || filebuf_size == 0) return;
-    print_serial("Popup Filename Search\n");
+    //print_serial("Popup Filename Search\n");
     int mover = 0;
     int getting_filename = 1;
     filebuf[0] = 'A';
@@ -514,7 +482,7 @@ void popupFilename(char *filebuf, int filebuf_size){
             WIDTH
         );
         for(int i = 0; i < filebuf_size && filebuf[i] != 0; i++){
-            vp_funcs->drawChar(
+            vp_drawChar(
                 vp,
                 (vp->loc.w / 2)-(filebuf_size*8 / 2)+(i*8),
                 (vp->loc.h / 2)-(4),
@@ -523,14 +491,10 @@ void popupFilename(char *filebuf, int filebuf_size){
                 0xbfbfbf
             );
         }
-        vp_funcs->copy(vp);
+        vp_copy(vp);
 
-        char c = vp_funcs->getc(vp);
+        char c = vp_getc(vp);
         if(c != 0){
-            print_arg("Got %c\n", c);
-            print_serial("Print Progress:");
-            print_serial(filebuf);
-            print_serial("\n");
             switch(c){
                 case 10:
                     getting_filename = 0;
@@ -545,19 +509,19 @@ void popupFilename(char *filebuf, int filebuf_size){
                     break;
             }
         }
-        vp_funcs->copy(vp);
+        vp_copy(vp);
     }
 }
 
 int handleRightClickMenu(struct RightClickMenu *rightClickMenu){
     int mouse_entry_hover = -1;
     if(
-        mouseStatus->pos.x - vp->loc.x >= rightClickMenu->x-2 &&
-        mouseStatus->pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
-        mouseStatus->pos.y - vp->loc.y >= rightClickMenu->y-2 &&
-        mouseStatus->pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
+        mouseStatus.pos.x - vp->loc.x >= rightClickMenu->x-2 &&
+        mouseStatus.pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
+        mouseStatus.pos.y - vp->loc.y >= rightClickMenu->y-2 &&
+        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
     ){
-        mouse_entry_hover = ((mouseStatus->pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
+        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
         if(mouse_entry_hover != 1 && mouse_entry_hover != 2) mouse_entry_hover = -1;
     }
     static char filename_buf[50];
@@ -570,10 +534,10 @@ int handleRightClickMenu(struct RightClickMenu *rightClickMenu){
     popupFilename(filename_buf, sizeof(filename_buf));
 
     if(mouse_entry_hover == 1){
-        fmkfile(filename_buf, 0x1000);
+        creat(filename_buf);
     }
     if(mouse_entry_hover == 2){
-        fmkdir(filename_buf);
+        creatdir(filename_buf);
     }
 
     return 0;

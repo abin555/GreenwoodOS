@@ -25,3 +25,11 @@ void yield(){
 	eax = 0x34;
 	asm("int 0x80");
 }
+
+void task_lock(int state){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) state;
+	eax = 0x32;
+	asm("int 0x80");
+}

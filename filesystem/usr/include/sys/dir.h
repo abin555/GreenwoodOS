@@ -21,5 +21,6 @@ struct DirectoryListing getDirectoryListing(char *path);
 int changeDirectory(char *change);
 char *getDirectory();
 void printDirectoryContents(char *path);
+void creatdir(char *path);
 
 #endif

@@ -1,5 +1,7 @@
 #include "mouse.h"
 #include "multitasking.h"
+#include "vfs.h"
+#include "sysfs.h"
 
 struct MouseStatus mouseStatus;
 
@@ -9,6 +11,16 @@ void mouse_init(){
     mouseStatus.buttons.right = 0;
     mouseStatus.buttons.left = 0;
     mouseStatus.buttons.middle = 0;
+}
+
+void *mouse_createCDEV(){
+    print_serial("[Mouse] Generating CDEV\n");
+    struct SysFS_Chardev *mouse_cdev = sysfs_createCharDevice(
+        (char *) &mouseStatus,
+        sizeof(struct MouseStatus),
+        CDEV_READ
+    );
+    return (void *) mouse_cdev;
 }
 
 void mouse_callEventHandler(){
