@@ -1,12 +1,9 @@
 qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
--audiodev pa,id=Sound \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
 -drive id=disk3,file=fstest.img,if=none,format=raw \
 -device ahci,id=ahci \
 -device ide-hd,drive=disk3,bus=ahci.0,bootindex=2 \
 -device ide-hd,drive=disk,bus=ahci.1,bootindex=1 \
--audiodev pa,id=speaker -machine pcspk-audiodev=speaker \
--audio pa,model=ac97 \
 -usb \
 -device usb-ehci,id=ehci \
 -rtc base=localtime,clock=host \

@@ -1,6 +1,5 @@
 #ifndef SYS_VP_H
 #define SYS_VP_H
-#include <stdbool.h>
 #include <stdint.h>
 
 struct Location {
@@ -27,8 +26,8 @@ struct Viewport {
     uint32_t *backbuf;
     uint32_t buf_size;
     uint8_t resizeable;
-    bool minimized;
-    bool open;
+    char minimized;
+    char open;
     int minimized_w;
     int minimized_h;
     char *title;
@@ -37,8 +36,8 @@ struct Viewport {
     char ascii;
 
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
-	bool click_events_enabled;
-    bool transparent;
+	char click_events_enabled;
+    char transparent;
 };
 
 struct Viewport *vp_open(int w, int h, char *title);

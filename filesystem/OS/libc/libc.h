@@ -9,7 +9,7 @@ typedef unsigned short uint16_t;
 typedef unsigned char uint8_t;
 
 #ifndef __cplusplus
-typedef char bool;
+#define bool char
 #define true 1
 #define false 0
 #endif
@@ -154,6 +154,8 @@ void addMouseEventHandler(void (*handler)(void));
 void freeRegion(void *addr, uint32_t size);
 void addEndCallback(void (*handler)(void));
 
+#ifndef SYS_VP_H
+
 struct Location {
     int x;
     int y;
@@ -204,6 +206,8 @@ struct ViewportFunctions {
 
 struct ViewportFunctions *viewport_get_funcs();
 struct CONSOLE *console_open_vp(struct Viewport *vp);
+
+#endif
 
 struct RealTimeClock {
 	unsigned char second;

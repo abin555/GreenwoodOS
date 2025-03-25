@@ -202,6 +202,7 @@ int vfs_open(char *path, int flags){
 
 void vfs_close(int fd){
     if(fd == -1) return;
+    print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
         pipe_close(file_idx->inode.fs.pipe);

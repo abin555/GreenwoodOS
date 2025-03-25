@@ -1,6 +1,14 @@
-#include "libc.h"
+#include <sys/vp.h>
+#include <sys/task.h>
+#include <stdbool.h>
+#include <sys/io.h>
+#include <sys/memory.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 #include "3D_types.h"
 
+#define NULL 0
 #define PI 3.14159263f
 #define PI2 6.283
 
@@ -20,9 +28,6 @@ float edgeFunction(Vector3 *a, Vector3 *b, Vector3 *c);
 void drawTriangle(TriangleExpl triangle, uint32_t color);
 void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color);
 void printTriangle(TriangleExpl tri);
-float atof(char *arr);
-int atoi(char *arr);
-void memset(void *mem, char v, int size);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 float sin(float x);
 float cos(float x);
@@ -74,7 +79,6 @@ uint32_t local_vp_buf[WIDTH * HEIGHT];
 
 int main(int argc, char** argv){
   set_schedule(ALWAYS);
-  vp_funcs = viewport_get_funcs();
 
   fNear = 0.1f;
   fFar = 10.0f;
@@ -101,7 +105,9 @@ int main(int argc, char** argv){
   TriangleRef *triangleBuf;
 
   if(argc >= 2){
-    if(!fexists(argv[1])){
+    int testOpen = open(argv[1], O_READ);
+    close(testOpen);
+    if(testOpen == -1){
       return 1;
     }
     obj = loadObjFile(argv[1]);
@@ -110,12 +116,12 @@ int main(int argc, char** argv){
     return 1;
   }
 
-  vp = vp_funcs->open(WIDTH, HEIGHT, argv[1]);
+  vp = vp_open(WIDTH, HEIGHT, argv[1]);
   vp->transparent = 1;
   vp_buf = local_vp_buf;//requestRegion(WIDTH * HEIGHT * sizeof(uint32_t));
-  vp_funcs->set_buffer(vp, vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
-  vp_funcs->add_event_handler(vp, event_handler);
-  vp_funcs->copy(vp);
+  vp_set_buffer(vp, vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
+  vp_add_event_handler(vp, event_handler);
+  vp_copy(vp);
 
 
   //addEndCallback(endCallback);
@@ -207,7 +213,7 @@ int main(int argc, char** argv){
       }
       //
       //drawTriangle(tri, 0xFFFFFF);
-      if(SlowRender) vp_funcs->copy(vp);
+      if(SlowRender) vp_copy(vp);
     }
     
     
@@ -227,7 +233,7 @@ int main(int argc, char** argv){
       break;
     }
     */
-    vp_funcs->copy(vp);
+    vp_copy(vp);
 
     char c = vp->ascii;
     switch(c){
@@ -293,15 +299,12 @@ int main(int argc, char** argv){
         break; 
       case 'z':
         Zbuffering = !Zbuffering;
-        print_arg("Z Buffering: %d\n", Zbuffering);
         break;
       case 'x':
         Outlines = !Outlines;
-        print_arg("Outlines: %d\n", Outlines);
         break;
       case 'v':
         SlowRender = !SlowRender;
-        print_arg("Slow Render: %d\n", SlowRender);
         break;
       case '1':
         fFov -= 0.5f;
@@ -384,8 +387,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 }
 
 void endCallback(){
-  print("3D render ending & cleaning\n");
-  freeRegion(region, region_size);
+  memory_returnRegion(region, region_size);
   //freeRegion(vp_buf, WIDTH * HEIGHT * sizeof(uint32_t));
 }
 
@@ -774,12 +776,6 @@ void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t col
 	}
 }
 
-void memset(void *mem, char v, int size){
-	for(int i = 0; i < size; i++){
-		((char *) mem)[i] = v;
-	}
-}
-
 void multiplyMatrixVector(Vector3 *vi, Vector3 *vo, Matrix4x4 *m){
   vo->x = vi->x * m->m[0][0] + vi->y * m->m[1][0] + vi->z * m->m[2][0] + m->m[3][0];
   vo->y = vi->x * m->m[0][1] + vi->y * m->m[1][1] + vi->z * m->m[2][1] + m->m[3][1];
@@ -812,53 +808,6 @@ float sqrtf(float x) {
   return u.x;
 }
 
-float atof(char *arr){
-  float val = 0;
-  char afterdot = 0;
-  float scale = 1;
-  char neg = 0;
-  while(*arr == ' ') arr++;
-
-  if(*arr == '-'){
-    arr++;
-    neg = 1;
-  }
-  while(*arr != 0 && *arr != ' ' && *arr != '\n'){
-    if(afterdot){
-      scale = scale / 10;
-      val = val + (*arr - '0')*scale;
-    }
-    else{
-      if(*arr == '.'){
-        afterdot++;
-      }
-      else{
-        val = val * 10.0 + (*arr - '0');
-      }
-    }
-    arr++;
-  }
-  //print_arg("ATOF: %x\n", val);
-  if(neg) return -val;
-  return val;
-}
-
-int atoi(char *arr){
-  int val = 0;
-  char neg;
-  if(*arr == '-'){
-    arr++;
-    neg = 1;
-  }
-  while(*arr != 0 && *arr != ' ' && *arr != '\n'){
-    val = val * 10 + (*arr - '0');
-    arr++;
-  }
-  //print_arg("ATOI: %d\n", val);
-  if(neg) return -val;
-  return val;
-}
-
 uint32_t last_alloc = 0x6000;
 
 void *alloc(int size){
@@ -868,21 +817,21 @@ void *alloc(int size){
 }
 
 Object loadObjFile(char *filename){
-  print_arg("Loading Object File %s\n", (uint32_t) filename);
+  printf("Opening %s\n", filename);
   Object obj = {0};
-  struct FILE *obj_file = fopen(filename);
-  if(!obj_file){
-    print("File does not exist!\n");
+  int obj_file = open(filename, O_READ);
+  if(obj_file == -1){
+    printf("File does not exist!\n");
     return obj;
   };
-  int size = fsize(obj_file);
+  int size = lseek(obj_file, 0, 2);
+  lseek(obj_file, 0, 0);
   region_size = sizeof(Vertex) * 10000 + sizeof(TriangleRef) * 10000 + WIDTH * HEIGHT * sizeof(ZBuffType) + size;
-  region = requestRegion(region_size);
+  region = memory_requestRegion(region_size);
   last_alloc = (uint32_t) region;
-  print_arg("File is %d bytes\n", size);
   char *filebuf = alloc(size);
-  fcopy(obj_file, filebuf, size);
-  fclose(obj_file);
+  read(obj_file, filebuf, size);
+  close(obj_file);
   char *scan = filebuf;
   
   
@@ -923,7 +872,8 @@ Object loadObjFile(char *filename){
         coord = atof(scan);
         vertices[obj.numVertex].z = coord;
         //print_arg("Z: %x\n", *((uint32_t *) &coord));
-        print("");
+        //print("");
+        write(0, NULL, 0);
         obj.numVertex++;
         break;
       }
@@ -959,26 +909,10 @@ Object loadObjFile(char *filename){
     scan++;
     continue;
   }
-  print("Loaded object!\n");
-  print_arg(" - %d verticies\n", obj.numVertex);
-  print_arg(" - %d triangles\n", obj.numTriangle);
   
   return obj;
 }
 
-void printTriangle(TriangleExpl tri){
-  print_arg("v0 - X: %x ", tri.v0.x);
-  print_arg("Y: %x ", tri.v0.y);
-  print_arg("Z: %x\n", tri.v0.z);
-  
-  print_arg("v1 - X: %x ", tri.v1.x);
-  print_arg("Y: %x ", tri.v1.y);
-  print_arg("Z: %x\n", tri.v1.z);
-  
-  print_arg("v2 - X: %x ", tri.v2.x);
-  print_arg("Y: %x ", tri.v2.y);
-  print_arg("Z: %x\n", tri.v2.z);
-}
 float edgeFunction(Vector3 *a, Vector3 *b, Vector3 *c)
 { return (c->x - a->x) * (b->y - a->y) - (c->y - a->y) * (b->x - a->x); }
 

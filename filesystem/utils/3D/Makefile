@@ -13,8 +13,4 @@ all:
 	ld $(LDFLAGS) $(OBJ) $(LIBS) -o $(PROG).elf
 	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
 
-	$(CC) $(CFLAGS) -g mainvp.c -o 3Dvp.o
-	ld $(LDFLAGS) 3Dvp.o $(LIBS) -o 3Dvp.elf
-	objcopy -O binary --only-section=.text 3Dvp.elf 3Dvp.exe
-#	rm $(OBJ)
-#	rm $(PROG).elf
+	i386-gwos-gcc -O0 mainvp.c -o 3Dvp.elf

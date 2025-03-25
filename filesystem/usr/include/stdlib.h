@@ -17,8 +17,9 @@ void *calloc(size_t n, size_t size);
 void *realloc(void  *ptr, size_t size);
 void *reallocarray(void *ptr, size_t n, size_t size);
 char *getenv(const char *name);
+float atof(const char *arr);
 int atoi(const char *nptr);
 int abs(int i);
-
+char *itoa(int n, char *buf, int radix);
 
 #endif
