@@ -24,8 +24,6 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	eax = 0x2E;
 	asm("int 0x80");
 	struct CONSOLE *console = (struct CONSOLE *) eax;
-	stdout->console = console;
-	stderr->console = console;
 	return console;
 }
 

@@ -2,19 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/io.h>
-#include <sys/console.h>
 #include <internal/stdio.h>
 
 #define MAX_FILE_LISTING 10
 struct FILE **fileListing;
 int openFiles;
-
-FILE *internal_createFileConsole(struct CONSOLE *console){
-	FILE *file = malloc(sizeof(FILE));
-	file->file_type = FILE_console;
-	file->console = console;
-	return file;
-}
 
 FILE *internal_createFileFD(int fd){
 	FILE *file = malloc(sizeof(FILE));
@@ -27,8 +19,7 @@ void init_stdio(){
 	fileListing = malloc(sizeof(FILE *) * MAX_FILE_LISTING);
 	memset(fileListing, 0, sizeof(fileListing));
 	fileListing[0] = NULL;
-	//fileListing[1] = internal_createFileConsole(console_get_current());
-	fileListing[1] = internal_createFileFD(open("/-/dev/serial", O_WRITE));
+	fileListing[1] = internal_createFileFD(open("/-/dev/console", O_WRITE));
 	fileListing[2] = fileListing[1];
 	openFiles = 3;
 }
@@ -41,14 +32,12 @@ int fprintf(FILE *file, const char *fmt, ...){
 	char *s_arg;
 	char *b;
 	if(file == NULL) return 0;
-	if(file->file_type == FILE_console){
-		console_print(file->console, (char *) fmt);
-	}
-	else{
+	if(file->file_type == FILE_fd){
 		//write(file->fd, (char *) fmt, strlen(fmt)+1);
 		while(*fmt != '\0'){
 			if(*fmt != '%'){
-				write(file->fd, fmt++, 1);
+				write(file->fd, (void *) fmt, 1);
+				fmt++;
 			}
 			else{
 				fmt++;
@@ -85,14 +74,11 @@ int printf(const char *fmt, ...){
 	char *s_arg;
 	char *b;
 	if(stdout == NULL) return 0;
-	if(stdout->file_type == FILE_console){
-		console_print(stdout->console, (char *) fmt);
-	}
-	else{
-		//write(file->fd, (char *) fmt, strlen(fmt)+1);
+	if(stdout->file_type == FILE_fd){
 		while(*fmt != '\0'){
 			if(*fmt != '%'){
-				write(stdout->fd, fmt++, 1);
+				write(stdout->fd, (void *) fmt, 1);
+				fmt++;
 			}
 			else{
 				fmt++;
@@ -123,10 +109,7 @@ int printf(const char *fmt, ...){
 
 int fputs(const char *s, FILE *file){
 	if(file == NULL) return 0;
-	if(file->file_type == FILE_console){
-		console_print(file->console, (char *) s);
-	}
-	else{
+	if(file->file_type == FILE_fd){
 		write(file->fd, (char *) s, strlen(s)+1);
 	}
 }

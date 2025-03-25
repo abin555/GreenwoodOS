@@ -1,7 +1,29 @@
 #include "console.h"
+#include "sysfs.h"
+#include "multitasking.h"
 
 struct CONSOLE consoles[MAX_CONSOLE] = {0};
 struct CONSOLE *kernel_console = NULL;
+
+void console_cdev_write_callback(void *cdev, int offset, int nbytes, int *head){
+    struct SysFS_Chardev *bg = cdev;
+	bg->buf[offset+nbytes] = 0;
+	print_console(tasks[task_running_idx].console, bg->buf + offset);
+    *head = 0;
+}
+
+char console_hold_buf[0xFF];
+
+void *console_createCDEV(){
+	print_serial("[CONSOLE] Generating CDEV\n");
+	struct SysFS_Chardev *console_cdev = sysfs_createCharDevice(
+		console_hold_buf,
+		sizeof(console_hold_buf),
+		CDEV_WRITE
+	);
+	sysfs_setCallbacks(console_cdev, console_cdev_write_callback, NULL);
+	return (void *) console_cdev;
+}
 
 void console_init(){
 	print_serial("[CONSOLE] Initialization\n");

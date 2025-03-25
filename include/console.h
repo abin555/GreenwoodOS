@@ -57,4 +57,6 @@ void shiftConsoleUp(struct CONSOLE *console);
 void console_putLine(struct CONSOLE *console, uint32_t places);
 void console_drawFull(struct CONSOLE *console);
 
+void *console_createCDEV();
+
 #endif

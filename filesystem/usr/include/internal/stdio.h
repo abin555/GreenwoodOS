@@ -3,11 +3,9 @@
 
 struct FILE {
 	enum {
-		FILE_console,
 		FILE_fd
 	} file_type;
 	union {
-		struct CONSOLE *console;
 		int fd;
 	};
 };

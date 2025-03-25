@@ -7,6 +7,7 @@
 #include "audio_cdev.h"
 #include "serial.h"
 #include "mouse.h"
+#include "console.h"
 
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
@@ -31,6 +32,7 @@ struct SysFS_Inode *sysroot_init(){
     );
     sysfs_setCallbacks(serial_cdev, sysroot_serial_write_callback, NULL);
     struct SysFS_Inode *serial = sysfs_mkcdev("serial", serial_cdev);
+    struct SysFS_Inode *console = sysfs_mkcdev("console", console_createCDEV());
     
     struct SysFS_Inode *audio = sysfs_mkcdev("audio", audio_createCDEV());
     struct SysFS_Inode *mouse = sysfs_mkcdev("mouse", mouse_createCDEV());
@@ -50,6 +52,7 @@ struct SysFS_Inode *sysroot_init(){
     );
 
     sysfs_addChild(devs, serial);
+    sysfs_addChild(devs, console);
     sysfs_addChild(systems, audio);
     sysfs_addChild(systems, mouse);
     sysfs_addChild(systems, viewport);
