@@ -30,7 +30,6 @@ void drawTriangle(TriangleExpl triangle, uint32_t color);
 void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color);
 void printTriangle(TriangleExpl tri);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
-float sqrtf(float x);
 void *alloc(int size);
 float min3(float a, float b, float c);
 float max3(float a, float b, float c);
@@ -41,9 +40,6 @@ int min(int a, int b);
 Vector3 camera = {0.0f, 0.0f, -3.0f};
 Vector3 camera_rot = {0.0f, 0.0f, 0.0f};
 Vector3 light = {0.5f, -1.0f, -1.0f};
-
-struct WINDOW *window;
-uint32_t *win_buf;
 
 Matrix4x4 ProjectionMatrix = {0};
 Matrix4x4 MatRotZ = {0};
@@ -142,7 +138,7 @@ int main(int argc, char** argv){
     }
 
 
-    float l = sqrtf(light.x*light.x + light.y*light.y + light.z*light.z);
+    float l = sqrt(light.x*light.x + light.y*light.y + light.z*light.z);
     light_normalized.x = light.x / l; 
     light_normalized.y = light.y / l; 
     light_normalized.z = light.z / l;
@@ -500,7 +496,7 @@ Vector3 calculateNormal(TriangleExpl triangle){
   normal.y = line1.z*line2.x - line1.x*line2.z;
   normal.z = line1.x*line2.y - line1.y*line2.x;
 
-  float l = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
+  float l = sqrt(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
   normal.x /= l; normal.y /= l; normal.z /= l;
 
   return normal;
@@ -780,20 +776,6 @@ TriangleExpl triangleRefToExpl(TriangleRef *tri){
   triangle.v1 = *tri->v1;
   triangle.v2 = *tri->v2;
   return triangle;
-}
-
-float sqrtf(float x) {
-  union {
-    int i;
-    float x;
-  } u;
-  u.x = x;
-  u.i = (1<<29) + (u.i >> 1) - (1 << 22);
-
-  u.x = u.x + x/u.x;
-  u.x = 0.25f*u.x + x/u.x;
-
-  return u.x;
 }
 
 uint32_t last_alloc = 0x6000;

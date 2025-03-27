@@ -22,5 +22,7 @@ int atoi(const char *nptr);
 int abs(int i);
 char *itoa(int n, char *buf, int radix);
 void exit(int code);
+void srand(unsigned int seed);
+int rand();
 
 #endif

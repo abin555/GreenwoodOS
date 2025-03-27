@@ -13,14 +13,8 @@ struct LocalFlock {
 } typedef LocalFlock;
 
 Boid* newBoid(Vector2 origin, Vector2 velocity, float rotation, float angularVelocity) {
-    Vector2* positions = malloc(sizeof(Vector2)*3);
-
-    positions[0] = (Vector2){0.0f, -5.0f};
-    positions[1] = (Vector2){-5, 5};
-    positions[2] = (Vector2){5, 5};
-
     Boid* boid = malloc(sizeof(Boid));
-    *boid = (Boid){origin, 0, positions, velocity, angularVelocity, 0.0f};
+    *boid = (Boid){origin, 0, {(Vector2){0.0f, -0.5f}, (Vector2){-5, 5}, (Vector2){5, 5}}, velocity, angularVelocity, 0.0f};
 
     rotateBoid(boid, rotation);
 
@@ -105,8 +99,7 @@ float getSeparation(Boid* boid, LocalFlock localFlock) {
     return INVERSE(closestLocalRotation);
 }
 
-void updateBoid(Boid* boid, Boid** flock, int flockSize) {
-    double now = 0.0f;
+void updateBoid(Boid* boid, Boid** flock, int flockSize, double now) {
     double deltaTime = now - boid->lastUpdate;
 
     LocalFlock localFlock = getLocalFlock(boid, flock, flockSize);
@@ -153,15 +146,17 @@ void updateBoid(Boid* boid, Boid** flock, int flockSize) {
 
     Vector2 velocity = {sin(boid->rotation)*boid->velocity.x, -cos(boid->rotation)*boid->velocity.y};
     boid->origin = (Vector2){boid->origin.x + velocity.x * deltaTime, boid->origin.y + velocity.y * deltaTime};
-    boid->origin = (Vector2){MODULO(boid->origin.x, 800), MODULO(boid->origin.y, 450)};
+    boid->origin = (Vector2){MODULO(boid->origin.x, 400), MODULO(boid->origin.y, 400)};
 
     boid->lastUpdate = now;
 }
 
 void rotateBoid(Boid* boid, float theta) {
+    if(boid == NULL) return;
     float rotationDelta = boid->rotation + theta;
 
     for (int i = 0; i < 3; i++) {
+        if(boid->positions == NULL) return;
         float x = boid->positions[i].x;
         float y = boid->positions[i].y;
         boid->positions[i].x = cos(theta) * x - sin(theta) * y;
@@ -179,4 +174,5 @@ void drawBoid(Boid* boid, struct Viewport *vp) {
     }
 
     //DrawTriangle(screenPositions[0], screenPositions[1], screenPositions[2], BLUE);
+    drawTriangle(vp, screenPositions[0], screenPositions[1], screenPositions[2], 0xFFFFFF);
 }

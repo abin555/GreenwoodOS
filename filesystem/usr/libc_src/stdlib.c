@@ -30,7 +30,13 @@ void clean_stdlib(){
 
 void *malloc(size_t size){
     void *addr = heap.head;
-    heap.head += size;
+    heap.head += size+0x10;
+    if(heap.head >= memory.region_base + memory.region_size){
+      printf("Alloc Error Out of Memory!\n");
+      while(1){
+
+      }
+    }
     return addr;
 }
 
@@ -38,10 +44,15 @@ void *calloc(size_t nmemb, size_t size){
 	return malloc(nmemb * size);
 }
 
+void free(void *mem){
+  return;
+}
+
 #include <string.h>
 void *realloc(void *ptr, size_t size){
 	void *new_alloc = malloc(size);
 	memcpy(new_alloc, ptr, size);
+  free(ptr);
 	return new_alloc;
 }
 
@@ -144,4 +155,19 @@ void exit(int code){
 	eax = 0x1F;
 	asm("int 0x80");
 	return;
+}
+
+void srand(unsigned int seed){
+	register unsigned int eax asm("eax");
+	register unsigned int ebx asm("ebx");
+	ebx = seed;
+	eax = 0x1D;
+	asm("int 0x80");
+}
+
+int rand(){
+	register unsigned int eax asm("eax");
+	eax = 0x1E;
+	asm("int 0x80");
+	return eax;
 }
