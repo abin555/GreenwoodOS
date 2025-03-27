@@ -1,6 +1,3 @@
 [submodule "Toolchain"]
 	path = Toolchain
 	url = git@github.com:abin555/GreenwoodOS-Toolchain.git
-[submodule "filesystem/usr/openlibm"]
-	path = filesystem/usr/openlibm
-	url = https://github.com/JuliaMath/openlibm.git
