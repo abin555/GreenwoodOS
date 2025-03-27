@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 #include "3D_types.h"
 
 #define NULL 0
@@ -29,8 +30,6 @@ void drawTriangle(TriangleExpl triangle, uint32_t color);
 void fillTriangle(TriangleExpl triangle, TriangleExpl *unprojected, uint32_t color);
 void printTriangle(TriangleExpl tri);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
-float sin(float x);
-float cos(float x);
 float sqrtf(float x);
 void *alloc(int size);
 float min3(float a, float b, float c);
@@ -514,17 +513,6 @@ void drawTriangle(TriangleExpl triangle, uint32_t color){
 }
 
 #define modd(x, y) ((x) - (int)((x) / (y)) * (y))
-
-float cos(float x)
-{
-  x = modd(x, PI2);
-  return 1 - ((x * x) / (2)) + ((x * x * x * x) / (24)) - ((x * x * x * x * x * x) / (720)) + ((x * x * x * x * x * x * x * x) / (40320)) - ((x * x * x * x * x * x * x * x * x * x) / (3628800)) + ((x * x * x * x * x * x * x * x * x * x * x * x) / (479001600));
-
-}
-
-float sin(float x){
-  return cos(x - (PI / 2));
-}
 
 int abs(int x){
   if(x < 0) return x * -1;

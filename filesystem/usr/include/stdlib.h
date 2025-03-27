@@ -21,5 +21,6 @@ float atof(const char *arr);
 int atoi(const char *nptr);
 int abs(int i);
 char *itoa(int n, char *buf, int radix);
+void exit(int code);
 
 #endif

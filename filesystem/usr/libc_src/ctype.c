@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <limits.h>
 
+/*
 int (isalnum)(int c) {
 	return (_Ctype[c] & (_DI|_LO|_UP|_XA));
 }
@@ -37,7 +38,7 @@ int (isupper)(int c) {
 int (isxdigit)(int c) {
 	return (_Ctype[c] & (_DI|_LO|_UP|_XA));
 }
-
+*/
 int tolower(int c){
 	if(c >= 'A' && c <= 'Z')
 		return c - 'A';

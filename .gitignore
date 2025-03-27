@@ -20,3 +20,4 @@ iso/*
 *.exe
 *.disassemble
 filesystem/AJB
+*.so

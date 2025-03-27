@@ -136,3 +136,12 @@ char* itoa(int k, char *buf, int radix){
 
     return buf;
 }
+
+void exit(int code){
+	register unsigned int eax asm("eax");
+	register unsigned int ebx asm("ebx");
+	ebx = (unsigned int) code;
+	eax = 0x1F;
+	asm("int 0x80");
+	return;
+}
