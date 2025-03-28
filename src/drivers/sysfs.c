@@ -120,12 +120,12 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
     
     struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
     if(sysfs->type != SysFS_Chardev){
-        print_serial("[SYSFS] Wrong FS device\n");
+        //print_serial("[SYSFS] Wrong FS device\n");
         return 0;
     }
     struct SysFS_Chardev *cdev = sysfs->data.chardev;
     if((cdev->perms & CDEV_WRITE) == 0){
-        print_serial("[SYSFS] No write permission");
+        //print_serial("[SYSFS] No write permission");
         return 0;
     };
     //print_serial("[SYSFS] Start Writing\n");
@@ -143,14 +143,14 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
     if(root == NULL) return NULL;
     if(path == NULL) return root;
 
-    print_serial("[SYSFS] Finding \"%s\" in \"%s\"\n", path, root->name);
-    sysfs_debugTree(root, 0);
+    //print_serial("[SYSFS] Finding \"%s\" in \"%s\"\n", path, root->name);
+    //sysfs_debugTree(root, 0);
     if(path[0] == 0){
         return root;
     }
 
     if(!strcmp(root->name, path)){
-        print_serial("[SYSFS] Found %s\n", root->name);
+        //print_serial("[SYSFS] Found %s\n", root->name);
         return root;
     }
 
@@ -161,13 +161,13 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
     char buf[100];
     memset(buf, 0, 100);
     memcpy(buf, path, part_len);
-    print_serial("%s %d\n", buf, part_len);
+    //print_serial("%s %d\n", buf, part_len);
 
 
     if(root->type == SysFS_Directory){
         for(int i = 0; i < root->data.dir.numChildren; i++){
             if(root->data.dir.children[i] == NULL) continue;
-            print_serial("[SYSFS] Checking #%d - %s=%s\n", i, root->data.dir.children[i]->name, buf);
+            //print_serial("[SYSFS] Checking #%d - %s=%s\n", i, root->data.dir.children[i]->name, buf);
             if(!strcmp(buf, root->data.dir.children[i]->name)){
                 if(root->data.dir.children[i]->type == SysFS_Directory){
                     struct SysFS_Inode *inode_candidate = sysfs_find(root->data.dir.children[i], path+part_len+1);

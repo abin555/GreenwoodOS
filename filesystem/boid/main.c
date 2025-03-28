@@ -65,7 +65,7 @@ int main(int argc, char **argv){
         );
     }
  
-    FILE *serial = fopen("/-/dev/serial", "w");
+    //FILE *serial = fopen("/-/dev/serial", "w");
 
     running = true;
     int ticks = 0;
@@ -84,9 +84,8 @@ int main(int argc, char **argv){
             vp_copy(main_vp);
         }
         ticks++;
-        yield();
     }
-    fclose(serial);
+    //fclose(serial);
 
     for(int i = 0; i < BOIDS; i++){
         free(flock[i]);

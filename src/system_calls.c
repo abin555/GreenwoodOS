@@ -318,7 +318,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x2E:{
-			print_serial("Syscall 0x2E\n");
 			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu.ebx);
 			cpu_state.eax = (uint32_t) console;
 			task->console = console;

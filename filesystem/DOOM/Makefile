@@ -81,11 +81,6 @@ START = start.o
 
 build: $(SRCS) $(START)
 	ld $(LDFLAGS) $(START) $(SRCS) $(LIBS) -o $(PROG).elf
-	objcopy -O binary --only-section=.text $(PROG).elf $(PROG).exe
-	objcopy --only-keep-debug $(PROG).elf $(PROG).sym
-
-build_linux:
-	gcc doom_linux.c -o doom_linux.elf
 
 clean:
 	rm $(SRCS)

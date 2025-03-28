@@ -1,4 +1,5 @@
 #include "stacktrace.h"
+#include "memory.h"
 
 struct stackframe;
 struct stackframe {
@@ -13,6 +14,9 @@ struct stackframe {
 
 void print_stack_trace(uint32_t ebp, unsigned int maxFrames){
     struct stackframe *stk = (struct stackframe *) ebp;
+    if(!MEM_virtualIsValid((uint32_t) stk)){
+      return;
+    }
     print_serial("Stack trace:\n");
     for(unsigned int frame = 0; stk && frame < maxFrames; ++frame)
     {

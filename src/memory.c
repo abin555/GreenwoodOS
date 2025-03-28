@@ -191,6 +191,19 @@ int calculateBlocks(uint32_t size){
 	return size / PAGE_SIZE + small_alloc;
 }
 
+int MEM_virtualIsValid(uint32_t address){
+	uint32_t masked_addr = address & 0xFFC00000;
+	print_serial("[MEM] Checking for VALID memory 0x%x -> 0x%x\n", address, masked_addr);
+	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
+		if(MEMORY_REGIONS[i].virtual_addr == masked_addr){
+			print_serial("[MEM] Region %d is valid\n", i);
+			return 1;
+		}
+	}
+	print_serial("[MEM] No Valid Region!\n");
+	return 0;
+}
+
 int MEM_findRegionIdx(uint32_t size){
 	int needed_blocks = calculateBlocks(size);
 	print_serial("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);

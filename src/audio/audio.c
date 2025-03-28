@@ -54,7 +54,7 @@ void audio_init(){
 
     sound_buffer_refilling_info = (struct sound_buffer_refilling_info_t *) malloc(sizeof(struct sound_buffer_refilling_info_t));
     pcm_data = (uint8_t *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(SIZE_OF_PCM_DATA_BUFFER), SIZE_OF_PCM_DATA_BUFFER, 0, OTHER));
-    MEM_printRegions();
+    //MEM_printRegions();
 }
 
 void audio_set_volume(uint8_t volume){

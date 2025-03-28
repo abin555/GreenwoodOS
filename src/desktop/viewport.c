@@ -191,7 +191,7 @@ bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
 
 void viewport_init_sys(struct ViewportList *viewport_list){
     if(viewport_list == NULL){
-        print_serial("[VIEWPORT] List is null!\n");
+        //print_serial("[VIEWPORT] List is null!\n");
     }
     viewport_list->max = MAX_VIEWPORTS;
     viewport_list->count = 0;
@@ -202,7 +202,7 @@ void viewport_init_sys(struct ViewportList *viewport_list){
     uint32_t addr = MEM_reserveRegionBlock(block, MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t), 0, FRAMEBUFFER);
 
     viewport_list->frontbuf_region = (uint32_t *) addr;
-    MEM_printRegions();
+    //MEM_printRegions();
 
     for(int i = 0; i < viewport_list->max; i++){
         viewport_list->viewports[i].open = false;
@@ -222,13 +222,13 @@ struct Viewport *viewport_indirect_open(int w, int h, char *title){
 }
 
 struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
-    print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
+    //print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
     if(w > (int) fb_width || h > (int) fb_height || w < 0 || h < 0) return NULL;
     int element_idx = -1;
     int viewport_idx = -1;
     for(int i = 0; i < viewport_list->max; i++){
         if(viewport_list->elements[i].inUse == false){
-            print_serial("[VIEWPORT] Element %d is not in use\n", i);
+            //print_serial("[VIEWPORT] Element %d is not in use\n", i);
             element_idx = i;
             viewport_list->count++;
             break;
@@ -245,7 +245,7 @@ struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct Viewport
     viewport_list->elements[element_idx].vp = &viewport_list->viewports[viewport_idx];
     
     viewport_list->viewports[viewport_idx] = make_viewport(w, h, title);
-    print_serial("[VIEWPORT] Opened - Elem: %d - VP: %d & %x Count: %d\n", element_idx, viewport_idx, viewport_list->elements[element_idx].vp, viewport_list->count);
+    //print_serial("[VIEWPORT] Opened - Elem: %d - VP: %d & %x Count: %d\n", element_idx, viewport_idx, viewport_list->elements[element_idx].vp, viewport_list->count);
     viewport_move_element_to_front(viewport_list, element_idx);
     return &viewport_list->viewports[viewport_idx];
 }
@@ -404,7 +404,7 @@ void viewport_copy_buffer(struct Viewport *viewport){
 
 void viewport_add_event_handler(struct Viewport *viewport, void (*handler)(struct Viewport *, VIEWPORT_EVENT_TYPE)){
     if(viewport == NULL || handler == NULL) return;
-    print_serial("[VIEWPORT] %s (SLOT %d) added event handler 0x%x\n", viewport->title, viewport->owner_program_slot, (uint32_t) handler);
+    //print_serial("[VIEWPORT] %s (SLOT %d) added event handler 0x%x\n", viewport->title, viewport->owner_program_slot, (uint32_t) handler);
     viewport->event_handler = handler;
 }
 

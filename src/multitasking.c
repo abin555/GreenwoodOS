@@ -299,6 +299,7 @@ void task_callback(){
         }
     }
     if(!task_available){
+        //print_serial("[TASK] Somehow, there are no tasks available...\n");
         return;
     }
     int8_t next_idx = running_idx + 1;

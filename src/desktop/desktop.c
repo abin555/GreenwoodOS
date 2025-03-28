@@ -6,7 +6,7 @@
 //#define BACKGROUND_FILE "A/image/bliss.tga\0"
 //#define BACKGROUND_FILE "A/image/Eibsee.tga\0"
 
-#define numIcons 10
+#define numIcons 0
 
 void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, struct WINDOW *window){
     if(bitmap.bitmap == NULL || window == NULL) return;
@@ -179,7 +179,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/utils/explorer/explorer.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'C'){
-        exec("/A/utils/clock/clock.exe", 0, NULL);
+        exec("/A/utils/clock/clock.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'L'){
         exec("/A/lisp/LISP.exe", 0, NULL);

@@ -117,7 +117,7 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     result.root = root;
     result.type = result.root->type;
     result.drive = result.root->drive;
-    print_serial("[VFS] Following link to %s\n", path);
+    //print_serial("[VFS] Following link to %s\n", path);
 
     //char *walker_start = path;
     //char *walker_end = path;
@@ -161,32 +161,32 @@ int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
 }
 
 int vfs_open(char *path, int flags){
-    print_serial("[VFS] Opening %s\n", path);
+    //print_serial("[VFS] Opening %s\n", path);
     if(path == NULL) return -1;
     char driveLetter = path[0];
     path += 2;
     struct VFS_Inode *root = vfs_findRoot(driveLetter);
     if(root->drive != NULL){
-        print_serial("[VFS] Drive root: %c\n", root->drive->identity);
+        //print_serial("[VFS] Drive root: %c\n", root->drive->identity);
     }
     else{
-        print_serial("[VFS] Drive root: %c\n", root->nonDriveLetter);
+        //print_serial("[VFS] Drive root: %c\n", root->nonDriveLetter);
     }
     if(root == NULL){
-        print_serial("[VFS] Unable to find root: \"%s\"\n", path);
+        //print_serial("[VFS] Unable to find root: \"%s\"\n", path);
         goto fail;
     }
     struct VFS_Inode inode = vfs_followLink(root, path);
     inode.flags = flags;
     if(inode.isValid == 0){
         if(inode.drive != NULL){
-            print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
+            //print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
         }
         goto fail;
     }
     int fd = vfs_allocFileD();
     if(fd == -1){
-        print_serial("[VFS] Unable to alloc file descriptor!\n");
+        //print_serial("[VFS] Unable to alloc file descriptor!\n");
         goto fail;
     }
 
@@ -202,7 +202,7 @@ int vfs_open(char *path, int flags){
 
 void vfs_close(int fd){
     if(fd == -1) return;
-    print_serial("[VFS] Closing FD %d\n", fd);
+    //print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
         pipe_close(file_idx->inode.fs.pipe);
@@ -310,7 +310,7 @@ int vfs_readExt2(struct VFS_File *file, void *buf, uint32_t nbytes){
                 block_head = 0;
             }
             else if(block_idx > 13){
-                print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
+                //print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
                 break;
             }
             else{
@@ -343,7 +343,7 @@ int vfs_readISO9660(struct VFS_File *file, void *buf, int nbytes){
         idx++;
         if(file->head == 512*4){
             sector_offset++;
-            print_serial("[DRIVE] Sector Offset %d\n", sector_offset);
+            //print_serial("[DRIVE] Sector Offset %d\n", sector_offset);
             iso_buf = (char *) ISO_read_sector(file->inode.fs.iso->drive, file->inode.fs.iso->drive->format_info.ISO->buf, file->inode.fs.iso->sector+sector_offset);
             file->head = 0;
         }
@@ -370,14 +370,14 @@ int vfs_read(int fd, void *buf, uint32_t nbytes){
             return pipe_read(file_idx->inode.fs.pipe, buf, nbytes);
             break;
         default:
-            print_serial("[VFS] ERROR - Read Unknown Inode Type!\n");
+            //print_serial("[VFS] ERROR - Read Unknown Inode Type!\n");
             break;
     }
     return -1;
 }
 
 int vfs_writeExt2(struct VFS_File *file, void *buf, int nbytes){
-    print_serial("[VFS] Writing %d bytes\n", nbytes);
+    //print_serial("[VFS] Writing %d bytes\n", nbytes);
     struct EXT2_FS *ext2 = file->inode.drive->format_info.ext2;
     struct EXT2_Inode *inode = file->inode.fs.ext2;
 
@@ -436,7 +436,7 @@ int vfs_writeExt2(struct VFS_File *file, void *buf, int nbytes){
 
     while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
         ((uint8_t *)block)[block_head] = ((uint8_t *)buf)[idx];
-        print_serial("%d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
+        //print_serial("%d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
         file->head++;
         idx++;
         block_head++;

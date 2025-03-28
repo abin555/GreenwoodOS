@@ -2,6 +2,8 @@
 #include "io.h"
 #include "timer.h"
 #include "serial.h"
+#include "sysfs.h"
+#include "vfs.h"
 
 #define CURRENT_YEAR        2023                            // Change this each year!
 
@@ -110,6 +112,24 @@ void rtc_callback(){
 	//print_serial("[RTC] %d:%d:%d\n", RTC.hour, RTC.minute, RTC.second);
 }
 
+void rtc_read_callback(void *cdev __attribute__((unused)), int offset __attribute__((unused)), int nbytes __attribute__((unused)), int *head){
+      *head = 0;
+}
+
 void rtc_init(){
 	timer_attach(50, rtc_callback);
+      struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
+      if(vfs_sysroot->type == VFS_SYS){
+            struct SysFS_Inode *sysfs = vfs_sysroot->fs.sysfs;
+            struct SysFS_Inode *rtcCDEV = sysfs_mkcdev(
+                  "RTC",
+                  sysfs_createCharDevice(
+                        (char *) &RTC,
+                        sizeof(RTC),
+                        CDEV_READ
+                  )
+            );
+            sysfs_setCallbacks(rtcCDEV->data.chardev, NULL, (void (*)(void *, int offset, int nbytes, int *head)) rtc_read_callback);
+            sysfs_addChild(sysfs_find(sysfs, "dev\0"), rtcCDEV);
+      }
 }
