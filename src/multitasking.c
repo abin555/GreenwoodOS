@@ -25,7 +25,6 @@ void multitask_init(){
     print_serial("[TASK] Setting Stack! - 0x%x\n", (uint32_t *) task_stack_base);
     for(int i = 0; i < MAX_TASKS; i++){
         task_stack_array[i] = task_stack_base + (TASK_STACK_SIZE * i);
-        print_serial("%d - 0x%x\n", i, task_stack_array[i]);
     }
 }
 

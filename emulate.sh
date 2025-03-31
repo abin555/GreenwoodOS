@@ -9,9 +9,10 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -device ide-hd,drive=disk2,bus=ahci.2,bootindex=3 \
 -audiodev pa,id=speaker -machine pcspk-audiodev=speaker \
 -audio pa,model=ac97 \
--usb \
--device usb-ehci,id=ehci \
+-device qemu-xhci,id=xhci \
 -rtc base=localtime,clock=host \
 -enable-kvm \
--nic user,model=rtl8139 \
+-netdev user,id=mynet0,net=10.0.1.0/24,dhcpstart=10.0.1.10 \
+-device rtl8139,netdev=mynet0 \
+-object filter-dump,id=f1,netdev=mynet0,file=netdump.dat \
 -smp sockets=1,cores=4,threads=1

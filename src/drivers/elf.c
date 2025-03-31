@@ -50,7 +50,7 @@ bool elf_check_supported(int file) {
 		print_serial("[ELF] Unsupported ELF File version.\n");
 		return false;
 	}
-	print_serial("%d\n", hdr.e_type);
+	//print_serial("%d\n", hdr.e_type);
 	if(hdr.e_type != ET_REL && hdr.e_type != ET_EXEC) {
 		print_serial("[ELF] Unsupported ELF File type.\n");
 		return false;

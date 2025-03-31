@@ -86,7 +86,7 @@ void kernel_task(int argc, char **argv){
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
     
-    
+    /*
     print_console(kernel_console, "kernel Window & Console Opened.\n");
     print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
     
@@ -95,6 +95,7 @@ void kernel_task(int argc, char **argv){
     for(int i = 0; i < drive_count; i++){
         print_console(kernel_console, "Drive %d is type %d and format %d\n", i, drives[i]->type, drives[i]->format);
     }
+    */
 
     zig_test();
 

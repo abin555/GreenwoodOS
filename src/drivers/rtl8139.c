@@ -169,7 +169,7 @@ struct ethernet_driver *rtl8139_init(struct PCI_driver *driver){
     print_serial("[RTL8139] Use %s based access (base: 0x%x)\n", (ether->bar_type) ? "mem" : "port", (ether->bar_type != 0) ? ether->io_base : ether->mem_base);
 
 	ether->private_page_base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, DRIVER);
-    MEM_printRegions();
+    //MEM_printRegions();
     ether->private_page_offset = 0;
     ether->num_private_pages = 1;
 

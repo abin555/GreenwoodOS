@@ -18,7 +18,7 @@ struct SysFS_Inode *sysfs_createRoot(){
     );
     sysfs->data.dir.numChildren = 0;
     sysfs->parent = sysfs;
-    print_serial("[SYSFS] Created Root Filesystem\n");
+    //print_serial("[SYSFS] Created Root Filesystem\n");
     return sysfs;
 }
 
@@ -29,7 +29,7 @@ int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child){
     if(parent->data.dir.numChildren == 20) return 2;
     parent->data.dir.children[parent->data.dir.numChildren++] = child;
     child->parent = parent;
-    print_serial("[SYSFS] Added Child \"%s\" to Parent \"%S\"\n", child->name, parent->name);
+    //print_serial("[SYSFS] Added Child \"%s\" to Parent \"%S\"\n", child->name, parent->name);
     return 0;
 }
 
@@ -46,7 +46,7 @@ struct SysFS_Inode *sysfs_mkdir(char *dirname){
     );
     sysfs->data.dir.numChildren = 0;
     sysfs->parent = NULL;
-    print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
+    //print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
     return sysfs;
 }
 
@@ -58,7 +58,7 @@ struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev){
     sysfs->namelen = strlen(name) < 20 ? strlen(name) : 19;
     sysfs->data.chardev = cdev;
     sysfs->parent = NULL;
-    print_serial("[SYSFS] Created Character Device File \"%s\"\n", sysfs->name);
+    //print_serial("[SYSFS] Created Character Device File \"%s\"\n", sysfs->name);
     return sysfs;
 }
 
@@ -71,7 +71,7 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     cdev->perms = perms;
     cdev->write_callback = NULL;
     cdev->read_callback = NULL;
-    print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
+    //print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
     return cdev;
 }
 

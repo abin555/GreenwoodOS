@@ -21,3 +21,4 @@ iso/*
 *.disassemble
 filesystem/AJB
 *.so
+netdump.dat
