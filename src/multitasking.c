@@ -355,6 +355,7 @@ int task_getFD(struct task_state *task){
 }
 
 int task_allocFD(struct task_state *task, int sysfd){
+    if(sysfd == -1) return -1;
     int fd = task_getFD(task);
     task->file_descs[fd] = sysfd;
     return fd;

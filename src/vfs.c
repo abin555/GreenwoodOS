@@ -125,7 +125,7 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     if(root->type == VFS_EXT2){
         uint32_t inodeIdx = ext2_get_inodeIdx_from_path(result.drive->format_info.ext2, path);
         if(inodeIdx == 0){
-			print_console(kernel_console, "[VFS] Inode is Zero???\n");
+			//print_serial("[VFS] Inode is Zero???\n");
 			return result;
 		}
         result.ext2_inode_idx = inodeIdx;
@@ -197,6 +197,7 @@ int vfs_open(char *path, int flags){
     return fd;
 
     fail:;
+    //print_serial("[VFS] Open Fail!\n");
     return -1;
 }
 
@@ -353,8 +354,8 @@ int vfs_readISO9660(struct VFS_File *file, void *buf, int nbytes){
 
 int vfs_read(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
-    //print_serial("[VFS] Read %d bytes\n", nbytes);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
+    //print_serial("[VFS] Read %d bytes @ %d\n", nbytes, file_idx->head);
     if(!(file_idx->inode.flags & VFS_FLAG_READ)) return -1;
     switch(file_idx->inode.type){
         case VFS_ISO9660:

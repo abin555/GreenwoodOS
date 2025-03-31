@@ -1,4 +1,11 @@
-#include "libc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <sys/vp.h>
+#include <sys/io.h>
+#include <sys/task.h>
+#include <sys/memory.h>
 //#define DOOM_IMPLEMENTATION
 #include "PureDOOM.h"
 
@@ -10,28 +17,6 @@ int running;
 
 struct ViewportFunctions *vp_funcs;
 struct Viewport *window;
-
-uint32_t *private_region;
-void *malloc_walker;
-
-void *memcpy(void *dest, const void *src, int n){
-  for(int i = 0; i < n; i++){
-    ((uint8_t *) dest)[i] = ((uint8_t *) src)[i];
-  }
-  return dest;
-}
-
-void *malloc_impl(int size){
-  void *addr = malloc_walker;
-  malloc_walker += size;
-
-  doom_memset(addr, 0, size);
-  return addr;
-}
-
-void free_impl(void *ptr){
-    return;
-}
 
 struct KeyData{
   char current_c;
@@ -167,17 +152,13 @@ char *getenv(const char *var){
     return "/A/DOOM";
   }
   else{
-    print("UNKNOWN ENV: ");
-    print(var);
-    print("\n");
+    printf("UNKNOWN ENV: %s\n", var);
   }
   return NULL;
 }
 
 void *impl_fopen(const char *filename, const char *mode){
-  if(!fexists(filename)) return NULL;
-  struct FILE *file = fopen(filename);
-  return file;
+  return fopen(filename, mode);
 }
 
 void impl_fclose(void *handle){
@@ -185,49 +166,55 @@ void impl_fclose(void *handle){
 }
 
 int impl_fread(void *handle, void *buf, int count){
-  fcopy(handle, buf, count);  
-  return count;
+  return fread(buf, count, 1, (FILE *) handle);
 }
 
 int impl_fwrite(void *handle, const void *buf, int count){
-  char *array = (char *) buf;
-  for(int i = 0; i < count; i++){
-    fputc(handle, array[i]);
-  }
-  return count;
+  return fwrite(buf, count, 1, (FILE *) handle);
 }
 
 int impl_fseek(void *handle, int offset, doom_seek_t origin){
   switch(origin){
     case DOOM_SEEK_CUR:
-    fseek(handle, ((struct FILE *) handle)->head + offset);
+    return fseek((FILE *) handle, offset, SEEK_CUR);
     break;
     case DOOM_SEEK_END:
-    fseek(handle, fsize(handle) + offset);
+    return fseek((FILE *) handle, offset, SEEK_END);
     break;
     case DOOM_SEEK_SET:
-    fseek(handle, offset);
+    return fseek((FILE *) handle, offset, SEEK_SET);
     break;
   }
   return 0;
 }
 
 int impl_ftell(void *handle){
-  return ((struct FILE *) handle)->head;
+  return ftell((FILE *) handle);
 }
 
 int impl_feof(void *handle){
-  if(((struct FILE *)handle)->head >= fsize(handle)) return 1;
-  return 0;
+  return feof((FILE *) handle);
 }
 
-struct RealTimeClock *rtc;
+struct RealTimeClock {
+	unsigned char second;
+	unsigned char minute;
+	unsigned char hour;
+	unsigned char day;
+	unsigned char month;
+	unsigned int year;
+	unsigned int msec;
+};
+
+int rtc_fd;
 
 unsigned int ticks = 0;
 
-void impl_gettime(int* sec, int* usec){  
-  *sec = 60*rtc->minute + rtc->second;
-  *usec = rtc->msec;
+void impl_gettime(int* sec, int* usec){ 
+  struct RealTimeClock rtc;
+  read(rtc_fd, &rtc, sizeof(rtc));
+  *sec = 60*rtc.minute + rtc.second;
+  *usec = rtc.msec;
   //ticks++;
   //*sec = ticks / 1000;
   //*usec = ticks % 1000;
@@ -235,22 +222,23 @@ void impl_gettime(int* sec, int* usec){
 
 void impl_exit(int code){
   running = 0;
-  vp_funcs->close(window);
-  freeRegion(private_region, 2*0x800000);
+  vp_close(window);
   exit(code);
 }
 
 int main(int argc, char **argv){
-  private_region = requestRegion(2*0x800000);
-  malloc_walker = private_region;
-  rtc = get_rtc();
-
   struct FEATURE_INFO keypressed_feature = getKernelFeature(FEAT_KEYPRESSMAP);
   key_pressed_map = keypressed_feature.addr;
+  //freopen("/-/dev/serial", "a+", stdout);
+  rtc_fd = open("/-/dev/RTC", O_READ);
+  if(rtc_fd == -1){
+    printf("Unable to access clock!\nExiting\n");
+    return 1;
+  }
 
-  doom_set_malloc(malloc_impl, free_impl);
+  doom_set_malloc((doom_malloc_fn) malloc, (doom_free_fn) free);
   doom_set_exit(impl_exit);
-  doom_set_print((void (*)(const char *)) print_serial);
+  doom_set_print((void (*)(const char *)) puts);
   doom_set_getenv(getenv);
   doom_set_file_io(
     impl_fopen,
@@ -263,17 +251,16 @@ int main(int argc, char **argv){
   );
   doom_set_gettime(impl_gettime);
 
-  print("DOOM starting init\n");
+  printf("DOOM starting init\n\n\0");
   task_lock(1);
   doom_init(argc, argv, 0);
   task_lock(0);
 
   running = 1;
-  vp_funcs = viewport_get_funcs();
-  window = vp_funcs->open(WIDTH, HEIGHT, "DOOM");
+  window = vp_open(WIDTH, HEIGHT, "DOOM");
   window->loc.x = 400-160;
   window->loc.y = 300-120;
-  vp_funcs->add_event_handler(window, event_handler);
+  vp_add_event_handler(window, event_handler);
   //addEndCallback(end_callback);
 
   uint32_t* framebuffer;
@@ -284,11 +271,11 @@ int main(int argc, char **argv){
     task_lock(0);
     handle_key();
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
-    vp_funcs->set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
-    vp_funcs->copy(window);
+    vp_set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
+    vp_copy(window);
     for(int i = 0; i < 0x8FFFFF; i++){}
   }
 
-  vp_funcs->close(window);
-  freeRegion(private_region, 2*0x800000);
+  vp_close(window);
+  close(rtc_fd);
 }
