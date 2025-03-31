@@ -248,7 +248,7 @@ void HandleSelection(char *work_buf, int sel){
             arg[1] = malloc(dir.entries[sel+2].name_len);
             for(int i = 0; i < dir.entries[sel+2].name_len; i++) arg[1][i] = dir.entries[sel+2].filename[i];
             sel = -1;
-            exec("/A/utils/Music/music.exe", 2, arg);
+            exec("/A/utils/Music/music.elf", 2, arg);
             return;
         }
         else {

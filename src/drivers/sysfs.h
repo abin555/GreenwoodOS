@@ -45,4 +45,7 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path);
 struct VFS_File;
 int sysfs_read(struct VFS_File *file, void *buf, int nbytes);
 int sysfs_write(struct VFS_File *file, void *buf, int nbytes);
+
+struct DirectoryListing sysfs_advListDirectory(struct SysFS_Inode *sysfs, char *path);
+
 #endif

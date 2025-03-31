@@ -182,3 +182,33 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
 
     return NULL;
 }
+
+struct DirectoryListing sysfs_advListDirectory(struct SysFS_Inode *sysfs, char *path){
+    struct DirectoryListing listing = {0};
+    if(sysfs == NULL || path == NULL) return listing;
+    struct SysFS_Inode *target = sysfs_find(sysfs, path);
+    if(target == NULL) return listing;
+
+    if(target->type != SysFS_Directory) return listing;
+
+    listing.directory_path_len = strlen(path);
+	listing.directory_path = strdup(path);
+	listing.num_entries = target->data.dir.numChildren;
+	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
+	memset(listing.entries, 0, sizeof(struct DirectoryEntry) * listing.num_entries);
+
+    for(int i = 0; i < listing.num_entries; i++){
+        memset(listing.entries[i].filename, 0, 50);
+        if(target->data.dir.children[i] == NULL) continue;
+        memcpy(listing.entries[i].filename, target->data.dir.children[i]->name, target->data.dir.children[i]->namelen);
+        listing.entries[i].name_len = target->data.dir.children[i]->namelen;
+        if(target->data.dir.children[i]->type == SysFS_Directory){
+            listing.entries[i].type = ENTRY_DIRECTORY;
+        }
+        else{
+            listing.entries[i].type = ENTRY_FILE;
+        }
+    }
+
+    return listing;
+}

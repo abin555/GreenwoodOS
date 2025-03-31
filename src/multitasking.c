@@ -80,7 +80,6 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
 
             uint32_t *return_instruction = (uint32_t *) ((uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4));
-            print_serial("RI: 0x%x\n", (uint32_t) return_instruction);
             return_instruction[1] = tasks[i].registers.ebp;
             return_instruction[-1] = (uint32_t) argv;
             return_instruction[-2] = (uint32_t) argc;
@@ -99,7 +98,6 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
                 char *namebuf = malloc(len+1);
                 memset(namebuf, 0, len+1);
                 memcpy(namebuf, name, len);
-                print_serial("Name len: %d - %s\n", len, namebuf);
                 tasks[i].task_name = namebuf;
             }
             
@@ -109,7 +107,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             tasks[i].console = tasks[task_running_idx].console;
             tasks[i].own_console = false;
             memcpy(tasks[i].currentDirectory.path, tasks[task_running_idx].currentDirectory.path, sizeof(tasks[i].currentDirectory.path));
-            print_serial("[TASK] Added to queue idx %d\n", i);
+            //print_serial("[TASK] Added to queue idx %d\n", i);
             tasks[i].slot_active = 1;
             tasks[i].keyboard_event_handler = NULL;
             tasks[i].mouse_event_handler = NULL;
@@ -117,7 +115,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;
             }
-            print_serial("[TASK] Added Task \"%s\" to queue\n", tasks[i].task_name);
+            //print_serial("[TASK] Added Task \"%s\" to queue\n", tasks[i].task_name);
             break;
         }
     }

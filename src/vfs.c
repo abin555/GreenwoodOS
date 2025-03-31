@@ -620,3 +620,35 @@ int vfs_mkpipe(int *writer_fd, int *reader_fd){
     reader_file->inode.isValid = 1;
     return 0;
 }
+
+struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path){
+    struct DirectoryListing listing = {0};
+    if(dir == NULL || path == NULL){
+		print_serial("[VFS] List Directory: Err: Invalid Args\n");
+		return listing;
+	}
+	char big_path[100];
+	expandPath(big_path, sizeof(big_path), dir, path);
+	char drive_letter = big_path[0];
+	path = big_path + 2;
+    struct VFS_Inode *root = vfs_findRoot(drive_letter);
+    if(root == NULL) return listing;
+    if(root->type == VFS_ISO9660 && root->drive != NULL && root->drive->format == ISO9660){
+
+    }
+    else if(root->type == VFS_EXT2 && root->drive != NULL && root->drive->format == EXT2){
+        listing = ext2_advListDirectory(root->drive->format_info.ext2, path);
+    }
+    else if(root->type == VFS_SYS){
+        listing = sysfs_advListDirectory(root->fs.sysfs, path);
+    }
+    else if(root->type == VFS_PIPE){
+        
+    }
+    return listing;
+}
+
+#include "multitasking.h"
+struct DirectoryListing vfs_taskListDirectory(char *path){
+    return vfs_listDirectory(&tasks[task_running_idx].currentDirectory, path);
+}

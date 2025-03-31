@@ -329,7 +329,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x30:{
-			cpu_state.eax = (uint32_t) &task_listDirectory;
+			cpu_state.eax = (uint32_t) &vfs_taskListDirectory;
 			break;
 		}
 		case 0x31:{

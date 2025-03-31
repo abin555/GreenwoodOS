@@ -193,7 +193,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         }
     }
     else if(KBD_flags.ctrl && ascii == 'V'){
-        exec("/A/utils/vaporwave/vaporwave.exe", 0, NULL);
+        exec("/A/utils/vaporwave/vaporwave.elf", 0, NULL);
     }
     else if(global_viewport_list->elements[0].inUse){
         if(global_viewport_list->elements[0].vp == NULL) return;

@@ -22,7 +22,7 @@ void __attribute__ ((optimize("-O3"))) select_program(uint8_t program_slot){
 }
 
 void exec(char *filename, int argc, char **argv){
-	print_serial("\n[EXEC] Starting Program %s\n", filename);
+	//print_serial("\n[EXEC] Starting Program %s\n", filename);
 	int slot = -1;
 	for(int i = 0; i < PROGRAM_MAX; i++){
 		if(program_slot_status[i] == false){
@@ -32,7 +32,7 @@ void exec(char *filename, int argc, char **argv){
 		}
 	}
 	if(slot == -1) return;
-	print_serial("Loading Program %s to slot %d\n", filename, slot);
+	//print_serial("Loading Program %s to slot %d\n", filename, slot);
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);
@@ -40,7 +40,7 @@ void exec(char *filename, int argc, char **argv){
 	vfs_seek(file, 0, 0);
 	if(file == -1) return;
 	if(elf_check_supported(file)){
-		print_serial("[PROGRAM] Is ELF Format!\n");
+		//print_serial("[PROGRAM] Is ELF Format!\n");
 		uint32_t entry = elf_get_entry_addr(file);
 		elf_load(file, (void *) (program_region_virt_base + 0x400000*slot));
 		//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
@@ -54,5 +54,5 @@ void exec(char *filename, int argc, char **argv){
 		vfs_close(file);
 		start_task(0, slot, argc, argv, filename);
 	}
-	print_serial("[EXEC] Program started!\n\n");
+	//print_serial("[EXEC] Program started!\n\n");
 }

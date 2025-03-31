@@ -144,7 +144,3 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 		set_schedule(NEVER);
 	}
 }
-
-void free(void *mem){
-	return;
-}

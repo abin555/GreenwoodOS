@@ -36,14 +36,14 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             0xBBBBBB,
             viewport->loc.x,
             viewport->loc.y,
-            viewport->loc.x + viewport->loc.w,
+            viewport->loc.x + viewport->loc.w - 1,
             viewport->loc.y + VIEWPORT_HEADER_HEIGHT,
             window->backbuffer,
             window->width
         );
         buf_putChar(
             window->backbuffer,
-            viewport->loc.x + viewport->loc.w - 16,
+            viewport->loc.x + viewport->loc.w - 16 - 1,
             viewport->loc.y + 1,
             '+',
             0xFFFFFF,
@@ -51,7 +51,7 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
         );
         buf_putChar(
             window->backbuffer,
-            viewport->loc.x + viewport->loc.w - 8,
+            viewport->loc.x + viewport->loc.w - 8 - 1,
             viewport->loc.y + 1,
             'X',
             0xFFFFFF,

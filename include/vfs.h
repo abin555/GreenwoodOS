@@ -61,5 +61,7 @@ int vfs_seek(int fd, int offset, int whence);
 int vfs_creatRel(struct DIRECTORY *dir, char *path);
 int vfs_creat(char *path);
 int vfs_mkpipe(int *writer_fd, int *reader_fd);
+struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path);
+struct DirectoryListing vfs_taskListDirectory(char *path);
 
 #endif

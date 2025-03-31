@@ -18,12 +18,12 @@ bool elf_check_file(Elf32_Ehdr hdr) {
 		print_serial("ELF Header EI_MAG3 incorrect.\n");
 		return false;
 	}
-	print_serial("[ELF] Successful Header Match!\n");
+	//print_serial("[ELF] Successful Header Match!\n");
 	return true;
 }
 
 bool elf_check_supported(int file) {
-	print_serial("[ELF] Checking Support\n");
+	//print_serial("[ELF] Checking Support\n");
 	int head = vfs_seek(file, 0, 1);
 	vfs_seek(file, 0, 0);
 	Elf32_Ehdr hdr;
@@ -66,7 +66,7 @@ uint32_t elf_get_entry_addr(int file){
 	Elf32_Ehdr hdr;
 	vfs_read(file, (char *) &hdr, sizeof(Elf32_Ehdr));
 	vfs_seek(file, head, 0);
-	print_serial("Entry Point Address: 0x%x\n", hdr.e_entry);
+	//print_serial("Entry Point Address: 0x%x\n", hdr.e_entry);
 	return hdr.e_entry;
 }
 
@@ -96,7 +96,7 @@ bool elf_load_section(int file, Elf32_Ehdr hdr, int sectionIdx, void *buffer){
 		return true;
 	}
 	else{
-		print_serial("[ELF] Section %d is not PROGBITS\n", sectionIdx);
+		//print_serial("[ELF] Section %d is not PROGBITS\n", sectionIdx);
 		return false;
 	}
 	return false;

@@ -1,4 +1,8 @@
-#include "libc.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <sys/vp.h>
+#include <sys/task.h>
 
 #define WIDTH 300
 #define HEIGHT 300
@@ -13,15 +17,14 @@ int running;
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 
 int main(int argc, char **argv){
-    print("Opening ART Window\n");
+    printf("Opening ART Window\n");
     set_schedule(ALWAYS);
     backbuffer = (uint32_t *) 0x6000;
-    struct ViewportFunctions *vp_funcs = viewport_get_funcs();
-    win = vp_funcs->open(WIDTH, HEIGHT, "ART");
-    vp_funcs->add_event_handler(win, event_handler);
+    win = vp_open(WIDTH, HEIGHT, "ART");
+    vp_add_event_handler(win, event_handler);
     if(win == NULL) return 1;
     uint32_t *buf = backbuffer;
-    vp_funcs->set_buffer(win, buf, BUF_SIZE);
+    vp_set_buffer(win, buf, BUF_SIZE);
     uint32_t x = WIDTH/2;
     uint32_t y = HEIGHT/2;
     int dx = 1;
@@ -59,11 +62,11 @@ int main(int argc, char **argv){
             y = HEIGHT - 1;
         }
         if(i > 5000){
-            vp_funcs->copy(win);
+            vp_copy(win);
             i = 0;
         }
     }
-    vp_funcs->close(win);
+    vp_close(win);
 }
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
