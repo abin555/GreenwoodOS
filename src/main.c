@@ -33,6 +33,8 @@
 #include "wav.h"
 #include "sysroot.h"
 #include "audio_cdev.h"
+#include "udp.h"
+#include "dhcp.h"
 
 extern void zig_test();
 
@@ -69,8 +71,10 @@ void kernel_task(int argc, char **argv){
 
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
+    udp_init();
+    //ethernet_demo();
+    dhcp_init(ethernet_getDriver());
 
-    ethernet_demo();
     audio_init();
 
 

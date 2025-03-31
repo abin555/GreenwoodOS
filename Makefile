@@ -48,6 +48,10 @@ OBJECTS = \
 		src/drivers/rtl8139.o \
 		src/networking/ethernet.o \
 		src/networking/network_utils.o \
+		src/networking/ip.o \
+		src/networking/arp.o \
+		src/networking/udp.o \
+		src/networking/dhcp.o \
 		src/test.o \
 		src/acpi.o \
 		src/apic.o \

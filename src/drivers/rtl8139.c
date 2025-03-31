@@ -110,12 +110,12 @@ void rtl8139_disableInterrupt(struct ethernet_driver *ether __attribute__((unuse
 }
 
 void rtl8139_int_handler(struct ethernet_driver *ether __attribute__((unused))){
-    print_serial("[RTL8139] Interrupt!\n");
+    //print_serial("[RTL8139] Interrupt!\n");
 
     uint16_t status = inports(ether->io_base + IntrStatus);
 
     if(status & TOK){
-        print_serial("[RTL8139] Packet Sent\n");
+        //print_serial("[RTL8139] Packet Sent\n");
         ether->tx_lock = false;
     }
     if(status & ROK){

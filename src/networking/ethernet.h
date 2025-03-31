@@ -67,4 +67,5 @@ void ethernet_init(struct PCI_driver *driver);
 int ethernet_send_packet(struct ethernet_driver *ether, uint8_t *dst_mac_addr, uint8_t *data, int len, uint16_t protocol);
 void ethernet_handle_packet(struct ethernet_header *packet, int len);
 void ethernet_demo();
+struct ethernet_driver *ethernet_getDriver();
 #endif

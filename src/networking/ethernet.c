@@ -1,4 +1,6 @@
 #include "ethernet.h"
+#include "arp.h"
+#include "ip.h"
 
 struct ethernet_driver *ethernet_drivers[2] = {NULL, NULL};
 
@@ -17,10 +19,10 @@ bool ethernet_assign_driver(struct ethernet_driver *driver) {
 }
 
 void ethernet_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    print_serial("[ETHERNET] interrupt\n");
+    //print_serial("[ETHERNET] interrupt\n");
     //pic_acknowledge(INT_currentInterrupt);
 
-    print_serial("[ETHERNET] ethernet_handler: %d\n", INT_currentInterrupt-32);
+    //print_serial("[ETHERNET] ethernet_handler: %d\n", INT_currentInterrupt-32);
     for (int i = 0; i < 2; i++) {
         if (!ethernet_drivers[i]) {
             continue;
@@ -30,7 +32,7 @@ void ethernet_handler(struct cpu_state cpu __attribute__((unused)), struct stack
             ethernet_drivers[i]->int_handler(ethernet_drivers[i]);
         }
     }
-    print_serial("[ETHERNET] interrupt complete\n");
+    //print_serial("[ETHERNET] interrupt complete\n");
     return;
 }
 
@@ -70,7 +72,7 @@ void ethernet_init(struct PCI_driver *pci){
 }
 
 int ethernet_send_packet(struct ethernet_driver *ether, uint8_t *dst_mac_addr, uint8_t *data, int len, uint16_t protocol){
-    print_serial("[ETHERNET] Sending Packet of size %d\n", len);
+    //print_serial("[ETHERNET] Sending Packet of size %d\n", len);
     struct ethernet_header *packet = malloc(sizeof(struct ethernet_header) + len);
     void *frame_data = (void*)packet + sizeof(struct ethernet_header);
 
@@ -100,18 +102,27 @@ void ethernet_demo(){
         0x0
     };
     ethernet_send_packet(ether, destination, (uint8_t *) message, sizeof(message), ETHERNET_TYPE_IP);
+
+    uint8_t check_mac[6];
+    arp_get_mac(ether, (uint8_t [4]){10, 0, 1, 2}, check_mac, 100);
 }
 
 void ethernet_handle_packet(struct ethernet_header *packet, int len){
-    print_serial("[ETHERNET] Handling Packet!\n");
-    void *data = (void *) packet + sizeof(struct ethernet_header);
+    //print_serial("[ETHERNET] Handling Packet!\n");
+    //void *data = (void *) packet + sizeof(struct ethernet_header);
     int data_len = len - sizeof(struct ethernet_header);
-    print_serial("[ETHERNET] Data (@ 0x%x) Size: %d\n", data, data_len);
+    //print_serial("[ETHERNET] Data (@ 0x%x) Size: %d\n", data, data_len);
 
     if(ntohs(packet->ethertype) == ETHERNET_TYPE_ARP){
         print_serial("[ETHERNET] Arp Packet Identified\n");
+        arp_receive_packet(ethernet_drivers[0], (struct arp_packet *) packet->data);
     }
     if(ntohs(packet->ethertype) == ETHERNET_TYPE_IP){
         print_serial("[ETHERNET] IP Packet Identified\n");
+        ipv4_receive_packet(ethernet_drivers[0], (struct ipv4_packet *) packet->data, packet->data + sizeof(struct ipv4_packet), data_len - sizeof(struct ethernet_header));
     }
+}
+
+struct ethernet_driver *ethernet_getDriver(){
+    return ethernet_drivers[0];
 }
