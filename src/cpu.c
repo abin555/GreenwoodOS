@@ -58,3 +58,19 @@ void enableSSE(){
         asm("hlt");
     }
 }
+
+void cpu_fxsave(char *region){
+    asm volatile (
+        "fxsave [%0]"
+        :: "r"(region)
+        : "memory"
+    );
+}
+
+void cpu_fxrstor(char *region){
+    asm volatile (
+        "fxrstor [%0]"
+        :: "r"(region)
+        : "memory"
+    );
+}

@@ -1,5 +1,6 @@
 #include "utils.h"
 #include "allocator.h"
+#include <stdarg.h>
 
 int strcmp(const char *s1, const char *s2){
 	while(*s1 && (*s1 == *s2)){
@@ -59,4 +60,34 @@ int strncmp( const char * s1, const char * s2, size_t n )
     {
         return ( *(unsigned char *)s1 - *(unsigned char *)s2 );
     }
+}
+
+int sprintf(char *str, const char *format, ...){
+	va_list listpd;
+	va_start(listpd, format);
+	if(str == NULL || format == NULL) return 0;
+	int idx = 0;
+	char *s;
+	int n = 0;
+	while(*format != '\0'){
+		if(*format != '%'){
+			str[idx++] = *format++;
+			n++;
+		}
+		else{
+			format++;
+			switch(*format){
+				case 's':{
+					s = va_arg(listpd, char *);
+					int l = strlen(s);
+					for(int i = 0; i < l; i++){
+						str[idx++] = s[i];
+						n++;
+					}
+				}
+			}
+			format++;
+		}
+	}
+	return n;
 }

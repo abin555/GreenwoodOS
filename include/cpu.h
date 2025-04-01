@@ -74,4 +74,8 @@ enum {
 };
 void enableSSE();
 extern void enableSSE_ASM();
+
+void cpu_fxsave(char *region);
+void cpu_fxrstor(char *region);
+
 #endif

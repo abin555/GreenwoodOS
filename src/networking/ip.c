@@ -1,6 +1,7 @@
 #include "ip.h"
 #include "arp.h"
 #include "udp.h"
+#include "tcp.h"
 
 
 bool ipv4_is_cidr_subnet(uint8_t ip[4], uint8_t netip[4], uint8_t mask[4]) {
@@ -100,7 +101,7 @@ void ipv4_receive_packet(struct ethernet_driver *driver, struct ipv4_packet *pac
             break;
         case IP_PROTOCOL_TCP:
             print_serial("[IP] tcp packet recieved\n");
-            //tcp_receive_packet(driver, packet, data, data + sizeof(tcp_packet));
+            tcp_receive_packet(driver, packet, data, data + sizeof(struct tcp_packet));
             break;
     }
 }

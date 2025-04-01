@@ -52,6 +52,8 @@ OBJECTS = \
 		src/networking/arp.o \
 		src/networking/udp.o \
 		src/networking/dhcp.o \
+		src/networking/tcp.o \
+		src/networking/http.o \
 		src/test.o \
 		src/acpi.o \
 		src/apic.o \

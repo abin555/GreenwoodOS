@@ -125,9 +125,7 @@ FILE *fopen(const char *pathname, const char *mode){
 	}
 	if(i == MAX_FILE_LISTING) return NULL;
 	int fd = open((char *) pathname, O_READ | O_WRITE);
-	printf("FD %d\n", fd);
 	if(fd == -1){
-		printf("FIle %s does not exist!\n", pathname);
 		return NULL;
 	}
 	fileListing[i] = internal_createFileFD(fd);

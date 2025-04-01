@@ -35,6 +35,8 @@
 #include "audio_cdev.h"
 #include "udp.h"
 #include "dhcp.h"
+#include "tcp.h"
+#include "http.h"
 
 extern void zig_test();
 
@@ -74,6 +76,9 @@ void kernel_task(int argc, char **argv){
     udp_init();
     //ethernet_demo();
     dhcp_init(ethernet_getDriver());
+    tcp_init();
+
+    //http_send_request(ethernet_getDriver(), (uint8_t [4]){208,77,18,143}, 80, "GET", "/", "www.retroarchive.org");
 
     audio_init();
 
@@ -135,7 +140,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     alloc_init();
     
-    /*
+    
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
     }
@@ -144,7 +149,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
-    */
+    
     
 
     //tasking_setup_kernel_stack();

@@ -507,9 +507,10 @@ void S_SetSfxVolume(int volume)
 //
 // Starts some music with the music id found in sounds.h.
 //
-void S_StartMusic(int m_id)
+void S_StartMusic(int m_id __attribute__((unused)))
 {
-    S_ChangeMusic(m_id, false);
+    return;
+    //S_ChangeMusic(m_id, false);
 }
 
 

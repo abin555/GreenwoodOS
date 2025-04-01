@@ -167,5 +167,6 @@ struct MADT {
 };
 
 void acpi_parseMADT();
+void acpi_shutdown();
 
 #endif

@@ -4,6 +4,7 @@ bool task_lock;
 int8_t task_running_idx;
 void *task_stack_base;
 uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (8)));
+char task_fxsave_region[MAX_TASKS][512] __attribute__((aligned(16)));
 struct task_state tasks[MAX_TASKS];
 
 extern uint32_t kernel_stack_base;
@@ -25,6 +26,7 @@ void multitask_init(){
     print_serial("[TASK] Setting Stack! - 0x%x\n", (uint32_t *) task_stack_base);
     for(int i = 0; i < MAX_TASKS; i++){
         task_stack_array[i] = task_stack_base + (TASK_STACK_SIZE * i);
+        cpu_fxsave(task_fxsave_region[i]);
     }
 }
 
@@ -245,9 +247,7 @@ void select_stack(int next, int current){
     //MEM_printRegions();
 }
 
-void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id){
-    new_id = old_id;
-    old_id = new_id;
+void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id __attribute__((unused)), int new_id __attribute__((unused))){
     //Save current task's state
     old_task->registers.eip = most_recent_int_stack_state.eip;
     old_task->registers.eax = most_recent_int_cpu_state.eax;
@@ -258,12 +258,15 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
     old_task->registers.esi = most_recent_int_cpu_state.esi;
     old_task->registers.edi = most_recent_int_cpu_state.edi;
     old_task->registers.esp = most_recent_int_cpu_state.esp;
+    cpu_fxsave(task_fxsave_region[old_id]);
+    //asm volatile("FINIT");
 
     //Load next task's state
     //select_stack(new_id, old_id);
     if(new_task->program_slot != -1){
         select_program(new_task->program_slot);
     }
+    cpu_fxrstor(task_fxsave_region[new_id]);
     override_state_return = true;
     most_recent_int_stack_state.eip = new_task->registers.eip;
     most_recent_int_cpu_state.eax = new_task->registers.eax;

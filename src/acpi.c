@@ -106,9 +106,6 @@ void acpi_shutdown(){
         print_serial("[FADT] FATAL: FADT does not exist\n");
         return;
     }
-
-    
-
     //outw(fadt->PM1aControlBlock, SLP_TYPa | (1<<13) );
 }
 
