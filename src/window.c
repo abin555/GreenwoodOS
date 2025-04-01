@@ -1,6 +1,6 @@
 #include "window.h"
 #include "allocator.h"
-#include "drive.h"
+#include "vfs.h"
 
 int window_selected;
 struct WINDOW windows[MAX_WINDOWS] = {0};
@@ -47,13 +47,14 @@ void window_init(){
 
 	cursor_file = NULL;
 	cursor_bitmap = NULL;
-	if(fexists(WINDOW_MOUSE_FILE)){
+	int cursor_fd = vfs_open(WINDOW_MOUSE_FILE, VFS_FLAG_READ);
+	if(cursor_fd != -1){
 		print_serial("[WINDOW] Loading cursor image\n");
-		struct FILE *cursor = fopen(WINDOW_MOUSE_FILE);
-		int size = fsize(cursor);
+		int size = vfs_seek(cursor_fd, 0, 2);
+		vfs_seek(cursor_fd, 0, 0);
 		cursor_file = malloc(size);
-		fcopy(cursor, (char *) cursor_file, size);
-		fclose(cursor);
+		vfs_read(cursor_fd, (char *) cursor_file, size);
+		vfs_close(cursor_fd);
 		tga_header_t *header = ((tga_header_t *) cursor_file);
 		cursor_width = header->w;
 		cursor_height = header->h;

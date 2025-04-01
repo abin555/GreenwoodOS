@@ -1,4 +1,7 @@
 #include "bitmap.h"
+#include "allocator.h"
+#include "desktop_shared.h"
+#include "vfs.h"
 
 typedef struct {
   unsigned char magic1;             // must be zero
@@ -22,13 +25,14 @@ struct Bitmap loadBitmap(char *filename){
         0,
         0
     };
-    struct FILE *file = fopen(filename);
-    if(file == NULL) return bitmap;
-    int size = fsize(file);
+    int file = vfs_open(filename, VFS_FLAG_READ);
+    if(file == -1) return bitmap;
+    int size = vfs_seek(file, 0, 2);
+    vfs_seek(file, 0, 0);
 
     bitmap.file = malloc(size+100);
-    fcopy(file, (char *) bitmap.file, size);
-    fclose(file);
+    vfs_read(file, (char *) bitmap.file, size);
+    vfs_close(file);
     tga_header_t *header = ((tga_header_t *) bitmap.file);
     bitmap.width = header->w;
     bitmap.height = header->h;

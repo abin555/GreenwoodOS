@@ -92,31 +92,22 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//File Open
 		case 0x0D:{
-			struct FILE *file = fopen_rel(&task->currentDirectory, (char *) cpu.ebx);
-			cpu_state.eax = (uint32_t) file;
 			break;
 		}
 		//File Close
 		case 0x0E:{
-			fclose((struct FILE *) cpu.ebx);
 			break;
 		}
 		//File GetC
 		case 0x0F:{
-			char c = fgetc((struct FILE *) cpu.ebx);
-			cpu_state.eax = c;
 			break;
 		}
 		//File Get Size
 		case 0x10:{
-			int size = fsize((struct FILE *) cpu.ebx);
-			cpu_state.eax = size;
 			break;
 		}
 		//File Copy
 		case 0x11:{
-			int status = fcopy((struct FILE *) cpu.ebx, (char *) cpu.ecx, cpu.edx);
-			cpu_state.eax = status;
 			break;
 		}
 		//Change Directory
@@ -135,12 +126,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		//List Directory
 		case 0x14:{
 			//Return string of files and folders in current directory.
-			listFiles(task->console, &task->currentDirectory, (char *) cpu.ebx);
 			break;
 		}
 		//File Exists
 		case 0x15:{
-			cpu_state.eax = fexists_rel(&task->currentDirectory, (char *) cpu_state.ebx);
 			break;
 		}
 		//Print Serial
@@ -209,20 +198,16 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//File Seek
 		case 0x18:{
-			fseek((struct FILE *) cpu.ebx, cpu.ecx);
 			break;
 		}
 		//File Put Character
 		case 0x19:{
-			fputc((struct FILE *) cpu.ebx, (char) cpu.ecx);
 			break;
 		}
 		case 0x1A:{
-			fmkdir(&task->currentDirectory, (char *) cpu.ebx);
 			break;
 		}
 		case 0x1B:{
-			fmkfile(&task->currentDirectory, (char *) cpu.ebx, (uint32_t) cpu.ecx);
 			break;
 		}
 		case 0x1C:{
@@ -259,7 +244,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Extend Files
 		case 0x22:{
-			cpu_state.eax = fextend((struct FILE *) cpu.ebx, (uint32_t) cpu.ecx);
 			break;
 		}
 		//Request Memory Block of size to be alloced to requested virtual memory region

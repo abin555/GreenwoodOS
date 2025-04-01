@@ -161,7 +161,7 @@ int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
 }
 
 int vfs_open(char *path, int flags){
-    //print_serial("[VFS] Opening %s\n", path);
+    print_serial("[VFS] Opening %s\n", path);
     if(path == NULL) return -1;
     char driveLetter = path[0];
     path += 2;

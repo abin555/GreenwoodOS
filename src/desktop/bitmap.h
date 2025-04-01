@@ -2,10 +2,7 @@
 #define BITMAP_H
 
 #include "stdint.h"
-#include "allocator.h"
 #include "window.h"
-#include "drive.h"
-#include "desktop_shared.h"
 
 struct Bitmap{
     uint8_t *file;
