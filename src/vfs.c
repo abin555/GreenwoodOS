@@ -653,3 +653,48 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path){
 struct DirectoryListing vfs_taskListDirectory(char *path){
     return vfs_listDirectory(&tasks[task_running_idx].currentDirectory, path);
 }
+
+int vfs_chdir(struct DIRECTORY *dir, char *path){
+	/*
+	Manipulates the task currentDirectory string.
+	Everything is appended to the string except for:
+	./ is ignored, and removed.
+	../ removed until the previous / and continues
+	- Note, ensure that ../ to idx 0 is covered.
+	*/
+	int path_size = 0;
+	//char workbuf[100];
+	while(path[path_size] != 0){
+		path_size++;
+	}
+	if(path[0] == '/'){//Absolute Directory
+        char driveLetter = path[1];
+        struct VFS_Inode *root = vfs_findRoot(driveLetter);
+        if(root == NULL){
+            return 1;
+        }
+        struct VFS_Inode inode = vfs_followLink(root, path + 3);
+		if(inode.isValid == 1){
+			memset(dir->path, 0 , sizeof(dir->path));
+			memcpy(dir->path, path+1, path_size-1);
+			if(dir->path[path_size-2] != '/') dir->path[path_size-1] = '/';
+			print_serial("Path is now %s\n", dir->path);
+			return 0;
+		}
+		else{
+			return 1;
+		}
+	}
+	else{//Relative Directory
+		print_serial("[DRIVE] CD: Relative %s\n", path);
+		if(path[0] == '.' && path[1] == '.' && path[2] == '\0'){
+			int last_slash = 0;
+			for(int i = 0; dir->path[i] != 0 && i < (int) sizeof(dir->path); i++) last_slash++;
+			for(int i = last_slash-2; dir->path[i] != '/'; i--) last_slash = i;
+			dir->path[last_slash] = '\0';
+			print_serial("[DRIVE] CD: Relative backup %s %d\n", dir->path, last_slash);
+			return 0;
+		}
+	}
+	return 1;
+}

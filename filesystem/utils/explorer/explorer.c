@@ -375,6 +375,11 @@ int identify_selection(struct DirectoryListing *dirs){
 void drawDirectoryContents(struct DirectoryListing *dirs, int selected, struct RightClickMenu *rightClickMenu){
     int iconY = 0;
     int iconX = 0;
+    char *dirpath = getDirectory();
+    int dirpath_len = strlen(dirpath);
+    for(int i = 0; i < dirpath_len; i++){
+        vp_drawChar(vp, 8*i, vp->loc.h-8, dirpath[i], 0xFFFFFF, 0x0);
+    }
     for(int i = 0; i < dirs->num_entries-2; i++){
         drawIcon(6*8*iconX, iconY*(24+8*4), &dirs->entries[i+2], i == selected ? 1 : 0);
         if(

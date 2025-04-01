@@ -123,7 +123,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		case 0x12:{
 			char *change = (char *) cpu.ebx;
 			print_serial("Task %s Changing Directory to %s\n", task->task_name, change);
-			cpu_state.eax = changeDirectory(&task->currentDirectory, change);
+			cpu_state.eax = vfs_chdir(&task->currentDirectory, change);
 			break;
 		}
 		//Get Directory
