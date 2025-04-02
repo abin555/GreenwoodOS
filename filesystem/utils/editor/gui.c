@@ -286,6 +286,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
 void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *context, struct GUIElement *elem, int x, int y){
     if(context == NULL || elem == NULL){
         printf("Interaction Fail, null input\n");
+        return;
     }
     //printf("Process Interaction\n");
     if(elem->type == GUI_CONTEXT){
@@ -373,8 +374,6 @@ void gui_handleContext(struct WindowContext *context){
     
     gui_drawElement(context, (struct GUIElement *) context, 0, 0);
     //printf("Handle Context Finish\n");
-
-    vp_copy(context->viewport);
 }
 
 extern int running;

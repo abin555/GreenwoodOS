@@ -37,6 +37,7 @@ char *strstr(const char *, const char *);
 char *strtok(char *, const char *);
 size_t strxfrm(char *, const char *, size_t);
 char *_Strerror(int, char *);
+char *strdup(const char *s);
 
 #define strerror(errcode)	_Strerror(errcode, _NULL)
 

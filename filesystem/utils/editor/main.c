@@ -1,14 +1,25 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/task.h>
 #include "gui.h"
+#include "editor.h"
 
 int running;
 
 int main(int argc, char **argv){
+    if(argc != 2){
+        printf("Missing file!\n");
+        return 1;
+    }
     gui_setup();
-    freopen("/-/dev/serial", "w+", stdout);
     running = 1;
+
+    struct EditorFile file = editor_open(argv[1]);
+    if(file.file == NULL){
+        printf("Unable to open file %s\n", argv[1]);
+        return 1;
+    }
 
     struct WindowContext *context = gui_makeContext("Editor", 60*8, 60*8, 10, 0x0);
     struct GUIBar *mainBar = gui_makeBar(context->width, 12, 0xc9c9c9, 0xb9b9b9, 4);
@@ -31,6 +42,8 @@ int main(int argc, char **argv){
     gui_setLocation(mainScroll, 0, mainBar->location.h);
     gui_addChild(context, mainScroll);
 
+    struct Location textBox = {13, 12, context->viewport->loc.w - 24, context->viewport->loc.h - 24};
+
     while(running){
         gui_handleContext(context);
         if(mainButton->isClicked){
@@ -41,6 +54,21 @@ int main(int argc, char **argv){
             running = 0;
             exitButton->isClicked = 0;
         }
+        int line = editor_getLineFromFilePct(
+            &file,
+            mainScroll->scroll
+        );
+        editor_draw(
+            context->viewport,
+            textBox,
+            &file,
+            line,
+            line + (textBox.h / 8)
+        );
+
+        vp_copy(context->viewport);
+
+        yield();
     }
     gui_closeContext(context);
 }

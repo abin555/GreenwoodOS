@@ -142,7 +142,6 @@ void run_command(char *cmd){
 		struct DirectoryListing dir = getDirectoryListing(path);
 		for(int i = 0; i < dir.num_entries; i++){
 			puts(dir.entries[i].filename);
-			puts("\n");
 		}
 	}
 	else if(!strcmp(args[0], "mkdir")){

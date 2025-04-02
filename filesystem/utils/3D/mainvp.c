@@ -363,7 +363,7 @@ int main(int argc, char** argv){
     if(spinning){
       rotateObjY(&obj, -0.01f);
     }
-
+    yield();
   }
   endCallback();
 }
