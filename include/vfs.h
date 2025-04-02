@@ -64,5 +64,6 @@ int vfs_mkpipe(int *writer_fd, int *reader_fd);
 struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path);
 struct DirectoryListing vfs_taskListDirectory(char *path);
 int vfs_chdir(struct DIRECTORY *dir, char *path);
+int vfs_ftruncate(int fd, unsigned int length);
 
 #endif

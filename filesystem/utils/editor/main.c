@@ -1,12 +1,13 @@
-#include "libc.h"
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "gui.h"
-#include "memory.h"
 
 int running;
 
 int main(int argc, char **argv){
-    memsetup(0x400000);
     gui_setup();
+    freopen("/-/dev/serial", "w+", stdout);
     running = 1;
 
     struct WindowContext *context = gui_makeContext("Editor", 60*8, 60*8, 10, 0x0);
@@ -26,15 +27,14 @@ int main(int argc, char **argv){
     gui_addChild(mainBar, mainButton);
     gui_addChild(mainBar, exitButton);
 
-    struct GUIScroll *mainScroll = gui_makeScroll(12, 59*8-mainBar->location.h, 30, 0xc9c9c9, 0xb9b9b9, 0x0F0F0F);
-    gui_setLocation(mainScroll, 0, 12);
-    //dprint("Set Location\n");
+    struct GUIScroll *mainScroll = gui_makeScroll(12, 59*8-mainBar->location.h+7, 30, 0xc9c9c9, 0xb9b9b9, 0x0F0F0F);
+    gui_setLocation(mainScroll, 0, mainBar->location.h);
     gui_addChild(context, mainScroll);
 
     while(running){
         gui_handleContext(context);
         if(mainButton->isClicked){
-            dprint("Button Click\n");
+            printf("Button Click\n");
             mainButton->isClicked = 0;
         }
         if(exitButton->isClicked){
@@ -43,6 +43,4 @@ int main(int argc, char **argv){
         }
     }
     gui_closeContext(context);
-
-    memfinish();
 }

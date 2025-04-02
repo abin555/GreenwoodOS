@@ -132,7 +132,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 ClickDrag.selected_vp = vp_interaction.vp;
                 ClickDrag.selected_vp->oldLoc = ClickDrag.selected_vp->loc;
             }
-            
             ClickDrag.dragging = 1;
             ClickDrag.startX = mouseStatus.pos.x;
             ClickDrag.startY = mouseStatus.pos.y;
@@ -151,6 +150,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 );
             }
             else{
+                /*
                 drawRect(
                     0x0000FF,
                     0x0000DD,
@@ -161,6 +161,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                     window->backbuffer,
                     window->width
                 );
+                */
             }
             
             

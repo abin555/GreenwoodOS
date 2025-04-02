@@ -520,7 +520,7 @@ int vfs_writeExt2(struct VFS_File *file, void *buf, int nbytes){
 
 int vfs_write(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
-
+    //print_serial("[VFS] Write %x %d\n", (char *) buf, nbytes);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(!(file_idx->inode.flags & VFS_FLAG_WRITE)) return -1;
     switch(file_idx->inode.type){
@@ -697,4 +697,26 @@ int vfs_chdir(struct DIRECTORY *dir, char *path){
 		}
 	}
 	return 1;
+}
+
+int vfs_ftruncate(int fd, unsigned int length){
+    if(fd == -1 || fd >= VFS_maxFiles || VFS_fileTable[fd].status == 1) return -1;
+
+    struct VFS_File *file = &VFS_fileTable[fd];
+    switch(file->inode.type){
+        case VFS_EXT2: {
+            struct EXT2_Inode *ext2 = file->inode.fs.ext2;
+            int size_delta = ext2->lsbSize - length;
+            if(size_delta < 0){
+
+            }
+            else if(size_delta > 0){
+                ext2_extendFile(file->inode.drive->format_info.ext2, file->inode.ext2_inode_idx, size_delta);
+            }
+            return 0;
+        }
+        default:
+            return -1;
+    }
+    return -1;
 }

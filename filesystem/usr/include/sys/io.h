@@ -16,4 +16,6 @@ int write(int fd, void *buf, int nbytes);
 int lseek(int fd, int off, int whence);
 int creat(char *path);
 
+int ftruncate(int fd, unsigned int length);
+
 #endif

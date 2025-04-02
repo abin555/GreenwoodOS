@@ -1,11 +1,18 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/io.h>
+#include <sys/task.h>
 #include "gui.h"
-#include "memory.h"
 
 struct ViewportFunctions *vp_funcs;
+int mouse_fd;
 
 void gui_setup(){
-    vp_funcs = viewport_get_funcs();
-    mouseStatus = getMousePtr();
+    mouse_fd = open("/-/sys/mouse", O_READ);
+    if(mouse_fd == -1){
+        printf("Error, unable to open mouse file!\n");
+        exit(1);
+    }
 }
 
 struct WindowContext *gui_makeContext(char *text, int width, int height, int maxChildren, uint32_t background){
@@ -15,11 +22,11 @@ struct WindowContext *gui_makeContext(char *text, int width, int height, int max
     context->tag_size = sizeof(struct WindowContext);
 
     context->buffer_size = sizeof(uint32_t) * width * height;
-    context->viewport = vp_funcs->open(width, height, text);
+    context->viewport = vp_open(width, height, text);
     context->buffer = malloc(context->buffer_size);
 
-    vp_funcs->add_event_handler(context->viewport, gui_event);
-    vp_funcs->set_buffer(context->viewport, context->buffer, context->buffer_size);
+    vp_add_event_handler(context->viewport, gui_event);
+    vp_set_buffer(context->viewport, context->buffer, context->buffer_size);
 
     context->width = width;
     context->height = height;
@@ -34,7 +41,8 @@ struct WindowContext *gui_makeContext(char *text, int width, int height, int max
 }
 
 void gui_closeContext(struct WindowContext *context){
-    vp_funcs->close(context->viewport);
+    close(mouse_fd);
+    vp_close(context->viewport);
 }
 
 void gui_addChild(void *e, void *c){
@@ -131,7 +139,7 @@ struct GUIButton *gui_makeButton(char *text, uint32_t tColor, uint32_t bgColor){
     button->isHovered = 0;
     button->hasHover = 0;
     button->text = text;
-    dprint("[GUI] Made Button\n");
+    printf("[GUI] Made Button\n");
     return button;
 }
 
@@ -173,7 +181,7 @@ struct GUIScroll *gui_makeScroll(int w, int h, int barHeight, uint32_t iColor, u
     scroll->handleColor = hColor;
 
     scroll->scroll = 0.0f;
-    dprint("[GUI] Made Scroll\n");
+    printf("[GUI] Made Scroll\n");
     return scroll;
 }
 
@@ -231,7 +239,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
         );
         if(button->text != NULL){
             for(int i = 0; button->text[i] != '\0'; i++){
-                vp_funcs->drawChar(
+                vp_drawChar(
                     context->viewport,
                     button->location.x + x + i*8,
                     button->location.y + y,
@@ -244,7 +252,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
     }
     else if(elem->type == GUI_SCROLL){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
-        dprint("Draw Scroll\n");
+        //printf("Draw Scroll\n");
         
         fillRect(
             scroll->innerColor,
@@ -259,7 +267,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
         
         
         int scrollSpaceSize = scroll->location.h - scroll->barHeight;
-        int barY = scroll->location.y + (scrollSpaceSize * scroll->scroll);
+        int barY = (int) (scrollSpaceSize * scroll->scroll);
         fillRect(
             scroll->handleColor,
             scroll->outerColor,
@@ -271,24 +279,24 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             context->width
         );
         
-        //dprint("Finish Draw Scroll\n");
+        //printf("Finish Draw Scroll\n");
     }
 }
 
 void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *context, struct GUIElement *elem, int x, int y){
     if(context == NULL || elem == NULL){
-        dprint("Interaction Fail, null input\n");
+        printf("Interaction Fail, null input\n");
     }
-    //dprint("Process Interaction\n");
+    //printf("Process Interaction\n");
     if(elem->type == GUI_CONTEXT){
-        //dprint("Context\n");
+        //printf("Context\n");
         struct WindowContext *elemContext = (struct WindowContext *) elem;
         for(int i = 0; i < elemContext->children.numChildren; i++){
             gui_processInteraction(mouseX, mouseY, context, elemContext->children.children[i], 0, 0);
         }
     }
     else if(elem->type == GUI_BAR){
-        //dprint("Bar\n");
+        //printf("Bar\n");
         struct GUIBar *bar = (struct GUIBar *) elem;
         
         for(int i = 0; i < bar->children.numChildren; i++){
@@ -296,7 +304,7 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
         }
     }
     else if(elem->type == GUI_BUTTON){
-        //dprint("Button\n");
+        //printf("Button\n");
         struct GUIButton *button = (struct GUIButton *) elem;
         if(
             mouseX > button->location.x + x && mouseX < button->location.x + x + button->location.w &&
@@ -307,11 +315,11 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
         else{
             button->isHovered = 0;
         }
-        if(button->isHovered && !button->clickLocked && mouseStatus->buttons.left){
+        if(button->isHovered && !button->clickLocked && context->mouseStatus.buttons.left){
             button->isClicked = 1;
             button->clickLocked = 1;
         }
-        if(!mouseStatus->buttons.left){
+        if(!context->mouseStatus.buttons.left){
             button->clickLocked = 0;
         }
     }
@@ -326,43 +334,48 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
         else{
             scroll->isHovered = 0;
         }
-        if(scroll->isHovered && !scroll->clickLocked && mouseStatus->buttons.left){
+        if(scroll->isHovered && !scroll->clickLocked && context->mouseStatus.buttons.left){
             scroll->isClicked = 1;
             scroll->clickLocked = 1;
+            scroll->mouseStart.x = mouseX;
+            scroll->mouseStart.y = mouseY;
         }
-        if(!mouseStatus->buttons.left){
+        if(!context->mouseStatus.buttons.left){
             scroll->clickLocked = 0;
+        }
+        if(scroll->clickLocked){
+            int deltaY = mouseY - scroll->location.y;
+            double proportion = (double) ((double)deltaY / (double)scroll->location.h);
+            if(!(proportion < 0 || proportion > 1)){
+                scroll->scroll = proportion;
+            }
         }
         return;
     }
-    //dprint("Finish process interaction\n");
+    //printf("Finish process interaction\n");
 }
 
 void gui_handleContext(struct WindowContext *context){
-    int localMouseX = mouseStatus->pos.x - context->viewport->loc.x;
-    int localMouseY = mouseStatus->pos.y - context->viewport->loc.y - 10;
+    read(mouse_fd, &context->mouseStatus, sizeof(context->mouseStatus));
+    lseek(mouse_fd, 0, SEEK_SET);
+    int localMouseX = context->mouseStatus.pos.x - context->viewport->loc.x;
+    int localMouseY = context->mouseStatus.pos.y - context->viewport->loc.y - 10;
     if(context == NULL) return;
-    //dprint("Handle Context\n");
-
-    gui_processInteraction(localMouseX, localMouseY, context, (struct GUIElement *) context, 0, 0);
+    //printf("Handle Context\n");
+    if(
+        !( 
+            localMouseX < 0 || localMouseX >= context->viewport->loc.w ||
+            localMouseY < 0 || localMouseY >= context->viewport->loc.h
+        )
+    ){
+        gui_processInteraction(localMouseX, localMouseY, context, (struct GUIElement *) context, 0, 0);
+    }
+    
     gui_drawElement(context, (struct GUIElement *) context, 0, 0);
-    //dprint("Handle Context Finish\n");
+    //printf("Handle Context Finish\n");
 
-    vp_funcs->copy(context->viewport);
+    vp_copy(context->viewport);
 }
-
-struct MouseStatus *getMousePtr();
-struct MouseStatus *mouseStatus;
-
-struct MouseStatus *getMousePtr(){
-	struct MouseStatus *mousePtr;
-	register uint32_t eax asm("eax");
-	eax = 0x27;
-	asm("int 0x80");
-	mousePtr = (struct MouseStatus *) eax;
-	return mousePtr;
-}
-
 
 extern int running;
 

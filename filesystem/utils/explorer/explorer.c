@@ -66,6 +66,8 @@ int isFocus;
 void drawRightClickMenu(struct RightClickMenu *rightClickMenu);
 int handleRightClickMenu(struct RightClickMenu *rightClickMenu);
 
+char *path;
+
 int main(int argc, char **argv){
 	vp = vp_open(WIDTH, HEIGHT, "Explorer");
     isFocus = 1;
@@ -78,6 +80,7 @@ int main(int argc, char **argv){
     file = loadBitmap("/A/OS/icons/file.tga");
 
     dir = getDirectoryListing(".");
+    path = getDirectory();
 
     running = 1;
     selection = 2;
@@ -133,6 +136,7 @@ int main(int argc, char **argv){
                 }
                 case 8:
                 changeDirectory("..");
+                path = getDirectory();
                 dir = getDirectoryListing(".");
                 break;
             }
@@ -202,6 +206,7 @@ void HandleSelection(char *work_buf, int sel){
         printf("Changing Path to %s\n", (uint32_t) work_buf);
 
         changeDirectory(work_buf);
+        path = getDirectory();
         dir = getDirectoryListing(".");
         sel = -1;
         return;
@@ -375,10 +380,9 @@ int identify_selection(struct DirectoryListing *dirs){
 void drawDirectoryContents(struct DirectoryListing *dirs, int selected, struct RightClickMenu *rightClickMenu){
     int iconY = 0;
     int iconX = 0;
-    char *dirpath = getDirectory();
-    int dirpath_len = strlen(dirpath);
+    int dirpath_len = strlen(path);
     for(int i = 0; i < dirpath_len; i++){
-        vp_drawChar(vp, 8*i, vp->loc.h-8, dirpath[i], 0xFFFFFF, 0x0);
+        vp_drawChar(vp, 8*i, vp->loc.h-8, path[i], 0xFFFFFF, 0x0);
     }
     for(int i = 0; i < dirs->num_entries-2; i++){
         drawIcon(6*8*iconX, iconY*(24+8*4), &dirs->entries[i+2], i == selected ? 1 : 0);

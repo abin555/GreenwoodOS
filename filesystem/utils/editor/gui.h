@@ -1,11 +1,12 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include "libc.h"
+#include <stdint.h>
+#include <sys/vp.h>
+#include <sys/mouse.h>
+
 
 extern struct ViewportFunctions *vp_funcs;
-extern struct MouseStatus *getMousePtr();
-extern struct MouseStatus *mouseStatus;
 
 typedef enum {
     GUI_BUTTON,
@@ -69,6 +70,10 @@ struct GUIScroll {
     char isClicked;
     char clickLocked;
     char isHovered;
+    struct {
+        int x;
+        int y;
+    } mouseStart;
 };
 
 struct WindowContext {
@@ -85,6 +90,7 @@ struct WindowContext {
 
     struct GUIChildren children;
     struct GUIElement *rightClick;
+    struct MouseStatus mouseStatus;
 };
 
 void gui_setup();

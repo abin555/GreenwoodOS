@@ -72,3 +72,15 @@ int creat(char *path){
 	asm("int 0x80");
 	return (int) eax;
 }
+
+int ftruncate(int fd, unsigned int length){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	register uint32_t edx asm("edx");
+	ecx = (uint32_t) length;
+	ebx = (uint32_t) fd;
+	eax = 0x3F;
+	asm("int 0x80");
+	return (int) eax;
+}

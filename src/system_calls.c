@@ -260,7 +260,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x25:{
-			print_serial((char *) cpu.ebx);
 			break;
 		}
 		case 0x26:{
@@ -268,7 +267,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x27:{
-			cpu_state.eax = (uint32_t) &mouseStatus;
 			break;
 		}
 		case 0x28:{
@@ -297,10 +295,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			tasks[task_running_idx].end_callback = (void (*)(void)) cpu.ebx;
 			break;
 		}
-		case 0x2D:{
-			cpu_state.eax = (uint32_t) &global_viewport_functions;
-			break;
-		}
 		case 0x2E:{
 			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu.ebx);
 			cpu_state.eax = (uint32_t) console;
@@ -308,16 +302,8 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			task->own_console = true;
 			break;
 		}
-		case 0x2F:{
-			cpu_state.eax = (uint32_t) &RTC;
-			break;
-		}
 		case 0x30:{
 			cpu_state.eax = (uint32_t) &vfs_taskListDirectory;
-			break;
-		}
-		case 0x31:{
-			print_serial((char *) cpu.ebx);
 			break;
 		}
 		case 0x32:{
@@ -325,7 +311,6 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x33:{
-			write_serial((char) cpu.ebx);
 			break;
 		}
 		case 0x34:{
@@ -370,11 +355,13 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Print to console
 		case 0x3D:{
-			print_console((struct CONSOLE *) cpu.ebx, (char*) cpu.ecx);
 			break;
 		}
 		case 0x3E:{
-			cpu_state.eax = (unsigned int) task->console;
+			break;
+		}
+		case 0x3F:{
+			cpu_state.eax = (unsigned int) vfs_ftruncate(cpu.ebx, cpu.ecx);
 			break;
 		}
 	}
