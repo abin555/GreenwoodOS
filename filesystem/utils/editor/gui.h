@@ -13,7 +13,8 @@ typedef enum {
     GUI_BAR,
     GUI_BOX,
     GUI_CONTEXT,
-    GUI_SCROLL
+    GUI_SCROLLV,
+    GUI_SCROLLH
 } GUI_ELEMENT;
 
 struct GUIElement {
@@ -61,7 +62,7 @@ struct GUIScroll {
     uint32_t tag_size;
     struct Location location;
 
-    int barHeight;
+    int barSize;
     uint32_t innerColor;
     uint32_t outerColor;
     uint32_t handleColor;
@@ -91,6 +92,9 @@ struct WindowContext {
     struct GUIChildren children;
     struct GUIElement *rightClick;
     struct MouseStatus mouseStatus;
+
+    int localMouseX;
+    int localMouseY;
 };
 
 void gui_setup();
@@ -100,7 +104,8 @@ void gui_closeContext(struct WindowContext *context);
 void gui_addChild(void *e, void *c);
 struct GUIButton *gui_makeButton(char *text, uint32_t tColor, uint32_t bgColor);
 struct GUIBar *gui_makeBar(int w, int h, uint32_t iColor, uint32_t oColor, int maxChildren);
-struct GUIScroll *gui_makeScroll(int w, int h, int barHeight, uint32_t iColor, uint32_t oColor, uint32_t hColor);
+struct GUIScroll *gui_makeVScroll(int w, int h, int barSize, uint32_t iColor, uint32_t oColor, uint32_t hColor);
+struct GUIScroll *gui_makeHScroll(int w, int h, int barSize, uint32_t iColor, uint32_t oColor, uint32_t hColor);
 
 void gui_setLocation(void *e, int x, int y);
 void gui_setScale(void *e, int w, int h);

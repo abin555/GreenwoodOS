@@ -66,7 +66,7 @@ void gui_addChild(void *e, void *c){
         struct GUIButton *button = (struct GUIButton *) elem;
         return;
     }
-    else if(elem->type == GUI_SCROLL){
+    else if(elem->type == GUI_SCROLLV){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         return;
     }
@@ -91,7 +91,7 @@ void gui_setLocation(void *e, int x, int y){
         button->location.x = x;
         button->location.y = y;
     }
-    else if(elem->type == GUI_SCROLL){
+    else if(elem->type == GUI_SCROLLV){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         scroll->location.x = x;
         scroll->location.y = y;
@@ -114,7 +114,7 @@ void gui_setScale(void *e, int w, int h){
         button->location.w = w;
         button->location.h = h;
     }
-    else if(elem->type == GUI_SCROLL){
+    else if(elem->type == GUI_SCROLLV){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         scroll->location.w = w;
         scroll->location.h = h;
@@ -163,11 +163,11 @@ struct GUIBar *gui_makeBar(int w, int h, uint32_t iColor, uint32_t oColor, int m
     return bar;
 }
 
-struct GUIScroll *gui_makeScroll(int w, int h, int barHeight, uint32_t iColor, uint32_t oColor, uint32_t hColor){
+struct GUIScroll *gui_makeVScroll(int w, int h, int barSize, uint32_t iColor, uint32_t oColor, uint32_t hColor){
     struct GUIScroll *scroll = malloc(sizeof(struct GUIScroll));
     if(scroll == NULL) return NULL;
 
-    scroll->type = GUI_SCROLL;
+    scroll->type = GUI_SCROLLV;
     scroll->tag_size = sizeof(struct GUIScroll);
 
     scroll->location.x = 0;
@@ -175,7 +175,29 @@ struct GUIScroll *gui_makeScroll(int w, int h, int barHeight, uint32_t iColor, u
     scroll->location.w = w;
     scroll->location.h = h;
 
-    scroll->barHeight = barHeight;
+    scroll->barSize = barSize;
+    scroll->innerColor = iColor;
+    scroll->outerColor = oColor;
+    scroll->handleColor = hColor;
+
+    scroll->scroll = 0.0f;
+    printf("[GUI] Made Scroll\n");
+    return scroll;
+}
+
+struct GUIScroll *gui_makeHScroll(int w, int h, int barSize, uint32_t iColor, uint32_t oColor, uint32_t hColor){
+    struct GUIScroll *scroll = malloc(sizeof(struct GUIScroll));
+    if(scroll == NULL) return NULL;
+
+    scroll->type = GUI_SCROLLH;
+    scroll->tag_size = sizeof(struct GUIScroll);
+
+    scroll->location.x = 0;
+    scroll->location.y = 0;
+    scroll->location.w = w;
+    scroll->location.h = h;
+
+    scroll->barSize = barSize;
     scroll->innerColor = iColor;
     scroll->outerColor = oColor;
     scroll->handleColor = hColor;
@@ -250,7 +272,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             }
         }
     }
-    else if(elem->type == GUI_SCROLL){
+    else if(elem->type == GUI_SCROLLV){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         //printf("Draw Scroll\n");
         
@@ -266,7 +288,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
         );
         
         
-        int scrollSpaceSize = scroll->location.h - scroll->barHeight;
+        int scrollSpaceSize = scroll->location.h - scroll->barSize;
         int barY = (int) (scrollSpaceSize * scroll->scroll);
         fillRect(
             scroll->handleColor,
@@ -274,7 +296,7 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             scroll->location.x + x,
             scroll->location.y + y + barY,
             scroll->location.x + x + scroll->location.w,
-            scroll->location.y + y + barY + scroll->barHeight,
+            scroll->location.y + y + barY + scroll->barSize,
             context->buffer,
             context->width
         );
@@ -324,7 +346,7 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
             button->clickLocked = 0;
         }
     }
-    else if(elem->type == GUI_SCROLL){
+    else if(elem->type == GUI_SCROLLV){
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         if(
             mouseX > scroll->location.x + x && mouseX < scroll->location.x + x + scroll->location.w &&
@@ -359,17 +381,17 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
 void gui_handleContext(struct WindowContext *context){
     read(mouse_fd, &context->mouseStatus, sizeof(context->mouseStatus));
     lseek(mouse_fd, 0, SEEK_SET);
-    int localMouseX = context->mouseStatus.pos.x - context->viewport->loc.x;
-    int localMouseY = context->mouseStatus.pos.y - context->viewport->loc.y - 10;
+    context->localMouseX = context->mouseStatus.pos.x - context->viewport->loc.x;
+    context->localMouseY = context->mouseStatus.pos.y - context->viewport->loc.y - 10;
     if(context == NULL) return;
     //printf("Handle Context\n");
     if(
         !( 
-            localMouseX < 0 || localMouseX >= context->viewport->loc.w ||
-            localMouseY < 0 || localMouseY >= context->viewport->loc.h
+            context->localMouseX < 0 || context->localMouseX >= context->viewport->loc.w ||
+            context->localMouseY < 0 || context->localMouseY >= context->viewport->loc.h
         )
     ){
-        gui_processInteraction(localMouseX, localMouseY, context, (struct GUIElement *) context, 0, 0);
+        gui_processInteraction(context->localMouseX, context->localMouseY, context, (struct GUIElement *) context, 0, 0);
     }
     
     gui_drawElement(context, (struct GUIElement *) context, 0, 0);

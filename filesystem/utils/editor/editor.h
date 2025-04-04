@@ -14,7 +14,7 @@ struct EditorFile {
 
 struct EditorFile editor_open(char *path);
 void editor_close(struct EditorFile *file);
-void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile *file, int lineStart, int lineEnd);
+void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile *file, int lineStart, int lineEnd, int mouseX, int mouseY);
 unsigned int editor_getLineFromFilePct(struct EditorFile *file, double pct);
 unsigned int editor_getLineCount(struct EditorFile *file);
 

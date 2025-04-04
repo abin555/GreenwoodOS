@@ -21,7 +21,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    struct WindowContext *context = gui_makeContext("Editor", 60*8, 60*8, 10, 0x0);
+    struct WindowContext *context = gui_makeContext("Editor", 12+60*8, 60*8, 10, 0x0);
     struct GUIBar *mainBar = gui_makeBar(context->width, 12, 0xc9c9c9, 0xb9b9b9, 4);
     gui_setLocation(mainBar, 0, 0);
     gui_addChild(context, mainBar);
@@ -38,7 +38,7 @@ int main(int argc, char **argv){
     gui_addChild(mainBar, mainButton);
     gui_addChild(mainBar, exitButton);
 
-    struct GUIScroll *mainScroll = gui_makeScroll(12, 59*8-mainBar->location.h+7, 30, 0xc9c9c9, 0xb9b9b9, 0x0F0F0F);
+    struct GUIScroll *mainScroll = gui_makeVScroll(12, 59*8-mainBar->location.h+7, 30, 0xc9c9c9, 0xb9b9b9, 0x0F0F0F);
     gui_setLocation(mainScroll, 0, mainBar->location.h);
     gui_addChild(context, mainScroll);
 
@@ -63,7 +63,9 @@ int main(int argc, char **argv){
             textBox,
             &file,
             line,
-            line + (textBox.h / 8)
+            line + (textBox.h / 8),
+            context->localMouseX,
+            context->localMouseY
         );
 
         vp_copy(context->viewport);

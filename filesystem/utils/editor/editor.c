@@ -48,7 +48,7 @@ unsigned int editor_getLineFromFilePct(struct EditorFile *file, double pct){
     return line;
 }
 
-void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile *file, int lineStart, int lineEnd){
+void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile *file, int lineStart, int lineEnd, int mouseX, int mouseY){
     int startIdx;
     int endIdx;
     int lineWalks = 0;
@@ -61,12 +61,26 @@ void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile 
         if(lineWalks == lineEnd) break;
     }
 
+    int mGridX, mGridY = -1;
+
+    if(
+        mouseX > subbox.x && mouseX < subbox.x+subbox.w &&
+        mouseY > subbox.y && mouseY < subbox.y+subbox.h
+    ){
+        mGridX = (mouseX - subbox.x) / 8;
+        mGridY = (mouseY - subbox.y) / 8;
+    }
+    else{
+        mGridX = -1;
+        mGridY = -1;
+    }
+
     int cX, cY = 0;
     int mX, mY;
     mX = (subbox.x + subbox.w);
     mY = (subbox.y + subbox.h);
     for(int i = startIdx; i < endIdx; i++){
-        if(cX >= mX){
+        if(cX >= mX-1){
             cX = 0;
             cY += 8;
             while(file->loaded_file[i] != '\n'){
@@ -79,7 +93,12 @@ void editor_draw(struct Viewport *vp, struct Location subbox, struct EditorFile 
             cY += 8;
         }
         else{
-            vp_drawChar(vp, subbox.x + cX, subbox.y + cY, file->loaded_file[i], 0xFFFFFF, 0x0);
+            if(((cX / 8) == mGridX) && ((cY / 8) == mGridY)){
+                vp_drawChar(vp, subbox.x + cX, subbox.y + cY, file->loaded_file[i], 0xFFFFFF, 0x770077);
+            }
+            else{
+                vp_drawChar(vp, subbox.x + cX, subbox.y + cY, file->loaded_file[i], 0xFFFFFF, 0x0);
+            }
             cX += 8;
         }
     }
