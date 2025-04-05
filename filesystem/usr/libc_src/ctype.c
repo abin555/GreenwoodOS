@@ -39,6 +39,20 @@ int (isxdigit)(int c) {
 	return (_Ctype[c] & (_DI|_LO|_UP|_XA));
 }
 */
+
+int isdigit(int c){
+	if(c <= '9' && c >= '0') return 1;
+	return 0;
+}
+int isalpha(int c){
+	if((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return 1;
+	return 0;
+}
+int isupper(int c){
+	if(c >= 'A' && c <= 'Z') return 1;
+	return 0;
+}
+
 int tolower(int c){
 	if(c >= 'A' && c <= 'Z')
 		return c - 'A';

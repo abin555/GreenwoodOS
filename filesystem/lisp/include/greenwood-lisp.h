@@ -1,13 +1,10 @@
 #ifndef GREENWOOD_LISP_H
 #define GREENWOOD_LISP_H
 
-#ifndef Greenwood_OS
-#include "linux_lib.h"
-#endif
-
-#ifdef Greenwood_OS
-#include "gwos_lib.h"
-#endif
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
 
 typedef enum {
     Error_OK = 0,

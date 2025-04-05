@@ -290,8 +290,7 @@ int builtin_strConv(Atom args, Atom *result){
     if(nilp(args) || nilp(car(args)) || !nilp(cdr(args))){
         return Error_Args;
     }
-
-    #ifndef Greenwood_OS
+    /*
     char *str = NULL;;
 
     if(car(args).type == Atom_INT){
@@ -311,12 +310,10 @@ int builtin_strConv(Atom args, Atom *result){
     }
     *result = make_string(str);
     return Error_OK;
-    #endif
-
-    #ifdef Greenwood_OS
+    */
+    
     *result = make_int(0x00F);
     return Error_OK;
-    #endif
 }
 
 int builtin_nth(Atom args, Atom *result){

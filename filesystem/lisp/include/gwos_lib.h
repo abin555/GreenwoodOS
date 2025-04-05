@@ -1,8 +1,6 @@
 #ifndef GWOS_LIB_H
 #define GWOS_LIB_H
 
-#include "../GWOS_lib/libc.h"
-
 void init_heap(int heap_size);
 void *malloc(int size);
 void free(void *mem);

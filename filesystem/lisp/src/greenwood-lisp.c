@@ -1,6 +1,6 @@
+#include <ctype.h>
 #include "greenwood-lisp.h"
 
-#ifndef Greenwood_OS
 char *slurp(const char *path){
     FILE *file;
     char *buf;
@@ -12,7 +12,7 @@ char *slurp(const char *path){
     len = ftell(file);
     fseek(file, 0, SEEK_SET);
 
-    buf = os_malloc(len + 1);
+    buf = malloc(len + 1);
     if(!buf)
         return NULL;
     
@@ -21,52 +21,39 @@ char *slurp(const char *path){
     fclose(file);
     return buf;
 }
-#endif
-#ifdef Greenwood_OS
-char *slurp(const char *path){
-    struct FILE *file = fopen((char *) path);
-    if(file == NULL) return NULL;
-    int size = fsize(file);
-    print_int("File size is %d\n", size);
-    char *buf = kmalloc(size+2);
-    memset(buf, 0, size+2);
-    fcopy(file, buf, size);
-    return buf;
-}
-#endif
 
 void load_file(Atom env, const char *path){
     char *text;
-    print_str("Reading %s...\n", (char *) path);
+    printf("Reading %s...\n", (char *) path);
     text = slurp(path);
     if(text != NULL) {
         const char *p = text;
         Atom expr;
-        print("Evaluating\n");
+        puts("Evaluating\n");
         Error err = Error_OK;
         while(err == Error_OK){
             err = read_expr(p, &p, &expr);
             if(err){
-                print("Error while reading!\n");
+                puts("Error while reading!\n");
                 break;
             }
             else{
                 print_expr(expr);
-                print("\n");
+                putchar('\n');
             }
             Atom result;
             err = eval_expr(expr, env, &result);
             if(err){
-                print("Error in expression:\n\t");
+                puts("Error in expression:\n\t");
                 print_expr(expr);
-                print("\n");
+                putchar('\n');
             }
             else{
                 print_expr(result);
-                print("\n");
+                putchar('\n');
             }
         }
-        os_free(text);
+        free(text);
     }
 }
 
@@ -102,7 +89,7 @@ int parse_simple(const char *start, const char *end, Atom *result){
     //Check if string
     if(start[0] == '\"' && *(end - 1) == '\"' && *(end - 2) != '\\'){
         start++;
-        buf = os_malloc(end - start + 1);
+        buf = malloc(end - start + 1);
         p = buf;
         while(start != end){
             *p++ = *start;
@@ -129,7 +116,7 @@ int parse_simple(const char *start, const char *end, Atom *result){
     }
 
     //NIL or symbol
-    buf = os_malloc(end - start + 1);
+    buf = malloc(end - start + 1);
     p = buf;
     while(start != end){
         //TODO: ABSTRACT IMPLEMENTATION FOR OS
@@ -143,7 +130,7 @@ int parse_simple(const char *start, const char *end, Atom *result){
     else{
         *result = make_sym(buf);
     }
-    os_free(buf);
+    free(buf);
     return Error_OK;
 }
 
@@ -231,66 +218,56 @@ int read_expr(const char *input, const char **end, Atom *result){
 void print_expr(Atom atom){
     switch(atom.type){
         case Atom_NIL:
-            print("NIL");
+            puts("NIL");
             break;
         case Atom_PAIR:
-            pchar('(');
+            putchar('(');
             print_expr(car(atom));
             atom = cdr(atom);
             while(!(nilp(atom))){
                 if(atom.type == Atom_PAIR){
-                    pchar(' ');
+                    putchar(' ');
                     print_expr(car(atom));
                     atom = cdr(atom);
                 }
                 else{
-                    print(" . ");
+                    puts(" . ");
                     print_expr(atom);
                     break;
                 }
             }
-            pchar(')');
+            putchar(')');
             break;
         case Atom_SYMBOL:
-            print_str("%s", (char *) atom.value.symbol);
+            printf("%s", (char *) atom.value.symbol);
             break;
         case Atom_INT:
-            print_int("%d", atom.value.integer);
+            printf("%d", atom.value.integer);
             break;
         case Atom_BUILTIN:
-            #ifndef Greenwood_OS
-            print_int("#<BUILTIN: 0x%x>", (unsigned long long) atom.value.builtin);
-            #endif
-            #ifdef Greenwood_OS
-            print_int("#<BUILTIN: 0x%x>", (uint32_t) atom.value.builtin);
-            #endif
+            printf("#<BUILTIN: 0x%x>", (uint32_t) atom.value.builtin);
             break;
         case Atom_STRING:
-            print_str("\"%s\"", atom.value.string);
+            printf("\"%s\"", atom.value.string);
             break;
         case Atom_REAL:
-            #ifndef Greenwood_OS
-            printf("%f", atom.value.real);
-            #endif
-            #ifdef Greenwood_OS
-            print_int("%d", atom.value.real);
-            print_int(".%d", (atom.value.real - ((int) atom.value.real)) * 100);
-            #endif
+            printf("%d", atom.value.real);
+            printf(".%d", (atom.value.real - ((int) atom.value.real)) * 100);
             break;
         case Atom_CLOSURE:
-            print("<Closure Fn>");
+            puts("<Closure Fn>");
             break;
         case Atom_MACRO:
-            print("<MACRO>");
+            puts("<MACRO>");
             break;
     }
-    //pchar('\n');
+    //putchar('\n');
 }
 
 Atom cons(Atom car_val, Atom cdr_val){
     Atom p;
     p.type = Atom_PAIR;
-    p.value.pair = os_malloc(sizeof(struct Pair));
+    p.value.pair = malloc(sizeof(struct Pair));
 
     car(p) = car_val;
     cdr(p) = cdr_val;
@@ -516,7 +493,7 @@ int eval_expr(Atom expr, Atom env, Atom *result){
                 return Error_Args;
             }
             print_expr(env);
-            pchar('\n');
+            putchar('\n');
             return Error_OK;
         }
         else if(!strcmp(op.value.symbol, "LAMBDA")){
@@ -550,7 +527,7 @@ int eval_expr(Atom expr, Atom env, Atom *result){
             
             err = make_closure(env, cdr(car(args)), cdr(args), &macro);
             if(err){
-                print("Error making closure\n");
+                puts("Error making closure\n");
                 return err;
             }
             macro.type = Atom_MACRO;

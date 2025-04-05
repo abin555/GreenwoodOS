@@ -1,28 +1,19 @@
-#ifndef Greenwood_OS
-#include "linux_lib.h"
-#endif
-#ifdef Greenwood_OS
-#include "gwos_lib.h"
-#endif
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <sys/vp.h>
+#include <sys/console.h>
+#include <sys/task.h>
 
 #include "greenwood-lisp.h"
 #include "builtin.h"
 
-#ifndef Greenwood_OS
-#include <editline/readline.h>
-#include <histedit.h>
-#endif
-
-
-#ifdef Greenwood_OS
 
 #define WIDTH 400
 #define HEIGHT 400
 
 void draw_cursor(int i);
-struct WINDOW *window;
-struct ViewportFunctions *vp_funcs;
 struct Viewport *vp;
 uint32_t *backbuf;
 struct CONSOLE *console;
@@ -48,33 +39,21 @@ char *defaultlib[] = {
 };
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 int running;
-#endif
 
 //static char input[2048];
 
 int main(int argc, int argv[]){
-
-    #ifdef Greenwood_OS
-    print("Opening Greenwood LISP\n");
-    vp_funcs = viewport_get_funcs();
-    vp = vp_funcs->open(400, 400, "Greenwood LISP");
-    backbuf = (uint32_t *) requestRegion(WIDTH * HEIGHT *sizeof(uint32_t));
-	vp_funcs->set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
-    vp_funcs->add_event_handler(vp, event_handler);
-    //window = window_open("GreenwoodLISP", true);
+    printf("Opening Greenwood LISP\n");
+    vp = vp_open(400, 400, "Greenwood LISP");
+    backbuf = (uint32_t *) malloc(WIDTH * HEIGHT *sizeof(uint32_t));
+	vp_set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
+    vp_add_event_handler(vp, event_handler);
     console = console_open_vp(vp);
 
 	term_width = WIDTH / 8;
 	term_height = HEIGHT / 8;
 
-    init_heap(0x2000);
-
-    #endif
-
-    print("Greenwood LISP Version 0.1\n");
-    #ifndef Greenwood_OS
-    print("Press Ctrl+C to Exit\n");
-    #endif
+    printf("Greenwood LISP Version 0.1\n");
 
     Atom env;
     env = env_create(nil);
@@ -98,46 +77,7 @@ int main(int argc, int argv[]){
     env_set(env, make_sym("PAIR?"), make_builtin(builtin_pair));
     env_set(env, make_sym("REAL"), make_builtin(builtin_real));
     
-    #ifndef Greenwood_OS
-    load_file(env, "library.lisp");
-
-
-    while(1){
-        char *input = readline("Greenwood LISP> ");
-        add_history(input);      
-        
-        const char *p = input;
-        Error err;
-        Atom expr, result;
-        err = read_expr(p, &p, &expr);
-
-        if(!err)
-            err = eval_expr(expr, env, &result);
-        
-        switch(err){
-            case Error_OK:
-                print_expr(result);
-                pchar('\n');
-                break;
-            case Error_Syntax:
-                print("Synax Error\n");
-                break;
-            case Error_Unbound:
-                print("Symbol not bound\n");
-                break;
-            case Error_Args:
-                print("Wrong number of arguments\n");
-                break;
-            case Error_Type:
-                print("Wrong Type\n");
-                break;
-        }
-        
-        free(input);
-    }
-    #endif
-
-    #ifdef Greenwood_OS
+    
     Atom expr, result;
     const char *p = "(* 4 5)";
     Error err;
@@ -147,24 +87,21 @@ int main(int argc, int argv[]){
         p = defaultlib[i];
         err = read_expr(p, &p, &expr);
         if(err){
-            print("Error while reading!\n");
+            printf("Error while reading!\n");
             continue;
         }
         err = eval_expr(expr, env, &result);
         if(err){
-            print("Error in expression:\n\t");
+            printf("Error in expression:\n\t");
             print_expr(expr);
-            print("\n");
+            printf("\n");
         }
         else{
             print_expr(result);
-            print("\n");
+            printf("\n");
         }
     }
 
-
-
-    window_update();
     int idx = 0;
     char *termbuf = malloc(term_width);
     memset(termbuf, 0, term_width);
@@ -172,8 +109,8 @@ int main(int argc, int argv[]){
 
     running = 1;
     while(running){
-        vp_funcs->copy(vp);
-		char c = vp_funcs->getc(vp);
+        vp_copy(vp);
+		char c = vp_getc(vp);
         draw_cursor(idx);
 		if(c == '\0') continue;
 		if(c == 8){
@@ -186,31 +123,31 @@ int main(int argc, int argv[]){
 			
 		}
 		for(int i = 0; i < term_width; i++){
-			vp_funcs->drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
+			vp_drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
 		}
 
         if(c == 10){
             p = termbuf;
             err = read_expr(p, &p, &expr);
-            print(termbuf);
+            puts(termbuf);
             if(!err)
                 err = eval_expr(expr, env, &result);
             switch(err){
                 case Error_OK:
                     print_expr(result);
-                    print("\n");
+                    printf("\n");
                     break;
                 case Error_Syntax:
-                    print("Synax Error\n");
+                    printf("Synax Error\n");
                     break;
                 case Error_Unbound:
-                    print("Symbol not bound\n");
+                    printf("Symbol not bound\n");
                     break;
                 case Error_Args:
-                    print("Wrong number of arguments\n");
+                    printf("Wrong number of arguments\n");
                     break;
                 case Error_Type:
-                    print("Wrong Type\n");
+                    printf("Wrong Type\n");
                     break;
             }
             idx = 0;
@@ -219,16 +156,14 @@ int main(int argc, int argv[]){
 
         draw_cursor(idx);
         //window_update();
-        vp_funcs->copy(vp);
+        vp_copy(vp);
     }
     console_close();
-    vp_funcs->close(vp);
-    freeRegion(backbuf, WIDTH * HEIGHT *sizeof(uint32_t));
-    #endif
+    vp_close(vp);
+    free(backbuf);
     return 0;
 }
 
-#ifdef Greenwood_OS
 void draw_cursor(int i){
 	for(int x = 0; x < 8; x++){
 		backbuf[WIDTH * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
@@ -246,4 +181,3 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 		set_schedule(ALWAYS);
     }
 }
-#endif

@@ -195,3 +195,16 @@ FILE *freopen(const char *pathname, const char *mode, FILE *stream){
 	}
 	return fopen(pathname, mode);
 }
+
+int fputc(int c, FILE *stream){
+    char cc = (char) c;
+    return fwrite(&cc, 1, 1, stream);    
+}
+
+int putc(int c, FILE *stream){
+    return fputc(c, stream);
+}
+
+int putchar(int c){
+    return putc(c, stdout);
+}

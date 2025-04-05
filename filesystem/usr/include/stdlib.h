@@ -24,5 +24,6 @@ char *itoa(int n, char *buf, int radix);
 void exit(int code);
 void srand(unsigned int seed);
 int rand();
+int strtol(const char *nptr, char **endptr, register int base);
 
 #endif

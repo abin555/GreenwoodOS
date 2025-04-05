@@ -37,7 +37,15 @@ int sprintf(char *str, const char *format, ...);
 int fputs(const char *s, FILE *file);
 int puts(const char *s);
 
+int fputc(int c, FILE *stream);
+int putc(int c, FILE *stream);
+int putchar(int c);
+
 FILE *freopen(const char *pathname, const char *mode, FILE *stream);
+
+int fputc(int c, FILE *stream);
+int putc(int c, FILE *stream);
+int putchar(int c);
 
 #include <stdarg.h>
 int vfprintf(FILE *stream, const char *format, va_list apq);
