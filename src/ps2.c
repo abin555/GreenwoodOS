@@ -47,7 +47,7 @@ void ps2_init(){
     inb(PS2_DATA);
 
     for(int j = 0; j < 5; j++){
-        fb_putChar(8, 8*j, 'T', 0xFF0000, 0x0000FF);
+        //fb_putChar(8, 8*j, 'T', 0xFF0000, 0x0000FF);
         ps2_write(PS2_CMD, PS2_SELF_TEST);
         if(ps2_read(PS2_DATA) != PS2_SELF_TEST_OK){
             print_serial("[PS2] Controller failed self-test\n");
@@ -94,7 +94,7 @@ void ps2_init(){
         ps2_controllers[1] = 0;
     }
     else{
-        fb_putChar(8*4, 0, '2', 0x00FF00, 0x000000);
+        //fb_putChar(8*4, 0, '2', 0x00FF00, 0x000000);
         //for(int i = 0; i < 0xFFFFFFF; i++){}
         //ps2_write(PS2_CMD, PS2_DISABLE_SECOND);
     }
@@ -246,16 +246,16 @@ uint32_t ps2_identify_multiplex(){
     ps2_write(PS2_DATA, 0x56);
     uint8_t res2 = ps2_read(PS2_DATA);//Should be 0x56 if multi
 
-    fb_putChar(8*(10), 8*4, quadToHex(res1 & 0xF0), 0xFFFFFF, 0);
-    fb_putChar(8*(11), 8*4, quadToHex(res1 & 0xF), 0xFFFFFF, 0);
-    fb_putChar(8*(10), 8*5, quadToHex(res2 & 0xF0), 0xFFFFFF, 0);
-    fb_putChar(8*(11), 8*5, quadToHex(res2 & 0xF), 0xFFFFFF, 0);
+    //fb_putChar(8*(10), 8*4, quadToHex(res1 & 0xF0), 0xFFFFFF, 0);
+    //fb_putChar(8*(11), 8*4, quadToHex(res1 & 0xF), 0xFFFFFF, 0);
+    //fb_putChar(8*(10), 8*5, quadToHex(res2 & 0xF0), 0xFFFFFF, 0);
+    //fb_putChar(8*(11), 8*5, quadToHex(res2 & 0xF), 0xFFFFFF, 0);
 
     ps2_write(PS2_CMD, 0xD3);
     ps2_write(PS2_DATA, 0xA4);
     uint8_t ver = ps2_read(PS2_DATA);
-    fb_putChar(8*(10), 8*6, quadToHex(ver & 0xF0), 0xFFFFFF, 0);
-    fb_putChar(8*(11), 8*6, quadToHex(ver & 0xF), 0xFFFFFF, 0);
+    //fb_putChar(8*(10), 8*6, quadToHex(ver & 0xF0), 0xFFFFFF, 0);
+    //fb_putChar(8*(11), 8*6, quadToHex(ver & 0xF), 0xFFFFFF, 0);
     print_serial("[PS2] Multiplex Test: %x %x %x\n", res1, res2, ver);
     if(ver != 0xA4){
         print_serial("[PS2] Mutliplex is available!\n");
@@ -277,12 +277,14 @@ void ps2_deactivate_multiplexing(){
     ps2_write(PS2_DATA, 0xA5);
     uint8_t ver = ps2_read(PS2_DATA);//Should be 0xF0 if multi
 
+    /*
     fb_putChar(8*(14), 8*4, quadToHex(res1 & 0xF0), 0xFFFFFF, 0);
     fb_putChar(8*(15), 8*4, quadToHex(res1 & 0xF), 0xFFFFFF, 0);
     fb_putChar(8*(14), 8*5, quadToHex(res2 & 0xF0), 0xFFFFFF, 0);
     fb_putChar(8*(15), 8*5, quadToHex(res2 & 0xF), 0xFFFFFF, 0);
     fb_putChar(8*(14), 8*6, quadToHex(ver & 0xF0), 0xFFFFFF, 0);
     fb_putChar(8*(15), 8*6, quadToHex(ver & 0xF), 0xFFFFFF, 0);
+    */
 
     print_serial("[PS2] Disabled Multiplexing %x %x %x\n", res1, res2, ver);
 }

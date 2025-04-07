@@ -116,7 +116,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;
             }
-            //print_serial("[TASK] Added Task \"%s\" to queue\n", tasks[i].task_name);
+            print_serial("[TASK] Added Task \"%s\" to queue at %d\n", tasks[i].task_name, i);
             break;
         }
     }
@@ -203,7 +203,7 @@ void stop_task(int8_t task_idx){
         tasks[task_idx].own_console = false;
     }
     print_serial("[TASK] Killed Task %d %s\n", task_idx, tasks[task_idx].task_name);
-    task_callback();
+    //task_callback();
 }
 
 void task_end(){

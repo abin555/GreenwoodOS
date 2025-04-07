@@ -35,10 +35,11 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     print_stack_trace(cpu.ebp, 10);
     fb_print(0,0,"PAGE FAULT!");
     //asm("hlt");
-    stop_task(task_running_idx);
+    //stop_task(task_running_idx);
+    list_tasks();
     override_state_return = true;
     most_recent_int_stack_state.eip = (uint32_t) &page_holding_pen;
-    //print_console(kernel_console, "Returning to kernel Task\n");
+    print_serial("Returning Task\n");
     return cpu;
 }
 

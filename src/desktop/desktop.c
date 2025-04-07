@@ -183,7 +183,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/utils/clock/clock.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'L'){
-        exec("/A/lisp/LISP.exe", 0, NULL);
+        exec("/A/lisp/LISP.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
