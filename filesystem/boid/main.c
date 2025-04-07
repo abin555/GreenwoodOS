@@ -12,7 +12,7 @@
 
 #define BOIDS 100
 
-struct Viewport *main_vp, *control_vp;
+struct Viewport *main_vp;
 bool running;
 
 
@@ -39,8 +39,6 @@ int GetRandomValue(int l, int r){
 int main(int argc, char **argv){
     printf("Hello From Boid!\n");
     main_vp = vp_open(WIDTH, HEIGHT, "BOID Simulation");
-    //control_vp = vp_open(WIDTH, 100, "BOID Controls");
-    control_vp->loc.y += HEIGHT;
     uint32_t *main_buf = malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
     //uint32_t *control_buf = malloc(sizeof(uint32_t) * WIDTH * 100);
     vp_set_buffer(main_vp, main_buf, sizeof(uint32_t) * WIDTH * HEIGHT);
