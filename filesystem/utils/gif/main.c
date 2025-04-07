@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/io.h>
 #include <sys/vp.h>
 #include <sys/task.h>
+#include <sys/memory.h>
 
 #include "gif_lib.h"
 
@@ -30,8 +30,9 @@ struct InternalFile {
 
 struct InternalFile Ifile;
 
-
+unsigned int nreads;
 int readgif(GifFileType *gif_file, GifByteType *byte, int len){
+	//printf("Reading %d bytes (#%d)\n", len, nreads++);
 	struct InternalFile *Ifile = (struct InternalFile *) gif_file->UserData;
 	memcpy(byte, Ifile->rawfile+Ifile->headidx, len);
 	Ifile->headidx += len;
@@ -89,22 +90,31 @@ int main(int argc, char **argv){
 	if(argc < 2){
 		return 1;
 	}
-
-	int gif_file = open(argv[1], O_READ);
-	if(gif_file == -1) return 1;
-	puts("Open\n");
-	int size = lseek(gif_file, 0, 2);
-    lseek(gif_file, 0, 0);
-	Ifile.rawfile = malloc(size);
+	nreads = 0;
+	freopen("/-/dev/serial", "rw+", stdout);
+	FILE *gif_file = fopen(argv[1], "r");
+	if(gif_file == NULL) return 1;
+	fseek(gif_file, 0, SEEK_END);
+	int size = ftell(gif_file);
+	fseek(gif_file, 0, SEEK_SET);
+	puts("Open");
+	Ifile.rawfile = memory_requestRegion(size);
 	Ifile.headidx = 0;
-	read(gif_file, Ifile.rawfile, size);
-	close(gif_file);
-	puts("Read\n");
 
-	int gif_err;
+	printf("Reading\n");
+	
+	fread(Ifile.rawfile, size, 1, gif_file);
+	fclose(gif_file);
+
+	int gif_err = 0;
 	GifFileType *gif = DGifOpen(&Ifile, readgif, &gif_err);
+	printf("Err: %d\n", gif_err);
+	task_lock(1);
 	gif_err = DGifSlurp(gif);
-	puts("GIF Open\n");
+	task_lock(0);
+	printf("Err: %d - %d - %s\n", gif_err, gif->Error, GifErrorString(gif->Error));
+	printf("GIF Open, there are %d frames\n", gif->ImageCount);
+	memory_returnRegion(Ifile.rawfile, size);
 	
 	vp = vp_open(gif->SWidth, gif->SHeight, argv[1]);
 	viewbuf = malloc(gif->SWidth * gif->SHeight * 4);
@@ -123,7 +133,7 @@ int main(int argc, char **argv){
 		if(image_idx >= gif->ImageCount){
 			image_idx = 0;
 		}
-		//task_lock(0);
+
 		yield();
 	}
 	DGifCloseFile(gif, &gif_err);

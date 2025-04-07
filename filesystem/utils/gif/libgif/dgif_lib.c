@@ -373,6 +373,7 @@ int DGifGetLine(GifFileType *GifFile, GifPixelType *Line, int LineLen) {
 	if (!IS_READABLE(Private)) {
 		/* This file was NOT open for reading: */
 		GifFile->Error = D_GIF_ERR_NOT_READABLE;
+		printf("Cant read\n");
 		return GIF_ERROR;
 	}
 
@@ -382,6 +383,7 @@ int DGifGetLine(GifFileType *GifFile, GifPixelType *Line, int LineLen) {
 
 	if ((Private->PixelCount -= LineLen) > 0xffff0000UL) {
 		GifFile->Error = D_GIF_ERR_DATA_TOO_BIG;
+		printf("Too big\n");
 		return GIF_ERROR;
 	}
 
@@ -395,12 +397,14 @@ int DGifGetLine(GifFileType *GifFile, GifPixelType *Line, int LineLen) {
 			do {
 				if (DGifGetCodeNext(GifFile, &Dummy) ==
 				    GIF_ERROR) {
+					printf("Flush err?\n");
 					return GIF_ERROR;
 				}
 			} while (Dummy != NULL);
 		}
 		return GIF_OK;
 	} else {
+		printf("Can't decompress?\n");
 		return GIF_ERROR;
 	}
 }
@@ -757,6 +761,7 @@ static int DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line,
 	LastCode = Private->LastCode;
 
 	if (StackPtr > LZ_MAX_CODE) {
+		printf("Bad code?\n");
 		return GIF_ERROR;
 	}
 
@@ -770,6 +775,7 @@ static int DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line,
 
 	while (i < LineLen) { /* Decode LineLen items. */
 		if (DGifDecompressInput(GifFile, &CrntCode) == GIF_ERROR) {
+			printf("Fail decompress here\n");
 			return GIF_ERROR;
 		}
 
@@ -779,6 +785,7 @@ static int DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line,
 			 * or EOF code will not be read at all, and
 			 * DGifGetLine/Pixel clean everything.  */
 			GifFile->Error = D_GIF_ERR_EOF_TOO_SOON;
+			printf("Wrong eof?\n");
 			return GIF_ERROR;
 		} else if (CrntCode == ClearCode) {
 			/* We need to start over again: */
@@ -844,6 +851,7 @@ static int DGifDecompressLine(GifFileType *GifFile, GifPixelType *Line,
 				if (StackPtr >= LZ_MAX_CODE ||
 				    CrntPrefix > LZ_MAX_CODE) {
 					GifFile->Error = D_GIF_ERR_IMAGE_DEFECT;
+					printf("DEFECT?\n");
 					return GIF_ERROR;
 				}
 				/* Push the last character on stack: */
@@ -1067,12 +1075,14 @@ int DGifSlurp(GifFileType *GifFile) {
 
 	do {
 		if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) {
+			printf("Error #1\n");
 			return (GIF_ERROR);
 		}
 
 		switch (RecordType) {
 		case IMAGE_DESC_RECORD_TYPE:
 			if (DGifGetImageDesc(GifFile) == GIF_ERROR) {
+			printf("Error #2\n");
 				return (GIF_ERROR);
 			}
 
@@ -1083,12 +1093,16 @@ int DGifSlurp(GifFileType *GifFile) {
 			    sp->ImageDesc.Width >
 			        (INT_MAX / sp->ImageDesc.Height)) {
 				DGifDecreaseImageCounter(GifFile);
+
+			printf("Error #3\n");
 				return GIF_ERROR;
 			}
 			ImageSize = sp->ImageDesc.Width * sp->ImageDesc.Height;
 
 			if (ImageSize > (SIZE_MAX / sizeof(GifPixelType))) {
 				DGifDecreaseImageCounter(GifFile);
+
+			printf("Error #4\n");
 				return GIF_ERROR;
 			}
 			sp->RasterBits = (unsigned char *)reallocarray(
@@ -1096,6 +1110,7 @@ int DGifSlurp(GifFileType *GifFile) {
 
 			if (sp->RasterBits == NULL) {
 				DGifDecreaseImageCounter(GifFile);
+			printf("Error #5\n");
 				return GIF_ERROR;
 			}
 
@@ -1123,6 +1138,8 @@ int DGifSlurp(GifFileType *GifFile) {
 						    GIF_ERROR) {
 							DGifDecreaseImageCounter(
 							    GifFile);
+
+						printf("Error #6?\n");
 							return GIF_ERROR;
 						}
 					}
@@ -1131,6 +1148,8 @@ int DGifSlurp(GifFileType *GifFile) {
 				if (DGifGetLine(GifFile, sp->RasterBits,
 				                ImageSize) == GIF_ERROR) {
 					DGifDecreaseImageCounter(GifFile);
+
+			printf("Error #7\n");
 					return GIF_ERROR;
 				}
 			}
@@ -1148,6 +1167,8 @@ int DGifSlurp(GifFileType *GifFile) {
 		case EXTENSION_RECORD_TYPE:
 			if (DGifGetExtension(GifFile, &ExtFunction, &ExtData) ==
 			    GIF_ERROR) {
+
+			printf("Error #8\n");
 				return (GIF_ERROR);
 			}
 			/* Create an extension block with our data */
@@ -1156,12 +1177,16 @@ int DGifSlurp(GifFileType *GifFile) {
 				        &GifFile->ExtensionBlockCount,
 				        &GifFile->ExtensionBlocks, ExtFunction,
 				        ExtData[0], &ExtData[1]) == GIF_ERROR) {
+
+			printf("Error #9\n");
 					return (GIF_ERROR);
 				}
 			}
 			for (;;) {
 				if (DGifGetExtensionNext(GifFile, &ExtData) ==
 				    GIF_ERROR) {
+
+			printf("Error #10\n");
 					return (GIF_ERROR);
 				}
 				if (ExtData == NULL) {
@@ -1173,6 +1198,8 @@ int DGifSlurp(GifFileType *GifFile) {
 				        &GifFile->ExtensionBlocks,
 				        CONTINUE_EXT_FUNC_CODE, ExtData[0],
 				        &ExtData[1]) == GIF_ERROR) {
+
+			printf("Error #11\n");
 					return (GIF_ERROR);
 				}
 			}
@@ -1189,6 +1216,8 @@ int DGifSlurp(GifFileType *GifFile) {
 	/* Sanity check for corrupted file */
 	if (GifFile->ImageCount == 0) {
 		GifFile->Error = D_GIF_ERR_NO_IMAG_DSCR;
+
+			printf("Error #12\n");
 		return (GIF_ERROR);
 	}
 
