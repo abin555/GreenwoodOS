@@ -143,7 +143,8 @@ size_t fread(void *ptr, size_t size, size_t n, FILE *stream){
 	int n_read = 0;
 	for(int i = 0; i < n; i++){
 		if(stream->file_type == FILE_fd){
-			n_read += read(stream->fd, (void *) ptr, size);
+			read(stream->fd, (void *) ptr, size);
+			n_read++;
 		}
 		else{
 

@@ -21,7 +21,7 @@ void *console_createCDEV(){
 		sizeof(console_hold_buf),
 		CDEV_WRITE
 	);
-	sysfs_setCallbacks(console_cdev, console_cdev_write_callback, NULL);
+	sysfs_setCallbacks(console_cdev, console_cdev_write_callback, NULL, NULL, NULL);
 	return (void *) console_cdev;
 }
 

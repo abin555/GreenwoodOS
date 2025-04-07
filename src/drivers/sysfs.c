@@ -29,7 +29,7 @@ int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child){
     if(parent->data.dir.numChildren == 20) return 2;
     parent->data.dir.children[parent->data.dir.numChildren++] = child;
     child->parent = parent;
-    //print_serial("[SYSFS] Added Child \"%s\" to Parent \"%S\"\n", child->name, parent->name);
+    print_serial("[SYSFS] Added Child \"%s\" to Parent \"%s\"\n", child->name, parent->name);
     return 0;
 }
 
@@ -46,7 +46,7 @@ struct SysFS_Inode *sysfs_mkdir(char *dirname){
     );
     sysfs->data.dir.numChildren = 0;
     sysfs->parent = NULL;
-    //print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
+    print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
     return sysfs;
 }
 
@@ -58,12 +58,12 @@ struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev){
     sysfs->namelen = strlen(name) < 20 ? strlen(name) : 19;
     sysfs->data.chardev = cdev;
     sysfs->parent = NULL;
-    //print_serial("[SYSFS] Created Character Device File \"%s\"\n", sysfs->name);
+    print_serial("[SYSFS] Created Character Device File \"%s\" @ 0x%x\n", sysfs->name, sysfs->data.chardev);
     return sysfs;
 }
 
 struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS perms){
-    if(buf == NULL) return NULL;
+    //if(buf == NULL) return NULL;
     struct SysFS_Chardev *cdev = malloc(sizeof(struct SysFS_Chardev));
     if(cdev == NULL) return NULL;
     cdev->buf = buf;
@@ -71,21 +71,40 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     cdev->perms = perms;
     cdev->write_callback = NULL;
     cdev->read_callback = NULL;
-    //print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
+    cdev->write_specialized_callback = NULL;
+    cdev->read_specialized_callback = NULL;
+    print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
     return cdev;
 }
 
-void sysfs_setCallbacks(struct SysFS_Chardev *cdev, void (*write_callback)(void *, int offset, int nbytes, int *head), void (*read_callback)(void *, int offset, int nbytes, int *head)){
+void sysfs_setCallbacks(struct SysFS_Chardev *cdev, 
+    void (*write_callback)(void *, int offset, int nbytes, int *head), 
+    void (*read_callback)(void *, int offset, int nbytes, int *head),
+    int (*write_specialized_callback)(void *cdev, void *buf, int woffset, int nbytes, int *head),
+    int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head)
+){
     if(cdev == NULL) return;
     cdev->write_callback = write_callback;
     cdev->read_callback = read_callback;
+    cdev->write_specialized_callback = write_specialized_callback;
+    cdev->read_specialized_callback = read_specialized_callback;
+    print_serial("%x %x %x %x\n",
+        cdev->write_callback,
+        cdev->read_callback,
+        cdev->write_specialized_callback,
+        cdev->read_specialized_callback
+    );
 }
 
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth){
     for(int i = 0; i < depth; i++){
         print_serial(" ");
     }
-    print_serial("%s\n", fs->name);
+    char *type[2] = {
+        "DIR",
+        "CDEV"
+    };
+    print_serial("%s (%s)\n", fs->name, type[fs->type]);
     if(fs->type == SysFS_Directory){
         for(int i = 0; i < fs->data.dir.numChildren; i++){
             sysfs_debugTree(fs->data.dir.children[i], depth+1);
@@ -95,17 +114,35 @@ void sysfs_debugTree(struct SysFS_Inode *fs, int depth){
 
 int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
     //print_serial("[SYSFS] Reading %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
-    if(file == NULL || buf == NULL || nbytes == 0) return 0;
-    if(file->inode.type != VFS_SYS) return 0;
+    if(file == NULL || buf == NULL || nbytes == 0){
+        print_serial("[SYSFS] Won't Read, doesn't exist, goes nowhere, or is nothing\n");
+        return 0;
+    }
+    if(file->inode.type != VFS_SYS){
+        print_serial("[SYSFS] Cant Read, not sysfs\n");
+        return 0;
+    }
 
     struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
-    if(sysfs->type != SysFS_Chardev) return 0;
+    if(sysfs->type != SysFS_Chardev){
+        print_serial("[SYSFS] Cant Read, not cdev\n");
+        return 0;
+    }
     struct SysFS_Chardev *cdev = sysfs->data.chardev;
-    if((cdev->perms & CDEV_READ) == 0) return 0;
+    if((cdev->perms & CDEV_READ) == 0){
+        print_serial("[SYSFS] Cant Read, no perms\n");
+        return 0;
+    }
     
     int i = 0;
-    for(; i < nbytes && file->head < cdev->buf_size; i++){
-        ((char *)buf)[i] = cdev->buf[file->head++];
+    if(cdev->read_specialized_callback == NULL){
+        //print_serial("[SYSFS] Normal Callback!\n");
+        for(; i < nbytes && file->head < cdev->buf_size; i++){
+            ((char *)buf)[i] = cdev->buf[file->head++];
+        }
+    }
+    else{
+        i = cdev->read_specialized_callback(cdev, buf, file->head, nbytes, &file->head);
     }
     if(cdev->read_callback != NULL){
         cdev->read_callback(cdev, file->head-i, i, &file->head);
@@ -130,9 +167,16 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
     };
     //print_serial("[SYSFS] Start Writing\n");
     int i = 0;
-    for(; i < nbytes && file->head < cdev->buf_size; i++){
-        cdev->buf[file->head++] = ((char *)buf)[i];
+
+    if(cdev->read_specialized_callback == NULL){
+        for(; i < nbytes && file->head < cdev->buf_size; i++){
+            cdev->buf[file->head++] = ((char *)buf)[i];
+        }
     }
+    else{
+        i = cdev->read_specialized_callback(cdev, buf, file->head, nbytes, &file->head);
+    }
+
     if(cdev->write_callback != NULL){
         cdev->write_callback(cdev, file->head-i, i, &file->head);
     }

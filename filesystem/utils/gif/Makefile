@@ -1,5 +1,5 @@
 CC = i386-gwos-gcc
-CFLAGS = -O0 -std=c17
+CFLAGS = -O0 -std=c17 -g
 INCLUDE_PATH = -I./libgif
 PROG = gif
 
@@ -13,6 +13,7 @@ SRCS += libgif/openbsd-reallocarray.c
 
 build:
 	$(CC) $(CFLAGS) $(INCLUDE_PATH) $(SRCS) -o $(PROG).elf
+#	gcc $(CFLAGS) $(INCLUDE_PATH) main_linux.c libgif/dgif_lib.c libgif/gif_err.c libgif/gifalloc.c libgif/openbsd-reallocarray.c -o giflx.elf
 
 clean:
 	rm $(SRCS)

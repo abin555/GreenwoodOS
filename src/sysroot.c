@@ -30,7 +30,7 @@ struct SysFS_Inode *sysroot_init(){
         100,
         CDEV_WRITE
     );
-    sysfs_setCallbacks(serial_cdev, sysroot_serial_write_callback, NULL);
+    sysfs_setCallbacks(serial_cdev, sysroot_serial_write_callback, NULL, NULL, NULL);
     struct SysFS_Inode *serial = sysfs_mkcdev("serial", serial_cdev);
     struct SysFS_Inode *console = sysfs_mkcdev("console", console_createCDEV());
     

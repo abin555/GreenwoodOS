@@ -308,6 +308,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		case 0x32:{
 			task_lock = cpu.ebx & 1;
+			print_serial("[SYSCALL] Task Lock %d\n", task_lock);
 			break;
 		}
 		case 0x33:{

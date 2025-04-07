@@ -55,7 +55,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 CDEV_READ | CDEV_WRITE
             )
         );
-        sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL);
+        sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
         sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
         sysfs_debugTree(sysfs, 0);        
     }

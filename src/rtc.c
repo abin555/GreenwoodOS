@@ -129,7 +129,7 @@ void rtc_init(){
                         CDEV_READ
                   )
             );
-            sysfs_setCallbacks(rtcCDEV->data.chardev, NULL, (void (*)(void *, int offset, int nbytes, int *head)) rtc_read_callback);
+            sysfs_setCallbacks(rtcCDEV->data.chardev, NULL, (void (*)(void *, int offset, int nbytes, int *head)) rtc_read_callback, NULL, NULL);
             sysfs_addChild(sysfs_find(sysfs, "dev\0"), rtcCDEV);
       }
 }
