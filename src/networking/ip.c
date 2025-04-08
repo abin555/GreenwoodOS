@@ -2,6 +2,7 @@
 #include "arp.h"
 #include "udp.h"
 #include "tcp.h"
+#include "icmp.h"
 
 
 bool ipv4_is_cidr_subnet(uint8_t ip[4], uint8_t netip[4], uint8_t mask[4]) {
@@ -93,7 +94,7 @@ void ipv4_receive_packet(struct ethernet_driver *driver, struct ipv4_packet *pac
     switch (packet->protocol) {
         case IP_PROTOCOL_ICMP:
             print_serial("[IP] icmp packet recieved\n");
-            //icmp_receive_packet(driver, packet, data, data + sizeof(icmp_packet));
+            icmp_recieve_packet(driver, packet, data, data + sizeof(struct icmp_packet));
             break;
         case IP_PROTOCOL_UDP:
             print_serial("[IP] udp packet recieved\n");

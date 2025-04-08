@@ -55,6 +55,8 @@ OBJECTS = \
 		src/networking/tcp.o \
 		src/networking/http.o \
 		src/networking/netfs.o \
+		src/networking/icmp.o \
+		src/networking/checksum.o \
 		src/test.o \
 		src/acpi.o \
 		src/apic.o \

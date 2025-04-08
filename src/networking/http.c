@@ -26,7 +26,8 @@ bool http_receive_request(struct ethernet_driver *driver __attribute__((unused))
     //hexdump(data, data_size);
     char *request = malloc(data_size + 1);
     memcpy(request, data, data_size);
-
+    request[data_size] = 0;
+    print_serial("Recieved %d bytes\n\n", data_size);
     print_serial("%s\n", request);
 
     //free(request);

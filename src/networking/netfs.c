@@ -9,6 +9,11 @@
 #include "arp.h"
 #include "dhcp.h"
 
+struct NETFS_programCallback {
+    int pid;
+    void *callback;
+};
+
 struct NETFS_http_request {
     
 };
@@ -49,6 +54,8 @@ int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *he
     return i;
 }
 
+
+
 struct SysFS_Inode *netfs_conn(){
     struct SysFS_Chardev *conn_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ);
     sysfs_setCallbacks(conn_dev,
@@ -59,6 +66,16 @@ struct SysFS_Inode *netfs_conn(){
     );
     struct SysFS_Inode *conn_inode = sysfs_mkcdev("conn", conn_dev);
     return conn_inode;
+}
+
+struct icmp_queue {
+    
+} netfs_icmp_queue;
+
+struct SysFS_Inode *netfs_icmp(){
+    struct SysFS_Chardev *icmp_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ);
+    struct SysFS_Inode *icmp_inode = sysfs_mkcdev("icmp", icmp_dev);
+    return icmp_inode;
 }
 
 
@@ -77,6 +94,5 @@ void netfs_init(){
     sysfs_addChild(sysfs, netdir);
     sysfs_addChild(netdir, netfs_http());
     sysfs_addChild(netdir, netfs_conn());
-    
-
+    sysfs_addChild(netdir, netfs_icmp());
 }

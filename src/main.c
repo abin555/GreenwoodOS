@@ -37,8 +37,20 @@
 #include "dhcp.h"
 #include "tcp.h"
 #include "http.h"
+#include "netfs.h"
+#include "icmp.h"
 
 extern void zig_test();
+
+void ping_task(){
+    while(1){
+        icmp_echoRequest(ethernet_getDriver(), (uint8_t[4]) {10,0,1,3}, 1, 2, 0, 0);
+        icmp_echoRequest(ethernet_getDriver(), (uint8_t[4]) {8,8,8,8}, 1, 2, 0, 0);
+        for(int i = 0; i < 10; i++){
+            wait(1000);
+        }
+    }
+}
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -78,6 +90,8 @@ void kernel_task(int argc, char **argv){
     dhcp_init(ethernet_getDriver());
     tcp_init();
 
+    netfs_init();
+
     //http_send_request(ethernet_getDriver(), (uint8_t [4]){208,77,18,143}, 80, "GET", "/", "www.retroarchive.org");
 
     audio_init();
@@ -111,6 +125,8 @@ void kernel_task(int argc, char **argv){
     audio_init();    
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
+    //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,16,206,227}, 80, "GET", "/", "10.16.206.227");
+    //start_task(ping_task, -1, 0, NULL, "Ping Task");
     //window_close(kernel_win);  
 
     task_lock = 0;
