@@ -38,7 +38,7 @@ typedef enum {
 
 struct task_state{
     struct task_registers registers;
-    int8_t program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
+    int program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
     char *task_name;
     uint8_t slot_active;
     uint8_t slot_running;
@@ -78,6 +78,7 @@ void multitask_init();
 void multitask_start();
 
 void list_tasks();
+int task_get_slot(int task_idx);
 void set_schedule(ScheduleType type);
 
 void task_yield();

@@ -13,7 +13,7 @@ extern bool program_slot_status[PROGRAM_MAX];
 extern uint8_t program_active_slot;
 
 void program_init();
-void select_program(uint8_t program_slot);
+void select_program(int program_slot);
 void exec(char *filename, int argc, char **argv);
 
 #endif

@@ -1,6 +1,7 @@
 #include "desktop.h"
 #include "vfs.h"
 #include "sysfs.h"
+#include "netproc.h"
 
 #define BACKGROUND_FILE "A/Pictures/norway.tga\0"
 //#define BACKGROUND_FILE "A/image/bliss.tga\0"
@@ -91,8 +92,10 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     kernel_console = console_open_vp(kernel_console_vp);
     print_console(kernel_console, "TEST CONSOLE!\n");
     */
-
     exec("/A/utils/explorer/explorer.elf", 0, NULL);
+
+    print_serial("Netprocess is at 0x%x\n", &netprocess);
+    start_task(netprocess, -1, 0xDEADBEEF, NULL, "Networking");
     //exec("/A/utils/clock/clock.exe", 0, NULL);
 
     //exec("/A/clock/clock.exe", 0, NULL);

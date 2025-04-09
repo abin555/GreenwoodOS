@@ -338,7 +338,7 @@ void task_callback(){
 void list_tasks(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active){
-            print_serial("Task #%x Is Called %s\n", i, tasks[i].task_name);
+            print_serial("Task #%d Is Called %s (Slot %d)\n", i, tasks[i].task_name, tasks[i].program_slot);
         }
     }
 }
@@ -377,4 +377,10 @@ int task_dupFD(struct task_state *task, int fd){
         task->file_descs[fd]
     );
     return dup_fd;
+}
+
+int task_get_slot(int task_idx){
+    int slot = tasks[task_idx].program_slot;
+    print_serial("[TASK] Got slot %d\n", slot);
+    return slot;
 }

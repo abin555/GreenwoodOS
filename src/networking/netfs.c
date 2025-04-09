@@ -8,6 +8,11 @@
 #include "http.h"
 #include "arp.h"
 #include "dhcp.h"
+#include "icmp.h"
+#include "multitasking.h"
+#include "netproc.h"
+
+#define MAX_QUEUE_ENTRIES 10
 
 struct NETFS_programCallback {
     int pid;
@@ -68,12 +73,35 @@ struct SysFS_Inode *netfs_conn(){
     return conn_inode;
 }
 
-struct icmp_queue {
-    
-} netfs_icmp_queue;
+
+int netfs_icmp_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *head){
+    print_serial("[NETFS] ICMP Write Handler\n");
+    struct SysFS_Chardev *sdev = cdev;
+    if(sdev == NULL || buf == NULL) return 0;
+    if(nbytes != sizeof(struct netproc_request) || woffset != 0) return 0;
+    struct netproc_request *request = buf;
+    char *request_str;
+    switch(request->type){
+        case NETPROC_ICMP_ECHO_REQUEST:
+            request_str = "ICMP ECHO REQUEST";
+            break;
+    }
+    print_serial("[NETFS] ICMP Request Made - \"%s\" from PID %d\n", request_str, task_running_idx);
+    netproc_addToQueue(task_running_idx, *request);
+    *head = 0;
+
+    return nbytes;
+}
 
 struct SysFS_Inode *netfs_icmp(){
-    struct SysFS_Chardev *icmp_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ);
+    struct SysFS_Chardev *icmp_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ | CDEV_WRITE);
+    sysfs_setCallbacks(
+        icmp_dev,
+        NULL,
+        NULL,
+        netfs_icmp_write_spec,
+        NULL
+    );
     struct SysFS_Inode *icmp_inode = sysfs_mkcdev("icmp", icmp_dev);
     return icmp_inode;
 }

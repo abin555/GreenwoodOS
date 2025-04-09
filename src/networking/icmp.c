@@ -5,6 +5,7 @@
 #include "network_utils.h"
 #include "serial.h"
 #include "checksum.h"
+#include "netproc.h"
 
 #define ICMP_TYPE_ECHO_REPLY            0
 #define ICMP_TYPE_DEST_UNREACHABLE      3
@@ -132,5 +133,6 @@ void icmp_recieve_packet(struct ethernet_driver *driver, struct ipv4_packet *ipv
             ipv4_packet->source_ip[2],
             ipv4_packet->source_ip[3]
         );
+        netproc_checkPending_icmp_reply(ipv4_packet->source_ip, ipv4_packet->total_length - sizeof(struct ipv4_packet) - sizeof(struct icmp_packet), packet);
     }
 }

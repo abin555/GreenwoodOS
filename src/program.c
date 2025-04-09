@@ -11,11 +11,12 @@ void program_init(){
 	program_region_virt_base = MEM_reserveRegionBlock(blockStart, 0x400000 * PROGRAM_MAX, 0, PROGRAM);
 	program_region_phys_base = blockStart * 0x400000;
 	print_serial("[PROGRAM] Memory Region Initialized at Physical 0x%x\n", program_region_phys_base);
+	MEM_printRegions();
 }
 
 uint8_t program_active_slot = 0;
 
-void __attribute__ ((optimize("-O3"))) select_program(uint8_t program_slot){
+void __attribute__ ((optimize("-O3"))) select_program(int program_slot){
     create_page_entry(program_region_phys_base + 0x400000*program_active_slot, program_region_virt_base + 0x400000*program_active_slot, 0x83);
     create_page_entry(program_region_phys_base + 0x400000*program_slot, 0, 0x83);
     program_active_slot = program_slot;
@@ -32,7 +33,7 @@ void exec(char *filename, int argc, char **argv){
 		}
 	}
 	if(slot == -1) return;
-	//print_serial("Loading Program %s to slot %d\n", filename, slot);
+	print_serial("Loading Program %s to slot %d\n", filename, slot);
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);

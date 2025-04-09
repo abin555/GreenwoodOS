@@ -39,6 +39,7 @@
 #include "http.h"
 #include "netfs.h"
 #include "icmp.h"
+#include "netproc.h"
 
 extern void zig_test();
 
@@ -127,7 +128,7 @@ void kernel_task(int argc, char **argv){
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,16,206,227}, 80, "GET", "/", "10.16.206.227");
     //start_task(ping_task, -1, 0, NULL, "Ping Task");
-    //window_close(kernel_win);  
+    //window_close(kernel_win);
 
     task_lock = 0;
     return;

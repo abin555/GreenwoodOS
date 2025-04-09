@@ -168,13 +168,13 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
     //print_serial("[SYSFS] Start Writing\n");
     int i = 0;
 
-    if(cdev->read_specialized_callback == NULL){
+    if(cdev->write_specialized_callback == NULL){
         for(; i < nbytes && file->head < cdev->buf_size; i++){
             cdev->buf[file->head++] = ((char *)buf)[i];
         }
     }
     else{
-        i = cdev->read_specialized_callback(cdev, buf, file->head, nbytes, &file->head);
+        i = cdev->write_specialized_callback(cdev, buf, file->head, nbytes, &file->head);
     }
 
     if(cdev->write_callback != NULL){

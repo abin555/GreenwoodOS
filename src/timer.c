@@ -74,5 +74,6 @@ void timer_detach(void *callback){
 
 void wait(int ticks){
 	uint32_t start = timer_ticks;
-	while(timer_ticks < start + ticks){}
+	while(timer_ticks < start + ticks){
+	}
 }
