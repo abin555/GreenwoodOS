@@ -72,4 +72,6 @@ int netfs_read(struct VFS_File *file, void *buf, int nbytes);
 int netfs_write(struct VFS_File *file, void *buf, int nbytes);
 struct DirectoryListing netfs_advListDirectory(struct NetFS_Inode *sysfs, char *path);
 
+void netfs_init();
+
 #endif
