@@ -82,15 +82,6 @@ void netprocess_yield(){
 int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     print_serial("[NETPROC] Starting Process\n");
     set_schedule(ALWAYS);
-    
-    for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
-        netproc_queue.entries[i].free = 1;
-        netproc_queue.entries[i].pending = 0;
-        netproc_pending.entries[i].free = 1;
-        netproc_pending.entries[i].has_reply = 0;
-    }
-    netproc_queue_needs_attention = 0;
-    netproc_pend_needs_attention = 0;
 
     while(1){
         if(!netproc_queue_needs_attention && !netproc_pend_needs_attention){
@@ -162,6 +153,16 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
 }
 
 void netproc_init(){
+
+    for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
+        netproc_queue.entries[i].free = 1;
+        netproc_queue.entries[i].pending = 0;
+        netproc_pending.entries[i].free = 1;
+        netproc_pending.entries[i].has_reply = 0;
+    }
+    netproc_queue_needs_attention = 0;
+    netproc_pend_needs_attention = 0;
+
     start_task(
         netprocess,
         -1,

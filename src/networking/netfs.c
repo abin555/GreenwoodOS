@@ -12,6 +12,8 @@
 #include "multitasking.h"
 #include "netproc.h"
 
+struct NetFS_System netfs_system;
+
 #define MAX_QUEUE_ENTRIES 10
 
 struct NETFS_programCallback {
@@ -122,5 +124,61 @@ void netfs_init(){
     sysfs_addChild(sysfs, netdir);
     sysfs_addChild(netdir, netfs_http());
     sysfs_addChild(netdir, netfs_conn());
-    sysfs_addChild(netdir, netfs_icmp());
+    //sysfs_addChild(netdir, netfs_icmp());
+}
+
+
+struct NetFS_Inode *netfs_createRoot(){
+    struct NetFS_Inode *root = malloc(sizeof(struct NetFS_Inode));
+    root->type = NETFS_Inode_Type_ROOT;
+    root->root = &netfs_system;
+    root->root->numConnections = 0;
+    memset(root->root->connections, 0, sizeof(root->root->connections));
+    return root;
+}
+
+struct NetFS_Inode *netfs_find(struct NetFS_Inode *root, char *path){
+    print_serial("[NETFS] Looking for %s\n", path);
+    if(!strcmp(path, ".")) return root;
+
+    if(!strcmp(path, "ctrl") && root == vfs_findRoot('@')->fs.netfs){
+        print_serial("[NETFS] Looking for CTRL file\n");
+        //return root->ctrl;
+    }
+    return root;
+}
+
+struct DirectoryListing netfs_advListDirectory(struct NetFS_Inode *netfs, char *path){
+    struct DirectoryListing listing = {0};
+    if(netfs == NULL || path == NULL) return listing;
+    struct NetFS_Inode *target = netfs_find(netfs, path);
+    if(target == NULL) return listing;
+
+    //if(target->type != NETFS_Inode_Type_FILE) return listing;
+
+    listing.directory_path_len = strlen(path);
+	listing.directory_path = strdup(path);
+	listing.num_entries = 3;
+	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
+	memset(listing.entries, 0, sizeof(struct DirectoryEntry) * listing.num_entries);
+
+    const char *dotfiles[3] = {
+        ".",
+        "..",
+        "ctrl"
+    };
+    int dotfileTypes[3] = {
+        ENTRY_DIRECTORY,
+        ENTRY_DIRECTORY,
+        ENTRY_FILE
+    };
+    for(int i = 0; i < 3; i++){
+        memset(listing.entries[i].filename, 0, 50);
+        memcpy(listing.entries[i].filename, (void *) dotfiles[i], sizeof(dotfiles[i])); 
+        listing.entries[i].name_len = sizeof(dotfiles[i]);       
+        listing.entries[i].type = dotfileTypes[i];
+        print_serial("%s\n", listing.entries[i].filename);
+    }
+
+    return listing;
 }

@@ -95,7 +95,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     exec("/A/utils/explorer/explorer.elf", 0, NULL);
 
     print_serial("Netprocess is at 0x%x\n", &netprocess);
-    start_task(netprocess, -1, 0xDEADBEEF, NULL, "Networking");
     //exec("/A/utils/clock/clock.exe", 0, NULL);
 
     //exec("/A/clock/clock.exe", 0, NULL);

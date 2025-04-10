@@ -82,6 +82,28 @@ void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter){
     print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->nonDriveLetter, label);
 }
 
+void vfs_addNetRoot(struct NetFS_Inode *netfs, char letter){
+    if(VFS.num_inodes == VFS_maxRootInodes) return;
+    if(netfs == NULL) return;
+
+    char *label;
+
+    struct VFS_Inode *inode = &VFS.inodes[VFS.num_inodes++];
+    inode->isRoot = 1;
+    inode->root = inode;
+    inode->isValid = 1;
+
+
+    inode->drive = NULL;
+    inode->nonDriveLetter = letter;
+    inode->type = VFS_NET;
+    inode->fs.netfs = netfs;
+
+    label = "NETFS";
+
+    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->nonDriveLetter, label);    
+}
+
 int vfs_allocFileD(){
     for(int i = 0; i < VFS_maxFiles; i++){
         if(VFS_fileTable[i].status == 1){
@@ -100,8 +122,8 @@ void vfs_freeFileD(int fd){
 struct VFS_Inode *vfs_findRoot(char driveLetter){
     for(int i = 0; i < VFS.num_inodes; i++){
         if(
-            (VFS.inodes[i].type != VFS_SYS && VFS.inodes[i].drive->identity == driveLetter) ||
-            (VFS.inodes[i].type == VFS_SYS && VFS.inodes[i].nonDriveLetter == driveLetter)
+            ((VFS.inodes[i].type != VFS_SYS && VFS.inodes[i].type != VFS_NET) && VFS.inodes[i].drive->identity == driveLetter) ||
+            ((VFS.inodes[i].type == VFS_SYS || VFS.inodes[i].type == VFS_NET) && VFS.inodes[i].nonDriveLetter == driveLetter)
         ){
             return &VFS.inodes[i];
         }
@@ -147,6 +169,13 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
         struct SysFS_Inode *sysinode = sysfs_find(root->fs.sysfs, path);
         if(sysinode == NULL) return result;
         result.fs.sysfs = sysinode;
+        result.isValid = 1;
+        return result;
+    }
+    else if(root->type == VFS_NET){
+        struct NetFS_Inode *netinode = netfs_find(root->fs.netfs, path);
+        if(netinode == NULL) return result;
+        result.fs.netfs = netinode;
         result.isValid = 1;
         return result;
     }
@@ -370,6 +399,9 @@ int vfs_read(int fd, void *buf, uint32_t nbytes){
         case VFS_PIPE:
             return pipe_read(file_idx->inode.fs.pipe, buf, nbytes);
             break;
+        case VFS_NET:
+            print_serial("[VFS] [NETFS] READ %d bytes at %d to 0x%x\n", nbytes, file_idx->head, buf);
+            break;
         default:
             //print_serial("[VFS] ERROR - Read Unknown Inode Type!\n");
             break;
@@ -535,6 +567,9 @@ int vfs_write(int fd, void *buf, uint32_t nbytes){
         case VFS_PIPE:
             return pipe_write(file_idx->inode.fs.pipe, buf, nbytes);
             break;
+        case VFS_NET:
+            print_serial("[VFS] [NETFS] WRITE %d bytes at %d to 0x%x\n", nbytes, file_idx->head, buf);
+            break;
     }
     return -1;
 }
@@ -557,6 +592,9 @@ int vfs_seek(int fd, int offset, int whence){
             file_idx->head += file_idx->inode.fs.iso->size + offset;
         }
         else if(file_idx->inode.type == VFS_SYS){
+
+        }
+        else if(file_idx->inode.type == VFS_NET){
 
         }
     }
@@ -642,6 +680,11 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path){
     }
     else if(root->type == VFS_SYS){
         listing = sysfs_advListDirectory(root->fs.sysfs, path);
+    }
+    else if(root->type == VFS_NET){
+        //listing = 
+        //print_serial("[VFS] [NETFS] Listing Directory %s\n", path);
+        listing = netfs_advListDirectory(root->fs.netfs, path);
     }
     else if(root->type == VFS_PIPE){
         

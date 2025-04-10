@@ -77,6 +77,11 @@ void kernel_task(int argc, char **argv){
         '-'
     );
 
+    vfs_addNetRoot(
+        netfs_createRoot(),
+        '@'
+    );
+
     window_init();
     console_init();
 
@@ -125,6 +130,7 @@ void kernel_task(int argc, char **argv){
 
     audio_init();    
     
+    //netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
     //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,16,206,227}, 80, "GET", "/", "10.16.206.227");
     //start_task(ping_task, -1, 0, NULL, "Ping Task");
