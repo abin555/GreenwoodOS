@@ -8,7 +8,6 @@
 #include "http.h"
 #include "arp.h"
 #include "dhcp.h"
-<<<<<<< HEAD
 #include "icmp.h"
 #include "multitasking.h"
 #include "netproc.h"
@@ -21,8 +20,6 @@ struct NETFS_programCallback {
     int pid;
     void *callback;
 };
-=======
->>>>>>> github/networking
 
 struct NETFS_http_request {
     
@@ -64,11 +61,8 @@ int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *he
     return i;
 }
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> github/networking
 struct SysFS_Inode *netfs_conn(){
     struct SysFS_Chardev *conn_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ);
     sysfs_setCallbacks(conn_dev,
@@ -82,7 +76,6 @@ struct SysFS_Inode *netfs_conn(){
 }
 
 
-<<<<<<< HEAD
 int netfs_icmp_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *head){
     print_serial("[NETFS] ICMP Write Handler\n");
     struct SysFS_Chardev *sdev = cdev;
@@ -116,8 +109,6 @@ struct SysFS_Inode *netfs_icmp(){
 }
 
 
-=======
->>>>>>> github/networking
 void netfs_init(){
     print_serial("[NETFS] Init\n");
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
@@ -133,7 +124,6 @@ void netfs_init(){
     sysfs_addChild(sysfs, netdir);
     sysfs_addChild(netdir, netfs_http());
     sysfs_addChild(netdir, netfs_conn());
-<<<<<<< HEAD
     //sysfs_addChild(netdir, netfs_icmp());
 }
 
@@ -191,8 +181,4 @@ struct DirectoryListing netfs_advListDirectory(struct NetFS_Inode *netfs, char *
     }
 
     return listing;
-=======
-    
-
->>>>>>> github/networking
 }
