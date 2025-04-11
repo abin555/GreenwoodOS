@@ -119,17 +119,15 @@ void rtc_read_callback(void *cdev __attribute__((unused)), int offset __attribut
 void rtc_init(){
 	timer_attach(50, rtc_callback);
       struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
-      if(vfs_sysroot->type == VFS_SYS){
-            struct SysFS_Inode *sysfs = vfs_sysroot->fs.sysfs;
-            struct SysFS_Inode *rtcCDEV = sysfs_mkcdev(
-                  "RTC",
-                  sysfs_createCharDevice(
-                        (char *) &RTC,
-                        sizeof(RTC),
-                        CDEV_READ
-                  )
-            );
-            sysfs_setCallbacks(rtcCDEV->data.chardev, NULL, (void (*)(void *, int offset, int nbytes, int *head)) rtc_read_callback, NULL, NULL);
-            sysfs_addChild(sysfs_find(sysfs, "dev\0"), rtcCDEV);
-      }
+      struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
+      struct SysFS_Inode *rtcCDEV = sysfs_mkcdev(
+            "RTC",
+            sysfs_createCharDevice(
+                  (char *) &RTC,
+                  sizeof(RTC),
+                  CDEV_READ
+            )
+      );
+      sysfs_setCallbacks(rtcCDEV->data.chardev, NULL, (void (*)(void *, int offset, int nbytes, int *head)) rtc_read_callback, NULL, NULL);
+      sysfs_addChild(sysfs_find(sysfs, "dev\0"), rtcCDEV);
 }

@@ -46,20 +46,18 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
     
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
-    if(vfs_sysroot->type == VFS_SYS){
-        struct SysFS_Inode *sysfs = vfs_sysroot->fs.sysfs;
-        struct SysFS_Inode *desktopCDEV = sysfs_mkcdev(
-            "desktopBG",
-            sysfs_createCharDevice(
-                (char *) &background,
-                sizeof(background),
-                CDEV_READ | CDEV_WRITE
-            )
-        );
-        sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
-        sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
-        sysfs_debugTree(sysfs, 0);        
-    }
+    struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
+    struct SysFS_Inode *desktopCDEV = sysfs_mkcdev(
+        "desktopBG",
+        sysfs_createCharDevice(
+            (char *) &background,
+            sizeof(background),
+            CDEV_READ | CDEV_WRITE
+        )
+    );
+    sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
+    sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
+    sysfs_debugTree(sysfs, 0);   
 
     struct Icon icons[numIcons];
     memset(icons, 0, sizeof(struct Icon) * numIcons);

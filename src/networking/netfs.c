@@ -112,13 +112,7 @@ struct SysFS_Inode *netfs_icmp(){
 void netfs_init(){
     print_serial("[NETFS] Init\n");
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
-    struct SysFS_Inode *sysfs;
-    if(vfs_sysroot->type == VFS_SYS){
-        sysfs = vfs_sysroot->fs.sysfs;
-    }
-    else{
-        return;
-    }
+    struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
 
     struct SysFS_Inode *netdir = sysfs_mkdir("net");
     sysfs_addChild(sysfs, netdir);
@@ -141,7 +135,7 @@ struct NetFS_Inode *netfs_find(struct NetFS_Inode *root, char *path){
     print_serial("[NETFS] Looking for %s\n", path);
     if(!strcmp(path, ".")) return root;
 
-    if(!strcmp(path, "ctrl") && root == vfs_findRoot('@')->fs.netfs){
+    if(!strcmp(path, "ctrl") && root == vfs_findRoot('@')->fs.fs){
         print_serial("[NETFS] Looking for CTRL file\n");
         //return root->ctrl;
     }

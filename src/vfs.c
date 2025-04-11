@@ -17,91 +17,40 @@ void vfs_init(){
     VFS.num_inodes = 0;
 
     for(int i = 0; i < drive_count; i++){
-        vfs_addRoot(drives[i]);
+        print_serial("[VFS] Adding Drive %d (type %d)\n", i, drives[i]->format);
+        switch(drives[i]->format){
+            case EXT2:
+                vfs_addFS(ext2_generateVFSRoot(drives[i]->format_info.ext2));
+                break;
+            default:
+                break;
+        }
+        //vfs_addRoot(drives[i]);
     }
     for(int i = 0; i < VFS_maxFiles; i++){
         VFS_fileTable[i].status = 1;
     }
 }
 
-void vfs_addRoot(struct DRIVE *drive){
-    if(VFS.num_inodes == VFS_maxRootInodes) return;
-    if(drive == NULL) return;
-
-    char *label;
-
+void vfs_addFS(struct VFS_RootInterface *interface){
+    if(interface == NULL) return;
     struct VFS_Inode *inode = &VFS.inodes[VFS.num_inodes++];
-    inode->isRoot = 1;
-    inode->root = inode;
-    inode->isValid = 1;
-    
-    switch(drive->format){
-        case EXT2:
-            inode->drive = drive;
-            inode->type = VFS_EXT2;
-            inode->fs.ext2 = NULL;
-            label = "EXT2";
-            break;
-        case ISO9660:
-            inode->drive = drive;
-            inode->type = VFS_ISO9660;
-            inode->fs.iso = NULL;
-            label = "ISO9660";
-            break;
-        case VFS_SYS:
-            inode->drive = drive;
-            inode->type = VFS_SYS;
-            label = "SYSFS";
-            break;
-        default:
-            label = "UNKNOWN";
-            return;
-    }
+    inode->interface = interface;
 
-    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", drive->identity, label);
-}
+    print_serial("[VFS] Letter: %c\n", inode->interface->vfsLetter == 0 ? inode->interface->drive->identity : inode->interface->vfsLetter);
+    print_serial("[VFS] Get: 0x%x\n", inode->interface->fs_getLink);
+    print_serial("[VFS] Read: 0x%x\n", inode->interface->fs_read);
+    print_serial("[VFS] Write: 0x%x\n", inode->interface->fs_write);
+    print_serial("[VFS] Seek: 0x%x\n", inode->interface->fs_seek);
+    print_serial("[VFS] Creat: 0x%x\n", inode->interface->fs_creat);
+    print_serial("[VFS] List: 0x%x\n", inode->interface->fs_listDirectory);
+    print_serial("[VFS] Trunc: 0x%x\n", inode->interface->fs_truncate);
 
-void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter){
-    if(VFS.num_inodes == VFS_maxRootInodes) return;
-    if(sysfs == NULL) return;
-
-    char *label;
-
-    struct VFS_Inode *inode = &VFS.inodes[VFS.num_inodes++];
-    inode->isRoot = 1;
-    inode->root = inode;
-    inode->isValid = 1;
-    
-    inode->drive = NULL;
-    inode->nonDriveLetter = letter;
-    inode->type = VFS_SYS;
-    inode->fs.sysfs = sysfs;
-
-    label = "SYSFS";  
-
-    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->nonDriveLetter, label);
-}
-
-void vfs_addNetRoot(struct NetFS_Inode *netfs, char letter){
-    if(VFS.num_inodes == VFS_maxRootInodes) return;
-    if(netfs == NULL) return;
-
-    char *label;
-
-    struct VFS_Inode *inode = &VFS.inodes[VFS.num_inodes++];
     inode->isRoot = 1;
     inode->root = inode;
     inode->isValid = 1;
 
-
-    inode->drive = NULL;
-    inode->nonDriveLetter = letter;
-    inode->type = VFS_NET;
-    inode->fs.netfs = netfs;
-
-    label = "NETFS";
-
-    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->nonDriveLetter, label);    
+    print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->interface->vfsLetter == 0 ? inode->interface->drive->identity : inode->interface->vfsLetter, inode->interface->fs_label);
 }
 
 int vfs_allocFileD(){
@@ -122,8 +71,8 @@ void vfs_freeFileD(int fd){
 struct VFS_Inode *vfs_findRoot(char driveLetter){
     for(int i = 0; i < VFS.num_inodes; i++){
         if(
-            ((VFS.inodes[i].type != VFS_SYS && VFS.inodes[i].type != VFS_NET) && VFS.inodes[i].drive->identity == driveLetter) ||
-            ((VFS.inodes[i].type == VFS_SYS || VFS.inodes[i].type == VFS_NET) && VFS.inodes[i].nonDriveLetter == driveLetter)
+            (VFS.inodes[i].interface->vfsLetter == 0 && VFS.inodes[i].interface->drive->identity == driveLetter) ||
+            (VFS.inodes[i].interface->vfsLetter == driveLetter)
         ){
             return &VFS.inodes[i];
         }
@@ -138,28 +87,37 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     if(root == NULL || path == NULL) return result;
     result.root = root;
     result.type = result.root->type;
-    result.drive = result.root->drive;
+    result.interface = result.root->interface;
+    void *queried = NULL;
+    if(root->interface->fs_getLink != NULL)
+        queried = root->interface->fs_getLink(root->interface->root, path);
+    
+    if(queried != NULL){
+        result.isValid = 1;
+        result.fs.fs = queried;
+    }
+    return result;
     //print_serial("[VFS] Following link to %s\n", path);
 
     //char *walker_start = path;
     //char *walker_end = path;
-
+    /*
     if(root->type == VFS_EXT2){
-        uint32_t inodeIdx = ext2_get_inodeIdx_from_path(result.drive->format_info.ext2, path);
+        uint32_t inodeIdx = ext2_get_inodeIdx_from_path(result.interface->drive->format_info.ext2, path);
         if(inodeIdx == 0){
 			//print_serial("[VFS] Inode is Zero???\n");
 			return result;
 		}
         result.ext2_inode_idx = inodeIdx;
         result.fs.ext2 = malloc(sizeof(struct EXT2_Inode));
-        *result.fs.ext2 = ext2_read_inode_data(result.drive->format_info.ext2, inodeIdx);
+        *result.fs.ext2 = ext2_read_inode_data(result.interface->drive->format_info.ext2, inodeIdx);
         result.isValid = 1;
         return result;
     }
     else if(root->type == VFS_ISO9660){
         struct File_Info *isoInfo = malloc(sizeof(struct File_Info));
         if(isoInfo == NULL) return result;
-        *isoInfo = ISO9660_GetFile(result.drive->format_info.ISO, path);
+        *isoInfo = ISO9660_GetFile(result.interface->drive->format_info.ISO, path);
         if(isoInfo->drive == NULL) return result;
         result.fs.iso = isoInfo;
         result.isValid = 1;
@@ -180,6 +138,7 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
         return result;
     }
     return result;
+    */
 }
 
 int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
@@ -195,21 +154,21 @@ int vfs_open(char *path, int flags){
     char driveLetter = path[0];
     path += 2;
     struct VFS_Inode *root = vfs_findRoot(driveLetter);
-    if(root->drive != NULL){
-        //print_serial("[VFS] Drive root: %c\n", root->drive->identity);
+    if(root->interface->drive != NULL){
+        print_serial("[VFS] Drive root: %c\n", root->interface->drive->identity);
     }
     else{
-        //print_serial("[VFS] Drive root: %c\n", root->nonDriveLetter);
+        print_serial("[VFS] Drive root: %c\n", root->interface->vfsLetter);
     }
     if(root == NULL){
-        //print_serial("[VFS] Unable to find root: \"%s\"\n", path);
+        print_serial("[VFS] Unable to find root: \"%s\"\n", path);
         goto fail;
     }
     struct VFS_Inode inode = vfs_followLink(root, path);
     inode.flags = flags;
     if(inode.isValid == 0){
-        if(inode.drive != NULL){
-            //print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->drive->identity);
+        if(inode.interface->drive != NULL){
+            print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->interface->drive->identity);
         }
         goto fail;
     }
@@ -226,7 +185,7 @@ int vfs_open(char *path, int flags){
     return fd;
 
     fail:;
-    //print_serial("[VFS] Open Fail!\n");
+    print_serial("[VFS] Open Fail!\n");
     return -1;
 }
 
@@ -242,312 +201,15 @@ void vfs_close(int fd){
     memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
 }
 
-int vfs_readExt2(struct VFS_File *file, void *buf, uint32_t nbytes){
-    struct EXT2_FS *ext2 = file->inode.drive->format_info.ext2;
-    struct EXT2_Inode *inode = file->inode.fs.ext2;
-    //print_serial("[VFS] [EXT2] Reading file\n");
-    uint32_t block_idx = 0;
-    uint32_t single_indirect_idx = 0;
-    uint32_t double_indirect_idx = 0;
-    uint32_t idx = 0;
-    uint32_t block_head = 0;
-
-    uint32_t block_offset = file->head / ext2->block_size;
-    uint32_t pointers_per_block = ext2->block_size / 4;
-
-    block_head = file->head % ext2->block_size;
-
-    char *block;
-    
-    if(block_offset < 12){
-        block_idx = block_offset;
-        single_indirect_idx = 0;
-        double_indirect_idx = 0;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-    }
-    else if(12 <= block_offset && block_offset < 12 + pointers_per_block){
-        block_idx = 12;
-        single_indirect_idx = block_offset - 12;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-        uint32_t *indirect_blocks = (uint32_t *) block;
-        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
-        block = ext2_read_block(ext2, indirect_block);
-    }
-    else if(block_offset >= 12 + pointers_per_block){
-        block_idx = 13;
-        uint32_t offset = block_offset - (11 + (ext2->block_size / 4));
-        single_indirect_idx = offset % pointers_per_block - 1;
-        double_indirect_idx = (offset / pointers_per_block) * (ext2->block_size / 4) % 255;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-        uint32_t *double_indirect_blocks = (uint32_t *) block;
-        uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
-        
-        block = ext2_read_block(ext2, double_indirect_block);
-        uint32_t *indirect_blocks = (uint32_t *) block;
-        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
-        block = ext2_read_block(ext2, indirect_block);
-    }
-
-    while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
-        ((uint8_t *)buf)[idx] = ((uint8_t *)block)[block_head];
-        file->head++;
-        idx++;
-        block_head++;
-
-        if((uint32_t) block_head == ext2->block_size){
-            //print_serial("[VFS] [EXT2] Update - Block No. %d Idx: %d\n", file->head / ext2->block_size, idx);
-            //print_serial("[VFS] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
-            if(block_idx == 12){
-                handle_first_indirect:;
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                uint32_t *indirect_blocks = (uint32_t *) block;
-                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
-                //print_serial("[VFS] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
-                block = ext2_read_block(ext2, indirect_block);
-                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
-                single_indirect_idx++;
-                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    block_idx++;
-                    if(block_idx == 13){
-                        single_indirect_idx = 0;
-                    }
-                }
-                block_head = 0;
-            }
-            else if(block_idx == 13){
-                handle_first_double_indirect:;
-                //print_serial("[VFS] [EXT2] Double Indirect Block\n");
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                uint32_t *double_indirect_blocks = (uint32_t *) block;
-                uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
-                
-                block = ext2_read_block(ext2, double_indirect_block);
-                uint32_t *indirect_blocks = (uint32_t *) block;
-                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
-                //print_serial("[VFS] Indirect Block is at %d-%d block %d, idx %d is %d\n", inode->BlockPointers[block_idx], double_indirect_idx, double_indirect_block, single_indirect_idx, indirect_block);
-                block = ext2_read_block(ext2, indirect_block);
-                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
-                single_indirect_idx++;
-                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    double_indirect_idx++;
-                    single_indirect_idx = 0;
-                }
-
-                if(double_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    block_idx++;
-                }
-
-                block_head = 0;
-            }
-            else if(block_idx > 13){
-                //print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
-                break;
-            }
-            else{
-                block_idx++;
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                if(block_idx == 12){
-                    goto handle_first_indirect;
-                }
-                if(block_idx == 13){
-                    single_indirect_idx = 0;
-                    goto handle_first_double_indirect;
-                }
-            }
-
-            block_head = 0;
-        }
-    }
-
-    return idx;
-}
-
-int vfs_readISO9660(struct VFS_File *file, void *buf, int nbytes){
-    char *iso_buf = (char *) ISO_read_sector(file->inode.fs.iso->drive, file->inode.fs.iso->drive->format_info.ISO->buf, file->inode.fs.iso->sector);
-    if(iso_buf == NULL) return 1;
-    int idx = 0;
-    int sector_offset = 0;
-    while(file->head < 512*4 && idx < nbytes){
-        ((char *) buf)[idx] = iso_buf[file->head];
-        file->head++;
-        idx++;
-        if(file->head == 512*4){
-            sector_offset++;
-            //print_serial("[DRIVE] Sector Offset %d\n", sector_offset);
-            iso_buf = (char *) ISO_read_sector(file->inode.fs.iso->drive, file->inode.fs.iso->drive->format_info.ISO->buf, file->inode.fs.iso->sector+sector_offset);
-            file->head = 0;
-        }
-    }
-    return idx;
-}
-
 int vfs_read(int fd, void *buf, uint32_t nbytes){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     //print_serial("[VFS] Read %d bytes @ %d\n", nbytes, file_idx->head);
     if(!(file_idx->inode.flags & VFS_FLAG_READ)) return -1;
-    switch(file_idx->inode.type){
-        case VFS_ISO9660:
-            return vfs_readISO9660(file_idx, buf, nbytes);
-            break;
-        case VFS_EXT2:
-            return vfs_readExt2(file_idx, buf, nbytes);
-            break;
-        case VFS_SYS:
-            return sysfs_read(file_idx, buf, nbytes);
-            break;
-        case VFS_PIPE:
-            return pipe_read(file_idx->inode.fs.pipe, buf, nbytes);
-            break;
-        case VFS_NET:
-            print_serial("[VFS] [NETFS] READ %d bytes at %d to 0x%x\n", nbytes, file_idx->head, buf);
-            break;
-        default:
-            //print_serial("[VFS] ERROR - Read Unknown Inode Type!\n");
-            break;
-    }
+
+    if(file_idx->inode.interface->fs_read != NULL)
+        return file_idx->inode.interface->fs_read(file_idx, buf, nbytes);
     return -1;
-}
-
-int vfs_writeExt2(struct VFS_File *file, void *buf, int nbytes){
-    //print_serial("[VFS] Writing %d bytes\n", nbytes);
-    struct EXT2_FS *ext2 = file->inode.drive->format_info.ext2;
-    struct EXT2_Inode *inode = file->inode.fs.ext2;
-
-    if((uint32_t)(file->head + nbytes) >= inode->lsbSize){
-        ext2_extendFile(ext2, file->inode.ext2_inode_idx, file->head + nbytes - inode->lsbSize);
-    }
-    
-    uint32_t block_idx = 0;
-    uint32_t single_indirect_idx = 0;
-    uint32_t double_indirect_idx = 0;
-    uint32_t idx = 0;
-    uint32_t block_head = 0;
-
-    uint32_t block_offset = file->head / ext2->block_size;
-    uint32_t pointers_per_block = ext2->block_size / 4;
-    uint32_t last_real_block_idx = 0;
-
-    block_head = file->head % ext2->block_size;
-
-    char *block;
-    
-    if(block_offset < 12){
-        block_idx = block_offset;
-        single_indirect_idx = 0;
-        double_indirect_idx = 0;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-        last_real_block_idx = inode->BlockPointers[block_idx];
-    }
-    else if(12 <= block_offset && block_offset < 12 + pointers_per_block){
-        block_idx = 12;
-        single_indirect_idx = block_offset - 12;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-        last_real_block_idx = inode->BlockPointers[block_idx];
-        uint32_t *indirect_blocks = (uint32_t *) block;
-        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
-        block = ext2_read_block(ext2, indirect_block);
-        last_real_block_idx = indirect_block;
-    }
-    else if(block_offset >= 12 + pointers_per_block){
-        block_idx = 13;
-        uint32_t offset = block_offset - (11 + (ext2->block_size / 4));
-        single_indirect_idx = offset % pointers_per_block - 1;
-        double_indirect_idx = (offset / pointers_per_block) * (ext2->block_size / 4) % 255;
-        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-        last_real_block_idx = inode->BlockPointers[block_idx];
-        uint32_t *double_indirect_blocks = (uint32_t *) block;
-        uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
-        
-        block = ext2_read_block(ext2, double_indirect_block);
-        last_real_block_idx = double_indirect_block;
-        uint32_t *indirect_blocks = (uint32_t *) block;
-        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
-        block = ext2_read_block(ext2, indirect_block);
-        last_real_block_idx = indirect_block;
-    }
-
-    while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
-        ((uint8_t *)block)[block_head] = ((uint8_t *)buf)[idx];
-        //print_serial("%d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
-        file->head++;
-        idx++;
-        block_head++;
-
-        if((uint32_t) block_head == ext2->block_size){
-            ext2_write_block(ext2, last_real_block_idx, block);
-            //print_serial("[VFS] [EXT2] Update - Block No. %d Idx: %d\n", file->head / ext2->block_size, idx);
-            //print_serial("[VFS] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
-            if(block_idx == 12){
-                handle_first_indirect:;
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                last_real_block_idx = inode->BlockPointers[block_idx];
-                uint32_t *indirect_blocks = (uint32_t *) block;
-                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
-                //print_serial("[VFS] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
-                block = ext2_read_block(ext2, indirect_block);
-                last_real_block_idx = indirect_block;
-                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
-                single_indirect_idx++;
-                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    block_idx++;
-                    if(block_idx == 13){
-                        single_indirect_idx = 0;
-                    }
-                }
-                block_head = 0;
-            }
-            else if(block_idx == 13){
-                handle_first_double_indirect:;
-                //print_serial("[VFS] [EXT2] Double Indirect Block\n");
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                last_real_block_idx = inode->BlockPointers[block_idx];
-                uint32_t *double_indirect_blocks = (uint32_t *) block;
-                uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
-                
-                block = ext2_read_block(ext2, double_indirect_block);
-                last_real_block_idx = double_indirect_block;
-                uint32_t *indirect_blocks = (uint32_t *) block;
-                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
-                //print_serial("[VFS] Indirect Block is at %d-%d block %d, idx %d is %d\n", inode->BlockPointers[block_idx], double_indirect_idx, double_indirect_block, single_indirect_idx, indirect_block);
-                block = ext2_read_block(ext2, indirect_block);
-                last_real_block_idx = indirect_block;
-                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
-                single_indirect_idx++;
-                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    double_indirect_idx++;
-                    single_indirect_idx = 0;
-                }
-
-                if(double_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
-                    block_idx++;
-                }
-
-                block_head = 0;
-            }
-            else if(block_idx > 13){
-                print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
-                break;
-            }
-            else{
-                block_idx++;
-                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
-                last_real_block_idx = inode->BlockPointers[block_idx];
-                if(block_idx == 12){
-                    goto handle_first_indirect;
-                }
-                if(block_idx == 13){
-                    single_indirect_idx = 0;
-                    goto handle_first_double_indirect;
-                }
-            }
-
-            block_head = 0;
-        }
-    }
-    ext2_write_block(ext2, last_real_block_idx, block);
-
-    return idx;
 }
 
 int vfs_write(int fd, void *buf, uint32_t nbytes){
@@ -555,22 +217,9 @@ int vfs_write(int fd, void *buf, uint32_t nbytes){
     //print_serial("[VFS] Write %x %d\n", (char *) buf, nbytes);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(!(file_idx->inode.flags & VFS_FLAG_WRITE)) return -1;
-    switch(file_idx->inode.type){
-        case VFS_ISO9660:
-            break;
-        case VFS_EXT2:
-            return vfs_writeExt2(file_idx, buf, nbytes);
-            break;
-        case VFS_SYS:
-            return sysfs_write(file_idx, buf, nbytes);
-            break;
-        case VFS_PIPE:
-            return pipe_write(file_idx->inode.fs.pipe, buf, nbytes);
-            break;
-        case VFS_NET:
-            print_serial("[VFS] [NETFS] WRITE %d bytes at %d to 0x%x\n", nbytes, file_idx->head, buf);
-            break;
-    }
+
+    if(file_idx->inode.interface->fs_write != NULL)
+        return file_idx->inode.interface->fs_write(file_idx, buf, nbytes);
     return -1;
 }
 
@@ -578,31 +227,9 @@ int vfs_seek(int fd, int offset, int whence){
     if(fd < 0 || fd > VFS_maxFiles) return -1;
     struct VFS_File *file_idx = &VFS_fileTable[fd];
 
-    if(whence == 0){//SEEK_SET
-        file_idx->head = offset;
-    }
-    else if(whence == 1){//SEEK_CUR
-        file_idx->head += offset;
-    }
-    else if(whence == 2){//SEEK_END
-        if(file_idx->inode.type == VFS_EXT2){
-            file_idx->head += file_idx->inode.fs.ext2->lsbSize + offset;
-        }
-        else if(file_idx->inode.type == VFS_ISO9660){
-            file_idx->head += file_idx->inode.fs.iso->size + offset;
-        }
-        else if(file_idx->inode.type == VFS_SYS){
-
-        }
-        else if(file_idx->inode.type == VFS_NET){
-
-        }
-    }
-    else{
-        return -1;
-    }
-
-    return file_idx->head;
+    if(file_idx->inode.root->interface->fs_seek)
+        return file_idx->inode.root->interface->fs_seek(file_idx, offset, whence);
+    return -1;
 }
 
 int vfs_creatRel(struct DIRECTORY *dir, char *path){
@@ -619,17 +246,10 @@ int vfs_creat(char *path){
     char driveLetter = path[0];
     path += 2;
     struct VFS_Inode *root = vfs_findRoot(driveLetter);
-    switch(root->type){
-        case VFS_EXT2:
-            if(ext2_createFile(root->drive->format_info.ext2, path, 1)){
-                return -1;
-            }
-            return 0;
-            break;
-        default:
-            return -1;
-            break;
-    }
+
+    if(root->interface->fs_creat != NULL)
+        return root->interface->fs_creat(root->interface->root, path, 1);
+    return -1;
 }
 
 int vfs_mkpipe(int *writer_fd, int *reader_fd){
@@ -648,14 +268,14 @@ int vfs_mkpipe(int *writer_fd, int *reader_fd){
     writer_file->inode.type = VFS_PIPE;
     writer_file->inode.fs.pipe = pipe;
     writer_file->inode.root = NULL;
-    writer_file->inode.drive = NULL;
+    writer_file->inode.interface->drive = NULL;
     writer_file->inode.isValid = 1;
 
     reader_file->inode.flags = VFS_FLAG_READ;
     reader_file->inode.type = VFS_PIPE;
     reader_file->inode.fs.pipe = pipe;
     reader_file->inode.root = NULL;
-    reader_file->inode.drive = NULL;
+    reader_file->inode.interface->drive = NULL;
     reader_file->inode.isValid = 1;
     return 0;
 }
@@ -672,23 +292,9 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path){
 	path = big_path + 2;
     struct VFS_Inode *root = vfs_findRoot(drive_letter);
     if(root == NULL) return listing;
-    if(root->type == VFS_ISO9660 && root->drive != NULL && root->drive->format == ISO9660){
 
-    }
-    else if(root->type == VFS_EXT2 && root->drive != NULL && root->drive->format == EXT2){
-        listing = ext2_advListDirectory(root->drive->format_info.ext2, path);
-    }
-    else if(root->type == VFS_SYS){
-        listing = sysfs_advListDirectory(root->fs.sysfs, path);
-    }
-    else if(root->type == VFS_NET){
-        //listing = 
-        //print_serial("[VFS] [NETFS] Listing Directory %s\n", path);
-        listing = netfs_advListDirectory(root->fs.netfs, path);
-    }
-    else if(root->type == VFS_PIPE){
-        
-    }
+    if(root->interface->fs_listDirectory != NULL)
+        listing = root->interface->fs_listDirectory(root->interface->root, path);
     return listing;
 }
 
@@ -746,20 +352,8 @@ int vfs_ftruncate(int fd, unsigned int length){
     if(fd == -1 || fd >= VFS_maxFiles || VFS_fileTable[fd].status == 1) return -1;
 
     struct VFS_File *file = &VFS_fileTable[fd];
-    switch(file->inode.type){
-        case VFS_EXT2: {
-            struct EXT2_Inode *ext2 = file->inode.fs.ext2;
-            int size_delta = ext2->lsbSize - length;
-            if(size_delta < 0){
-
-            }
-            else if(size_delta > 0){
-                ext2_extendFile(file->inode.drive->format_info.ext2, file->inode.ext2_inode_idx, size_delta);
-            }
-            return 0;
-        }
-        default:
-            return -1;
+    if(file->inode.interface->fs_truncate != NULL){
+        return file->inode.interface->fs_truncate(file, length);
     }
     return -1;
 }

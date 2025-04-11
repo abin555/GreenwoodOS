@@ -72,15 +72,19 @@ void kernel_task(int argc, char **argv){
     struct SysFS_Inode *sysroot = sysroot_init();
     sysfs_debugTree(sysroot, 0);
 
-    vfs_addSysRoot(
-        sysroot,
-        '-'
+    vfs_addFS(
+        sysfs_generateVFSRoot(
+            sysroot,
+            '-'
+        )
     );
 
+    /*
     vfs_addNetRoot(
         netfs_createRoot(),
         '@'
     );
+    */
 
     window_init();
     console_init();

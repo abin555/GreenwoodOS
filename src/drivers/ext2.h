@@ -170,10 +170,16 @@ uint32_t ext2_get_freeBlockIdx(struct EXT2_FS *ext2);
 uint32_t ext2_alloc_inode(struct EXT2_FS *ext2, uint16_t type, uint32_t size);
 uint32_t ext2_alloc_block(struct EXT2_FS *ext2);
 
-int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size);
+int ext2_createFile(void *fs, char *path, uint32_t size);
 int ext2_extendFile(struct EXT2_FS *ext2, uint32_t inodeIdx, uint32_t extendAmount);
 
 int ext2_createDirectory(struct EXT2_FS *ext2, char *path);
-struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path);
+struct DirectoryListing ext2_advListDirectory(void *fs, char *path);
+
+int ext2_read(void *f, void *buf, int nbytes);
+int ext2_write(void *f, void *buf, int nbytes);
+void *ext2_getInode(void *fs, char *path);
+int ext2_seek(void *f, int offset, int whence);
+void *ext2_generateVFSRoot(struct EXT2_FS *ext2);
 
 #endif

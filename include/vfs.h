@@ -13,33 +13,45 @@ typedef enum {
     VFS_FLAG_WRITE = 0b10
 } VFS_Inode_Flags;
 
+typedef enum {
+    VFS_ISO9660,
+    VFS_EXT2,
+    VFS_SYS,
+    VFS_NET,
+    VFS_PIPE
+} VFS_InodeType;
+
+struct VFS_File;
+struct VFS_RootInterface {
+    struct DRIVE *drive;
+    char vfsLetter;
+    char *fs_label;
+    void *root;
+
+    void *(*fs_getLink)(void *, char *path);
+    int (*fs_read)(void *f, void *buf, int nbytes);
+    int (*fs_write)(void *f, void *buf, int nbytes);
+    int (*fs_seek)(void *f, int offset, int whence);
+    int (*fs_creat)(void *fs, char *path, unsigned int size);
+    struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
+    int (*fs_truncate)(void *f, unsigned int len);
+};
+
 struct VFS_Inode;
 struct VFS_Inode {
-    enum {
-        VFS_ISO9660,
-        VFS_EXT2,
-        VFS_SYS,
-        VFS_NET,
-        VFS_PIPE
-    } type;
+    VFS_InodeType type;
 
     union {
-        struct File_Info *iso;
-        struct EXT2_Inode *ext2;
-        struct SysFS_Inode *sysfs;
-        struct NetFS_Inode *netfs;
+        void *fs;
         struct Pipe *pipe;
     } fs;
     int ext2_inode_idx;
 
     struct VFS_Inode *root;
-
+    struct VFS_RootInterface *interface;
     int isRoot;
     int isValid;
     int flags;
-
-    struct DRIVE *drive;
-    char nonDriveLetter;
 };
 
 struct VFS_File {
@@ -49,6 +61,7 @@ struct VFS_File {
 };
 
 void vfs_init();
+void vfs_addFS(struct VFS_RootInterface *interface);
 void vfs_addRoot(struct DRIVE *drive);
 void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter);
 void vfs_addNetRoot(struct NetFS_Inode *netfs, char letter);
@@ -69,5 +82,6 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path);
 struct DirectoryListing vfs_taskListDirectory(char *path);
 int vfs_chdir(struct DIRECTORY *dir, char *path);
 int vfs_ftruncate(int fd, unsigned int length);
+
 
 #endif

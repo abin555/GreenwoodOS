@@ -137,4 +137,6 @@ int ISO9660_checkExists(struct ISO9660 *iso, char *path);
 void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path);
 int ISO9660_createDirectory(struct ISO9660 *iso, char *path);
 int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size);
+
+int iso9660_read(void *f, void *buf, int nbytes);
 #endif

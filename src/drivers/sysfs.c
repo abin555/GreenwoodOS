@@ -112,18 +112,15 @@ void sysfs_debugTree(struct SysFS_Inode *fs, int depth){
     }
 }
 
-int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
+int sysfs_read(void *f, void *buf, int nbytes){
+    struct VFS_File *file = f;
     //print_serial("[SYSFS] Reading %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
     if(file == NULL || buf == NULL || nbytes == 0){
         print_serial("[SYSFS] Won't Read, doesn't exist, goes nowhere, or is nothing\n");
         return 0;
     }
-    if(file->inode.type != VFS_SYS){
-        print_serial("[SYSFS] Cant Read, not sysfs\n");
-        return 0;
-    }
 
-    struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
+    struct SysFS_Inode *sysfs = file->inode.fs.fs;
     if(sysfs->type != SysFS_Chardev){
         print_serial("[SYSFS] Cant Read, not cdev\n");
         return 0;
@@ -150,22 +147,21 @@ int sysfs_read(struct VFS_File *file, void *buf, int nbytes){
     return i;
 }
 
-int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
-    //print_serial("[SYSFS] Writing %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
+int sysfs_write(void *f, void *buf, int nbytes){
+    struct VFS_File *file = f;
+    //print_serial("[SYSFS] Writing %d bytes with head at %d and file size %d to %s\n", nbytes, file->head, ((struct SysFS_Inode *) file->inode.fs.fs)->data.chardev->buf_size, ((struct SysFS_Inode *) file->inode.fs.fs)->name);
     if(file == NULL || buf == NULL || nbytes == 0) return 0;
-    if(file->inode.type != VFS_SYS) return 0;
     
-    struct SysFS_Inode *sysfs = file->inode.fs.sysfs;
+    struct SysFS_Inode *sysfs = file->inode.fs.fs;
     if(sysfs->type != SysFS_Chardev){
-        //print_serial("[SYSFS] Wrong FS device\n");
+        print_serial("[SYSFS] Wrong FS device\n");
         return 0;
     }
     struct SysFS_Chardev *cdev = sysfs->data.chardev;
     if((cdev->perms & CDEV_WRITE) == 0){
-        //print_serial("[SYSFS] No write permission");
+        print_serial("[SYSFS] No write permission");
         return 0;
     };
-    //print_serial("[SYSFS] Start Writing\n");
     int i = 0;
 
     if(cdev->write_specialized_callback == NULL){
@@ -176,14 +172,14 @@ int sysfs_write(struct VFS_File *file, void *buf, int nbytes){
     else{
         i = cdev->write_specialized_callback(cdev, buf, file->head, nbytes, &file->head);
     }
-
     if(cdev->write_callback != NULL){
         cdev->write_callback(cdev, file->head-i, i, &file->head);
     }
     return i;
 }
 
-struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
+void *sysfs_find(void *r, char *path){
+    struct SysFS_Inode *root = r;
     if(root == NULL) return NULL;
     if(path == NULL) return root;
     if(!strcmp(path, ".")) return root;
@@ -229,7 +225,8 @@ struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path){
     return NULL;
 }
 
-struct DirectoryListing sysfs_advListDirectory(struct SysFS_Inode *sysfs, char *path){
+struct DirectoryListing sysfs_advListDirectory(void *fs, char *path){
+    struct SysFS_Inode *sysfs = fs;
     struct DirectoryListing listing = {0};
     if(sysfs == NULL || path == NULL) return listing;
     struct SysFS_Inode *target = sysfs_find(sysfs, path);
@@ -268,4 +265,38 @@ struct DirectoryListing sysfs_advListDirectory(struct SysFS_Inode *sysfs, char *
     }
 
     return listing;
+}
+
+int sysfs_seek(void *f, int offset, int whence){
+	struct VFS_File *file_idx = f;
+	if(whence == 0){//SEEK_SET
+        file_idx->head = offset;
+    }
+    else if(whence == 1){//SEEK_CUR
+        file_idx->head += offset;
+    }
+    else if(whence == 2){//SEEK_END
+        
+    }
+    else{
+        return -1;
+    }
+	return file_idx->head;
+}
+
+void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
+    struct VFS_RootInterface *interface = malloc(sizeof(struct VFS_RootInterface));
+	interface->drive = NULL;
+	interface->vfsLetter = letter;
+	interface->fs_label = "SysFS";
+    interface->root = root;
+
+	interface->fs_getLink = sysfs_find;
+	interface->fs_read = sysfs_read;
+	interface->fs_write = sysfs_write;
+	interface->fs_seek = sysfs_seek;
+	interface->fs_creat = NULL;
+	interface->fs_listDirectory = sysfs_advListDirectory;
+	interface->fs_truncate = NULL;
+	return interface;
 }

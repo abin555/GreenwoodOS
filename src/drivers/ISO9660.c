@@ -260,8 +260,8 @@ int ISO9660_checkExists(struct ISO9660 *iso, char *path){
 		}
 		if(dirSector == 0){//Check if file
 			print_serial("Checking if file %s\n", work_buf);
-			struct File_Info fileinfo = ISO9660_getFile(iso, dirSector_back, work_buf);
-			if(fileinfo.drive != NULL){
+			struct File_Info File_Info = ISO9660_getFile(iso, dirSector_back, work_buf);
+			if(File_Info.drive != NULL){
 				print_serial("File Exists!\n");
 				return 1;
 			}
@@ -477,4 +477,25 @@ int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size){
 		ISO_write_sector(iso->drive, iso->buf, newTableSector+i);
 	}
 	return 0;
+}
+
+#include "vfs.h"
+int iso9660_read(void *f, void *buf, int nbytes){
+	struct VFS_File *file = f;
+    char *iso_buf = (char *) ISO_read_sector(((struct File_Info *) file->inode.fs.fs)->drive, ((struct File_Info *) file->inode.fs.fs)->drive->format_info.ISO->buf, ((struct File_Info *) file->inode.fs.fs)->sector);
+    if(iso_buf == NULL) return 1;
+    int idx = 0;
+    int sector_offset = 0;
+    while(file->head < 512*4 && idx < nbytes){
+        ((char *) buf)[idx] = iso_buf[file->head];
+        file->head++;
+        idx++;
+        if(file->head == 512*4){
+            sector_offset++;
+            //print_serial("[DRIVE] Sector Offset %d\n", sector_offset);
+            iso_buf = (char *) ISO_read_sector(((struct File_Info *) file->inode.fs.fs)->drive, ((struct File_Info *) file->inode.fs.fs)->drive->format_info.ISO->buf, ((struct File_Info *) file->inode.fs.fs)->sector+sector_offset);
+            file->head = 0;
+        }
+    }
+    return idx;
 }

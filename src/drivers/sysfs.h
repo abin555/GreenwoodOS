@@ -47,12 +47,15 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
 );
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth);
 
-struct SysFS_Inode *sysfs_find(struct SysFS_Inode *root, char *path);
+void *sysfs_find(void *r, char *path);
 
 struct VFS_File;
-int sysfs_read(struct VFS_File *file, void *buf, int nbytes);
-int sysfs_write(struct VFS_File *file, void *buf, int nbytes);
+int sysfs_read(void *f, void *buf, int nbytes);
+int sysfs_write(void *f, void *buf, int nbytes);
+int sysfs_seek(void *f, int offset, int whence);
 
-struct DirectoryListing sysfs_advListDirectory(struct SysFS_Inode *sysfs, char *path);
+struct DirectoryListing sysfs_advListDirectory(void *fs, char *path);
+
+void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter);
 
 #endif

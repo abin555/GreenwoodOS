@@ -457,11 +457,12 @@ int ext2_createDirectory(struct EXT2_FS *ext2, char *path){
 	return 0;
 }
 
-int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size){
+int ext2_createFile(void *fs, char *path, uint32_t size){
+	struct EXT2_FS *ext2 = fs;
 	print_serial("[EXT2] Creating File %s\n", path);
 	if(ext2_get_inodeIdx_from_path(ext2, path)){
 		print_serial("[EXT2] %s already exists\n", path);
-		return 1;
+		return -1;
 	}
 	uint32_t path_length = 0;
 	for(int i = 0; path[i] != '\0' && i < 255; i++){
@@ -483,9 +484,9 @@ int ext2_createFile(struct EXT2_FS *ext2, char *path, uint32_t size){
 
 	//print_serial("[EXT2] Making File named %s from parent %s\n", path+dir_name_idx, parent_path);
 	uint32_t parent_inode_idx = ext2_get_inodeIdx_from_path(ext2, parent_path);
-	if(parent_inode_idx == 0) return 1;
+	if(parent_inode_idx == 0) return -1;
 	uint32_t child_inode_idx = ext2_alloc_inode(ext2, EXT2_InodeType_RegularFile, size);
-	if(child_inode_idx == 0) return 1;
+	if(child_inode_idx == 0) return -1;
 	//print_serial("[EXT2] Parent Inode %d, Child Inode is now %d\n", parent_inode_idx, child_inode_idx);
 	ext2_make_dir_entry(ext2, parent_inode_idx, path+dir_name_idx, child_inode_idx, 1, false);
 	return 0;
@@ -554,7 +555,8 @@ void ext2_console_printDirectory(struct CONSOLE *console, struct EXT2_FS *ext2, 
 }
 */
 
-struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
+struct DirectoryListing ext2_advListDirectory(void *fs, char *path){
+	struct EXT2_FS *ext2 = fs;
 	struct DirectoryListing listing = {0};
 	//print_console(console, "Listing Drive %c path %s\n", ext2->drive->identity, path);
 	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
@@ -606,4 +608,318 @@ struct DirectoryListing ext2_advListDirectory(struct EXT2_FS *ext2, char *path){
 		dir = (struct EXT2_Directory *) ((void *) dir + dir->entry_size);
 	}
 	return listing;
+}
+
+#include "vfs.h"
+int ext2_read(void *f, void *buf, int nbytes){
+	struct VFS_File *file = f;
+    struct EXT2_FS *ext2 = file->inode.interface->drive->format_info.ext2;
+    struct EXT2_Inode *inode = file->inode.fs.fs;
+    //print_serial("[VFS] [EXT2] Reading file\n");
+    uint32_t block_idx = 0;
+    uint32_t single_indirect_idx = 0;
+    uint32_t double_indirect_idx = 0;
+    uint32_t idx = 0;
+    uint32_t block_head = 0;
+
+    uint32_t block_offset = file->head / ext2->block_size;
+    uint32_t pointers_per_block = ext2->block_size / 4;
+
+    block_head = file->head % ext2->block_size;
+
+    char *block;
+    
+    if(block_offset < 12){
+        block_idx = block_offset;
+        single_indirect_idx = 0;
+        double_indirect_idx = 0;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+    }
+    else if(12 <= block_offset && block_offset < 12 + pointers_per_block){
+        block_idx = 12;
+        single_indirect_idx = block_offset - 12;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+        uint32_t *indirect_blocks = (uint32_t *) block;
+        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
+        block = ext2_read_block(ext2, indirect_block);
+    }
+    else if(block_offset >= 12 + pointers_per_block){
+        block_idx = 13;
+        uint32_t offset = block_offset - (11 + (ext2->block_size / 4));
+        single_indirect_idx = offset % pointers_per_block - 1;
+        double_indirect_idx = (offset / pointers_per_block) * (ext2->block_size / 4) % 255;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+        uint32_t *double_indirect_blocks = (uint32_t *) block;
+        uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
+        
+        block = ext2_read_block(ext2, double_indirect_block);
+        uint32_t *indirect_blocks = (uint32_t *) block;
+        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
+        block = ext2_read_block(ext2, indirect_block);
+    }
+
+    while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
+        ((uint8_t *)buf)[idx] = ((uint8_t *)block)[block_head];
+        file->head++;
+        idx++;
+        block_head++;
+
+        if((uint32_t) block_head == ext2->block_size){
+            //print_serial("[VFS] [EXT2] Update - Block No. %d Idx: %d\n", file->head / ext2->block_size, idx);
+            //print_serial("[VFS] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
+            if(block_idx == 12){
+                handle_first_indirect:;
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                uint32_t *indirect_blocks = (uint32_t *) block;
+                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+                //print_serial("[VFS] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
+                block = ext2_read_block(ext2, indirect_block);
+                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
+                single_indirect_idx++;
+                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    block_idx++;
+                    if(block_idx == 13){
+                        single_indirect_idx = 0;
+                    }
+                }
+                block_head = 0;
+            }
+            else if(block_idx == 13){
+                handle_first_double_indirect:;
+                //print_serial("[VFS] [EXT2] Double Indirect Block\n");
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                uint32_t *double_indirect_blocks = (uint32_t *) block;
+                uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
+                
+                block = ext2_read_block(ext2, double_indirect_block);
+                uint32_t *indirect_blocks = (uint32_t *) block;
+                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+                //print_serial("[VFS] Indirect Block is at %d-%d block %d, idx %d is %d\n", inode->BlockPointers[block_idx], double_indirect_idx, double_indirect_block, single_indirect_idx, indirect_block);
+                block = ext2_read_block(ext2, indirect_block);
+                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
+                single_indirect_idx++;
+                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    double_indirect_idx++;
+                    single_indirect_idx = 0;
+                }
+
+                if(double_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    block_idx++;
+                }
+
+                block_head = 0;
+            }
+            else if(block_idx > 13){
+                //print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
+                break;
+            }
+            else{
+                block_idx++;
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                if(block_idx == 12){
+                    goto handle_first_indirect;
+                }
+                if(block_idx == 13){
+                    single_indirect_idx = 0;
+                    goto handle_first_double_indirect;
+                }
+            }
+
+            block_head = 0;
+        }
+    }
+
+    return idx;
+}
+
+int ext2_write(void *f, void *buf, int nbytes){
+	struct VFS_File *file = f;
+    //print_serial("[VFS] Writing %d bytes\n", nbytes);
+    struct EXT2_FS *ext2 = file->inode.interface->drive->format_info.ext2;
+    struct EXT2_Inode *inode = file->inode.fs.fs;
+
+    if((uint32_t)(file->head + nbytes) >= inode->lsbSize){
+        ext2_extendFile(ext2, file->inode.ext2_inode_idx, file->head + nbytes - inode->lsbSize);
+    }
+    
+    uint32_t block_idx = 0;
+    uint32_t single_indirect_idx = 0;
+    uint32_t double_indirect_idx = 0;
+    uint32_t idx = 0;
+    uint32_t block_head = 0;
+
+    uint32_t block_offset = file->head / ext2->block_size;
+    uint32_t pointers_per_block = ext2->block_size / 4;
+    uint32_t last_real_block_idx = 0;
+
+    block_head = file->head % ext2->block_size;
+
+    char *block;
+    
+    if(block_offset < 12){
+        block_idx = block_offset;
+        single_indirect_idx = 0;
+        double_indirect_idx = 0;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+        last_real_block_idx = inode->BlockPointers[block_idx];
+    }
+    else if(12 <= block_offset && block_offset < 12 + pointers_per_block){
+        block_idx = 12;
+        single_indirect_idx = block_offset - 12;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+        last_real_block_idx = inode->BlockPointers[block_idx];
+        uint32_t *indirect_blocks = (uint32_t *) block;
+        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
+        block = ext2_read_block(ext2, indirect_block);
+        last_real_block_idx = indirect_block;
+    }
+    else if(block_offset >= 12 + pointers_per_block){
+        block_idx = 13;
+        uint32_t offset = block_offset - (11 + (ext2->block_size / 4));
+        single_indirect_idx = offset % pointers_per_block - 1;
+        double_indirect_idx = (offset / pointers_per_block) * (ext2->block_size / 4) % 255;
+        block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+        last_real_block_idx = inode->BlockPointers[block_idx];
+        uint32_t *double_indirect_blocks = (uint32_t *) block;
+        uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
+        
+        block = ext2_read_block(ext2, double_indirect_block);
+        last_real_block_idx = double_indirect_block;
+        uint32_t *indirect_blocks = (uint32_t *) block;
+        uint32_t indirect_block = indirect_blocks[single_indirect_idx++];
+        block = ext2_read_block(ext2, indirect_block);
+        last_real_block_idx = indirect_block;
+    }
+
+    while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
+        ((uint8_t *)block)[block_head] = ((uint8_t *)buf)[idx];
+        //print_serial("%d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
+        file->head++;
+        idx++;
+        block_head++;
+
+        if((uint32_t) block_head == ext2->block_size){
+            ext2_write_block(ext2, last_real_block_idx, block);
+            //print_serial("[VFS] [EXT2] Update - Block No. %d Idx: %d\n", file->head / ext2->block_size, idx);
+            //print_serial("[VFS] Block offset %d - %d\n", block_idx, inode->BlockPointers[block_idx]);
+            if(block_idx == 12){
+                handle_first_indirect:;
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                last_real_block_idx = inode->BlockPointers[block_idx];
+                uint32_t *indirect_blocks = (uint32_t *) block;
+                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+                //print_serial("[VFS] Indirect Block is at %d, idx %d is %d\n", inode->BlockPointers[block_idx], single_indirect_idx, indirect_block);
+                block = ext2_read_block(ext2, indirect_block);
+                last_real_block_idx = indirect_block;
+                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
+                single_indirect_idx++;
+                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    block_idx++;
+                    if(block_idx == 13){
+                        single_indirect_idx = 0;
+                    }
+                }
+                block_head = 0;
+            }
+            else if(block_idx == 13){
+                handle_first_double_indirect:;
+                //print_serial("[VFS] [EXT2] Double Indirect Block\n");
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                last_real_block_idx = inode->BlockPointers[block_idx];
+                uint32_t *double_indirect_blocks = (uint32_t *) block;
+                uint32_t double_indirect_block = double_indirect_blocks[double_indirect_idx];
+                
+                block = ext2_read_block(ext2, double_indirect_block);
+                last_real_block_idx = double_indirect_block;
+                uint32_t *indirect_blocks = (uint32_t *) block;
+                uint32_t indirect_block = indirect_blocks[single_indirect_idx];
+                //print_serial("[VFS] Indirect Block is at %d-%d block %d, idx %d is %d\n", inode->BlockPointers[block_idx], double_indirect_idx, double_indirect_block, single_indirect_idx, indirect_block);
+                block = ext2_read_block(ext2, indirect_block);
+                last_real_block_idx = indirect_block;
+                //block = ext2_read_block(ext2, inode->BlockPointers[0]);
+                single_indirect_idx++;
+                if(single_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    double_indirect_idx++;
+                    single_indirect_idx = 0;
+                }
+
+                if(double_indirect_idx * sizeof(uint32_t) >= ext2->block_size){
+                    block_idx++;
+                }
+
+                block_head = 0;
+            }
+            else if(block_idx > 13){
+                print_serial("[VFS] [EXT2] Fucky Wucky time on the block idx\n");
+                break;
+            }
+            else{
+                block_idx++;
+                block = ext2_read_block(ext2, inode->BlockPointers[block_idx]);
+                last_real_block_idx = inode->BlockPointers[block_idx];
+                if(block_idx == 12){
+                    goto handle_first_indirect;
+                }
+                if(block_idx == 13){
+                    single_indirect_idx = 0;
+                    goto handle_first_double_indirect;
+                }
+            }
+
+            block_head = 0;
+        }
+    }
+    ext2_write_block(ext2, last_real_block_idx, block);
+
+    return idx;
+}
+
+void *ext2_getInode(void *fs, char *path){
+	struct EXT2_FS *ext2 = fs;
+	print_serial("[EXT2] Looking for %s\n", path);
+	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
+	if(inodeIdx == 0){
+		//print_serial("[VFS] Inode is Zero???\n");
+		return NULL;
+	}
+	print_serial("[EXT2] Found at inode %d\n", inodeIdx);
+	//int ext2_inode_idx = inodeIdx;
+	struct EXT2_Inode *inode = malloc(sizeof(struct EXT2_Inode));
+	*inode = ext2_read_inode_data(ext2, inodeIdx);
+	return inode;
+}
+
+int ext2_seek(void *f, int offset, int whence){
+	struct VFS_File *file_idx = f;
+	if(whence == 0){//SEEK_SET
+        file_idx->head = offset;
+    }
+    else if(whence == 1){//SEEK_CUR
+        file_idx->head += offset;
+    }
+    else if(whence == 2){//SEEK_END
+        file_idx->head += ((struct EXT2_Inode *) file_idx->inode.fs.fs)->lsbSize + offset;
+    }
+    else{
+        return -1;
+    }
+	return file_idx->head;
+}
+
+void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
+	print_serial("[EXT2] Generating Interface for VFS\n");
+	struct VFS_RootInterface *interface = malloc(sizeof(struct VFS_RootInterface));
+	interface->drive = ext2->drive;
+	interface->vfsLetter = 0;
+	interface->fs_label = "EXT2";
+	interface->root = ext2;
+
+	interface->fs_getLink = ext2_getInode;
+	interface->fs_read = ext2_read;
+	interface->fs_write = ext2_write;
+	interface->fs_seek = ext2_seek;
+	interface->fs_creat = ext2_createFile;
+	interface->fs_listDirectory = ext2_advListDirectory;
+	interface->fs_truncate = NULL;
+	return interface;
 }
