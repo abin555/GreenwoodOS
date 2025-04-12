@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-#define bufsize 100
+#define bufsize 1000
+char buf[bufsize];
 int main(int argc, char **argv){
-    char buf[bufsize];
     if(argc != 2){
         return 1;
     }
-
+    //freopen("/-/dev/serial", "rw+", stdout);
     FILE *f = fopen(argv[1], "r");
     if(f == NULL){
         printf("File %s does not exist\n", argv[1]);
@@ -15,7 +15,7 @@ int main(int argc, char **argv){
     }
     fseek(f, 0, SEEK_END);
     int size = ftell(f);
-    //printf("Size %d\n", size);
+    printf("Size %d\n", size);
     fseek(f, 0, SEEK_SET);
     int remaining = size;
     for(int i = 0; i < (size / bufsize)+1; i++){

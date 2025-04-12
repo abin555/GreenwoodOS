@@ -270,6 +270,7 @@ struct DirectoryListing sysfs_advListDirectory(void *fs, char *path){
 
 int sysfs_seek(void *f, int offset, int whence){
 	struct VFS_File *file_idx = f;
+    struct SysFS_Inode *inode = (struct SysFS_Inode *) file_idx->inode.fs.fs;
 	if(whence == 0){//SEEK_SET
         file_idx->head = offset;
     }
@@ -277,7 +278,15 @@ int sysfs_seek(void *f, int offset, int whence){
         file_idx->head += offset;
     }
     else if(whence == 2){//SEEK_END
-        
+        switch(inode->type){
+            case SysFS_Chardev:
+                file_idx->head = inode->data.chardev->buf_size + offset;
+                if(file_idx->head > inode->data.chardev->buf_size)
+                    file_idx->head = inode->data.chardev->buf_size;
+                break;
+            default:
+                break;
+        }
     }
     else{
         return -1;

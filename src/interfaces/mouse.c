@@ -13,6 +13,43 @@ void mouse_init(){
     mouseStatus.buttons.middle = 0;
 }
 
+int mouseTxt_read(void *dev, void *buf, int roffset, int nbytes, int *head){
+    struct SysFS_Chardev *mousedev = dev;
+    int n = snprintf(
+        mousedev->buf,
+        mousedev->buf_size,
+        "X: %d\nY: %d\n",
+        mouseStatus.pos.x,
+        mouseStatus.pos.y
+    );
+    mousedev->buf[n] = '\0';
+    int step = roffset;
+    int i;
+    for(i = 0; i < nbytes && step < mousedev->buf_size && i < n; i++){
+        ((char *) buf)[i] = mousedev->buf[step++];
+    }
+    //print_serial("Wrote %d bytes with snprintf of %d bytes at offset %d\n", i, n, roffset);
+    *head += i;
+    return i;
+}
+
+void *mouseTxt_createCDEV(){
+    print_serial("[Mouse] Generating Text CDEV\n");
+    struct SysFS_Chardev *mouse_cdev = sysfs_createCharDevice(
+        malloc(50),
+        50,
+        CDEV_READ
+    );
+    sysfs_setCallbacks(
+        mouse_cdev,
+        NULL,
+        NULL,
+        NULL,
+        mouseTxt_read
+    );
+    return (void *) mouse_cdev;
+}
+
 void *mouse_createCDEV(){
     print_serial("[Mouse] Generating CDEV\n");
     struct SysFS_Chardev *mouse_cdev = sysfs_createCharDevice(

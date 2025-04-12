@@ -15,5 +15,6 @@ int strlen(char *s);
 char *strdup(char *s);
 char *strndup(char *s, int n);
 int sprintf(char *str, const char *format, ...);
+int snprintf(char *str, size_t size, const char *format, ...);
 
 #endif

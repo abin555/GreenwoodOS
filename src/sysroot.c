@@ -36,6 +36,7 @@ struct SysFS_Inode *sysroot_init(){
     
     struct SysFS_Inode *audio = sysfs_mkcdev("audio", audio_createCDEV());
     struct SysFS_Inode *mouse = sysfs_mkcdev("mouse", mouse_createCDEV());
+    struct SysFS_Inode *mouseTxt = sysfs_mkcdev("mouseTxt", mouseTxt_createCDEV());
     struct SysFS_Inode *viewport = sysfs_mkcdev("viewport", 
         sysfs_createCharDevice(
             (char *) &global_viewport_functions,
@@ -55,6 +56,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(devs, console);
     sysfs_addChild(systems, audio);
     sysfs_addChild(systems, mouse);
+    sysfs_addChild(systems, mouseTxt);
     sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
     sysfs_addChild(root, devs);

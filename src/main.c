@@ -41,8 +41,7 @@
 #include "icmp.h"
 #include "netproc.h"
 #include "stddef.h"
-
-extern void zig_test();
+#include "monitors.h"
 
 void ping_task(){
     while(1){
@@ -105,6 +104,8 @@ void kernel_task(int argc, char **argv){
 
     audio_init();
 
+    monitors_init();
+
 
     struct WINDOW *kernel_win = window_open("KERNEL", false);
     kernel_console = console_open(kernel_win);    
@@ -118,13 +119,11 @@ void kernel_task(int argc, char **argv){
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
-    zig_test();
-
     audio_init();    
     
     //netproc_init();
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
-    
+    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+
     task_lock = 0;
     return;
 }

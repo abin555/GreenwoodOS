@@ -34,6 +34,7 @@ int feof(FILE *stream);
 
 int printf(const char *format, ...);
 int sprintf(char *str, const char *format, ...);
+int snprintf(char *str, size_t size, const char *format, ...);
 int fputs(const char *s, FILE *file);
 int puts(const char *s);
 
@@ -49,5 +50,6 @@ int putchar(int c);
 
 #include <stdarg.h>
 int vfprintf(FILE *stream, const char *format, va_list apq);
+
 
 #endif

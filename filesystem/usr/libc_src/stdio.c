@@ -209,3 +209,55 @@ int putc(int c, FILE *stream){
 int putchar(int c){
     return putc(c, stdout);
 }
+
+int snprintf(char *str, size_t size, const char *format, ...){
+	va_list listpd;
+	va_start(listpd, format);
+	if(str == NULL || format == NULL || size <= 0) return 0;
+	char wbuf[100];
+	int idx = 0;
+	char *s;
+	size_t n = 0;
+	while(*format != '\0' && n < size){
+		if(*format != '%'){
+			str[idx++] = *format++;
+			n++;
+		}
+		else{
+			format++;
+			switch(*format){
+				case 's':{
+					s = va_arg(listpd, char *);
+					int l = strlen(s);
+					for(int i = 0; i < l && n < size; i++){
+						str[idx++] = s[i];
+						n++;
+					}
+					break;
+				}
+				case 'd':{
+					int val = va_arg(listpd, int);
+					s = itoa(val, wbuf, 10);
+					int l = strlen(s);
+					for(int i = 0; i < l && n < size; i++){
+						str[idx++] = s[i];
+						n++;
+					}
+					break;
+				}
+				case 'x':{
+					int val = va_arg(listpd, int);
+					s = itoa(val, wbuf, 16);
+					int l = strlen(s);
+					for(int i = 0; i < l && n < size; i++){
+						str[idx++] = s[i];
+						n++;
+					}
+					break;
+				}
+			}
+			format++;
+		}
+	}
+	return n;
+}

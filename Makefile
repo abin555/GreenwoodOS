@@ -58,7 +58,6 @@ OBJECTS = \
 		src/networking/icmp.o \
 		src/networking/checksum.o \
 		src/networking/netproc.o \
-		src/test.o \
 		src/acpi.o \
 		src/apic.o \
 		src/vfs.o \
@@ -68,7 +67,8 @@ OBJECTS = \
 		src/audio/wav.o \
 		src/drivers/sysfs.o \
 		src/sysroot.o \
-		src/audio/audio_cdev.o
+		src/audio/audio_cdev.o \
+		src/monitors.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
@@ -102,8 +102,6 @@ emulate:
 	$(CC) $< $(CFLAGS) -o $@
 %.o: %.s
 	$(AS) $< $(ASFLAGS) -o $@
-%.o: %.zig
-	$(ZIGC) $< $(ZIGC_FLAGS) -femit-bin=$@
 
 clean:
 	rm -rf src/*.i src/main.s *\~  kernel.elf GreenwoodOS.iso

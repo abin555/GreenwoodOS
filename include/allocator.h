@@ -14,6 +14,9 @@ struct ALLOC_TABLE{
 	uint8_t used;
 };
 
+extern const uint32_t alloc_table_size;
+extern uint32_t total_alloc;
+
 void alloc_init();
 
 void *malloc(uint32_t size);
