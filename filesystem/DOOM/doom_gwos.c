@@ -229,12 +229,12 @@ void impl_exit(int code){
 int main(int argc, char **argv){
   struct FEATURE_INFO keypressed_feature = getKernelFeature(FEAT_KEYPRESSMAP);
   key_pressed_map = keypressed_feature.addr;
-  //freopen("/-/dev/serial", "a+", stdout);
   rtc_fd = open("/-/dev/RTC", O_READ);
   if(rtc_fd == -1){
     printf("Unable to access clock!\nExiting\n");
     return 1;
   }
+  freopen("/-/dev/serial", "a+", stdout);
 
   doom_set_malloc((doom_malloc_fn) malloc, (doom_free_fn) free);
   doom_set_exit(impl_exit);

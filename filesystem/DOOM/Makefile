@@ -1,8 +1,9 @@
 CC = i386-gwos-gcc
-CFLAGS = -g -c -O0
+CFLAGS = -c -O0
 INCLUDE_PATH = -I./include/
 PROG = DOOM
 
+SRCS += doom_gwos.o
 SRCS += src/am_map.o
 SRCS += src/d_items.o
 SRCS += src/d_main.o
@@ -65,7 +66,6 @@ SRCS += src/v_video.o
 SRCS += src/wi_stuff.o
 SRCS += src/w_wad.o
 SRCS += src/z_zone.o
-SRCS += doom_gwos.o
 
 %.o : %.c
 	$(CC) -c $(CFLAGS) $(INCLUDE_PATH) $< -o $@

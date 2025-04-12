@@ -61,6 +61,7 @@ void HandleSelection(char *work_buf, int sel);
 struct DirectoryListing dir;
 struct Vec2 relMousePos;
 int selection;
+int rclick_selection;
 int isFocus;
 
 void drawRightClickMenu(struct RightClickMenu *rightClickMenu);
@@ -139,6 +140,15 @@ int main(int argc, char **argv){
                 path = getDirectory();
                 dir = getDirectoryListing(".");
                 break;
+                case '-':
+                changeDirectory("/-/");
+                path = getDirectory();
+                dir = getDirectoryListing(".");
+                break;
+                case 'A':
+                changeDirectory("/A/");
+                path = getDirectory();
+                dir = getDirectoryListing(".");
             }
         }
         if(mouseStatus.buttons.left && !last_mouse_left && isFocus){
@@ -165,6 +175,7 @@ int main(int argc, char **argv){
             rightClickMenu.isVisible = 1;
             rightClickMenu.x = mouseStatus.pos.x - vp->loc.x;
             rightClickMenu.y = mouseStatus.pos.y - vp->loc.y;
+            rclick_selection = selection;
 
         }
         if(!mouseStatus.buttons.right && last_mouse_right){
@@ -438,6 +449,13 @@ void drawRect(
     }
 }
 
+static char *options[3] = {
+    "New File",
+    "New Folder",
+    "Monitor"
+};
+int num_options = 3;
+
 void drawRightClickMenu(struct RightClickMenu *rightClickMenu){
     drawRect(
         0x5c5c5c,
@@ -445,31 +463,27 @@ void drawRightClickMenu(struct RightClickMenu *rightClickMenu){
         rightClickMenu->x-2,
         rightClickMenu->y-2,
         rightClickMenu->x+(8*10)+4,
-        rightClickMenu->y+(2*8)+4,
+        rightClickMenu->y+(num_options*8)+4,
         buf,
         WIDTH
     );
-    static char newFile[] = "New File";
-    static char newFolder[] = "New Folder";
+    
     int mouse_entry_hover = -1;
     if(
         mouseStatus.pos.x - vp->loc.x >= rightClickMenu->x-2 &&
         mouseStatus.pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
         mouseStatus.pos.y - vp->loc.y >= rightClickMenu->y-2 &&
-        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
+        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(num_options*8)+4
     ){
-        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
-        if(mouse_entry_hover != 1 && mouse_entry_hover != 2) mouse_entry_hover = -1;
+        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8);
+        if(mouse_entry_hover < 0 || mouse_entry_hover > num_options) mouse_entry_hover = -1;
     }
-    for(int i = 0; i < sizeof(newFile)-1; i++){
-        vp_drawChar(
-            vp, rightClickMenu->x+(8*i)+1, rightClickMenu->y+0+1, newFile[i], mouse_entry_hover == 1 ? 0xFFFFFF : 0x0, mouse_entry_hover == 1 ? 0x0 : 0xbfbfbf
-        );
-    }
-    for(int i = 0; i < sizeof(newFolder)-1; i++){
-        vp_drawChar(
-            vp, rightClickMenu->x+(8*i)+1, rightClickMenu->y+8+1, newFolder[i], mouse_entry_hover == 2 ? 0xFFFFFF : 0x0, mouse_entry_hover == 2 ? 0x0 : 0xbfbfbf
-        );
+    for(int i = 0; i < num_options; i++){
+        for(int j = 0; j < strlen(options[i]); j++){
+            vp_drawChar(
+                vp, rightClickMenu->x+(8*j)+1, rightClickMenu->y+(8*i)+1, options[i][j], mouse_entry_hover == i ? 0xFFFFFF : 0x0, mouse_entry_hover == i ? 0x0 : 0xbfbfbf
+            );
+        }
     }
 }
 
@@ -528,10 +542,10 @@ int handleRightClickMenu(struct RightClickMenu *rightClickMenu){
         mouseStatus.pos.x - vp->loc.x >= rightClickMenu->x-2 &&
         mouseStatus.pos.x - vp->loc.x <= rightClickMenu->x+(8*10)+4 &&
         mouseStatus.pos.y - vp->loc.y >= rightClickMenu->y-2 &&
-        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(2*8)+4
+        mouseStatus.pos.y - vp->loc.y <= rightClickMenu->y+(num_options*8)+4
     ){
-        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8) + 1;
-        if(mouse_entry_hover != 1 && mouse_entry_hover != 2) mouse_entry_hover = -1;
+        mouse_entry_hover = ((mouseStatus.pos.y - vp->loc.y - 8 - rightClickMenu->y+1) / 8);
+        if(mouse_entry_hover < 0 || mouse_entry_hover > num_options) mouse_entry_hover = -1;
     }
     static char filename_buf[50];
     memset(filename_buf, 0, sizeof(filename_buf));
@@ -540,13 +554,24 @@ int handleRightClickMenu(struct RightClickMenu *rightClickMenu){
         return 0;
     }
 
-    popupFilename(filename_buf, sizeof(filename_buf));
-
-    if(mouse_entry_hover == 1){
+    if(mouse_entry_hover == 0){
+        popupFilename(filename_buf, sizeof(filename_buf));
         creat(filename_buf);
     }
-    if(mouse_entry_hover == 2){
+    if(mouse_entry_hover == 1){
+        popupFilename(filename_buf, sizeof(filename_buf));
         creatdir(filename_buf);
+    }
+    if(mouse_entry_hover == 2){
+        printf("Selection %d %s\n", rclick_selection, dir.entries[rclick_selection+2].filename);
+        if(dir.entries[rclick_selection+2].type == 0){
+            char **arg = malloc(sizeof(char *) * 2);
+            arg[0] = 0x0;
+            arg[1] = malloc(dir.entries[rclick_selection+2].name_len);
+            for(int i = 0; i < dir.entries[rclick_selection+2].name_len; i++) arg[1][i] = dir.entries[rclick_selection+2].filename[i];
+            //sel = -1;
+            exec("/A/utils/monitor/monitor.elf", 2, arg);
+        }
     }
 
     return 0;

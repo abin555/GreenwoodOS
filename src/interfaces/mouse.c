@@ -36,8 +36,8 @@ int mouseTxt_read(void *dev, void *buf, int roffset, int nbytes, int *head){
 void *mouseTxt_createCDEV(){
     print_serial("[Mouse] Generating Text CDEV\n");
     struct SysFS_Chardev *mouse_cdev = sysfs_createCharDevice(
-        malloc(50),
-        50,
+        malloc(20),
+        20,
         CDEV_READ
     );
     sysfs_setCallbacks(

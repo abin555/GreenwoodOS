@@ -11,6 +11,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 	struct task_state *task = &tasks[task_running_idx];
 	//save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
+	//print_serial("[SYSCALL] #%x\n", cpu.eax);
 	switch(cpu.eax){
 		//Open Window
 		case 0x01:{
@@ -226,6 +227,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			print_serial("EXIT Syscall\n");
 			task_lock = 0;
 			stop_task(task_running_idx);
+			task_yield();
 			break;
 		}
 		//Request Memory Block, takes number of bytes, returns void pointer to region

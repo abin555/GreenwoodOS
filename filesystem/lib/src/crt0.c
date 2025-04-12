@@ -6,12 +6,14 @@ extern void main(int argc, char **argv);
 extern void clean_stdlib();
 extern int sys_vp_initialized;
 
+extern void puts(const char *s);
+
 void _start(int argc, char **argv){
     sys_vp_initialized = 0;
     init_stdlib();
     init_stdio();
-    
-    _init();
+    puts("Ready?");
+    //_init();
 
     main(argc, argv);
 
