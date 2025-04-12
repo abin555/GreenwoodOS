@@ -1,5 +1,6 @@
 #ifndef INTEL_E1000_H
 #define INTEL_E1000_H
+#include "stddef.h"
 #include "pci.h"
 #include "stdint.h"
 #include "serial.h"

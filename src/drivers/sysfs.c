@@ -1,3 +1,4 @@
+#include "stddef.h"
 #include "sysfs.h"
 #include "allocator.h"
 #include "memory.h"
@@ -197,7 +198,7 @@ void *sysfs_find(void *r, char *path){
     }
 
     int part_len = 0;
-    for(int i = 0; path[i] != NULL && path[i] != '/'; i++){
+    for(int i = 0; path[i] != '\0' && path[i] != '/'; i++){
         part_len++;
     }
     char buf[100];

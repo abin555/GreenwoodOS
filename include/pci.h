@@ -1,6 +1,6 @@
 #ifndef PCI_H
 #define PCI_H
-
+#include "stdbool.h"
 #include "io.h"
 #include "stdint.h"
 #include "allocator.h"

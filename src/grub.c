@@ -1,4 +1,5 @@
 #include "grub.h"
+#include "stddef.h"
 
 struct multiboot_tag_framebuffer *GRUB_tagfb = NULL;
 struct multiboot_tag_apm *GRUB_APM = NULL;

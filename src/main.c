@@ -40,6 +40,7 @@
 #include "netfs.h"
 #include "icmp.h"
 #include "netproc.h"
+#include "stddef.h"
 
 extern void zig_test();
 
@@ -95,14 +96,12 @@ void kernel_task(int argc, char **argv){
 
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
-    udp_init();
+    //udp_init();
     //ethernet_demo();
-    dhcp_init(ethernet_getDriver());
-    tcp_init();
+    //dhcp_init(ethernet_getDriver());
+    //tcp_init();
 
-    netfs_init();
-
-    //http_send_request(ethernet_getDriver(), (uint8_t [4]){208,77,18,143}, 80, "GET", "/", "www.retroarchive.org");
+    //netfs_init();
 
     audio_init();
 
@@ -118,17 +117,6 @@ void kernel_task(int argc, char **argv){
 
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
-    
-    /*
-    print_console(kernel_console, "kernel Window & Console Opened.\n");
-    print_console(kernel_console, "Initial Directory: %s\n", kernel_path);
-    
-    print_console(kernel_console, "Loading Desktop Task...\n");
-    print_console(kernel_console, "There are %d drives\n", drive_count);
-    for(int i = 0; i < drive_count; i++){
-        print_console(kernel_console, "Drive %d is type %d and format %d\n", i, drives[i]->type, drives[i]->format);
-    }
-    */
 
     zig_test();
 
@@ -136,10 +124,7 @@ void kernel_task(int argc, char **argv){
     
     //netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");  
-    //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,16,206,227}, 80, "GET", "/", "10.16.206.227");
-    //start_task(ping_task, -1, 0, NULL, "Ping Task");
-    //window_close(kernel_win);
-
+    
     task_lock = 0;
     return;
 }

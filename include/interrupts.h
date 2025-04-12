@@ -1,6 +1,6 @@
 #ifndef INTERRUPTS_H
 #define INTERRUPTS_H
-
+#include "stdbool.h"
 #include "stdint.h"
 #include "io.h"
 #include "framebuffer.h"

@@ -1,6 +1,6 @@
 #ifndef IP_H
 #define IP_H
-
+#include "stddef.h"
 #include "stdint.h"
 #include "network_utils.h"
 #include "ethernet.h"

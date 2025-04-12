@@ -1,4 +1,4 @@
-qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -no-reboot -d int,cpu_reset \
+qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log \
 -audiodev pipewire,id=Sound \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
 -drive id=disk3,file=fstest.img,if=none,format=raw \

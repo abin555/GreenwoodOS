@@ -1,6 +1,6 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
-
+#include "stdbool.h"
 #include "multitasking.h"
 #include "drive.h"
 #include "memory.h"

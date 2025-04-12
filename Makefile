@@ -72,7 +72,7 @@ OBJECTS = \
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
-	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I./src/audio/ -I. -masm=intel -g -c
+	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I./src/audio/ -I. -I./src/uACPI/include/ -masm=intel -g -c
 LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
 AS = nasm
 ASFLAGS = -f elf -gdwarf

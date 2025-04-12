@@ -1,5 +1,7 @@
 #ifndef AUDIO_H
 #define AUDIO_H
+#include "stddef.h"
+#include "stdbool.h"
 #include "stdint.h"
 
 #define SIZE_OF_PCM_DATA_BUFFER 4*48000*4 //four seconds for 2 channels with 16 bit samples

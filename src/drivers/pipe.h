@@ -1,6 +1,6 @@
 #ifndef PIPE_H
 #define PIPE_H
-
+#include "stddef.h"
 #include "stdint.h"
 #include "allocator.h"
 

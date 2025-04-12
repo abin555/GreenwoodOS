@@ -31,8 +31,10 @@ typedef unsigned long long uint_fast64_t;
 typedef long long          intmax_t;
 typedef unsigned long long uintmax_t;
 
-typedef unsigned char      bool;
-typedef unsigned int size_t;
+//typedef unsigned char bool;
+typedef long unsigned int size_t;
+
+typedef unsigned long int *uintptr_t;
 
 #define true 1
 #define false 0
@@ -49,5 +51,4 @@ typedef unsigned int size_t;
 #define UINT16_MAX       0xffffui16
 #define UINT32_MAX       0xffffffffui32
 #define UINT64_MAX       0xffffffffffffffffui64
-#define NULL 0
 #endif

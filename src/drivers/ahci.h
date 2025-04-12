@@ -1,6 +1,6 @@
 #ifndef AHCI_H
 #define AHCI_H
-
+#include "stdbool.h"
 #include "allocator.h"
 #include "serial.h"
 #include "memory.h"

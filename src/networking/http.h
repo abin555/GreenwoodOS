@@ -1,6 +1,6 @@
 #ifndef HTTP_H
 #define HTTP_H
-
+#include "stddef.h"
 #include "stdint.h"
 #include "ip.h"
 #include "tcp.h"

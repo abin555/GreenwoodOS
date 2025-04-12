@@ -1,6 +1,6 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
-
+#include "stdbool.h"
 #include <stdarg.h>
 #include "allocator.h"
 #include "serial.h"

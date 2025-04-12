@@ -22,11 +22,11 @@ struct IntelHDA_Driver {
 	
 	uint32_t *corb_mem;
 	uint32_t corb_num_entries;
-	bool corb_pointer;
+	uint8_t corb_pointer;
 
 	uint32_t *rirb_mem;
 	uint32_t rirb_num_entries;
-	bool rirb_pointer;
+	uint8_t rirb_pointer;
 };
 
 

@@ -1,4 +1,5 @@
 #include "hda.h"
+#include "stddef.h"
 
 #define HDA_WIDGET_AUDIO_OUTPUT 0x0
 #define HDA_WIDGET_AUDIO_INPUT 0x1

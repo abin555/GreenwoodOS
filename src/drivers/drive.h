@@ -1,6 +1,7 @@
 #ifndef DRIVE_H
 #define DRIVE_H
 
+#include "stdbool.h"
 //#include "stdlib.h"
 #include "allocator.h"
 #include "serial.h"

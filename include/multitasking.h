@@ -1,6 +1,7 @@
 #ifndef MULTITASKING_H
 #define MULTITASKING_H
 
+#include "stdbool.h"
 #include "memory.h"
 #include "allocator.h"
 #include "paging.h"

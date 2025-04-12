@@ -1,6 +1,6 @@
 #ifndef VIEWPORT_H
 #define VIEWPORT_H
-
+#include "stdbool.h"
 #include "stdint.h"
 #include "gfx.h"
 #include "desktop_shared.h"

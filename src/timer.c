@@ -1,3 +1,4 @@
+#include "stddef.h"
 #include "timer.h"
 
 #define MAX_TIMER_FUNCS 0xFF
