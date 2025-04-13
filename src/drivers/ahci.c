@@ -2,6 +2,12 @@
 
 #define AHCI_IRQ 3
 
+HBA_MEM *ABAR;
+HBA_PORT **Drive_PORTS;
+uint32_t driveNUM;
+
+bool AHCI_int_trigger;
+
 int devicePortNums[32] = {0};
 
 uint32_t AHCI_BASE;

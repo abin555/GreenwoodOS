@@ -1,5 +1,7 @@
 #include "ISO9660.h"
 
+uint8_t ISO9660_sector_buffer[ISO9660_SECTOR_SIZE_BYTES];
+
 #define getLe32(x) *((uint32_t *) &x.le)
 #define getLe16(x) *((uint16_t *) &x.le)
 

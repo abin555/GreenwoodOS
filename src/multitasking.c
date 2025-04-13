@@ -38,14 +38,16 @@ void multitask_start(){
 void print_tasks(){
     print_serial("[TASKS] Task Status:\n");
     for(int i = 0; i < MAX_TASKS; i++){
-        print_serial("PID %d - EAX: 0x%x Slot: %d EIP: 0x%x Running: %d Active: %d [\"%s\"]\n",
+        if(tasks[i].slot_active == 0) continue;
+        print_serial("PID %d - EAX: 0x%x Slot: %d EIP: 0x%x Running: %d Active: %d [\"%s\"] %c\n",
             i,
             tasks[i].registers.eax,
             tasks[i].program_slot,
             tasks[i].registers.eip,
             tasks[i].slot_running,
             tasks[i].slot_active,
-            tasks[i].task_name
+            tasks[i].task_name,
+            i == task_running_idx ? '*' : ' '
         );
     }
 }
@@ -283,6 +285,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
 void task_callback(){
     if(task_lock) return;
     //print_serial("[TASK] Callback\n");
+    //print_tasks();
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){

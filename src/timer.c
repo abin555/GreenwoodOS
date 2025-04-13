@@ -44,6 +44,7 @@ struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), st
 	//print_serial("[Timer] Tick\n");
 	for(uint32_t i = 0; i < MAX_TIMER_FUNCS; i++){
 		if(timer_attached_functions[i].attached_function == NULL) continue;
+		if(timer_attached_functions[i].divisor == 0) continue;
 		if(timer_ticks % timer_attached_functions[i].divisor == 0){
 			timer_attached_functions[i].attached_function();
 		}

@@ -72,23 +72,23 @@ common_interrupt_handler:
 	;return the system
 	iret
 
-err_int_handler 0
-err_int_handler 1
-err_int_handler 2
-err_int_handler 3
-err_int_handler 4
-err_int_handler 5
-err_int_handler 6
-err_int_handler 7
+no_err_int 0
+no_err_int 1
+no_err_int 2
+no_err_int 3
+no_err_int 4
+no_err_int 5
+no_err_int 6
+no_err_int 7
 err_int_handler 8
-err_int_handler 9
+no_err_int 9
 err_int_handler 10
 err_int_handler 11
 err_int_handler 12
 err_int_handler 13 ; General Protection Fault
-err_int_handler 14
+err_int_handler 14 ; Page Fault
 no_err_int 15
-err_int_handler 16
+no_err_int 16
 err_int_handler 17
 err_int_handler 18
 err_int_handler 19
