@@ -190,6 +190,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip);
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
 	
+	//fb_putChar(16, 8, 'E', 0xFF, 0x0);
 	if((uint32_t) interrupt_handlers[interrupt]){
 		cpu = interrupt_handlers[interrupt](cpu, stack);
 		
@@ -205,6 +206,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 			fix_the_dang_stack[3] = stack.cs;
 			fix_the_dang_stack[4] = stack.eflags;
 			override_state_return = false;
+			//fb_putChar(16, 8, ' ', 0xFF, 0x0);
 			return;
 		}
 		
@@ -214,6 +216,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 		//printk("[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
+	//fb_putChar(16, 8, ' ', 0xFF, 0x0);
 	//print_serial("[Interrupt] Return\n");
 }
 

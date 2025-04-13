@@ -30,7 +30,6 @@
 #include "vfs.h"
 #include "sysfs.h"
 #include "audio.h"
-#include "wav.h"
 #include "sysroot.h"
 #include "audio_cdev.h"
 #include "udp.h"
@@ -55,6 +54,7 @@ void ping_task(){
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
+    fb_putChar(0, 0, 'T', 0xFF, 0x0);
     task_lock = 1;
     print_serial("Program Init\n");
     program_init();
@@ -65,6 +65,7 @@ void kernel_task(int argc, char **argv){
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
+    fb_print(0, 8, "Drives");
 
     drive_enumerate();
     vfs_init();
@@ -160,22 +161,28 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
+    fb_putChar(0, 0, 'C', 0xFF, 0x0);
     
     
 
     //tasking_setup_kernel_stack();
 
     PCI_init();
+    fb_putChar(0, 0, 'P', 0xFF, 0x0);
     
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
+    fb_putChar(0, 0, 'K', 0xFF, 0x0);
     timer_init(2);
+    fb_putChar(0, 0, 'T', 0xFF, 0x0);
 
     multitask_init();
+    fb_putChar(0, 0, 'M', 0xFF, 0x0);
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_start();
+    fb_putChar(0, 0, 'S', 0xFF, 0x0);
 
     while(1){}
     return 1;
