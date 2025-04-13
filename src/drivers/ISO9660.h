@@ -11,7 +11,7 @@ struct DRIVE;
 
 #define ISO9660_SECTOR_SIZE_BYTES 512*4
 
-uint8_t ISO9660_sector_buffer[ISO9660_SECTOR_SIZE_BYTES];
+extern uint8_t ISO9660_sector_buffer[ISO9660_SECTOR_SIZE_BYTES];
 
 typedef struct { uint16_t le; }__attribute__((packed))          l9660_luint16;
 typedef struct { uint16_t be; }__attribute__((packed))          l9660_buint16;

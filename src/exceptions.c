@@ -3,7 +3,7 @@
 void exception_holding();
 
 struct cpu_state exception_divide_by_zero(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-	print_serial("Divide by zero from %s @ %x\n", tasks[task_running_idx].task_name, stack.eip);
+	print_serial("Divide by zero from %s @ 0x%x\n", tasks[task_running_idx].task_name, stack.eip);
 	print_console(tasks[task_running_idx].console, "Divide by zero, terminating.\n");
 	//print_stack_trace(cpu.ebx, 10);
 	stop_task(task_running_idx);

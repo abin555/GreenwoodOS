@@ -106,7 +106,7 @@ void window_copy_buffer(struct WINDOW *window){
 }
 
 void window_timer_callback(){
-
+	//print_serial("[WINDOW] Copy\n");
 	if(!windows[window_selected].copyOnPromptOnly && windows[window_selected].active){
 		window_copy_buffer(&windows[window_selected]);
 	}

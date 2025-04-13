@@ -10,9 +10,9 @@
 #include "multitasking.h"
 #include "program.h"
 
-uint32_t keyboard_buffer_size;
-uint8_t *keyboard_KEYBuffer;
-char *keyboard_ASCIIBuffer;
+extern uint32_t keyboard_buffer_size;
+extern uint8_t *keyboard_KEYBuffer;
+extern char *keyboard_ASCIIBuffer;
 
 typedef enum{
 	PS2_KBD = 1,
@@ -36,16 +36,16 @@ struct KBD_flags{
 	char key;
 };
 
-struct KBD_flags KBD_flags;
-
-uint32_t KBD_scancode_buffer_idx;
-uint32_t KBD_ascii_buffer_idx;
+extern struct KBD_flags KBD_flags;
+extern uint32_t KBD_scancode_buffer_idx;
+extern uint32_t KBD_ascii_buffer_idx;
+extern uint32_t KBD_last_key_idx;
 extern char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size);
 
 void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source);
-uint32_t KBD_last_key_idx;
+
 char kbd_getChar();
 char getc_blk();
 int getArrow();

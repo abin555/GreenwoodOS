@@ -379,11 +379,11 @@ typedef struct tagHBA_CMD_HEADER
 } HBA_CMD_HEADER;
 
 
-HBA_MEM *ABAR;
-HBA_PORT **Drive_PORTS;
-uint32_t driveNUM;
+extern HBA_MEM *ABAR;
+extern HBA_PORT **Drive_PORTS;
+extern uint32_t driveNUM;
 
-bool AHCI_int_trigger;
+extern bool AHCI_int_trigger;
 
 void initialize_AHCI(struct PCI_driver *driver);
 void addSATA_Drive(HBA_PORT *port, int portno);

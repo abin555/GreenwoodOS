@@ -7,8 +7,8 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -
 -device ide-hd,drive=disk3,bus=ahci.0,bootindex=2 \
 -device ide-hd,drive=disk,bus=ahci.1,bootindex=1 \
 -device ide-hd,drive=disk2,bus=ahci.2,bootindex=3 \
--audiodev pipewire,id=speaker -machine pcspk-audiodev=speaker \
--audio pipewire,model=ac97 \
+-audiodev pa,id=speaker -machine pcspk-audiodev=speaker \
+-audio pa,model=ac97 \
 -device qemu-xhci,id=xhci \
 -rtc base=localtime,clock=host \
 -enable-kvm \

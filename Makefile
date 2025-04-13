@@ -73,7 +73,7 @@ OBJECTS = \
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I./src/audio/ -I. -I./src/uACPI/include/ -masm=intel -g -c
-LDFLAGS = -T link.ld -melf_i386 --allow-multiple-definition
+LDFLAGS = -T link.ld
 AS = nasm
 ASFLAGS = -f elf -gdwarf
 
@@ -83,7 +83,7 @@ ZIGC_FLAGS = -target x86-freestanding -I ./include/
 all: build emulate
 
 kernel.elf: $(OBJECTS)
-	ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
+	i386-elf-ld $(LDFLAGS) $(OBJECTS) -o kernel.elf
 	cd ..	
 	objcopy --only-keep-debug kernel.elf kernel.sym
 	objcopy --strip-debug kernel.elf
