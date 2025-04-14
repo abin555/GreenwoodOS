@@ -47,7 +47,7 @@ higher_half:
 
 section .data
 KERNEL_VIRTUAL_BASE equ 0xC0000000                  ; 3GB
-KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; Page directory index of kernel's 4MB PTE.
+KERNEL_PAGE_NUMBER equ (KERNEL_VIRTUAL_BASE >> 22)  ; Page directory index of kernels 4MB PTE.
 
 align 0x1000
 
@@ -72,6 +72,7 @@ boot_page_directory:
 KERNEL_STACK_SIZE equ 0x400
 SECTION .bss
 align 4
+global kernel_stack
 kernel_stack:
 	resb KERNEL_STACK_SIZE
 

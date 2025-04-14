@@ -223,9 +223,8 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 void IDT_dump(){
 	print_serial("IDT Dump:\n");
 	for(uint16_t vector = 0; vector < INTERRUPT_DESCRIPTOR_COUNT; vector++){
-		if(idt_descriptors[vector].type_and_attr){
-			uint32_t addr = (uint32_t) (idt_descriptors[vector].offset_high << 16) | (idt_descriptors[vector].offset_low);
-			print_serial("(%x) at 0x%x\n", vector, addr);
+		if(interrupt_handlers[vector] != NULL){
+			print_serial("(%d) at 0x%x\n", vector, interrupt_handlers[vector]);
 		}
 	}
 }

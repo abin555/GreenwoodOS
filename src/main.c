@@ -121,7 +121,7 @@ void kernel_task(int argc, char **argv){
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
     audio_init();    
-    
+    IDT_dump();
     //netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
 
@@ -138,6 +138,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
         return 0xFF;
     }
     parse_multiboot2(magic_addr);
+    print_serial("[GDT] Setup Start\n");
     load_gdt();
     interrupts_install_idt();
     getCPUVendorString();
