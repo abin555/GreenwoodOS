@@ -187,7 +187,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     //start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     //multitask_start();
-    task_create(kernel_task, -1, 0, "Kernel");
+    task_create(kernel_task, -1, 0, "Kernel", 0xDEADBEEF, NULL);
     tasking_start();
     MEM_printRegions();
     IRQ_RES;

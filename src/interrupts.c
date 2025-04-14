@@ -162,6 +162,8 @@ struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
 
 struct processor_state *interrupt_handler(struct processor_state *state){
+	print_serial("[INT] %d from 0x%x with ebp 0x%x\n", state->intr, state->eip, state->ebp);
+	task_printState(state);
 	struct gwos_task *task = task_getCurrent();
 	if(task != NULL){
 		task_saveState(task, state);
@@ -169,7 +171,6 @@ struct processor_state *interrupt_handler(struct processor_state *state){
 	}
 
 
-	print_serial("[INT] %d from 0x%x with ebp 0x%x\n", state->intr, state->eip, state->ebp);
 
 	if(interrupt_handlers[state->intr] != NULL){
 		interrupt_handlers[state->intr](task);

@@ -51,7 +51,7 @@ void tasking_start(){
 	timer_attach(1, taskSchedule);
 }
 
-struct gwos_task *task_create(void *eip, int program_slot, uint8_t securityLevel, char *name){
+struct gwos_task *task_create(void *eip, int program_slot, uint8_t securityLevel, char *name, int argc, char *argv[]){
     struct gwos_task *new_task = NULL;
     struct gwos_task *parent_task = task_getCurrent();
     for(int i = 0; i < G_MAX_TASKS; i++){
@@ -109,18 +109,62 @@ struct gwos_task *task_create(void *eip, int program_slot, uint8_t securityLevel
 
 
     //new_task->state->eip = (uint32_t) eip;
-    task_initMemory(new_task);
-    task_resetState(new_task, eip, securityLevel);
-    //cpu_fxsave(new_task->fpu_state);
-    //TODO: Stack & State Management
+    new_task->interrupt_stack = task_memCreateStack(1);
+
+    if(new_task->security_level == 3){//Kernel
+        new_task->stack = task_memCreateStack(1);
+    }
+    else{
+        new_task->stack = task_memCreateStack(2);
+    }
+    uint32_t *kernelStack = new_task->interrupt_stack.end;
+    uint32_t code_segment = 0x08;
+
+    if(new_task->security_level == 0){
+        *(--kernelStack) = (uint32_t) task_endPen;
+    }
+    else{
+        *(--kernelStack) = 0x23;
+        *(--kernelStack) = (uint32_t) new_task->stack.end;
+        code_segment = 0x1B;
+    }
+    *(--kernelStack) = 0x0202;
+
+    *(--kernelStack) = code_segment;
+    *(--kernelStack) = (uint32_t) eip;
+    *(--kernelStack) = 0;
+    *(--kernelStack) = 0;
+
+    *(--kernelStack) = argc;
+    *(--kernelStack) = (uint32_t) argv;
+    *(--kernelStack) = 0;
+    *(--kernelStack) = 0;
+    *(--kernelStack) = (uint32_t) new_task->interrupt_stack.end-sizeof(struct processor_state);
+    *(--kernelStack) = 0;
+    *(--kernelStack) = 0;
+
+    uint32_t data_segment = new_task->security_level  == 3 ? 0x23 : 0x10;
+
+    *(--kernelStack) = data_segment;
+    *(--kernelStack) = data_segment;
+    *(--kernelStack) = data_segment;
+    *(--kernelStack) = data_segment;
+
+    new_task->state = (struct processor_state *) kernelStack;
+    task_printState(new_task->state);
+
 
     print_serial("[TASKING] Created New Task \"%s\" with pid %d using slot %d and security %d\n", new_task->name, new_task->id, new_task->program_slot, new_task->security_level);
     return new_task;
 }
 
-void task_initMemory(struct gwos_task *task){
-    task_memInitStacks(task);
+void task_endPen(){
+    print_serial("[TASKING] Task Ended Here!\n");
+    while(1){
+
+    }
 }
+
 
 void task_resetState(struct gwos_task *task, void *eip, uint8_t security){
     struct processor_state *state;
@@ -173,23 +217,6 @@ void task_restoreState(struct gwos_task *task){
     cpu_fxrstor(task->fpu_state);
 }
 
-void task_memInitStacks(struct gwos_task *task){
-    if(task->security_level != 3){//KERNEL
-        task->interrupt_stack = task_memCreateStack(2);
-    }
-    else{
-        task->interrupt_stack.start = 0;
-        task->interrupt_stack.end = 0;
-    }
-
-    if(task->security_level == 3){//Kernel
-        task->stack = task_memCreateStack(1);
-    }
-    else{
-        task->stack = task_memCreateStack(2);
-    }
-}
-
 struct gwos_stack task_memCreateStack(int npages){
     struct gwos_stack stack;
     uint32_t size = PAGE_SIZE * npages;
@@ -210,7 +237,8 @@ void task_saveState(struct gwos_task *task, struct processor_state *state){
 }
 
 void task_printState(struct processor_state *state){
-    print_serial("Processor State:\nGS: 0x%x\nFS: 0x%x\nES: 0x%x\nDS: 0x%x\nEAX: 0x%x\nEBX: 0x%x\nECX: 0x%x\nEDX: 0x%x\nEBP: 0x%x\nINTR: 0x%x\nEIP: 0x%x\n",
+    print_serial("Processor State @ 0x%x:\nGS: 0x%x\nFS: 0x%x\nES: 0x%x\nDS: 0x%x\nEAX: 0x%x\nEBX: 0x%x\nECX: 0x%x\nEDX: 0x%x\nEBP: 0x%x\nINTR: 0x%x\nEIP: 0x%x\n",
+        state,
         state->gs,
         state->fs,
         state->es,
@@ -219,6 +247,7 @@ void task_printState(struct processor_state *state){
         state->ebx,
         state->ecx,
         state->edx,
+        state->ebp,
         state->intr,
         state->eip
     );
