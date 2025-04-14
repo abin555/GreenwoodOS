@@ -1,23 +1,24 @@
 #include "system_calls.h"
+#include "tasking.h"
+#include "task.h"
 
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
 	interrupt_add_handle(0x80, syscall_callback);
 }
 
-struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void syscall_callback(void *t){
 	IRQ_OFF;
-	struct cpu_state cpu_state = cpu;
-	struct task_state *task = &tasks[task_running_idx];
+	struct gwos_task *task = t;
 	//save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
-	//print_serial("[SYSCALL] #%x\n", cpu.eax);
-	switch(cpu.eax){
+	//print_serial("[SYSCALL] #%x\n", task->state->eax);
+	switch(task->state->eax){
 		//Open Window
 		case 0x01:{
-			struct WINDOW *window = window_open((char *) cpu.ebx, cpu.ecx);
-			print_serial("Name address is: 0x%x\n", cpu.ebx);
-			cpu_state.eax = (uint32_t) window;
+			struct WINDOW *window = window_open((char *) task->state->ebx, task->state->ecx);
+			print_serial("Name address is: 0x%x\n", task->state->ebx);
+			task->state->eax = (uint32_t) window;
 			task->window = window;
 			task->own_window = true;
 			print_serial("[SYS] Open Window %s\n", window->name);
@@ -25,8 +26,8 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Close Window
 		case 0x02:{
-			print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) cpu.ebx)->name);
-			window_close((struct WINDOW *) cpu_state.ebx);
+			print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) task->state->ebx)->name);
+			window_close((struct WINDOW *) task->state->ebx);
 			task->window = NULL;
 			task->own_console = false;
 			break;
@@ -38,36 +39,36 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Put Char
 		case 0x04:{
-			//print_serial("[SYS] Put Character X: %x Y: %x %c %x\n", cpu.ebx, cpu.ecx, cpu.edx, cpu.edx);
-			buf_putChar(task->window->backbuffer, cpu.ebx, cpu.ecx, (char) cpu.edx, 0xFFFFFFFF, 0);
+			//print_serial("[SYS] Put Character X: %x Y: %x %c %x\n", task->state->ebx, task->state->ecx, task->state->edx, task->state->edx);
+			buf_putChar(task->window->backbuffer, task->state->ebx, task->state->ecx, (char) task->state->edx, 0xFFFFFFFF, 0);
 			break;
 		}
 		//Get Kbd Char
 		case 0x05:{
-			cpu_state.eax = (unsigned int) getc_blk;
+			task->state->eax = (unsigned int) getc_blk;
 			break;
 		}
 		//Execute Program
 		case 0x06:{
-			exec((char *)cpu.ebx, cpu.ecx, (char **) cpu.edx);
+			exec((char *)task->state->ebx, task->state->ecx, (char **) task->state->edx);
 			break;
 		}
 		//Set Scheduling Type
 		case 0x07:{
-			set_schedule(cpu.ebx);
+			set_schedule(task->state->ebx);
 			break;
 		}
 		//Print to console
 		case 0x08:{
 			if(task->console != NULL)
-				print_console(task->console, (char*) cpu.ebx);
+				print_console(task->console, (char*) task->state->ebx);
 			break;
 		}
 		//Open Console
 		case 0x09:{
 			if(task->window == NULL) break;
 			struct CONSOLE *console = console_open(task->window);
-			cpu_state.eax = (uint32_t) console;
+			task->state->eax = (uint32_t) console;
 			task->console = console;
 			task->own_console = true;
 			break;
@@ -82,13 +83,13 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Malloc
 		case 0x0B:{
-			cpu_state.eax = (uint32_t) malloc(cpu.ebx);
+			task->state->eax = (uint32_t) malloc(task->state->ebx);
 			break;
 		}
 		//Print to console w/t args=
 		case 0x0C:{
 			if(task->console != NULL)
-				print_console(task->console, (char*) cpu.ebx, cpu.ecx);
+				print_console(task->console, (char*) task->state->ebx, task->state->ecx);
 			break;
 		}
 		//File Open
@@ -113,15 +114,15 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Change Directory
 		case 0x12:{
-			char *change = (char *) cpu.ebx;
-			print_serial("Task %s Changing Directory to %s\n", task->task_name, change);
-			cpu_state.eax = vfs_chdir(&task->currentDirectory, change);
+			char *change = (char *) task->state->ebx;
+			print_serial("Task %s Changing Directory to %s\n", task->name, change);
+			task->state->eax = vfs_chdir(&task->currentDirectory, change);
 			break;
 		}
 		//Get Directory
 		case 0x13:{
 			//return currentDirectory string
-			cpu_state.eax = (uint32_t) task->currentDirectory.path;
+			task->state->eax = (uint32_t) task->currentDirectory.path;
 			break;
 		}
 		//List Directory
@@ -135,7 +136,7 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Print Serial
 		case 0x16:{
-			print_serial((char *) cpu.ebx);
+			print_serial((char *) task->state->ebx);
 			break;
 		}
 		//Get Raw Kernel Feature
@@ -145,53 +146,53 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		// EAX = Pointer
 		// EBX = Size
 		case 0x17:{
-			switch(cpu.ebx){
+			switch(task->state->ebx){
 				//Font Memory
 				case 0x01:{
-					cpu_state.eax = (uint32_t) FONT;
-					cpu_state.ebx = (uint32_t) sizeof(FONT);
+					task->state->eax = (uint32_t) FONT;
+					task->state->ebx = (uint32_t) sizeof(FONT);
 					break;
 				};
 				//Keyboard
 				case 0x02:{
-					cpu_state.eax = (uint32_t) keyboard_KEYBuffer;
-					cpu_state.ebx = (uint32_t) keyboard_buffer_size;
+					task->state->eax = (uint32_t) keyboard_KEYBuffer;
+					task->state->ebx = (uint32_t) keyboard_buffer_size;
 					break;
 				};
 				//Paging Memory
 				case 0x03:{
-					cpu_state.eax = (uint32_t) page_directory;
-					cpu_state.ebx = 0;
+					task->state->eax = (uint32_t) page_directory;
+					task->state->ebx = 0;
 					break;
 				};
 				//Task Table
 				case 0x04:{
-					cpu_state.eax = (uint32_t) &tasks;
-					cpu_state.ebx = sizeof(tasks);
+					task->state->eax = (uint32_t) &tasks;
+					task->state->ebx = sizeof(tasks);
 					break;
 				};
 				//Program Memory Base
 				case 0x05:{
-					cpu_state.eax = PROGRAM_VIRT_REGION_BASE;
-					cpu_state.ebx = PROGAM_MAX_SIZE;
+					task->state->eax = PROGRAM_VIRT_REGION_BASE;
+					task->state->ebx = PROGAM_MAX_SIZE;
 					break;
 				}
 				//Raw Framebuffer
 				case 0x06:{
-					cpu_state.eax = (uint32_t) fb_frontbuffer;
-					cpu_state.ebx = fb_width * fb_height * sizeof(uint32_t);
+					task->state->eax = (uint32_t) fb_frontbuffer;
+					task->state->ebx = fb_width * fb_height * sizeof(uint32_t);
 					break;
 				}
 				//Timer Function Buffer
 				case 0x07:{
-					cpu_state.eax = (uint32_t) &timer_attached_functions;
-					cpu_state.ebx = timer_attached_functions_num;
+					task->state->eax = (uint32_t) &timer_attached_functions;
+					task->state->ebx = timer_attached_functions_num;
 					break;
 				}
 				//Keyboard Pressed Buffer
 				case 0x08:{
-					cpu_state.eax = (uint32_t) &key_pressed_map;
-					cpu_state.ebx = sizeof(key_pressed_map);
+					task->state->eax = (uint32_t) &key_pressed_map;
+					task->state->ebx = sizeof(key_pressed_map);
 					break;
 				}
 			}
@@ -212,15 +213,15 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x1C:{
-			cpu_state.eax = getArrow();
+			task->state->eax = getArrow();
 			break;
 		}
 		case 0x1D:{
-			srand(cpu.ebx);
+			srand(task->state->ebx);
 			break;
 		}
 		case 0x1E:{
-			cpu_state.eax = rand();
+			task->state->eax = rand();
 			break;
 		}
 		case 0x1F:{
@@ -232,16 +233,16 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Request Memory Block, takes number of bytes, returns void pointer to region
 		case 0x20:{
-			int block = MEM_findRegionIdx(cpu.ebx);
-			uint32_t addr = MEM_reserveRegionBlock(block, cpu.ebx, 0, PROGRAM);
-			cpu_state.eax = addr;
+			int block = MEM_findRegionIdx(task->state->ebx);
+			uint32_t addr = MEM_reserveRegionBlock(block, task->state->ebx, 0, PROGRAM);
+			task->state->eax = addr;
 			//MEM_printRegions();
 			break;
 		}
 		//Add Keyboard Event Listener
 		case 0x21:{
-			print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu.ebx);
-			tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) cpu.ebx;
+			print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", task->state->ebx);
+			tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) task->state->ebx;
 			break;
 		}
 		//Extend Files
@@ -250,66 +251,66 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 		}
 		//Request Memory Block of size to be alloced to requested virtual memory region
 		case 0x23:{
-			int block = MEM_findRegionIdx(cpu.ebx);
-			MEM_reserveRegionBlock(block, cpu.ebx, cpu.ecx, PROGRAM);
+			int block = MEM_findRegionIdx(task->state->ebx);
+			MEM_reserveRegionBlock(block, task->state->ebx, task->state->ecx, PROGRAM);
 			//MEM_printRegions();
-			cpu_state.eax = cpu.ecx;
+			task->state->eax = task->state->ecx;
 			break;
 		}
 		//Add timer callback
 		case 0x24:{
-			timer_attach((int) cpu.ebx, (void *) cpu.ecx);
+			timer_attach((int) task->state->ebx, (void *) task->state->ecx);
 			break;
 		}
 		case 0x25:{
 			break;
 		}
 		case 0x26:{
-			start_task((void *) cpu.ebx, -1, 0, NULL, (char *) cpu.ecx);
+			start_task((void *) task->state->ebx, -1, 0, NULL, (char *) task->state->ecx);
 			break;
 		}
 		case 0x27:{
 			break;
 		}
 		case 0x28:{
-			cpu_state.eax = (uint32_t) &PCSpeaker_Handle;
-			print_serial("[SYSCALL] Program requested handle to PCspeaker - returned 0x%x\n", cpu_state.eax);
+			task->state->eax = (uint32_t) &PCSpeaker_Handle;
+			print_serial("[SYSCALL] Program requested handle to PCspeaker - returned 0x%x\n", task->state->eax);
 			break;
 		}
 		case 0x29:{
-			cpu_state.eax = (uint32_t) &timer_ticks;
-			print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", cpu_state.eax);
+			task->state->eax = (uint32_t) &timer_ticks;
+			print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", task->state->eax);
 			break;
 		}
 		case 0x2A:{
-			print_serial("[SYSCALL] Program requested mouse event handler @%x\n", cpu.ebx);
-			tasks[task_running_idx].mouse_event_handler = (void (*)(void)) cpu.ebx;
+			print_serial("[SYSCALL] Program requested mouse event handler @%x\n", task->state->ebx);
+			tasks[task_running_idx].mouse_event_handler = (void (*)(void)) task->state->ebx;
 			break;
 		}
 		case 0x2B:{
 			print_serial("[SYSCALL] Free Region\n");
-			MEM_freeRegionBlock(cpu.ebx, cpu.ecx);
+			MEM_freeRegionBlock(task->state->ebx, task->state->ecx);
 			//MEM_printRegions();
 			break;
 		}
 		case 0x2C:{
-			print_serial("[SYSCALL] Program requested program end event handler @%x\n", cpu.ebx);
-			tasks[task_running_idx].end_callback = (void (*)(void)) cpu.ebx;
+			print_serial("[SYSCALL] Program requested program end event handler @%x\n", task->state->ebx);
+			tasks[task_running_idx].end_callback = (void (*)(void)) task->state->ebx;
 			break;
 		}
 		case 0x2E:{
-			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu.ebx);
-			cpu_state.eax = (uint32_t) console;
+			struct CONSOLE *console = console_open_vp((struct Viewport *) task->state->ebx);
+			task->state->eax = (uint32_t) console;
 			task->console = console;
 			task->own_console = true;
 			break;
 		}
 		case 0x30:{
-			cpu_state.eax = (uint32_t) &vfs_taskListDirectory;
+			task->state->eax = (uint32_t) &vfs_taskListDirectory;
 			break;
 		}
 		case 0x32:{
-			task_lock = cpu.ebx & 1;
+			task_lock = task->state->ebx & 1;
 			//print_serial("[SYSCALL] Task Lock %d\n", task_lock);
 			break;
 		}
@@ -321,39 +322,39 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x35:{
-			cpu_state.eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu.ebx, (int) cpu.ecx));
+			//task->state->eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) task->state->ebx, (int) task->state->ecx));
 			break;
 		}
 		case 0x36:{
-			vfs_close(task_getSysFD(task, (int) cpu.ebx));
-			task_freeFD(task, (int) cpu.ebx);
+			//vfs_close(task_getSysFD(task, (int) task->state->ebx));
+			//task_freeFD(task, (int) task->state->ebx);
 			break;
 		}
 		case 0x37:{
-			cpu_state.eax = (unsigned int) vfs_read(task_getSysFD(task, (int) cpu.ebx), (void *) cpu.ecx, (int) cpu.edx);
+			//task->state->eax = (unsigned int) vfs_read(task_getSysFD(task, (int) task->state->ebx), (void *) task->state->ecx, (int) task->state->edx);
 			break;
 		}
 		case 0x38:{
-			cpu_state.eax = (unsigned int) vfs_write(task_getSysFD(task, (int) cpu.ebx), (void *) cpu.ecx, (int) cpu.edx);
+			//task->state->eax = (unsigned int) vfs_write(task_getSysFD(task, (int) task->state->ebx), (void *) task->state->ecx, (int) task->state->edx);
 			break;
 		}
 		case 0x39:{
-			cpu_state.eax = (unsigned int) vfs_seek(task_getSysFD(task, (int) cpu.ebx), cpu.ecx, (int) cpu.edx);
+			//task->state->eax = (unsigned int) vfs_seek(task_getSysFD(task, (int) task->state->ebx), task->state->ecx, (int) task->state->edx);
 			break;
 		}
 		case 0x3A:{
-			cpu_state.eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) cpu.ebx);
+			//task->state->eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) task->state->ebx);
 			break;
 		}
 		case 0x3B:{
-			cpu_state.eax = (unsigned int) task_dupFD(task, (int) cpu.ebx);
+			//task->state->eax = (unsigned int) task_dupFD(task, (int) task->state->ebx);
 			break;
 		}
 		case 0x3C:{
 			//print_serial("EIP: 0x%x\n", stack.eip);
 			//task->registers.eip = stack.eip;
 			print_serial("[SYSCALL] Fork\n");
-			cpu_state.eax = 0;//(unsigned int) fork();
+			task->state->eax = 0;//(unsigned int) fork();
 			break;
 		}
 		//Print to console
@@ -364,10 +365,10 @@ struct cpu_state syscall_callback(struct cpu_state cpu __attribute__((unused)), 
 			break;
 		}
 		case 0x3F:{
-			cpu_state.eax = (unsigned int) vfs_ftruncate(cpu.ebx, cpu.ecx);
+			//task->state->eax = (unsigned int) vfs_ftruncate(task->state->ebx, task->state->ecx);
 			break;
 		}
 	}
 	IRQ_RES;
-	return cpu_state;
+	return;
 }

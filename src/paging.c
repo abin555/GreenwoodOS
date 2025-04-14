@@ -1,7 +1,8 @@
 #include "paging.h"
 
 #include "console.h"
-#include "multitasking.h"
+#include "tasking.h"
+#include "task.h"
 
 uint32_t *page_directory;
 
@@ -26,21 +27,35 @@ void page_holding_pen(){
     }
 }
 
-struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void page_error(void *t){
+    struct gwos_task *task = t;
     register uint32_t eax asm("eax");
     asm("mov eax, cr2");
 
-    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name, task_running_idx);
+    if(task == NULL){
+        print_serial("ERROR: Page Fault prior to tasking init\nHalting!\n");
+        while(1){
+
+        }
+    }
+    //register uint32_t eax asm("eax");
+    //asm("mov eax, cr2");
+
+    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", 
+        task->state->eip, 
+        task->state->error, 
+        eax, 
+        task->name, 
+        task->id
+    );
     //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
-    print_stack_trace(cpu.ebp, 10);
+    print_stack_trace(task->state->ebp, 10);
     fb_print(0,0,"PAGE FAULT!");
     //asm("hlt");
     //stop_task(task_running_idx);
-    list_tasks();
-    override_state_return = true;
-    most_recent_int_stack_state.eip = (uint32_t) &page_holding_pen;
+    //list_tasks();
     print_serial("Returning Task\n");
-    return cpu;
+    return;
 }
 
 uint32_t get_physical(uint32_t address){

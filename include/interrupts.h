@@ -6,6 +6,8 @@
 #include "framebuffer.h"
 #include "serial.h"
 #include "processor_state.h"
+#include "tasking.h"
+
 
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
@@ -93,9 +95,9 @@ void irq_remap();
 void interrupts_init_desciptor(uint32_t index, void *address);
 void interrupts_install_idt();
 
-extern struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state, struct stack_state);
+extern void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct gwos_task *state);
 
-void interrupt_add_handle(uint8_t interrupt, void *handler);
+void interrupt_add_handle(uint8_t interrupt, void (*handler)(void *state));
 extern void load_idt(unsigned int idt_address);
 
 extern struct cpu_state most_recent_int_cpu_state;

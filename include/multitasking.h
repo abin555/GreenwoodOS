@@ -96,35 +96,4 @@ int task_fork(struct task_state *task);
 void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stack_state *stack);
 void tasking_setup_kernel_stack();
 
-struct gwos_task {
-    int id;
-    int program_slot;
-    uint8_t status;
-    char *name;
-
-    uint8_t security_level;
-    struct processor_state *state;
-
-    ScheduleType schedule_type;
-    struct WINDOW *window;
-    struct CONSOLE *console;
-    struct DIRECTORY currentDirectory;
-    void (*keyboard_event_handler)(char);
-    void (*mouse_event_handler)(void);
-    void (*end_callback)(void);
-    bool own_window;
-    bool own_console;
-    int file_descs[MT_maxDescriptors];
-    int num_used;
-
-
-    char fpu_state[512];
-};
-
-extern struct gwos_task gwos_tasks[MAX_TASKS];
-extern int gwos_current_task;
-
-struct gwos_task *task_getCurrent();
-void task_saveState(struct gwos_task *task, struct processor_state *state);
-
 #endif

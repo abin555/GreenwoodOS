@@ -10,6 +10,7 @@
 #include "ISO9660.h"
 #include "ext2.h"
 #include "console.h"
+#include "dir.h"
 
 #define DRIVE_NUM 20
 
@@ -38,10 +39,6 @@ struct DRIVE{
 	bool locked;
 	bool ready;
 	char identity;
-};
-
-struct DIRECTORY{
-	char path[100];
 };
 
 struct File_Info{

@@ -8,7 +8,6 @@
 #include "interrupts.h"
 #include "stacktrace.h"
 
-
 #define PAGE_SIZE 0x400000
 #define NUM_PAGES 0x100000000 / PAGE_SIZE
 
@@ -23,7 +22,7 @@ void page_init();
 struct cpu_state;
 struct stack_state;
 
-struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused)));
+void page_error(void *t);
 void create_page_entry(
 	uint32_t base_address, 
 	uint32_t target_address,

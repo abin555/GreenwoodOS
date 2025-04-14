@@ -42,11 +42,11 @@ struct RealTimeClock {
 
 extern struct RealTimeClock RTC;
 
-struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void timer_callback(void *t __attribute__((unused))){
 	pic_acknowledge(32);
 	timer_ticks++;
 	//fb_putChar(8, 8, 'T', 0xFF, 0x0);
-	//print_serial("[Timer] Tick\n");
+	print_serial("[Timer] Tick\n");
 	for(uint32_t i = 0; i < MAX_TIMER_FUNCS; i++){
 		if(timer_attached_functions[i].attached_function == NULL) continue;
 		if(timer_attached_functions[i].divisor == 0) continue;
@@ -55,7 +55,7 @@ struct cpu_state timer_callback(struct cpu_state cpu __attribute__((unused)), st
 		}
 	}
 	//fb_putChar(8, 8, '@', 0xFF, 0x0);
-	return cpu;
+	return;
 }
 
 void timer_attach(int divisor, void *callback){

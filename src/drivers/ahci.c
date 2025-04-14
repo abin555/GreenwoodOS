@@ -212,10 +212,10 @@ void rebase_PORT(HBA_PORT *port, int portno){
 	start_cmd(port);	// Start command engine
 }
 
-struct cpu_state AHCI_Interrupt_Handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+void AHCI_Interrupt_Handler(void *task __attribute__((unused))){
     AHCI_int_trigger = true;
 	print_serial("[AHCI Driver] AHCI Interrupt Called\n");
-	return cpu;
+	return;
 }
  
 bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf)

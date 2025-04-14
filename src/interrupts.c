@@ -1,16 +1,13 @@
 #include "interrupts.h"
-
+#include "tasking.h"
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
 
-unsigned int BUFFER_COUNT;
-struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state, struct stack_state);
+void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct gwos_task *state);
 
 unsigned int INT_currentInterrupt;
 
-extern uint32_t saved_stack_ebp;
-extern uint32_t saved_stack_esp;
 
 void pic_acknowledge(unsigned int interrupt){
 
@@ -79,8 +76,8 @@ void IRQ_clear_mask(unsigned char IRQline) {
     outb(port, value);     
 }
 
-void interrupt_add_handle(uint8_t interrupt, void* handler){
-	interrupt_handlers[interrupt] = handler;
+void interrupt_add_handle(uint8_t interrupt, void (*handler)(void *state)){
+	interrupt_handlers[interrupt] = (void (*)(struct gwos_task *)) handler;
 }
 
 void interrupts_init_descriptor(int index, void *address)
@@ -159,7 +156,6 @@ void interrupts_install_idt()
 }
 
 #include "console.h"
-#include "multitasking.h"
 struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
@@ -168,6 +164,10 @@ struct processor_state *interrupt_handler(struct processor_state *state){
 	struct gwos_task *task = task_getCurrent();
 	if(task != NULL){
 		task_saveState(task, state);
+	}
+
+	if(interrupt_handlers[state->intr] != NULL){
+		interrupt_handlers[state->intr](task);
 	}
 
 	/*
