@@ -7,6 +7,7 @@ OBJECTS = \
 		src/io.o \
 		src/cpu.o \
 		src/gdt.o \
+		src/descriptor_table.o \
 		src/paging_asm.o \
 		src/paging.o \
 		src/interrupts.o \

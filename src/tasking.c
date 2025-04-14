@@ -9,7 +9,10 @@
 #include "timer.h"
 
 struct gwos_task gwos_tasks[G_MAX_TASKS];
+struct gwos_task *current_task_ptr;
 int gwos_current_task;
+
+bool task_switching;
 
 int tasking_process_counter;
 int tasking_ready = 0;
@@ -32,6 +35,7 @@ void tasking_init(){
     
     tasking_process_counter = 0;
     scheduler_started = 0;
+    task_switching = false;
     print_serial("[TASK] Init Multitasking Complete\n");
 }
 
@@ -151,6 +155,7 @@ struct gwos_task *task_create(void *eip, int program_slot, uint8_t securityLevel
     *(--kernelStack) = data_segment;
 
     new_task->state = (struct processor_state *) kernelStack;
+    new_task->interrupt_stack_ptr = kernelStack;
     task_printState(new_task->state);
 
 
@@ -211,10 +216,10 @@ void task_restoreState(struct gwos_task *task){
 
         }
     }
-    print_serial("[TASK] Restoring State of task 0x%x, tss is at 0x%x to esp 0x%x\n", task, &tss, task->interrupt_stack.end);
+    //print_serial("[TASK] Restoring State of task 0x%x, tss is at 0x%x to esp 0x%x\n", task, &tss, task->interrupt_stack.end);
 
-    tss.esp0 = (uint32_t) task->interrupt_stack.end;
-    cpu_fxrstor(task->fpu_state);
+    //tss.esp0 = (uint32_t) task->interrupt_stack.end;
+    //cpu_fxrstor(task->fpu_state);
 }
 
 struct gwos_stack task_memCreateStack(int npages){
@@ -251,4 +256,35 @@ void task_printState(struct processor_state *state){
         state->intr,
         state->eip
     );
+}
+
+uint32_t task_switch(struct gwos_task* newTask)
+{
+    current_task_ptr = newTask;
+
+    tss_switch((uint32_t)current_task_ptr->interrupt_stack_ptr, current_task_ptr->state, current_task_ptr->ss); // esp0, esp, ss
+
+    #ifdef _TASKING_DIAGNOSIS_
+    textColor(TEXT);
+    printf("%u ", currentTask->pid);
+    textColor(TEXT);
+    #endif
+    /*
+    // Set TS
+    if (currentTask == FPUTask)
+    {
+        __asm__ volatile("clts"); // CLearTS: reset the TS bit (no. 3) in CR0 to disable #NM
+    }
+    else
+    {
+        uint32_t cr0;
+        __asm__("mov %%cr0, %0": "=r"(cr0)); // Read cr0
+        cr0 |= BIT(3); // Set the TS bit (no. 3) in CR0 to enable #NM (exception no. 7)
+        __asm__("mov %0, %%cr0":: "r"(cr0)); // Write cr0
+    }
+    */
+
+    task_switching = true;
+
+    return (current_task_ptr->state); // Return new task's esp
 }

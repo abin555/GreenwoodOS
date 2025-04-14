@@ -45,6 +45,11 @@ struct gwos_task {
     struct gwos_stack stack;
     struct gwos_stack interrupt_stack;
 
+    void *stack_ptr;
+    void *interrupt_stack_ptr;
+
+    uint32_t ss;
+
     char *fpu_state;
 };
 
