@@ -95,7 +95,7 @@ void irq_remap();
 void interrupts_init_desciptor(uint32_t index, void *address);
 void interrupts_install_idt();
 
-extern void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct gwos_task *state);
+extern void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(void *state);
 
 void interrupt_add_handle(uint8_t interrupt, void (*handler)(void *state));
 extern void load_idt(unsigned int idt_address);

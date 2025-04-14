@@ -234,7 +234,7 @@ void ps2_init(){
     for(int i = 0; i < 0xFFFFFFF; i++){}
     */
 
-    IRQ_RES;
+    //IRQ_RES;
     //print_serial("[PS2] Initialized\n");
 }
 
@@ -456,7 +456,7 @@ void ps2_mouse_handler(void *task __attribute__((unused))){
 }
 
 void ps2_mouse_init(int device){
-    IRQ_OFF;
+    //IRQ_OFF;
     print_serial("[PS2] Initializing Mouse on Dev %d\n", device);
  
     ps2_write_device(device, 0xF6);//Use default settings
@@ -470,5 +470,5 @@ void ps2_mouse_init(int device){
     interrupt_add_handle(44, &ps2_mouse_handler);
     IRQ_clear_mask(12);
     IRQ_clear_mask(2);
-    IRQ_RES;
+    //IRQ_RES;
 }

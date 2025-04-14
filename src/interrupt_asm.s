@@ -62,7 +62,6 @@ common_interrupt_handler:
 
 	;Call C function handler
 	call interrupt_handler
-
 	mov esp, eax
 
 	;restore registers

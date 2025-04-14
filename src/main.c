@@ -10,7 +10,7 @@
 #include "timer.h"
 #include "ps2.h"
 #include "keyboard.h"
-#include "multitasking.h"
+#include "tasking.h"
 #include "ahci.h"
 #include "drive.h"
 #include "program.h"
@@ -123,13 +123,14 @@ void kernel_task(int argc, char **argv){
     audio_init();    
     IDT_dump();
     //netproc_init();
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+    //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
 
     task_lock = 0;
     return;
 }
 
 int kmain(unsigned int magic, unsigned long magic_addr){
+    IRQ_OFF;
     init_serial();
     print_serial("\n\nGreenwood OS Boot Start!\n");
     if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
@@ -153,7 +154,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     alloc_init();
     
-    
+    /*
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
     }
@@ -162,6 +163,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
+    */
     fb_putChar(0, 0, 'C', 0xFF, 0x0);
     
     
@@ -177,12 +179,18 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     fb_putChar(0, 0, 'K', 0xFF, 0x0);
     timer_init(2);
     fb_putChar(0, 0, 'T', 0xFF, 0x0);
-
-    multitask_init();
+    
+    tasking_init();
+    
+    //multitask_init();
     fb_putChar(0, 0, 'M', 0xFF, 0x0);
 
-    start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
-    multitask_start();
+    //start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    //multitask_start();
+    task_create(kernel_task, -1, 0, "Kernel");
+    tasking_start();
+    MEM_printRegions();
+    IRQ_RES;
     fb_putChar(0, 0, 'S', 0xFF, 0x0);
 
     while(1){}

@@ -1,8 +1,6 @@
 ;GLOBAL DESCRIPTOR TABLE SETUP
 global load_gdt
 
-extern header_start
-
 ; GDT with a NULL Descriptor, a 32-Bit code Descriptor
 ; and a 32-bit Data Descriptor
 gdt_start:

@@ -1,10 +1,11 @@
 #include "interrupts.h"
 #include "tasking.h"
+#include "task.h"
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
 
-void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct gwos_task *state);
+void (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(void *state);
 
 unsigned int INT_currentInterrupt;
 
@@ -77,7 +78,7 @@ void IRQ_clear_mask(unsigned char IRQline) {
 }
 
 void interrupt_add_handle(uint8_t interrupt, void (*handler)(void *state)){
-	interrupt_handlers[interrupt] = (void (*)(struct gwos_task *)) handler;
+	interrupt_handlers[interrupt] = handler;
 }
 
 void interrupts_init_descriptor(int index, void *address)
@@ -152,7 +153,7 @@ void interrupts_install_idt()
 	print_serial("Loading IDT at 0x%x of size %x\n", idt.address, idt.size);
 	load_idt((uint32_t) &idt);
 
-	IRQ_RES;
+	//IRQ_RES;
 }
 
 #include "console.h"
@@ -164,47 +165,29 @@ struct processor_state *interrupt_handler(struct processor_state *state){
 	struct gwos_task *task = task_getCurrent();
 	if(task != NULL){
 		task_saveState(task, state);
+		print_serial("[INT] Saved State\n");
 	}
+
+
+	print_serial("[INT] %d from 0x%x with ebp 0x%x\n", state->intr, state->eip, state->ebp);
 
 	if(interrupt_handlers[state->intr] != NULL){
 		interrupt_handlers[state->intr](task);
 	}
 
-	/*
-	most_recent_int_cpu_state = cpu;
-	most_recent_int_stack_state = stack;
-	INT_currentInterrupt = interrupt;
-
-	#ifdef OS_DEBUG
-	print_serial("Interrupt %d\n", interrupt);
-	#endif
-	
-	if((uint32_t) interrupt_handlers[interrupt]){
-		cpu = interrupt_handlers[interrupt](cpu, stack);
-		
-		if(override_state_return == true){
-			*(struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int)) = most_recent_int_stack_state;
-			*(struct cpu_state *) saved_stack_esp = most_recent_int_cpu_state;
-			uint32_t *fix_the_dang_stack = (uint32_t *) cpu.esp;
-			fix_the_dang_stack[0] = interrupt;
-			fix_the_dang_stack[1] = stack.error_code;
-			fix_the_dang_stack[2] = stack.eip;
-			fix_the_dang_stack[3] = stack.cs;
-			fix_the_dang_stack[4] = stack.eflags;
-			override_state_return = false;
-			return;
-		}
-		
+	struct gwos_task *new_task = task_getCurrent();
+	print_serial("[INT] New Task is at 0x%x Old Task is at 0x%x\n", new_task, task);
+	if(new_task == NULL || new_task->state == NULL){
+		print_serial("[INT] [PANIC!] Attempted to switch to null task!\n");
+		while(1){}
 	}
-	else{
-		print_serial("[CPU INT] Uninitialized Interrupt %d from 0x%x\n", interrupt, stack.eip);
-		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
+	if(new_task != task){
+		print_serial("[INT] Restoring state of New Task\n");
+		//task_restoreState(new_task);
 	}
-	*/
-
-	print_serial("[INT] %d from 0x%x\n", state->intr, state->eip);
-
-	return state;
+	print_serial("new state at 0x%x old state at 0x%x\n", new_task->state, state);
+	task_printState(new_task->state);
+	return new_task->state;
 }
 
 void IDT_dump(){

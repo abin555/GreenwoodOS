@@ -15,9 +15,15 @@ typedef enum {
     G_NEVER = 4
 } GWOS_ScheduleType;
 
+struct gwos_stack {
+    void *start;
+    void *end;
+};
+
 struct gwos_task {
     int id;
     int program_slot;
+    uint8_t free;
     uint8_t status;
     char *name;
 
@@ -36,8 +42,10 @@ struct gwos_task {
     int file_descs[G_MT_maxDescriptors];
     int num_used;
 
+    struct gwos_stack stack;
+    struct gwos_stack interrupt_stack;
 
-    char fpu_state[512];
+    char *fpu_state;
 };
 
 #endif

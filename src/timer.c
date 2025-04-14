@@ -9,7 +9,7 @@ struct timer_function timer_attached_functions[MAX_TIMER_FUNCS];
 void timer_init(uint32_t frequency){
 	print_serial("[Timer] Starting Initialization\n");
     fb_putChar(8, 0, '1', 0xFF, 0x0);
-	IRQ_OFF;
+	//IRQ_OFF;
 	uint32_t divisor = 1193180 / frequency;
     uint8_t l = (uint8_t)(divisor & 0xFF);
     uint8_t h = (uint8_t)((divisor >> 8) & 0xFF);
@@ -26,7 +26,7 @@ void timer_init(uint32_t frequency){
 	//timer_attached_functions_num = 0xFF;
     print_serial("[Timer] Initialized at 0x%x hz\n", frequency);
 	fb_putChar(8, 0, '4', 0xFF, 0x0);
-	IRQ_RES;
+	//IRQ_RES;
 	fb_putChar(8, 0, '5', 0xFF, 0x0);
 }
 
@@ -46,7 +46,7 @@ void timer_callback(void *t __attribute__((unused))){
 	pic_acknowledge(32);
 	timer_ticks++;
 	//fb_putChar(8, 8, 'T', 0xFF, 0x0);
-	print_serial("[Timer] Tick\n");
+	//print_serial("[Timer] Tick\n");
 	for(uint32_t i = 0; i < MAX_TIMER_FUNCS; i++){
 		if(timer_attached_functions[i].attached_function == NULL) continue;
 		if(timer_attached_functions[i].divisor == 0) continue;
