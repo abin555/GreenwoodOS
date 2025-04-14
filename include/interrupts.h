@@ -5,6 +5,8 @@
 #include "io.h"
 #include "framebuffer.h"
 #include "serial.h"
+#include "processor_state.h"
+
 
 #define INTERRUPT_DESCRIPTOR_COUNT 256
 #define PIC_1_OFFSET 0x20
@@ -99,7 +101,7 @@ extern void load_idt(unsigned int idt_address);
 extern struct cpu_state most_recent_int_cpu_state;
 extern struct stack_state most_recent_int_stack_state;
 extern bool override_state_return;
-void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack);  //add the number of the interrupt as an argument.
+struct processor_state *interrupt_handler(struct processor_state *state);
 extern unsigned int INT_currentInterrupt;
 void IDT_dump();
 

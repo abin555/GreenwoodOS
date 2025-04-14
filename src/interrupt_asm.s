@@ -39,32 +39,45 @@ int_handler_%1:
 
 common_interrupt_handler:
 	;save registers
-	push esp
-	push ebp
 	push edi
 	push esi
+	push ebp
+	push ebx
 	push edx
 	push ecx
-	push ebx
 	push eax
 
-	stack_switch
+	push ds
+	push es
+	push fs
+	push gs
+
+	mov ax, 0x10
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov ss, ax
+
+	push esp
 
 	;Call C function handler
 	call interrupt_handler
 
-;	mov ebp, [saved_stack_ebp]
-;	mov esp, [saved_stack_esp]
+	mov esp, eax
 
 	;restore registers
+	pop gs
+	pop fs
+	pop es
+	pop ds
+
 	pop eax
-	pop ebx
 	pop ecx
 	pop edx
+	pop ebx
+	pop ebp
 	pop esi
 	pop edi
-	pop ebp
-	pop esp
 
 	;restore stack pointer
 	add esp, 8

@@ -2,10 +2,14 @@
 
 bool task_lock;
 int8_t task_running_idx;
+bool tasking_init = 0;
 void *task_stack_base;
 uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (8)));
 char task_fxsave_region[MAX_TASKS][512] __attribute__((aligned(16)));
 struct task_state tasks[MAX_TASKS];
+
+struct gwos_task gwos_tasks[MAX_TASKS];
+int gwos_current_task;
 
 extern uint32_t kernel_stack_base;
 
@@ -22,12 +26,15 @@ void multitask_init(){
     task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, 0, STACK));
     //tasks = (struct task_state *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(sizeof(struct task_state) * MAX_TASKS), sizeof(struct task_state) * MAX_TASKS, 0, KERNEL));
     memset(tasks, 0, sizeof(struct task_state) * MAX_TASKS);
+    memset(gwos_tasks, 0, sizeof(struct gwos_task) * MAX_TASKS);
     MEM_printRegions();
     print_serial("[TASK] Setting Stack! - 0x%x\n", (uint32_t *) task_stack_base);
     for(int i = 0; i < MAX_TASKS; i++){
         task_stack_array[i] = task_stack_base + (TASK_STACK_SIZE * i);
         cpu_fxsave(task_fxsave_region[i]);
+        cpu_fxsave(gwos_tasks[i].fpu_state);
     }
+    tasking_init = 1;
 }
 
 void multitask_start(){
@@ -279,6 +286,17 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
     most_recent_int_cpu_state.esi = new_task->registers.esi;
     most_recent_int_cpu_state.edi = new_task->registers.edi;
     most_recent_int_cpu_state.esp = new_task->registers.esp;
+}
+
+struct gwos_task *task_getCurrent(){
+    if(tasking_init == 0) return NULL;
+
+    return &gwos_tasks[gwos_current_task];
+}
+
+void task_saveState(struct gwos_task *task, struct processor_state *state){
+    task->state = state;
+    cpu_fxsave(task->fpu_state);
 }
 
 
