@@ -1,67 +1,31 @@
-;GLOBAL DESCRIPTOR TABLE SETUP
-global load_gdt
+section .text
 
-extern header_start
+; flush.asm -- contains global descriptor table and interrupt descriptor table setup code
 
-; GDT with a NULL Descriptor, a 32-Bit code Descriptor
-; and a 32-bit Data Descriptor
-gdt_start:
-gdt_null:
-    dw 0, 0, 0, 0
-gdt_kcode:
-    dw 0xffff, 0x0000, 0x9a00, 0x00cf
-gdt_kdata:
-    dw 0xffff, 0x0000, 0x9200, 0x00cf
-gdt_ucode:
-    dw 0xffff, 0x0000, 0xfa00, 0x00cf
-gdt_udata:
-    dw 0xffff, 0x0000, 0xf200, 0x00cf
-gdt_tss:
-    dw 0x0068, 0x0000, 0x8901, 0x00cf
-gdt_end:
+global gdt_flush      ; Allows the C code to call gdt_flush().
 
-; GDT descriptor record
-gdt_descriptor:
-    dw gdt_end - gdt_start - 1
-    dd gdt_start
+gdt_flush:
+    mov eax, [esp+4]  ; Get the pointer to the GDT, passed as a parameter.
+    lgdt [eax]        ; Load the new GDT register
 
-KERN_CODE_SEG equ gdt_kcode - gdt_start
-KERN_DATA_SEG equ gdt_kdata - gdt_start
-USER_CODE_SEG equ gdt_ucode - gdt_start
-USER_DATA_SEG equ gdt_udata - gdt_start
-TSS_SEG equ gdt_tss - gdt_start
-
-; Load GDT and set selectors for a flat memory model
-load_gdt:
-    mov eax, tss
-    mov word [gdt_tss + 2], ax
-    shr eax, 16
-    mov byte [gdt_tss + 4], al
-    mov byte [gdt_tss + 7], ah
-    lgdt [gdt_descriptor]
-    jmp KERN_CODE_SEG:normal_setds              ; Set CS selector with far JMP
-global normal_setds
-normal_setds:
-    mov eax, KERN_DATA_SEG                ; Set the Data selectors to defaults
-    mov ds, eax
-    mov es, eax
-    mov ss, eax
-    mov ax, TSS_SEG
-    ltr ax
-    mov eax, 0
-    mov fs, eax
-    mov gs, eax
+    mov ax, 0x10      ; 0x10 is the offset in the GDT to our data segment
+    mov ds, ax        ; Load all data segment selectors
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
+    mov ss, ax
+    jmp 0x08:.flush   ; 0x08 is the offset to our code segment: Far jump!
+.flush:
     ret
 
 
-align 16
-global tss
-tss:
-    dd 0
+global tss_flush    ; Allows our C code to call tss_flush().
 
-extern kernel_stack
-global interrupt_stack_pointer
-interrupt_stack_pointer:
-    dd kernel_stack
-    dd 2 * 8
-    times 22 dd 0
+tss_flush:
+   mov ax, 0x2B      ; Load the index of our TSS structure - The index is
+                     ; 0x28, as it is the 5th selector and each is 8 bytes
+                     ; long, but we set the bottom two bits (making 0x2B)
+                     ; so that it has an RPL of 3, not zero.
+   ltr ax            ; LTR loads the task register (TR) with a segment selector pointing to a Task State Segment (TSS).
+                     ; The addressed TSS is marked busy, but no hardware task switch occurs.
+   ret

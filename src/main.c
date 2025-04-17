@@ -3,6 +3,7 @@
 #include "serial.h"
 #include "paging.h"
 #include "interrupts.h"
+#include "descriptor_table.h"
 #include "grub.h"
 #include "memory.h"
 #include "allocator.h"
@@ -139,7 +140,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     parse_multiboot2(magic_addr);
     print_serial("[GDT] Setup Start\n");
-    load_gdt();
+    gdt_install();
     interrupts_install_idt();
     getCPUVendorString();
     enableSSE();

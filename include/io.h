@@ -20,8 +20,6 @@ static inline uint8_t inb(uint16_t port){
 void outportl(uint16_t port, uint32_t value);
 uint32_t inportl(uint16_t port);
 
-extern void load_gdt();
-
 static inline void outdw(uint16_t port, uint32_t data) {
 	__asm__ volatile("out dx,eax" : : "a"(data), "d"(port));
 }
