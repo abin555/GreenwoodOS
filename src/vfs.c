@@ -97,48 +97,6 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
         result.fs.fs = queried;
     }
     return result;
-    //print_serial("[VFS] Following link to %s\n", path);
-
-    //char *walker_start = path;
-    //char *walker_end = path;
-    /*
-    if(root->type == VFS_EXT2){
-        uint32_t inodeIdx = ext2_get_inodeIdx_from_path(result.interface->drive->format_info.ext2, path);
-        if(inodeIdx == 0){
-			//print_serial("[VFS] Inode is Zero???\n");
-			return result;
-		}
-        result.ext2_inode_idx = inodeIdx;
-        result.fs.ext2 = malloc(sizeof(struct EXT2_Inode));
-        *result.fs.ext2 = ext2_read_inode_data(result.interface->drive->format_info.ext2, inodeIdx);
-        result.isValid = 1;
-        return result;
-    }
-    else if(root->type == VFS_ISO9660){
-        struct File_Info *isoInfo = malloc(sizeof(struct File_Info));
-        if(isoInfo == NULL) return result;
-        *isoInfo = ISO9660_GetFile(result.interface->drive->format_info.ISO, path);
-        if(isoInfo->drive == NULL) return result;
-        result.fs.iso = isoInfo;
-        result.isValid = 1;
-        return result;
-    }
-    else if(root->type == VFS_SYS){
-        struct SysFS_Inode *sysinode = sysfs_find(root->fs.sysfs, path);
-        if(sysinode == NULL) return result;
-        result.fs.sysfs = sysinode;
-        result.isValid = 1;
-        return result;
-    }
-    else if(root->type == VFS_NET){
-        struct NetFS_Inode *netinode = netfs_find(root->fs.netfs, path);
-        if(netinode == NULL) return result;
-        result.fs.netfs = netinode;
-        result.isValid = 1;
-        return result;
-    }
-    return result;
-    */
 }
 
 int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
@@ -149,27 +107,29 @@ int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
 }
 
 int vfs_open(char *path, int flags){
-    print_serial("[VFS] Opening %s\n", path);
+    //print_serial("[VFS] Opening %s\n", path);
     if(path == NULL) return -1;
     char driveLetter = path[0];
     path += 2;
     struct VFS_Inode *root = vfs_findRoot(driveLetter);
     if(root->interface->drive != NULL){
-        print_serial("[VFS] Drive root: %c\n", root->interface->drive->identity);
+        //print_serial("[VFS] Drive root: %c\n", root->interface->drive->identity);
     }
     else{
-        print_serial("[VFS] Drive root: %c\n", root->interface->vfsLetter);
+        //print_serial("[VFS] Drive root: %c\n", root->interface->vfsLetter);
     }
     if(root == NULL){
-        print_serial("[VFS] Unable to find root: \"%s\"\n", path);
+        //print_serial("[VFS] Unable to find root: \"%s\"\n", path);
         goto fail;
     }
     struct VFS_Inode inode = vfs_followLink(root, path);
     inode.flags = flags;
     if(inode.isValid == 0){
+        /*
         if(inode.interface->drive != NULL){
             print_serial("[VFS] Unable to follow path \"%s\" from root %c\n", path, root->interface->drive->identity);
         }
+        */
         goto fail;
     }
     int fd = vfs_allocFileD();
@@ -185,7 +145,7 @@ int vfs_open(char *path, int flags){
     return fd;
 
     fail:;
-    print_serial("[VFS] Open Fail!\n");
+    //print_serial("[VFS] Open %s Fail!\n", path);
     return -1;
 }
 
@@ -327,7 +287,6 @@ int vfs_chdir(struct DIRECTORY *dir, char *path){
 			memset(dir->path, 0 , sizeof(dir->path));
 			memcpy(dir->path, path+1, path_size-1);
 			if(dir->path[path_size-2] != '/') dir->path[path_size-1] = '/';
-			print_serial("Path is now %s\n", dir->path);
 			return 0;
 		}
 		else{
@@ -335,13 +294,11 @@ int vfs_chdir(struct DIRECTORY *dir, char *path){
 		}
 	}
 	else{//Relative Directory
-		print_serial("[DRIVE] CD: Relative %s\n", path);
 		if(path[0] == '.' && path[1] == '.' && path[2] == '\0'){
 			int last_slash = 0;
 			for(int i = 0; dir->path[i] != 0 && i < (int) sizeof(dir->path); i++) last_slash++;
 			for(int i = last_slash-2; dir->path[i] != '/'; i--) last_slash = i;
 			dir->path[last_slash] = '\0';
-			print_serial("[DRIVE] CD: Relative backup %s %d\n", dir->path, last_slash);
 			return 0;
 		}
 	}

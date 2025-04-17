@@ -91,37 +91,28 @@ int main(int argc, char **argv){
 		return 1;
 	}
 	nreads = 0;
-	freopen("/-/dev/serial", "rw+", stdout);
 	FILE *gif_file = fopen(argv[1], "r");
 	if(gif_file == NULL) return 1;
 	fseek(gif_file, 0, SEEK_END);
 	int size = ftell(gif_file);
 	fseek(gif_file, 0, SEEK_SET);
-	puts("Open");
 	Ifile.rawfile = memory_requestRegion(size);
 	Ifile.headidx = 0;
-
-	printf("Reading\n");
 	
 	fread(Ifile.rawfile, size, 1, gif_file);
 	fclose(gif_file);
 
 	int gif_err = 0;
 	GifFileType *gif = DGifOpen(&Ifile, readgif, &gif_err);
-	printf("Err: %d\n", gif_err);
 	task_lock(1);
 	gif_err = DGifSlurp(gif);
 	task_lock(0);
-	printf("Err: %d - %d - %s\n", gif_err, gif->Error, GifErrorString(gif->Error));
-	printf("GIF Open, there are %d frames\n", gif->ImageCount);
 	memory_returnRegion(Ifile.rawfile, size);
 	
 	vp = vp_open(gif->SWidth, gif->SHeight, argv[1]);
 	viewbuf = malloc(gif->SWidth * gif->SHeight * 4);
 	vp_set_buffer(vp, viewbuf, gif->SWidth * gif->SHeight * 4);
 	vp_add_event_handler(vp, event_handler);
-
-	puts("VP Open\n");
 
 	int image_idx = 0;
 	running = 1;

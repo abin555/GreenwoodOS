@@ -234,11 +234,11 @@ int main(int argc, char **argv){
     printf("Unable to access clock!\nExiting\n");
     return 1;
   }
-  freopen("/-/dev/serial", "a+", stdout);
+  //freopen("/-/dev/serial", "a+", stdout);
 
   doom_set_malloc((doom_malloc_fn) malloc, (doom_free_fn) free);
   doom_set_exit(impl_exit);
-  doom_set_print((void (*)(const char *)) puts);
+  doom_set_print((void (*)(const char *)) printf);
   doom_set_getenv(getenv);
   doom_set_file_io(
     impl_fopen,

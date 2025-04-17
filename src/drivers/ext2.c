@@ -876,13 +876,13 @@ int ext2_write(void *f, void *buf, int nbytes){
 
 void *ext2_getInode(void *fs, char *path){
 	struct EXT2_FS *ext2 = fs;
-	print_serial("[EXT2] Looking for %s\n", path);
+	//print_serial("[EXT2] Looking for %s\n", path);
 	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
 	if(inodeIdx == 0){
 		//print_serial("[VFS] Inode is Zero???\n");
 		return NULL;
 	}
-	print_serial("[EXT2] Found at inode %d\n", inodeIdx);
+	//print_serial("[EXT2] Found at inode %d\n", inodeIdx);
 	//int ext2_inode_idx = inodeIdx;
 	struct EXT2_Inode *inode = malloc(sizeof(struct EXT2_Inode));
 	*inode = ext2_read_inode_data(ext2, inodeIdx);
