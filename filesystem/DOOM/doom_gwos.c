@@ -166,11 +166,11 @@ void impl_fclose(void *handle){
 }
 
 int impl_fread(void *handle, void *buf, int count){
-  return fread(buf, count, 1, (FILE *) handle);
+  return count * fread(buf, count, 1, (FILE *) handle);
 }
 
 int impl_fwrite(void *handle, const void *buf, int count){
-  return fwrite(buf, count, 1, (FILE *) handle);
+  return count * fwrite(buf, count, 1, (FILE *) handle);
 }
 
 int impl_fseek(void *handle, int offset, doom_seek_t origin){

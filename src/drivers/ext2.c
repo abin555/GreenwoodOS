@@ -615,7 +615,7 @@ int ext2_read(void *f, void *buf, int nbytes){
 	struct VFS_File *file = f;
     struct EXT2_FS *ext2 = file->inode.interface->drive->format_info.ext2;
     struct EXT2_Inode *inode = file->inode.fs.fs;
-    //print_serial("[VFS] [EXT2] Reading file\n");
+    //print_serial("[VFS] [EXT2] Reading file %d bytes from %d\n", nbytes, file->head);
     uint32_t block_idx = 0;
     uint32_t single_indirect_idx = 0;
     uint32_t double_indirect_idx = 0;
@@ -891,6 +891,7 @@ void *ext2_getInode(void *fs, char *path){
 
 int ext2_seek(void *f, int offset, int whence){
 	struct VFS_File *file_idx = f;
+	//print_serial("[EXT2] Seek %d to %d\n", whence, offset);
 	if(whence == 0){//SEEK_SET
         file_idx->head = offset;
     }
