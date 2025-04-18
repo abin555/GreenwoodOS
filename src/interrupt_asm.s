@@ -10,16 +10,6 @@ saved_stack_esp:
 
 extern kernel_stack_base
 
-%macro stack_switch 0
-	mov [saved_stack_ebp], ebp
-	mov [saved_stack_esp], esp
-;	mov ebp, [kernel_stack_base]
-;	add ebp, 0x80000-(1*4)
-;	mov esp, ebp
-;	sub esp, (2*4)
-
-%endmacro
-
 %macro no_err_int 1
 global int_handler_%1
 int_handler_%1:
@@ -48,13 +38,11 @@ common_interrupt_handler:
 	push ebx
 	push eax
 
-	stack_switch
+	mov [saved_stack_ebp], ebp
+	mov [saved_stack_esp], esp
 
 	;Call C function handler
 	call interrupt_handler
-
-;	mov ebp, [saved_stack_ebp]
-;	mov esp, [saved_stack_esp]
 
 	;restore registers
 	pop eax
