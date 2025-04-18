@@ -60,7 +60,7 @@ common_interrupt_handler:
 	;return the system
 	iret
 
-no_err_int 0
+err_int_handler 0 ; Divide by Zero
 no_err_int 1
 no_err_int 2
 no_err_int 3

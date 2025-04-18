@@ -32,6 +32,7 @@ higher_half:
 	mov dword [boot_page_directory], 0
 	invlpg [0]
 	mov esp, kernel_stack+KERNEL_STACK_SIZE
+	mov ebp, esp
 
 	add ebx, KERNEL_VIRTUAL_BASE
 
@@ -59,14 +60,7 @@ boot_page_directory:
 	dd 0x00000083
 	dd 0x00400083
 	dd 0x00800083
-	dd 0x00C00083
-	dd 0x01000083
-	dd 0x01400083
-	dd 0x01800083
-	dd 0x01C00083
-	dd 0x02000083
-	dd 0x02400083
-	times (1024 - KERNEL_PAGE_NUMBER - 10) dd 0
+	times (1024 - KERNEL_PAGE_NUMBER - 3) dd 0
 
 
 KERNEL_STACK_SIZE equ 0x400

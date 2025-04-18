@@ -77,3 +77,27 @@ void tss_switch(uint32_t esp0, uint32_t esp, uint32_t ss)
     tss.esp = esp;
     tss.ss = ss;
 }
+
+void tss_printState(){
+    print_serial(
+        "[TSS] Dump of TSS Structure\n"
+        "Prev TSS: 0x%x\n"
+        "    ESP0: 0x%x\n"
+        "     SS0: 0x%x\n"
+        "      ES: 0x%x\n"
+        "      CS: 0x%x\n"
+        "      SS: 0x%x\n"
+        "      DS: 0x%x\n"
+        "      FS: 0x%x\n"
+        "      GS: 0x%x\n",
+        tss.prev_tss,
+        tss.esp0,
+        tss.ss0,
+        tss.es,
+        tss.cs,
+        tss.ss,
+        tss.ds,
+        tss.fs,
+        tss.gs
+    );
+}

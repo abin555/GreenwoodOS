@@ -96,5 +96,6 @@ void gdt_flush(struct GDTptr*); // c.f. flush.asm
 void tss_write(int32_t num, uint16_t ss0, uint32_t esp0);
 void tss_flush(void); // c.f. flush.asm
 void tss_switch(uint32_t esp0, uint32_t esp, uint32_t ss); // Used by task_switch
+void tss_printState();
 
 #endif

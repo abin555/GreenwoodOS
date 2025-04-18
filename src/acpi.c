@@ -159,7 +159,7 @@ void acpi_parseMADT(){
             case 1://I/O APIC
             {
                 print_serial("Found I/O APIC #%d @ 0x%x\n", entry->IO_APIC.id, entry->IO_APIC.addr);
-                MEM_reserveRegion(entry->IO_APIC.addr, entry->IO_APIC.addr, SYSTEM);
+                //MEM_reserveRegion(entry->IO_APIC.addr, entry->IO_APIC.addr, SYSTEM);
                 break;
             }
             default:

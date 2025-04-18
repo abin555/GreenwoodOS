@@ -1,5 +1,5 @@
 #include "interrupts.h"
-
+#include "descriptor_table.h"
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
@@ -159,7 +159,6 @@ void interrupts_install_idt()
 }
 
 #include "console.h"
-#include "multitasking.h"
 struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
@@ -168,7 +167,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	most_recent_int_cpu_state = cpu;
 	most_recent_int_stack_state = stack;
 	INT_currentInterrupt = interrupt;
-
+	//tss_printState();
 	#ifdef OS_DEBUG
 	print_serial("Interrupt %d\n", interrupt);
 	#endif
@@ -195,7 +194,6 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	}
 	else{
 		print_serial("[CPU INT] Uninitialized Interrupt %d from 0x%x\n", interrupt, stack.eip);
-		print_console(tasks[task_running_idx].console, "[CPU INT] Uninitialized Interrupt %x\n", interrupt);
 	}
 }
 

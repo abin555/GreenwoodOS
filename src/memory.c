@@ -65,14 +65,14 @@ void MEM_freeRegion(uint32_t virtual){
 
 void MEM_populateRegions(){
 	print_serial("Loading Memory Map into Memory Region Table\n");
-	for(unsigned int i = 0; i < 10; i++){
+	for(unsigned int i = 0; i < 3; i++){
         MEMORY_REGIONS[i].exists = 1;
 		MEMORY_REGIONS[i].available = 0;
         MEMORY_REGIONS[i].type = KERNEL;
         MEMORY_REGIONS[i].physical_addr = i*0x400000;
         MEMORY_REGIONS[i].virtual_addr = get_virtual(MEMORY_REGIONS[i].physical_addr);
     }
-	for(unsigned int i = 10; i < 0x300; i++){
+	for(unsigned int i = 3; i < 0x300; i++){
 		MEMORY_REGIONS[i].exists = 1;
 		MEMORY_REGIONS[i].available = 1;
         MEMORY_REGIONS[i].type = AVAILABLE;

@@ -4,4 +4,4 @@ LIBS = ../OS/libc/libc.o
 PROG = wolf
 
 all:
-	i386-gwos-gcc $(FILES) -o $(PROG).elf
+	i386-gwos-gcc $(FILES) -g -o $(PROG).elf
