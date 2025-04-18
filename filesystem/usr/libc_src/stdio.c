@@ -27,6 +27,8 @@ void init_stdio(){
 int vfprintf(FILE *file, const char *fmt, va_list listpd){
 	char s[40];
 	int num;
+	float f;
+	double d;
 	char *s_arg;
 	char *b;
 	int ntok = 0;
@@ -55,6 +57,8 @@ int vfprintf(FILE *file, const char *fmt, va_list listpd){
 					num = va_arg(listpd, int);
 					b = itoa(num, s, 16);
 					ntok += fwrite(b, strlen(b)+1, 1, file);
+					break;
+				case 'F':
 					break;
 			}
 			fmt++;

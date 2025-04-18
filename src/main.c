@@ -102,7 +102,7 @@ void kernel_task(int argc, char **argv){
     //dhcp_init(ethernet_getDriver());
     //tcp_init();
 
-    //netfs_init();
+    netfs_init();
 
     audio_init();
 
@@ -148,7 +148,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-    //enable_apic();
+    enable_apic();
 
 	fb_init(GRUB_tagfb);
 
