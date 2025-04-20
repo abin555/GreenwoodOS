@@ -49,4 +49,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source);
 char kbd_getChar();
 char getc_blk();
 int getArrow();
+
+void *kbd_createCDEV();
+void *kbdTxt_createCDEV();
 #endif

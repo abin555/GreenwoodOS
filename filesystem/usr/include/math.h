@@ -45,6 +45,8 @@ extern int signgam;
 
 #define	MAXFLOAT	((float)3.40282346638528860e+38)
 
+#define M_PI 3.14159265f
+
 enum fdversion {fdlibm_ieee = -1, fdlibm_svid, fdlibm_xopen, fdlibm_posix};
 
 #define _LIB_VERSION_TYPE enum fdversion
@@ -214,5 +216,3 @@ extern double __kernel_sin __P((double,double,int));
 extern double __kernel_cos __P((double,double));
 extern double __kernel_tan __P((double,double,int));
 extern int    __kernel_rem_pio2 __P((double*,double*,int,int,int,const int*));
-
-#define M_PI 3.14159265f

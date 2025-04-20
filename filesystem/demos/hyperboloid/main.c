@@ -288,7 +288,7 @@ void handleMouseInteraction(FILE *mouseFile, struct Hyperboloid *h, struct Rende
 
 int main(int argc, char **argv){
     printf("Hyperboloid Renderer Test!\n");
-    struct Hyperboloid *h = init_hyperboloid(25, 1);
+    struct Hyperboloid *h = init_hyperboloid(50, 1);
     struct RenderContext *ctx = init_renderContext();
 
     FILE *mouseFile = fopen("/-/sys/mouse", "r");

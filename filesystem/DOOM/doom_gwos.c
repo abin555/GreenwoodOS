@@ -26,7 +26,7 @@ struct KeyData{
 struct KeyData keyData;
 
 char key_pressed_map_back[0xFF];
-char *key_pressed_map;
+char key_pressed_map[0xFF];
 
 int skips;
 void handle_key(){
@@ -227,13 +227,18 @@ void impl_exit(int code){
 }
 
 int main(int argc, char **argv){
-  struct FEATURE_INFO keypressed_feature = getKernelFeature(FEAT_KEYPRESSMAP);
-  key_pressed_map = keypressed_feature.addr;
   rtc_fd = open("/-/dev/RTC", O_READ);
   if(rtc_fd == -1){
     printf("Unable to access clock!\nExiting\n");
     return 1;
   }
+
+  FILE *kbd = fopen("/-/sys/kbd", "r");
+  if(kbd == NULL){
+    printf("Cannot access keyboard file!\n");
+    return 1;
+  }
+
   //freopen("/-/dev/serial", "a+", stdout);
 
   doom_set_malloc((doom_malloc_fn) malloc, (doom_free_fn) free);
@@ -269,6 +274,8 @@ int main(int argc, char **argv){
     task_lock(1);
     doom_update();
     task_lock(0);
+    fread(key_pressed_map, sizeof(key_pressed_map), 1, kbd);
+    fseek(kbd, 0, SEEK_SET);
     handle_key();
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
     vp_set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);

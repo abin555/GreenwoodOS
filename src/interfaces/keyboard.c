@@ -1,4 +1,6 @@
 #include "keyboard.h"
+#include "vfs.h"
+#include "sysfs.h"
 
 uint32_t keyboard_buffer_size;
 uint8_t *keyboard_KEYBuffer;
@@ -14,6 +16,7 @@ char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;
+	print_serial("[KBD] buffer size: %d @ 0x%x\n", keyboard_buffer_size, &keyboard_buffer_size);
 	keyboard_KEYBuffer = (uint8_t *) malloc(keyboard_buffer_size);
 	memset(keyboard_KEYBuffer, 0, keyboard_buffer_size);
 	keyboard_ASCIIBuffer = (char *) malloc(keyboard_buffer_size);
@@ -27,6 +30,7 @@ void kbd_init(uint32_t buffer_size){
 	KBD_flags.release = 0;
 	KBD_flags.backspace = 0;
 	KBD_flags.special = 0;
+	print_serial("[KBD] buffer size: %d\n", keyboard_buffer_size);
 }
 
 void kbd_callEventHandler(unsigned char ascii){
@@ -51,6 +55,7 @@ void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
 	char justRelease = 0;
 	char justSpecial = 0;
+	keyboard_buffer_size = 255;
 	if(source != PS2_KBD) return;
 	if(scancode){
 		if(kbd_US[scancode] != 0 && !KBD_flags.release && !KBD_flags.special){
@@ -118,7 +123,7 @@ void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD
 					break;
 				case 0x69:
 					if(KBD_flags.special){
-						print_serial("End!\n");
+						//print_serial("End!\n");
 						for(int i = 0; i < MAX_TASKS; i++){
 							if(tasks[i].window == &windows[window_selected]){
 								stop_task(i);
@@ -222,4 +227,54 @@ char getc_blk(){
 
 int getArrow(){
 	return KBD_flags.arrow;
+}
+
+void *kbd_createCDEV(){
+	print_serial("[KBD] Generating CDEV\n");
+	struct SysFS_Chardev *kbd_cdev = sysfs_createCharDevice(
+		(char *) &key_pressed_map,
+		sizeof(key_pressed_map),
+		CDEV_READ
+	);
+	return (void *) kbd_cdev;
+}
+
+int kbdTxt_read(void *dev, void *buf, int roffset, int nbytes, int *head){
+	struct SysFS_Chardev *kbddev = dev;
+	int n = snprintf(
+		kbddev->buf,
+		kbddev->buf_size,
+		"%d\n",
+		KBD_ascii_buffer_idx
+	);
+	for(uint32_t i = 0; i < keyboard_buffer_size && n < kbddev->buf_size-1; i++){
+		if(keyboard_ASCIIBuffer[i] != '\0'){
+			kbddev->buf[n++] = keyboard_ASCIIBuffer[i];
+		}
+	}
+	kbddev->buf[n] = '\0';
+	int step = roffset;
+	int i;
+	for(i = 0; i < nbytes && step < kbddev->buf_size && i < n; i++){
+		((char *) buf)[i] = kbddev->buf[step++];
+	}
+	*head += i;
+	return i;
+}
+
+void *kbdTxt_createCDEV(){
+	print_serial("[KBD] Generating Text CDEV\n");
+	struct SysFS_Chardev *kbd_cdev = sysfs_createCharDevice(
+		malloc(keyboard_buffer_size + 20),
+		keyboard_buffer_size + 20,
+		CDEV_READ
+	);
+	sysfs_setCallbacks(
+		kbd_cdev,
+		NULL,
+		NULL,
+		NULL,
+		kbdTxt_read
+	);
+	return (void *) kbd_cdev;
 }

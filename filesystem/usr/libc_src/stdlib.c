@@ -19,7 +19,7 @@ struct Heap heap;
 
 
 void init_stdlib(){
-    memory.region_size = 0x00400000*15;
+    memory.region_size = 0x00400000*4;
     memory.region_base = memory_requestRegion(memory.region_size);
     memory.region_head = memory.region_base;
     heap.head = memory.region_head;
