@@ -82,6 +82,7 @@ int main(int argc, char **argv){
             vp_copy(main_vp);
         }
         ticks++;
+        yield();
     }
     //fclose(serial);
 

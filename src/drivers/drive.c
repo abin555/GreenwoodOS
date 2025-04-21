@@ -8,6 +8,7 @@ void init_drive_system(){
 	print_serial("[DRIVE SYS] INIT\n");
 	drives = malloc(sizeof(struct DRIVE **) * DRIVE_NUM);
 	drive_sector_buf = malloc(512);
+	memset(drive_sector_buf, 0, 512);
 	drive_count = 0;
 }
 

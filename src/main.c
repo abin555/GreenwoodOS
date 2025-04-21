@@ -54,9 +54,7 @@ void ping_task(){
 }
 
 void kernel_task(int argc, char **argv){
-    fb_print(0,16, "  Inside Kernel Task");
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
-    fb_putChar(0, 0, 'T', 0xFF, 0x0);
     task_lock = 1;
     print_serial("Program Init\n");
     program_init();
@@ -67,7 +65,6 @@ void kernel_task(int argc, char **argv){
             PCI_drivers[i]->init_driver(PCI_drivers[i]);
         }
     }
-    fb_print(0, 8, "Drives");
 
     drive_enumerate();
     vfs_init();
@@ -99,7 +96,6 @@ void kernel_task(int argc, char **argv){
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
     udp_init();
-    ethernet_demo();
     dhcp_init(ethernet_getDriver());
     tcp_init();
 
@@ -165,30 +161,21 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
-    fb_putChar(0, 0, 'C', 0xFF, 0x0);
     
     
 
     //tasking_setup_kernel_stack();
 
     PCI_init();
-    fb_putChar(0, 0, 'P', 0xFF, 0x0);
     
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
-    fb_putChar(0, 0, 'K', 0xFF, 0x0);
     timer_init(2);
-    fb_putChar(0, 0, 'T', 0xFF, 0x0);
-    fb_print(0,16, "Starting Multitasking");
     multitask_init();
-    fb_putChar(0, 0, 'M', 0xFF, 0x0);
-    fb_print(0,16, " Started Multitasking");
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
-    fb_print(0,16, "   Added Kernel Task");
     multitask_start();
-    fb_putChar(0, 0, 'S', 0xFF, 0x0);
 
     while(1){}
     return 1;

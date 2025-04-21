@@ -151,7 +151,6 @@ int ext2_check_format(struct DRIVE *drive){
 	print_serial("[EXT2] Checking format on drive %c\n", drive->identity);
 	if(drive == NULL){
 		print_serial("[EXT2] Invalid Drive\n");
-		while(1){}
 		return 0;
 	}
 	int err = drive_read(drive, drive_sector_buf, 2, 1);

@@ -3,8 +3,7 @@
 #include <stdarg.h>
 #define PORT 0x3f8
 #include "framebuffer.h"
-#define OS_DEBUG
-
+//#define OS_DEBUG
 
 int ser_printDecimal(int data){
     int idx = 0;
