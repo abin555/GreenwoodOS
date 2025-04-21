@@ -38,6 +38,7 @@ struct SysFS_Inode *sysfs_mkdir(char *dirname){
     struct SysFS_Inode *sysfs = malloc(sizeof(struct SysFS_Inode));
     if(sysfs == NULL) return NULL;
     sysfs->type = SysFS_Directory;
+    memset(sysfs->name, 0, sizeof(sysfs->name));
     memcpy(sysfs->name, dirname, strlen(dirname) < 20 ? strlen(dirname) : 19);
     sysfs->namelen = strlen(dirname) < 20 ? strlen(dirname) : 19;
     memset(
@@ -55,6 +56,7 @@ struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev){
     struct SysFS_Inode *sysfs = malloc(sizeof(struct SysFS_Inode));
     if(sysfs == NULL) return NULL;
     sysfs->type = SysFS_Chardev;
+    memset(sysfs->name, 0, sizeof(sysfs->name));
     memcpy(sysfs->name, name, strlen(name) < 20 ? strlen(name) : 19);
     sysfs->namelen = strlen(name) < 20 ? strlen(name) : 19;
     sysfs->data.chardev = cdev;

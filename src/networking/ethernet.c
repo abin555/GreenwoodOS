@@ -37,7 +37,7 @@ void ethernet_handler(struct cpu_state cpu __attribute__((unused)), struct stack
 }
 
 void ethernet_init(struct PCI_driver *pci){
-    struct ethernet_driver *driver;
+    struct ethernet_driver *driver = NULL;
     if(
         pci->device->vendorID == 0x8086 &&
         pci->device->deviceID == 0x100E

@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #define PORT 0x3f8
 #include "framebuffer.h"
+#define OS_DEBUG
+
 
 int ser_printDecimal(int data){
     int idx = 0;
@@ -161,7 +163,10 @@ void print_serial(char str[], ...){
     if(fb_frontbuffer != 0x0){
       fb_idxy++;
       if(fb_idxy > (int) fb_height / 8) fb_idxy = 0;
-      for(int j = 0; j < 0xFFFFF; j++){}
+      for(int j = 0; j < 0xFFFFFF; j++){}
+      for(uint32_t i = 0; i < fb_width / 8; i++){
+        fb_putChar(i*8, fb_idxy*8, '-', 0xFF0000, 0x0);
+      }
     }
     #endif
 }

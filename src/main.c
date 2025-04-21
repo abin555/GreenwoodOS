@@ -54,6 +54,7 @@ void ping_task(){
 }
 
 void kernel_task(int argc, char **argv){
+    fb_print(0,16, "  Inside Kernel Task");
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     fb_putChar(0, 0, 'T', 0xFF, 0x0);
     task_lock = 1;
@@ -179,11 +180,13 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     fb_putChar(0, 0, 'K', 0xFF, 0x0);
     timer_init(2);
     fb_putChar(0, 0, 'T', 0xFF, 0x0);
-
+    fb_print(0,16, "Starting Multitasking");
     multitask_init();
     fb_putChar(0, 0, 'M', 0xFF, 0x0);
+    fb_print(0,16, " Started Multitasking");
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    fb_print(0,16, "   Added Kernel Task");
     multitask_start();
     fb_putChar(0, 0, 'S', 0xFF, 0x0);
 

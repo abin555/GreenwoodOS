@@ -117,6 +117,7 @@ static void dhcp_udp_listener(struct ethernet_driver *driver, void *data, size_t
 }
 
 void dhcp_init(struct ethernet_driver *driver) {
+    if(driver == NULL) return;
     print_serial("dhcp_init\n");
     udp_install_listener(68, dhcp_udp_listener);
     dhcp_send_discover(driver);

@@ -1,5 +1,5 @@
 #include "paging.h"
-
+#include "utils.h"
 #include "console.h"
 #include "multitasking.h"
 
@@ -34,6 +34,9 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
     print_stack_trace(cpu.ebp, 10);
     fb_print(0,0,"PAGE FAULT!");
+    char errbuff[50];
+    snprintf(errbuff, sizeof(errbuff), "0x%x\n\0", stack.eip);
+    fb_print(0,8,errbuff);
     //asm("hlt");
     //stop_task(task_running_idx);
     list_tasks();
