@@ -43,16 +43,6 @@
 #include "stddef.h"
 #include "monitors.h"
 
-void ping_task(){
-    while(1){
-        icmp_echoRequest(ethernet_getDriver(), (uint8_t[4]) {10,0,1,3}, 1, 2, 0, 0);
-        icmp_echoRequest(ethernet_getDriver(), (uint8_t[4]) {8,8,8,8}, 1, 2, 0, 0);
-        for(int i = 0; i < 10; i++){
-            wait(1000);
-        }
-    }
-}
-
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;

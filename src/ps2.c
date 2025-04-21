@@ -409,11 +409,8 @@ uint8_t mouse_byte[3];
 #define MOUSE_V_BIT  0x08
 
 void ps2_mouse_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
-    fb_putChar(fb_width - 16, fb_height - 8, 'M', 0xFFFFFF, 0x0);
     uint8_t status = ps2_read(MOUSE_STATUS);
-    //print_serial("[MOUSE] %d %x\n", mouse_cycle, status);
     if(mouse_cycle > 2) mouse_cycle = 0;
-    //print_serial("[MOUSE] %d %x\n", mouse_cycle, status);
 
 	while (status & MOUSE_BBIT) {
 		int8_t mouse_in = ps2_read(MOUSE_PORT);
