@@ -9,16 +9,12 @@ void fb_init(struct multiboot_tag_framebuffer* tagfb){
 	fb_width = tagfb->common.framebuffer_width;
 	fb_height = tagfb->common.framebuffer_height;
 
-    //print_serial("[Framebuffer] Initializing\n");
-    //print_serial("[Framebuffer] Width: %d Height %d\n", fb_width, fb_height);
-
-    //create_page_entry((uint32_t) fb_frontbuffer, (uint32_t) fb_frontbuffer, 0x93);
-    //create_page_entry((uint32_t) fb_frontbuffer+0x400000, (uint32_t) fb_frontbuffer+0x400000, 0x93);
+    print_serial("[Framebuffer] Initializing\n");
+    print_serial("[Framebuffer] Width: %d Height %d\n", fb_width, fb_height);
     MEM_reserveRegion((uint32_t) fb_frontbuffer, (uint32_t) fb_frontbuffer, FRAMEBUFFER);
     MEM_reserveRegion((uint32_t) fb_frontbuffer+0x400000, (uint32_t) fb_frontbuffer+0x400000, FRAMEBUFFER);
 
     print_serial("[Framebuffer] Initialized\n");
-    fb_putChar(0, 0, 'B', 0xFF, 0x0);
 }
 
 void fb_setPixel(uint32_t idx, uint32_t color){
