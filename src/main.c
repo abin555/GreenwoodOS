@@ -115,6 +115,11 @@ void kernel_task(int argc, char **argv){
     MEM_printRegions();
 
     task_lock = 0;
+    set_schedule(NEVER);
+    //task_yield();
+    while(1){
+        
+    }
     return;
 }
 

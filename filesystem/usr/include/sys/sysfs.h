@@ -50,29 +50,4 @@ struct SysFS_Meta {
     struct SysFS_Inode *root;
 };
 
-struct SysFS_Inode *sysfs_createRoot();
-int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child);
-struct SysFS_Inode *sysfs_mkdir(char *dirname);
-struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev);
-struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS perms);
-void sysfs_setCallbacks(struct SysFS_Chardev *cdev, 
-    void (*write_callback)(void *, int offset, int nbytes, int *head), 
-    void (*read_callback)(void *, int offset, int nbytes, int *head),
-    int (*write_specialized_callback)(void *cdev, void *buf, int woffset, int nbytes, int *head),
-    int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head)
-);
-void sysfs_debugTree(struct SysFS_Inode *fs, int depth);
-
-void *sysfs_find(void *r, char *path);
-
-struct VFS_File;
-int sysfs_read(void *f, void *buf, int nbytes);
-int sysfs_write(void *f, void *buf, int nbytes);
-int sysfs_seek(void *f, int offset, int whence);
-
-struct DirectoryListing sysfs_advListDirectory(void *fs, char *path);
-
-void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter);
-struct SysFS_Inode *sysfs_createMetaFile(struct SysFS_Inode *root);
-
 #endif

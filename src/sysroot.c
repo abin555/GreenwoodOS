@@ -66,6 +66,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, font);
     sysfs_addChild(root, devs);
     sysfs_addChild(root, systems);
+    sysfs_addChild(root, sysfs_createMetaFile(root));
 
     return root;
 }

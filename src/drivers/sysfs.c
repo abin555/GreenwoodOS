@@ -4,6 +4,7 @@
 #include "memory.h"
 #include "utils.h"
 #include "vfs.h"
+#include "multitasking.h"
 
 struct SysFS_Inode *sysfs_createRoot(){
     struct SysFS_Inode *sysfs = malloc(sizeof(struct SysFS_Inode));
@@ -69,6 +70,8 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     //if(buf == NULL) return NULL;
     struct SysFS_Chardev *cdev = malloc(sizeof(struct SysFS_Chardev));
     if(cdev == NULL) return NULL;
+    cdev->owner_pid = task_running_idx;
+    print_serial("[SYSFS] Creating Character Device with owner %d slot %d\n", cdev->owner_pid, tasks[cdev->owner_pid].program_slot);
     cdev->buf = buf;
     cdev->buf_size = buf_size;
     cdev->perms = perms;
@@ -134,6 +137,10 @@ int sysfs_read(void *f, void *buf, int nbytes){
         return 0;
     }
     
+    if(tasks[cdev->owner_pid].program_slot != -1){
+        select_program(tasks[cdev->owner_pid].program_slot);
+    }
+    
     int i = 0;
     if(cdev->read_specialized_callback == NULL){
         //print_serial("[SYSFS] Normal Callback!\n");
@@ -147,6 +154,11 @@ int sysfs_read(void *f, void *buf, int nbytes){
     if(cdev->read_callback != NULL){
         cdev->read_callback(cdev, file->head-i, i, &file->head);
     }
+
+    if(tasks[task_running_idx].program_slot != -1 && tasks[cdev->owner_pid].program_slot != -1){
+        select_program(tasks[task_running_idx].program_slot);
+    }
+
     return i;
 }
 
@@ -167,6 +179,10 @@ int sysfs_write(void *f, void *buf, int nbytes){
     };
     int i = 0;
 
+    if(tasks[cdev->owner_pid].program_slot != -1){
+        select_program(tasks[cdev->owner_pid].program_slot);
+    }
+
     if(cdev->write_specialized_callback == NULL){
         for(; i < nbytes && file->head < cdev->buf_size; i++){
             cdev->buf[file->head++] = ((char *)buf)[i];
@@ -178,6 +194,11 @@ int sysfs_write(void *f, void *buf, int nbytes){
     if(cdev->write_callback != NULL){
         cdev->write_callback(cdev, file->head-i, i, &file->head);
     }
+
+    if(tasks[task_running_idx].program_slot != -1 && tasks[cdev->owner_pid].program_slot != -1){
+        select_program(tasks[task_running_idx].program_slot);
+    }
+
     return i;
 }
 
@@ -311,4 +332,33 @@ void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
 	interface->fs_listDirectory = sysfs_advListDirectory;
 	interface->fs_truncate = NULL;
 	return interface;
+}
+
+struct SysFS_Meta sysfs_createMeta(struct SysFS_Inode *root){
+    struct SysFS_Meta meta;
+    meta = (struct SysFS_Meta) {
+        sysfs_mkdir,
+        sysfs_mkcdev,
+        sysfs_createCharDevice,
+        sysfs_addChild,
+        sysfs_setCallbacks,
+        root
+    };
+    return meta;
+}
+
+struct SysFS_Inode *sysfs_createMetaFile(struct SysFS_Inode *root){
+    struct SysFS_Meta *meta = malloc(sizeof(struct SysFS_Meta));
+    *meta = sysfs_createMeta(root);
+    
+    struct SysFS_Chardev *meta_cdev = sysfs_createCharDevice(
+        (char *) meta,
+        sizeof(struct SysFS_Meta),
+        CDEV_READ
+    );
+    struct SysFS_Inode *meta_inode = sysfs_mkcdev(
+        "fsCTRL",
+        meta_cdev
+    );
+    return meta_inode;
 }
