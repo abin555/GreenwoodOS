@@ -36,9 +36,9 @@ void *realloc(void *ptr, size_t size){
 }
 
 
-int strncmp(const char *s1, const char *s2, register size_t n)
+int strncmp(const char *s1, const char *s2, size_t n)
 {
-  register unsigned char u1, u2;
+  unsigned char u1, u2;
 
   while (n-- > 0)
     {

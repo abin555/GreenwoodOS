@@ -234,7 +234,7 @@ void ps2_init(){
     for(int i = 0; i < 0xFFFFFFF; i++){}
     */
 
-    IRQ_RES;
+    //IRQ_RES;
     //print_serial("[PS2] Initialized\n");
 }
 
@@ -467,5 +467,5 @@ void ps2_mouse_init(int device){
     interrupt_add_handle(44, &ps2_mouse_handler);
     IRQ_clear_mask(12);
     IRQ_clear_mask(2);
-    IRQ_RES;
+    //IRQ_RES;
 }

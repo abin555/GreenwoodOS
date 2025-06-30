@@ -20,6 +20,7 @@ struct Window {
     int width;
     int height;
     uint32_t bufSize;
+    int shouldClose;
 };
 
 struct Object;

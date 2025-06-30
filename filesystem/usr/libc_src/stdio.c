@@ -99,6 +99,7 @@ FILE *fopen(const char *pathname, const char *mode){
 	if(i == MAX_FILE_LISTING) return NULL;
 	int fd = open((char *) pathname, O_READ | O_WRITE);
 	if(fd == -1){
+		printf("fopen fail\n");
 		return NULL;
 	}
 	fileListing[i] = internal_createFileFD(fd);
@@ -147,7 +148,7 @@ size_t fread(void *ptr, size_t size, size_t n, FILE *stream){
 	int n_read = 0;
 	for(int i = 0; i < n; i++){
 		if(stream->file_type == FILE_fd){
-			read(stream->fd, (void *) ptr, size);
+			read(stream->fd, (void *) (ptr+n_read*size), size);
 			n_read++;
 		}
 		else{

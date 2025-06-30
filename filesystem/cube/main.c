@@ -1,4 +1,8 @@
-#include "libc.h"
+#include <sys/vp.h>
+#include <sys/task.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
 #define PI 3.1415
 #define PI2 6.283
@@ -34,8 +38,6 @@ float cube3d[8][3] = {
 };
 unsigned char cube2d[8][2];
 
-
-void memset(void *mem, char v, int size);
 void drawLine(int x1, int y1, int x2, int y2, uint32_t color);
 float sin(float x);
 float cos(float x);
@@ -51,14 +53,12 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 int running;
 
 int main(int argc, char **argv){
-  print("Opening Math Renderer\n");
-  uint32_t *ticks = getTimerTickHandle();
-  vp_funcs = viewport_get_funcs();
-  cube_buf = (uint32_t *) 0x6000;
+  printf("Opening Math Renderer\n");
+  cube_buf = (uint32_t *) malloc(BUF_SIZE);
 
-  cube_vp = vp_funcs->open(WIDTH, HEIGHT, "Cube");
-  vp_funcs->add_event_handler(cube_vp, event_handler);
-  vp_funcs->set_buffer(cube_vp, cube_buf, BUF_SIZE);
+  cube_vp = vp_open(WIDTH, HEIGHT, "Cube");
+  vp_add_event_handler(cube_vp, event_handler);
+  vp_set_buffer(cube_vp, cube_buf, BUF_SIZE);
   
   set_schedule(ALWAYS);
   srand(1234);
@@ -84,7 +84,7 @@ int main(int argc, char **argv){
           zrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
       case 1:
@@ -92,7 +92,7 @@ int main(int argc, char **argv){
           zrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
       case 2:
@@ -100,7 +100,7 @@ int main(int argc, char **argv){
           xrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
       case 3:
@@ -108,7 +108,7 @@ int main(int argc, char **argv){
           xrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
       case 4:
@@ -116,7 +116,7 @@ int main(int argc, char **argv){
           yrotate(-0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
       case 5:
@@ -124,16 +124,16 @@ int main(int argc, char **argv){
           yrotate(0.1);
           memset(cube_buf, 0, BUF_SIZE);
           printcube();
-          vp_funcs->copy(cube_vp);
+          vp_copy(cube_vp);
         }
         break;
     }
     
     
     //printcube();
-    vp_funcs->copy(cube_vp);
+    vp_copy(cube_vp);
   }
-  vp_funcs->close(cube_vp);
+  vp_close(cube_vp);
 }
 
 #define modd(x, y) ((x) - (int)((x) / (y)) * (y))
@@ -222,12 +222,6 @@ void drawLine(int x1, int y1, int x2, int y2, uint32_t color){
     if(e2 >= dy){err += dy; x1 += sx;}
     if(e2 <= dx){err += dx; y1 += sy;}
   }
-}
-
-void memset(void *mem, char v, int size){
-	for(int i = 0; i < size; i++){
-		((char *) mem)[i] = v;
-	}
 }
 
 void printcube() {

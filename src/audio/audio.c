@@ -4,6 +4,7 @@
 #include "serial.h"
 #include "timer.h"
 #include "ac97.h"
+#include "mic.h"
 
 int sound_volume;
 struct audio_driver *audio_drivers[4] = {NULL, NULL, NULL, NULL};
@@ -54,6 +55,8 @@ void audio_init(){
 
     sound_buffer_refilling_info = (struct sound_buffer_refilling_info_t *) malloc(sizeof(struct sound_buffer_refilling_info_t));
     pcm_data = (uint8_t *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(SIZE_OF_PCM_DATA_BUFFER), SIZE_OF_PCM_DATA_BUFFER, 0, OTHER));
+    ac97_start_microphone_listen(audio_drivers[0]);
+    microphone_init(audio_drivers[0]);
     //MEM_printRegions();
 }
 

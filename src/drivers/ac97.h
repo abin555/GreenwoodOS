@@ -36,7 +36,16 @@
 #define AC97_NABM_IO_GLOBAL_CONTROL 0x2C
 
 #define AC97_NABM_IO_PCM_INPUT_CONTROL 0x0B
-#define AC97_NABM_IO_MICROPHONE_INPUT_CONTROL 0x2B
+
+// Microphone Input DMA (Bus Master Registers)
+#define AC97_NABM_IO_MICROPHONE_INPUT_BUFFER_BASE_ADDRESS      0x20
+#define AC97_NABM_IO_MICROPHONE_INPUT_CURRENTLY_PROCESSED_ENTRY 0x24
+#define AC97_NABM_IO_MICROPHONE_INPUT_LAST_VALID_ENTRY         0x25
+#define AC97_NABM_IO_MICROPHONE_INPUT_STATUS                   0x26
+#define AC97_NABM_IO_MICROPHONE_INPUT_CURRENT_ENTRY_POSITION   0x28
+#define AC97_NABM_IO_MICROPHONE_INPUT_CONTROL                  0x2B
+#define AC97_NAM_IO_MIC_VOLUME 0x0E
+#define AC97_NAM_IO_MIC_SAMPLE_RATE 0x3C
 
 #define AC97_SPEAKER_OUTPUT 0
 #define AC97_HEADPHONE_OUTPUT 1
@@ -66,6 +75,8 @@ struct AC97_driver {
 
     void *private_page;
     uint32_t page_head;
+    struct ac97_buffer_entry *microphone_ptr;
+    void *mic_data_ptr;
 };
 
 struct audio_driver *ac97_init(struct PCI_driver *driver);
@@ -78,5 +89,5 @@ void ac97_set_sample_rate(struct audio_driver *audio, uint16_t sample_rate);
 void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate);
 uint32_t ac97_get_actual_stream_position(struct audio_driver *audio);
 void ac97_stop_sound(struct audio_driver *audio);
-
+void ac97_start_microphone_listen(struct audio_driver *audio);
 #endif

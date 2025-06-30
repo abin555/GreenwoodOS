@@ -11,7 +11,7 @@ int scan;
 
 void *alloc(int size);
 void memset(void *mem, char v, int size);
-void render_file();
+void render_file(char *buf, int line);
 void render_mode();
 
 char *mode_strs[] = {

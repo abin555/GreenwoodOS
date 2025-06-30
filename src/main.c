@@ -91,8 +91,6 @@ void kernel_task(int argc, char **argv){
 
     netfs_init();
 
-    audio_init();
-
     monitors_init();
 
 
@@ -162,12 +160,13 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     //tasking_setup_kernel_stack();
 
     PCI_init();
-    
+    IRQ_OFF;
     kbd_init(0xFF);
     mouse_init();
     ps2_init();
     timer_init(2);
     multitask_init();
+    IRQ_RES;
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
     multitask_start();

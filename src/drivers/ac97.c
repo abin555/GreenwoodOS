@@ -21,6 +21,7 @@ struct audio_driver *ac97_init(struct PCI_driver *driver){
 
 	audio->pci = driver;
 	audio->int_number = driver->interrupt;
+    print_serial("[AC97] Int #%d\n", audio->int_number);
 	audio->deviceType = AUDIO_AC97;
 
 	if(driver->BAR[0] & 0x1){
@@ -342,4 +343,90 @@ void ac97_stop_sound(struct audio_driver *audio) {
 
     //destroy task for looping
     timer_detach(task_ac97_play_buffer_in_loop);
+}
+
+
+#define NUM_MIC_BUFFERS 32
+#define MIC_BUFFER_SIZE 4096  // 4 KB
+
+
+/*
+void ac97_handle_microphone_buffer(struct audio_driver *audio) {
+    struct AC97_driver *ac97 = audio->device.ac97;
+    struct ac97_buffer_entry *bdl = ac97->microphone_ptr;
+
+    // Determine current buffer index
+    uint8_t current_index = inb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_CURRENTLY_PROCESSED_ENTRY);
+    uint8_t processed_index = (current_index == 0) ? (NUM_MIC_BUFFERS - 1) : (current_index - 1);
+    //print_serial("[AC97] Processed index is %d\n", processed_index);
+    // Get the physical address of the completed buffer
+    uint32_t buffer_phys_addr = bdl[processed_index].sample_memory;
+    uint32_t buffer_len = bdl[processed_index].number_of_samples; // Bit 0 reserved
+
+    // Convert physical to virtual if needed
+    //void *buffer_data = (void *)get_virtual(buffer_phys_addr);
+
+    // Example: copy to a ring buffer in RAM
+    //mic_ringbuffer_write(buffer_data, buffer_len);
+    //print_serial("[AC97] There are %d samples at 0x%x\n", buffer_len, buffer_phys_addr);
+
+
+    // Optionally: reset the buffer for reuse (optional depending on DMA config)
+    // memset(buffer_data, 0, buffer_len); // Optional
+}
+*/
+
+void ac97_poll_microphone_input() {
+    struct audio_driver *audio = audio_drivers[0];
+    if(audio == NULL || audio->deviceType != AUDIO_AC97) return;
+    uint8_t status = inb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_STATUS);
+
+    if (status & 0x02) {  // Bit 1: Buffer Completion
+        // Handle filled buffer
+        //ac97_handle_microphone_buffer(audio);
+        //print_serial("[AC97] Buffer Is Complete!\n");
+        //ac97_handle_microphone_buffer(audio);
+
+        // Clear the buffer completion interrupt bit
+        outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_STATUS, 0x02);
+    }
+
+    // You can also poll for other events if desired:
+    // - Bit 2: Last valid buffer
+    // - Bit 3: FIFO error
+}
+
+void ac97_start_microphone_listen(struct audio_driver *audio){
+    if(audio == NULL) return;
+    if(audio->deviceType != AUDIO_AC97) return;
+    struct AC97_driver *ac97 = audio->device.ac97;
+
+    outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_CONTROL, 0x2);
+    wait(10);
+
+    ac97->microphone_ptr = ac97->private_page + ac97->page_head;
+    ac97->page_head += sizeof(struct ac97_buffer_entry)*32;
+    ac97->mic_data_ptr = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(0x40000), 0x40000, 0, DRIVER));
+
+    for (int i = 0; i < NUM_MIC_BUFFERS; i++) {
+        ac97->microphone_ptr[i].sample_memory = get_physical((uint32_t)(ac97->mic_data_ptr + (i * MIC_BUFFER_SIZE)));
+        ac97->microphone_ptr[i].number_of_samples = MIC_BUFFER_SIZE;
+        ac97->microphone_ptr[i].interrupt_on_completion = 1;  // Generate interrupt on completion
+        print_serial("[AC97] Mic buf %d has %d samples at 0x%x\n", i, ac97->microphone_ptr[i].number_of_samples, ac97->microphone_ptr[i].sample_memory);
+    }
+
+    outportl(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_BUFFER_BASE_ADDRESS, get_physical((uint32_t) ac97->microphone_ptr));
+
+    outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_LAST_VALID_ENTRY, NUM_MIC_BUFFERS - 1); // 0-based
+
+    outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_STATUS, 0x1F);
+
+    outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_CONTROL, 0x1C); // IOCE | FEIE | RPBM
+
+    outb(audio->nabm_base + AC97_NABM_IO_MICROPHONE_INPUT_CONTROL, 0x01); // Run
+
+    outports(audio->nam_base + AC97_NAM_IO_MIC_VOLUME, 0x0000); // Unmute MIC
+    outports(audio->nam_base + AC97_NAM_IO_MIC_SAMPLE_RATE, 41000); // Optional
+
+    timer_attach(2, ac97_poll_microphone_input);
 }
