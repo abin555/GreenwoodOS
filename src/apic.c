@@ -107,9 +107,13 @@ void apic_startCores(){
    print_serial("BSP ID: %d, aprunning: %d\n", bspid, aprunning);
 
    create_page_entry(0x8000, 0x8000, 0x83);
+   int backBlock = MEM_findRegionIdx(0x4096);
+   uint32_t backupRegion = MEM_reserveRegionBlock(backBlock, 0x4096, 0, SYSTEM);
+   memcpy((void *) backupRegion, (void *) 0x8000, 4096);
    memcpy((void*)0x8000, &ap_trampoline, 4096);
 
    for(int i = 0; i < apic_coreInfo.numcores; i++){
+      print_serial("[APIC] %d cpus started\n", aprunning);
       uint32_t coreid = apic_coreInfo.ids[i];
       apic_stack_top = apic_coreInfo.stack_regions[i] + 0x7D00;
       print_serial("Starting Core: %d (#%d)\n", coreid, i);
@@ -137,7 +141,7 @@ void apic_startCores(){
       );
       print_serial("Wait 1\n");
       for(uint32_t wait = 0; wait < 0xFFFFF; wait++){
-         for(uint32_t wait2 = 0; wait2 < 0xFF; wait2++){
+         for(uint32_t wait2 = 0; wait2 < 0xFFF; wait2++){
          
          }
       }
@@ -149,7 +153,7 @@ void apic_startCores(){
          writeAPICRegister(0x300, (readAPICRegister(0x300) & 0xff0f800) | 0x000608);
       }
       print_serial("Wait 2\n");
-      for(uint32_t wait = 0; wait < 0xFFFF; wait++){
+      for(uint32_t wait = 0; wait < 0xFFFFF; wait++){
          for(uint32_t wait2 = 0; wait2 < 0xFF; wait2++){
          
          }
@@ -162,4 +166,12 @@ void apic_startCores(){
       );
    }
    apic_bspdone = 1;
+
+   for(uint32_t wait = 0; wait < 0xFFFF; wait++){
+      for(uint32_t wait2 = 0; wait2 < 0x2FF; wait2++){
+      
+      }
+   }
+   memcpy((void *) 0x8000, (void *) backupRegion, 4096);
+   print_serial("[APIC] %d cpus started\n", aprunning);
 }

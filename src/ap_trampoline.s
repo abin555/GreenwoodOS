@@ -4,6 +4,7 @@ global ap_trampoline
 extern apic_bspdone
 extern aprunning
 extern apic_stack_top
+extern boot_page_directory_physical
 
 ap_trampoline:
     cli
@@ -41,6 +42,21 @@ _L8060:
     mov ax, 0x10
     mov ds, ax
     mov ss, ax
+    
+    mov al, 'A'
+    out 0xE9, al
+
+    mov ecx, boot_page_directory_physical 
+	mov cr3, ecx
+
+	;ENABLE PSE for 4MB Pages
+	mov ecx, cr4
+	or ecx, 0x00000010
+	mov cr4, ecx
+
+    mov ecx, cr0
+	or ecx, 0x80000000
+	mov cr0, ecx
 
     ; get our Local APIC ID
     mov eax, 1
@@ -50,17 +66,18 @@ _L8060:
 
     ; setup 32k stack for this core
     shl ebx, 15
-    mov esp, [apic_stack_top]
+    mov esp, apic_stack_top
     sub esp, ebx
 
     push edi
 
 .wait_bsp:
     pause
-    cmp byte [apic_bspdone], 0
-    je .wait_bsp
+    ;cmp byte [apic_bspdone], 0
+    ;je .wait_bsp
 
     lock inc byte [aprunning]
 
     ; jump into C code
+    mov edi, ebx
     jmp 0x08:ap_startup

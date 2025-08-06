@@ -146,6 +146,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     alloc_init();
     
+    /*
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
     }
@@ -154,6 +155,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     }
     acpi_initFADT();
     acpi_parseMADT();
+    */
     
     //apic_startCores();
 

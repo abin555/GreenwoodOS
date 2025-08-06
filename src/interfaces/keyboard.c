@@ -3,8 +3,8 @@
 #include "sysfs.h"
 
 uint32_t keyboard_buffer_size;
-uint8_t *keyboard_KEYBuffer;
-char *keyboard_ASCIIBuffer;
+uint8_t *keyboard_KEYBuffer = NULL;
+char *keyboard_ASCIIBuffer = NULL;
 
 struct KBD_flags KBD_flags;
 
@@ -16,11 +16,12 @@ char key_pressed_map[0xFF];
 
 void kbd_init(uint32_t buffer_size){
 	keyboard_buffer_size = buffer_size;
-	print_serial("[KBD] buffer size: %d @ 0x%x\n", keyboard_buffer_size, &keyboard_buffer_size);
 	keyboard_KEYBuffer = (uint8_t *) malloc(keyboard_buffer_size);
 	memset(keyboard_KEYBuffer, 0, keyboard_buffer_size);
 	keyboard_ASCIIBuffer = (char *) malloc(keyboard_buffer_size);
 	memset(keyboard_ASCIIBuffer, 0, keyboard_buffer_size);
+	print_serial("[KBD] buffer size: %d @ 0x%x 0x%x\n", keyboard_buffer_size, keyboard_ASCIIBuffer, keyboard_KEYBuffer);
+
 	KBD_scancode_buffer_idx = 0;
 	KBD_ascii_buffer_idx = 0;
 	KBD_last_key_idx = 0;
@@ -51,12 +52,18 @@ void kbd_callEventHandler(unsigned char ascii){
 	}
 }
 
-void __attribute__ ((optimize("-O2"))) kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
+void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	//print_serial("[Keyboard Driver] Keyboard recieved scancode %x from %x\n", scancode, source);
 	char justRelease = 0;
 	char justSpecial = 0;
 	keyboard_buffer_size = 255;
 	if(source != PS2_KBD) return;
+	if(keyboard_ASCIIBuffer == NULL || keyboard_KEYBuffer == NULL){
+		print_serial("%d - 0x%x 0x%x\n", keyboard_buffer_size, keyboard_ASCIIBuffer, keyboard_KEYBuffer);
+		keyboard_ASCIIBuffer = malloc(keyboard_buffer_size);
+		keyboard_KEYBuffer = malloc(keyboard_buffer_size);
+		return;
+	}
 	if(scancode){
 		if(kbd_US[scancode] != 0 && !KBD_flags.release && !KBD_flags.special){
 			if(KBD_flags.ctrl && !KBD_flags.shift){

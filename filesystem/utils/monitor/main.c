@@ -61,6 +61,7 @@ int main(int argc, char **argv){
             }
         }
     }
+    fheight++;
 
     struct Viewport *vp = vp_open(
         8*fwidth,
@@ -89,6 +90,7 @@ int main(int argc, char **argv){
                 }
             }
         }
+        fheight++;
 
         int x = 0;
         int y = 0;
