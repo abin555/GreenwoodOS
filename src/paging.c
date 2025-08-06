@@ -40,8 +40,16 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     //asm("hlt");
     //stop_task(task_running_idx);
     list_tasks();
-    override_state_return = true;
-    most_recent_int_stack_state.eip = (uint32_t) &page_holding_pen;
+    //override_state_return = true;
+    //most_recent_int_stack_state.eip = (uint32_t) &page_holding_pen;
+
+    tasks[task_running_idx].slot_active = 0;
+    tasks[task_running_idx].slot_running = 0;
+    switch_to_task(
+        (struct task_state*) &tasks[task_running_idx], (struct task_state*) &tasks[0], task_running_idx, 0
+    );
+    task_running_idx = 0;
+
     print_serial("Returning Task\n");
     return cpu;
 }

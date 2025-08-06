@@ -118,7 +118,7 @@ void netfs_init(){
     sysfs_addChild(sysfs, netdir);
     sysfs_addChild(netdir, netfs_http());
     sysfs_addChild(netdir, netfs_conn());
-    //sysfs_addChild(netdir, netfs_icmp());
+    sysfs_addChild(netdir, netfs_icmp());
 }
 
 

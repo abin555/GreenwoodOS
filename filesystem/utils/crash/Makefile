@@ -1,5 +1,5 @@
 CC = i386-gwos-gcc
-PROG = setbg
+PROG = crash
 
 SRCS += main.o
 

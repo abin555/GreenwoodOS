@@ -11,7 +11,7 @@ LIBC_SRCS := $(patsubst %.c,%.o,$(LIBC_FILES))
 output_libc := libc
 
 %.o : %.c
-	$(CC) $(INCLUDE_PATH) -c $(CFLAGS) $< -o $@
+	$(CC) $(INCLUDE_PATH) -g -c $(CFLAGS) $< -o $@
 %.o : *.s
 	$(AS) $< -o $@
 

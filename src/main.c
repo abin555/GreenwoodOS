@@ -108,8 +108,9 @@ void kernel_task(int argc, char **argv){
 
     audio_init();    
     IDT_dump();
-    //netproc_init();
+    netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+    //exec("/A/wolf/wolf.elf", 0, NULL);
     MEM_printRegions();
 
     task_lock = 0;
@@ -144,7 +145,6 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 	fb_init(GRUB_tagfb);
 
     alloc_init();
-    
     
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);

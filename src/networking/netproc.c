@@ -79,22 +79,28 @@ void netprocess_yield(){
 	asm("int 0x80");
 }
 
+#define PRINT(...) \
+print_serial(__VA_ARGS__); \
+print_console(con, __VA_ARGS__);
+
 int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     print_serial("[NETPROC] Starting Process\n");
     set_schedule(ALWAYS);
+    struct WINDOW *win = window_open("NETPROC", 1);
+    struct CONSOLE *con = console_open(win);
 
     while(1){
         if(!netproc_queue_needs_attention && !netproc_pend_needs_attention){
             netprocess_yield();
         }
         if(netproc_queue_needs_attention){
-            print_serial("[NETPROC] Addressing Queue\n");
+            PRINT("[NETPROC] Addressing Queue\n");
             for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
                 struct netproc_req_entry *req = &netproc_queue.entries[i];
                 if(req->pending && !req->free){
                     switch(req->request.type){
                         case NETPROC_ICMP_ECHO_REQUEST:
-                            print_serial("[NETPROC] Addressing ICMP Request\n");
+                            PRINT("[NETPROC] Addressing ICMP Request\n");
                             netproc_addToPending(req->pid, req->request);
                             icmp_echoRequest(
                                 ethernet_getDriver(),
@@ -103,13 +109,14 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
                             );
                             break;
                     }
+                    req->pending = 0;
                 }
             }
             netproc_queue_needs_attention = 0;
         }
 
         if(netproc_pend_needs_attention){
-            print_serial("[NETPROC] Addressing Pending\n");
+            PRINT("[NETPROC] Addressing Pending\n");
             
             task_lock = 1;
             for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
@@ -118,28 +125,34 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
                 if(!pend->has_reply) continue;
 
                 if(pend->request.type == NETPROC_ICMP_ECHO_REQUEST){
-                    print_serial("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
+                    PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
                     list_tasks();
-                    int current_task_id = task_running_idx;
-                    task_running_idx = pend->pid;
-                    int slot = task_get_slot(task_running_idx);
-                    print_serial("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
-                    if(tasks[task_running_idx].program_slot != -1){
-                        print_serial("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
-                        select_program(slot);
-                    }
+                    if(tasks[pend->pid].slot_active){
+                        int current_task_id = task_running_idx;
+                        task_running_idx = pend->pid;
+                        int slot = task_get_slot(task_running_idx);
+                        PRINT("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
+                        if(tasks[task_running_idx].program_slot != -1){
+                            PRINT("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
+                            select_program(slot);
+                        }
 
-                    print_serial("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
-                    
-                    print_serial("[NETPROC] Processing ICMP Callback to 0x%x on PID %d\n", pend->request.request.icmp_echo_request.callback, task_running_idx);
-                    //viewport->event_handler(viewport, event);
-                    int response = pend->request.request.icmp_echo_request.callback(pend->reply.icmp_reply.packet_size, pend->reply.icmp_reply.source_ip, pend->reply.icmp_reply.packet);
-                    print_serial("[NETPROC] Result: %d\n", response);
-                    task_running_idx = current_task_id;
-                    if(tasks[task_running_idx].program_slot != -1){
-                        print_serial("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
-                        select_program(task_get_slot(task_running_idx));
+                        PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
+                        
+                        PRINT("[NETPROC] Processing ICMP Callback to 0x%x on PID %d\n", pend->request.request.icmp_echo_request.callback, task_running_idx);
+                        //viewport->event_handler(viewport, event);
+                        int response = pend->request.request.icmp_echo_request.callback(pend->reply.icmp_reply.packet_size, pend->reply.icmp_reply.source_ip, pend->reply.icmp_reply.packet);
+                        PRINT("[NETPROC] Result: %d\n", response);
+                        task_running_idx = current_task_id;
+                        if(tasks[task_running_idx].program_slot != -1){
+                            PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
+                            select_program(task_get_slot(task_running_idx));
+                        }
                     }
+                    else{
+                        PRINT("[NETPROC] Error: PID %d no longer running\n", pend->pid);
+                    }
+                    
                 }
                 pend->free = 1;
                 pend->has_reply = 0;
@@ -147,6 +160,7 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
             netproc_pend_needs_attention = 0;
             task_lock = 0;
         }
+        //window_copy_buffer(win);
     }
 
     return 0;

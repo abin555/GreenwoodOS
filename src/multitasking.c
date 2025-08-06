@@ -236,6 +236,10 @@ void task_end(){
 	while(1){}
 }
 
+void task_kill(int8_t task_idx){
+    tasks[task_idx].slot_active = 0;
+}
+
 void select_stack(int next, int current){
     print_serial("[TASK] (%d %d) Routing 0x%x to 0x%x and 0x%x to 0x%x\n",
         next, current,

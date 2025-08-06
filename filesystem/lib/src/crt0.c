@@ -5,6 +5,7 @@ extern void _init();
 extern void main(int argc, char **argv);
 extern void clean_stdlib();
 extern int sys_vp_initialized;
+extern void exit(int);
 
 extern void puts(const char *s);
 
@@ -17,5 +18,6 @@ void _start(int argc, char **argv){
     main(argc, argv);
 
     clean_stdlib();
+    //exit(0);
     return;
 }
