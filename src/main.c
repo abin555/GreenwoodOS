@@ -155,7 +155,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     acpi_initFADT();
     acpi_parseMADT();
     
-    
+    //apic_startCores();
 
     //tasking_setup_kernel_stack();
 

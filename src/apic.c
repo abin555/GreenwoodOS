@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "cpuid.h"
 #include "memory.h"
+#include "timer.h"
 
 #define IA32_APIC_BASE_MSR 0x1B
 #define IA32_APIC_BASE_MSR_BSP 0x100 // Processor is a BSP
@@ -11,6 +12,9 @@
  *  and if the local APIC hasn't been disabled in MSRs
  *  note that this requires CPUID to be supported.
  */
+
+struct APIC_CoreInfo apic_coreInfo;
+
 bool check_apic() {
    uint32_t eax, unused, edx;
    __get_cpuid(1, &eax, &unused, &unused, &edx);
@@ -65,4 +69,97 @@ void enable_apic() {
 
     /* Set the Spurious Interrupt Vector Register bit 8 to start receiving interrupts */
     writeAPICRegister(0xF0, readAPICRegister(0xF0) | 0x100);
+
+    apic_coreInfo.numcores = 0;
+}
+
+extern int ap_trampoline;
+uint32_t bspid, apic_bspdone;
+uint8_t aprunning;
+uint32_t apic_stack_top;
+
+void apic_startCores(){
+   print_serial("[APIC] starting cores!\n");
+   aprunning = 0;  // count how many APs have started
+   apic_bspdone = 0;
+   // get the BSP's Local APIC ID
+   __asm__ __volatile__ (
+      "mov eax, 1\n\t"
+      "cpuid\n\t"
+      "shr ebx, 24\n\t"
+      "mov %0, ebx\n\t"
+      : "=r"(bspid)
+      :
+      : "eax", "ebx", "ecx", "edx"
+   );
+
+   print_serial("Reserving Stacks!\n");
+   for(int i = 0; i < apic_coreInfo.numcores; i++){
+      uint32_t coreid = apic_coreInfo.ids[i];
+      if(coreid == bspid){
+         print_serial("Is boot core, skipping\n");
+         continue;
+      }
+      int block = MEM_findRegionIdx(0x7D00);
+      apic_coreInfo.stack_regions[i] = MEM_reserveRegionBlock(block, 0x7D00, 0, STACK);
+   }
+
+   print_serial("BSP ID: %d, aprunning: %d\n", bspid, aprunning);
+
+   create_page_entry(0x8000, 0x8000, 0x83);
+   memcpy((void*)0x8000, &ap_trampoline, 4096);
+
+   for(int i = 0; i < apic_coreInfo.numcores; i++){
+      uint32_t coreid = apic_coreInfo.ids[i];
+      apic_stack_top = apic_coreInfo.stack_regions[i] + 0x7D00;
+      print_serial("Starting Core: %d (#%d)\n", coreid, i);
+      if(coreid == bspid){
+         print_serial("Is boot core, skipping\n");
+         continue;
+      }
+      writeAPICRegister(0x280, 0);
+      writeAPICRegister(0x310, readAPICRegister(0x310) | (coreid << 24));
+      writeAPICRegister(0x300, (readAPICRegister(0x300) & 0xFFF00000) | 0x00C500);
+
+      do {
+         __asm__ __volatile__ ("pause" : : : "memory");
+      } while(
+         readAPICRegister(0x300) & (coreid << 12)
+      );
+
+      writeAPICRegister(0x310, readAPICRegister(0x310) | (coreid << 24));
+      writeAPICRegister(0x300, (readAPICRegister(0x300) & 0xFFF00000) | 0x008500);
+
+      do {
+         __asm__ __volatile__ ("pause" : : : "memory");
+      } while(
+         readAPICRegister(0x300) & (coreid << 12)
+      );
+      print_serial("Wait 1\n");
+      for(uint32_t wait = 0; wait < 0xFFFFF; wait++){
+         for(uint32_t wait2 = 0; wait2 < 0xFF; wait2++){
+         
+         }
+      }
+      print_serial("Wait Done\n");
+
+      for(int j = 0; j < 2; j++){
+         writeAPICRegister(0x280, 0);
+         writeAPICRegister(0x310, readAPICRegister(0x310) | (coreid << 24));
+         writeAPICRegister(0x300, (readAPICRegister(0x300) & 0xff0f800) | 0x000608);
+      }
+      print_serial("Wait 2\n");
+      for(uint32_t wait = 0; wait < 0xFFFF; wait++){
+         for(uint32_t wait2 = 0; wait2 < 0xFF; wait2++){
+         
+         }
+      }
+      print_serial("Wait Done\n");
+      do {
+         __asm__ __volatile__ ("pause" : : : "memory");
+      } while(
+         readAPICRegister(0x300) & (coreid << 12)
+      );
+   }
+   apic_bspdone = 1;
 }

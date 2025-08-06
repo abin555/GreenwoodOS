@@ -70,7 +70,9 @@ OBJECTS = \
 		src/sysroot.o \
 		src/audio/audio_cdev.o \
 		src/monitors.o \
-		src/audio/mic.o
+		src/audio/mic.o \
+		src/ap_startup.o \
+		src/ap_trampoline.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \

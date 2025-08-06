@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "memory.h"
 #include "grub.h"
+#include "apic.h"
 
 struct RSDT *acpi_rsdt = NULL;
 
@@ -154,6 +155,8 @@ void acpi_parseMADT(){
                 print_serial("\t     APIC ID: %d\n", entry->processorLocalAPIC.apic_id);
                 print_serial("\tFlags: %x\n", entry->processorLocalAPIC.flags);
                 print_serial("}\n");
+                apic_coreInfo.ids[apic_coreInfo.numcores] = entry->processorLocalAPIC.processor_id;
+                apic_coreInfo.numcores++;
                 break;
             }
             case 1://I/O APIC
