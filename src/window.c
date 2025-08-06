@@ -9,23 +9,7 @@ uint32_t window_buf_size;
 
 void window_timer_callback();
 
-typedef struct {
-  unsigned char magic1;             // must be zero
-  unsigned char colormap;           // must be zero
-  unsigned char encoding;           // must be 2
-  unsigned short cmaporig, cmaplen; // must be zero
-  unsigned char cmapent;            // must be zero
-  unsigned short x;                 // must be zero
-  unsigned short y;                 // image's height
-  unsigned short w;                 // image's height
-  unsigned short h;                 // image's width
-  unsigned char bpp;                // must be 32
-  unsigned char pixeltype;          // must be 40
-} __attribute__((packed)) tga_header_t;
-uint8_t *cursor_file;
-uint32_t *cursor_bitmap;
-int cursor_width;
-int cursor_height;
+struct Bitmap cursor_bitmap_s;
 
 void window_init(){
 	print_serial("[WINDOW] Initialization\n");
@@ -45,22 +29,8 @@ void window_init(){
 		windows[i].copyOnPromptOnly = false;
 	}
 
-	cursor_file = NULL;
-	cursor_bitmap = NULL;
-	int cursor_fd = vfs_open(WINDOW_MOUSE_FILE, VFS_FLAG_READ);
-	if(cursor_fd != -1){
-		print_serial("[WINDOW] Loading cursor image\n");
-		int size = vfs_seek(cursor_fd, 0, 2);
-		vfs_seek(cursor_fd, 0, 0);
-		cursor_file = malloc(size);
-		vfs_read(cursor_fd, (char *) cursor_file, size);
-		vfs_close(cursor_fd);
-		tga_header_t *header = ((tga_header_t *) cursor_file);
-		cursor_width = header->w;
-		cursor_height = header->h;
-		cursor_bitmap = (uint32_t *) (cursor_file + sizeof(tga_header_t) + header->magic1);
-	}
-	else{
+	cursor_bitmap_s = loadBitmap(WINDOW_MOUSE_FILE);
+	if(cursor_bitmap_s.bitmap == NULL){
 		print_serial("[WINDOW] Cursor image unavailable!\n");
 	}
 
@@ -69,17 +39,11 @@ void window_init(){
 }
 
 void window_draw_cursor(int x, int y){
-	if(cursor_bitmap == NULL){
+	if(cursor_bitmap_s.bitmap == NULL){
 		fb_putChar(x, y, 'M', 0xFFFFFFFF, 0);
 		return;
 	}
-	for(int ly = 0; ly < cursor_height; ly++){
-        for(int lx = 0; lx < cursor_width; lx++){
-			uint32_t color = cursor_bitmap[lx+ly*cursor_width];
-			if(!(color & 0xFF000000)) continue;
-            windows[window_selected].backbuffer[(y+ly)*fb_width + (x+lx)] = color;
-        }
-    }
+	drawBitmap(x, y, &cursor_bitmap_s, &windows[window_selected]);
 }
 
 void window_render_bar(){

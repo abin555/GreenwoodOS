@@ -2,7 +2,6 @@
 #define BITMAP_H
 
 #include "stdint.h"
-#include "window.h"
 
 struct Bitmap{
     uint8_t *file;
@@ -11,7 +10,9 @@ struct Bitmap{
     uint32_t height;
 };
 
+struct WINDOW;
+
 struct Bitmap loadBitmap(char *filename);
-void drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window);
+void drawBitmap(int x, int y, struct Bitmap *bitmap, struct WINDOW *window);
 
 #endif

@@ -2,6 +2,7 @@
 #include "allocator.h"
 #include "desktop_shared.h"
 #include "vfs.h"
+#include "window.h"
 
 typedef struct {
   unsigned char magic1;             // must be zero
@@ -43,13 +44,13 @@ struct Bitmap loadBitmap(char *filename){
 }
 
 
-void __attribute__ ((optimize("-O3"))) drawBitmap(int x, int y, struct Bitmap bitmap, struct WINDOW *window){
-    if(bitmap.bitmap == NULL || window == NULL) return;
-    for(uint32_t ly = 0; ly < bitmap.height; ly++){
-        uint32_t yoff = ly*bitmap.width;
+void __attribute__ ((optimize("-O3"))) drawBitmap(int x, int y, struct Bitmap *bitmap, struct WINDOW *window){
+    if(bitmap->bitmap == NULL || window == NULL) return;
+    for(uint32_t ly = 0; ly < bitmap->height; ly++){
+        uint32_t yoff = ly*bitmap->width;
         uint32_t byoff = (y + ly) * window->width;
-        for(uint32_t lx = 0; lx < bitmap.width; lx++){
-            uint32_t color = bitmap.bitmap[lx+yoff];
+        for(uint32_t lx = 0; lx < bitmap->width; lx++){
+            uint32_t color = bitmap->bitmap[lx+yoff];
             if(!(color & 0xFF000000)) continue;
             window->backbuffer[byoff + (x + lx)] = color;
         }

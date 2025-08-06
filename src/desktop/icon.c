@@ -38,7 +38,7 @@ void drawIcon(struct Icon *icon, struct WINDOW *window){
     drawBitmap(
         icon->loc.x,
         icon->loc.y,
-        icon->bitmap,
+        &icon->bitmap,
         window
     );
     if(icon->selected){

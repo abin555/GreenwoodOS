@@ -33,6 +33,12 @@ void desktopbg_write_callback(void *cdev, int offset, int nbytes, int *head){
     *head = 0;
 }
 
+void cursorbmap_write_callback(void *cdev, int offset, int nbytes, int *head){
+    struct SysFS_Chardev *cursor = cdev;
+    print_serial("[DESKTOP] [CURSOR] Write to cursor of size %d at offset %d @ 0x%x\n", nbytes, offset, cursor->buf);
+    *head = 0;
+}
+
 int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
@@ -57,6 +63,16 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     );
     sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
     sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
+    struct SysFS_Inode *cursorCDEV = sysfs_mkcdev(
+        "cursorBM",
+        sysfs_createCharDevice(
+            (char *) &cursor_bitmap_s,
+            sizeof(cursor_bitmap_s),
+            CDEV_READ | CDEV_WRITE
+        )
+    );
+    sysfs_setCallbacks(cursorCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) cursorbmap_write_callback, NULL, NULL, NULL);
+    sysfs_addChild(sysfs_find(sysfs, "sys\0"), cursorCDEV);
     sysfs_debugTree(sysfs, 0);   
 
     struct Icon icons[numIcons];

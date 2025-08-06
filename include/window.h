@@ -7,6 +7,7 @@
 #include "timer.h"
 #include "utils.h"
 #include "mouse.h"
+#include "bitmap.h"
 
 #define WINDOW_MOUSE_FILE "A/OS/icons/mouse.tga"
 
@@ -33,6 +34,7 @@ struct WINDOW{
 #define MAX_WINDOWS 16
 extern int window_selected;
 extern struct WINDOW windows[MAX_WINDOWS];
+extern struct Bitmap cursor_bitmap_s;
 
 void window_render_bar();
 void window_init();
