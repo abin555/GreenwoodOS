@@ -29,8 +29,156 @@ struct NETFS_http_response {
 
 };
 
+int atoi(const char *arr){
+    int val = 0;
+    char neg = 0;
+    if(*arr == '-'){
+      arr++;
+      neg = 1;
+    }
+    while(*arr != 0 && *arr != ' ' && *arr != '\n'){
+      val = val * 10 + (*arr - '0');
+      arr++;
+    }
+    //print_arg("ATOI: %d\n", val);
+    if(neg) return -val;
+    return val;
+}
+
+void split_ip(char *ip, char *ip_parts[4]) {
+    int part = 0;
+    char *walker = ip;
+
+    ip_parts[part++] = walker;
+
+    while (*walker != '\0' && part < 4) {
+        if (*walker == '.') {
+            *walker = '\0';             // terminate the current part
+            ip_parts[part++] = walker + 1; // next part starts after dot
+        }
+        walker++;
+    }
+}
+
+struct http_request {
+    http_reply_callback callback;
+    int str_len;
+    char req[];
+};
+
+int netfs_http_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *head){
+    print_serial("[NETFS] HTTP Write Handler\n");
+    struct SysFS_Chardev *sdev = cdev;
+    if(sdev == NULL || buf == NULL) return 0;
+    if(woffset != 0){
+        print_serial("Size / offset error %d %d\n", sizeof(struct netproc_request), nbytes);
+        return 0;
+    }
+    struct http_request *hreq = buf;
+
+    print_serial("Request payload: %d %s\n", hreq->str_len, (char *) hreq->req);
+    char *walker = (char *) hreq->req;
+    char *ip = NULL;
+    char *port = NULL;
+    char *method = NULL;
+    char *path = NULL;
+    char *host = NULL;
+
+    int part = 0;
+    while(*walker != '\0'){
+        if(part == 0 && *walker != ' '){
+            ip = walker;
+            part++;
+        }
+        if(part == 1 && *walker == ' '){
+            *walker = '\0';
+            walker++;
+            part++;
+            port = walker;
+        }
+        if(part == 2 && *walker == ' '){
+            *walker = '\0';
+            walker++;
+            part++;
+            method = walker;
+        }
+        if(part == 3 && *walker == ' '){
+            *walker = '\0';
+            walker++;
+            part++;
+            path = walker;
+        }
+        if(part == 4 && *walker == ' '){
+            *walker = '\0';
+            walker++;
+            part++;
+            host = walker;
+        }
+
+        walker++;
+    }
+    if(part != 5){
+        print_serial("[NETFS] Incomplete HTTP request or parse error!\n");
+        return 0;
+    }
+    print_serial("[NETFS] Parsed HTTP Request:\n%s:%s\n%s\n%s\n%s\n", ip, port, method, path, host);
+    
+    char *ip_parts[4];
+    split_ip(ip, ip_parts);
+    
+
+    struct netproc_request request;
+    request.type = NETPROC_HTTP_REQUEST;
+    for(int i = 0; i < 4; i++){
+        print_serial("%d - %s\n", i, ip_parts[i]);
+        request.request.http_request.dst_ip[i] = atoi(ip_parts[i]);
+    }
+    request.request.http_request.dst_port = atoi(port);
+    request.request.http_request.callback = hreq->callback;
+    request.request.http_request.method = malloc(strlen(method)+1);
+    memcpy(request.request.http_request.method, method, strlen(method));
+    request.request.http_request.path = malloc(strlen(path)+1);
+    memcpy(request.request.http_request.path, path, strlen(path));
+    request.request.http_request.host = malloc(strlen(host)+1);
+    memcpy(request.request.http_request.host, host, strlen(host));
+
+    print_serial("[NETFS] Parse 2 HTTP: %d.%d.%d.%d:%d %s %s %s\n",
+        request.request.http_request.dst_ip[0],
+        request.request.http_request.dst_ip[1],
+        request.request.http_request.dst_ip[2],
+        request.request.http_request.dst_ip[3],
+        request.request.http_request.dst_port,
+        request.request.http_request.method,
+        request.request.http_request.path,
+        request.request.http_request.host
+    );
+    
+    char *request_str;
+    switch(request.type){
+        case NETPROC_ICMP_ECHO_REQUEST:
+            request_str = "ICMP ECHO REQUEST";
+            break;
+        case NETPROC_HTTP_REQUEST:
+            request_str = "HTTP REQUEST";
+            break;
+    }
+    print_serial("[NETFS] HTTP Request Made - \"%s\" from PID %d\n", request_str, task_running_idx);
+    netproc_addToQueue(task_running_idx, request);
+    
+    *head = 0;
+
+    return nbytes;
+}
+
 struct SysFS_Inode *netfs_http(){
     struct SysFS_Chardev *http_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ | CDEV_WRITE);
+    sysfs_setCallbacks(
+        http_dev,
+        NULL,
+        NULL,
+        netfs_http_write_spec,
+        NULL
+    );
     struct SysFS_Inode *http_inode = sysfs_mkcdev("http", http_dev);
     return http_inode;
 }
@@ -80,12 +228,17 @@ int netfs_icmp_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
     print_serial("[NETFS] ICMP Write Handler\n");
     struct SysFS_Chardev *sdev = cdev;
     if(sdev == NULL || buf == NULL) return 0;
-    if(nbytes != sizeof(struct netproc_request) || woffset != 0) return 0;
+    if(nbytes != sizeof(struct netproc_request) || woffset != 0){
+        print_serial("Size / offset error %d %d\n", sizeof(struct netproc_request), nbytes);
+    }
     struct netproc_request *request = buf;
     char *request_str;
     switch(request->type){
         case NETPROC_ICMP_ECHO_REQUEST:
             request_str = "ICMP ECHO REQUEST";
+            break;
+        case NETPROC_HTTP_REQUEST:
+            request_str = "HTTP REQUEST";
             break;
     }
     print_serial("[NETFS] ICMP Request Made - \"%s\" from PID %d\n", request_str, task_running_idx);

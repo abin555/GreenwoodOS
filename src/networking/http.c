@@ -1,5 +1,6 @@
 #include "http.h"
 #include "utils.h"
+#include "netproc.h"
 
 void http_send_request(struct ethernet_driver *driver __attribute__((unused)), uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host) {
     print_serial("http_send_request\n");
@@ -17,7 +18,8 @@ void http_send_request(struct ethernet_driver *driver __attribute__((unused)), u
     //free(request);
 }
 
-bool http_receive_request(struct ethernet_driver *driver __attribute__((unused)), void *data, size_t data_size) {
+bool http_receive_request(struct ethernet_driver *driver __attribute__((unused)), uint16_t port, void *data, size_t data_size) {
+    print_serial("[HTTP] Recieve on port %d %d bytes\n", port, data_size);
     if (data_size == 0) {
         return true;
     }
@@ -29,6 +31,8 @@ bool http_receive_request(struct ethernet_driver *driver __attribute__((unused))
     request[data_size] = 0;
     print_serial("Recieved %d bytes\n\n", data_size);
     print_serial("%s\n", request);
+
+    netproc_checkPending_http_response(port, data, data_size);
 
     //free(request);
     return true;

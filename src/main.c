@@ -69,12 +69,6 @@ void kernel_task(int argc, char **argv){
         )
     );
 
-    /*
-    vfs_addNetRoot(
-        netfs_createRoot(),
-        '@'
-    );
-    */
 
     window_init();
     console_init();
@@ -88,8 +82,9 @@ void kernel_task(int argc, char **argv){
     udp_init();
     dhcp_init(ethernet_getDriver());
     tcp_init();
+    //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,0,1,2}, 80, "GET", "/", "localhost");
 
-    netfs_init();
+    netfs_init();    
 
     monitors_init();
 

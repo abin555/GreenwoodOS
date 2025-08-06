@@ -28,7 +28,7 @@ struct tcp_packet {
     uint16_t urgent_pointer;
 } __attribute__((unused));
 
-typedef bool (*tcp_listener)(struct ethernet_driver *, void *, size_t);
+typedef bool (*tcp_listener)(struct ethernet_driver *, uint16_t port, void *, size_t);
 
 void tcp_init(void);
 

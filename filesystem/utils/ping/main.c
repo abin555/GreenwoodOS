@@ -15,9 +15,11 @@ struct icmp_packet {
 } __attribute__((packed));
 
 typedef int (*icmp_echo_reply_callback)(unsigned int packet_size, uint8_t source_ip[4], struct icmp_packet *packet);
+typedef int (*http_reply_callback)(uint16_t port, void *data, size_t data_size);
 
 typedef enum {
-    NETPROC_ICMP_ECHO_REQUEST
+    NETPROC_ICMP_ECHO_REQUEST,
+    NETPROC_HTTP_REQUEST
 } netproc_request_type;
 
 struct netproc_icmp_echo_request {
@@ -25,12 +27,22 @@ struct netproc_icmp_echo_request {
     icmp_echo_reply_callback callback;
 };
 
+struct netproc_http_request {
+    uint8_t dst_ip[4];
+    http_reply_callback callback;
+    uint16_t dst_port;
+    char *method;
+    char *path;
+    char *host;
+};
+
 struct netproc_request {
     netproc_request_type type;
     union {
         struct netproc_icmp_echo_request icmp_echo_request;
+        struct netproc_http_request http_request;
     } request;
-};
+} __attribute__((packed));
 
 int has_reply;
 FILE *serial_file;
