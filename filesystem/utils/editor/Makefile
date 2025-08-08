@@ -7,7 +7,7 @@ SRCS += editor.c
 
 
 build:
-	$(CC) $(SRCS) -o $(PROG).elf
+	$(CC) -g $(SRCS) -o $(PROG).elf
 	
 clean:
 	rm $(SRCS)

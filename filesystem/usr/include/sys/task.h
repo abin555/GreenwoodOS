@@ -12,5 +12,6 @@ void exec(char *filename, int argc, char **argv);
 void set_schedule(ScheduleType type);
 void yield();
 void task_lock(int state);
+void manual_task(void *address, char *name);
 
 #endif
