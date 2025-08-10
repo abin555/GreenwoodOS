@@ -1,4 +1,4 @@
-CFLAGS := -fPIC -pie -g
+CFLAGS := -fPIC -g
 CC := i386-gwos-gcc
 
 

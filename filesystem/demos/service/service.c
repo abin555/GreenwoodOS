@@ -42,7 +42,6 @@ void read_notification(void *file, int offset, int nbytes, int *head){
 }
 
 int main(){
-    task_lock(1);
     printf("Hello from Service! Fib is at 0x%x\n", &fib);
     serial = fopen("/-/dev/serial", "w");
     fib(10);
@@ -69,11 +68,9 @@ int main(){
         CDEV_READ
     );
 
-    void (*func)(void) = (void (*)(void)) read_notification;
-
     meta.setCallbacks(cdev,
         NULL,
-        (void (*)(void *, int offset, int nbytes, int *head)) (((unsigned int) 0x22800000) + (unsigned int) func),
+        read_notification,
         NULL,
         NULL
     );
@@ -86,7 +83,6 @@ int main(){
     meta.addChild(dir, test);
 
     printf("was_read @ 0x%x\n", &was_read);
-    task_lock(0);
     while(1){
         if(was_read){
             was_read = 0;

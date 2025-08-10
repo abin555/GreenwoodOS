@@ -420,3 +420,15 @@ int builtin_real(Atom args, Atom *result){
         return Error_OK;
     }
 }
+
+#include <sys/vp.h>
+int builtin_vp_open(Atom args, Atom *result){
+    if(car(args).type == Atom_STRING){
+        struct Viewport *vp = vp_open(200, 200, car(args).value.string);
+        *result = make_int((int) vp);
+        return Error_OK;
+    }
+    else{
+        return Error_Args;
+    }
+}

@@ -3,7 +3,7 @@
 bool task_lock;
 int8_t task_running_idx;
 void *task_stack_base;
-uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (8)));
+uint8_t *task_stack_array[MAX_TASKS] __attribute__((aligned (16)));
 char task_fxsave_region[MAX_TASKS][512] __attribute__((aligned(16)));
 struct task_state tasks[MAX_TASKS];
 
@@ -82,7 +82,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             //tasks[i].registers.ebp = (uint32_t) TASK_STACK_VIRTUAL_BASE+TASK_STACK_SIZE-(3*4);
             tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
 
-            uint32_t *return_instruction = (uint32_t *) ((uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4));
+            uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
             return_instruction[1] = tasks[i].registers.ebp;
             return_instruction[-1] = (uint32_t) argv;
             return_instruction[-2] = (uint32_t) argc;
@@ -118,7 +118,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;
             }
-            print_serial("[TASK] Added Task \"%s\" to queue at %d\n", tasks[i].task_name, i);
+            print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x)\n", tasks[i].task_name, i, tasks[i].registers.esp, tasks[i].registers.ebp);
             break;
         }
     }

@@ -43,7 +43,8 @@ fib:
 	addl	%edx, %eax
 	movl	%eax, -20(%ebp)
 	.loc 1 21 5
-	movl	serial@GOTOFF(%ebx), %eax
+	movl	serial@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	pushl	-16(%ebp)
 	pushl	-24(%ebp)
 	leal	.LC0@GOTOFF(%ebx), %edx
@@ -57,7 +58,8 @@ fib:
 	jmp	.L2
 .L3:
 	.loc 1 25 9
-	movl	serial@GOTOFF(%ebx), %eax
+	movl	serial@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	subl	$4, %esp
 	pushl	-20(%ebp)
 	leal	.LC1@GOTOFF(%ebx), %edx
@@ -84,7 +86,8 @@ fib:
 	cmpl	8(%ebp), %eax
 	jle	.L3
 	.loc 1 30 5
-	movl	serial@GOTOFF(%ebx), %eax
+	movl	serial@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	subl	$8, %esp
 	pushl	%eax
 	pushl	$10
@@ -135,7 +138,8 @@ read_notification:
 	call	__x86.get_pc_thunk.ax
 	addl	$_GLOBAL_OFFSET_TABLE_, %eax
 	.loc 1 41 14
-	movl	$1, was_read@GOTOFF(%eax)
+	movl	was_read@GOT(%eax), %eax
+	movl	$1, (%eax)
 	.loc 1 42 1
 	nop
 	popl	%ebp
@@ -191,19 +195,14 @@ main:
 	call	__x86.get_pc_thunk.bx
 	addl	$_GLOBAL_OFFSET_TABLE_, %ebx
 	.loc 1 45 5
-	subl	$12, %esp
-	pushl	$1
-	call	task_lock@PLT
-	addl	$16, %esp
-	.loc 1 46 5
 	subl	$8, %esp
-	leal	fib@GOTOFF(%ebx), %eax
+	movl	fib@GOT(%ebx), %eax
 	pushl	%eax
 	leal	.LC2@GOTOFF(%ebx), %eax
 	pushl	%eax
 	call	printf@PLT
 	addl	$16, %esp
-	.loc 1 47 14
+	.loc 1 46 14
 	subl	$8, %esp
 	leal	.LC3@GOTOFF(%ebx), %eax
 	pushl	%eax
@@ -211,14 +210,15 @@ main:
 	pushl	%eax
 	call	fopen@PLT
 	addl	$16, %esp
-	.loc 1 47 12 discriminator 1
-	movl	%eax, serial@GOTOFF(%ebx)
-	.loc 1 48 5
+	.loc 1 46 12 discriminator 1
+	movl	serial@GOT(%ebx), %edx
+	movl	%eax, (%edx)
+	.loc 1 47 5
 	subl	$12, %esp
 	pushl	$10
-	call	fib
+	call	fib@PLT
 	addl	$16, %esp
-	.loc 1 50 22
+	.loc 1 49 22
 	subl	$8, %esp
 	leal	.LC5@GOTOFF(%ebx), %eax
 	pushl	%eax
@@ -227,54 +227,61 @@ main:
 	call	fopen@PLT
 	addl	$16, %esp
 	movl	%eax, -12(%ebp)
-	.loc 1 51 7
+	.loc 1 50 7
 	cmpl	$0, -12(%ebp)
 	jne	.L6
-	.loc 1 52 9
+	.loc 1 51 9
 	subl	$12, %esp
 	leal	.LC7@GOTOFF(%ebx), %eax
 	pushl	%eax
 	call	puts@PLT
 	addl	$16, %esp
-	.loc 1 53 16
+	.loc 1 52 16
 	movl	$1, %eax
 	jmp	.L10
 .L6:
-	.loc 1 56 5
+	.loc 1 55 5
 	pushl	-12(%ebp)
 	pushl	$1
 	pushl	$24
-	leal	-52(%ebp), %eax
+	leal	-48(%ebp), %eax
 	pushl	%eax
 	call	fread@PLT
 	addl	$16, %esp
-	.loc 1 57 5
+	.loc 1 56 5
 	subl	$12, %esp
 	pushl	-12(%ebp)
 	call	fclose@PLT
 	addl	$16, %esp
-	.loc 1 59 24
+	.loc 1 58 24
 	subl	$12, %esp
 	pushl	$1000
 	call	malloc@PLT
 	addl	$16, %esp
-	.loc 1 59 22 discriminator 1
-	movl	%eax, service_file_buf@GOTOFF(%ebx)
-	.loc 1 60 15
-	movl	$0, num_reads@GOTOFF(%ebx)
-	.loc 1 61 14
-	movl	$0, was_read@GOTOFF(%ebx)
-	.loc 1 63 5
-	movl	service_file_buf@GOTOFF(%ebx), %eax
+	movl	%eax, %edx
+	.loc 1 58 22 discriminator 1
+	movl	service_file_buf@GOT(%ebx), %eax
+	movl	%edx, (%eax)
+	.loc 1 59 15
+	movl	num_reads@GOT(%ebx), %eax
+	movl	$0, (%eax)
+	.loc 1 60 14
+	movl	was_read@GOT(%ebx), %eax
+	movl	$0, (%eax)
+	.loc 1 62 5
+	movl	service_file_buf@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	subl	$4, %esp
 	pushl	$1000
 	pushl	$0
 	pushl	%eax
 	call	memset@PLT
 	addl	$16, %esp
-	.loc 1 64 5
-	movl	num_reads@GOTOFF(%ebx), %edx
-	movl	service_file_buf@GOTOFF(%ebx), %eax
+	.loc 1 63 5
+	movl	num_reads@GOT(%ebx), %eax
+	movl	(%eax), %edx
+	movl	service_file_buf@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	pushl	%edx
 	leal	.LC8@GOTOFF(%ebx), %edx
 	pushl	%edx
@@ -282,10 +289,11 @@ main:
 	pushl	%eax
 	call	snprintf@PLT
 	addl	$16, %esp
-	.loc 1 66 22
-	movl	-44(%ebp), %eax
-	.loc 1 66 18
-	movl	service_file_buf@GOTOFF(%ebx), %edx
+	.loc 1 65 22
+	movl	-40(%ebp), %eax
+	.loc 1 65 18
+	movl	service_file_buf@GOT(%ebx), %edx
+	movl	(%edx), %edx
 	subl	$4, %esp
 	pushl	$2
 	pushl	$1000
@@ -294,28 +302,22 @@ main:
 .LVL0:
 	addl	$16, %esp
 	movl	%eax, -16(%ebp)
-	.loc 1 72 12
-	leal	read_notification@GOTOFF(%ebx), %eax
-	movl	%eax, -20(%ebp)
-	.loc 1 74 9
-	movl	-36(%ebp), %eax
-	.loc 1 76 94
-	movl	-20(%ebp), %edx
-	.loc 1 76 92
-	addl	$578813952, %edx
-	.loc 1 74 5
+	.loc 1 71 9
+	movl	-32(%ebp), %eax
+	.loc 1 71 5
 	subl	$12, %esp
 	pushl	$0
 	pushl	$0
+	movl	read_notification@GOT(%ebx), %edx
 	pushl	%edx
 	pushl	$0
 	pushl	-16(%ebp)
 	call	*%eax
 .LVL1:
 	addl	$32, %esp
-	.loc 1 80 22
-	movl	-48(%ebp), %eax
-	.loc 1 80 18
+	.loc 1 77 22
+	movl	-44(%ebp), %eax
+	.loc 1 77 18
 	subl	$8, %esp
 	pushl	-16(%ebp)
 	leal	.LC9@GOTOFF(%ebx), %edx
@@ -323,59 +325,57 @@ main:
 	call	*%eax
 .LVL2:
 	addl	$16, %esp
-	movl	%eax, -24(%ebp)
-	.loc 1 83 21
-	movl	-52(%ebp), %eax
-	.loc 1 83 17
+	movl	%eax, -20(%ebp)
+	.loc 1 80 21
+	movl	-48(%ebp), %eax
+	.loc 1 80 17
 	subl	$12, %esp
 	leal	.LC10@GOTOFF(%ebx), %edx
 	pushl	%edx
 	call	*%eax
 .LVL3:
 	addl	$16, %esp
-	movl	%eax, -28(%ebp)
-	.loc 1 84 9
-	movl	-40(%ebp), %eax
-	.loc 1 84 5
-	movl	-32(%ebp), %edx
+	movl	%eax, -24(%ebp)
+	.loc 1 81 9
+	movl	-36(%ebp), %eax
+	.loc 1 81 5
+	movl	-28(%ebp), %edx
 	subl	$8, %esp
-	pushl	-28(%ebp)
+	pushl	-24(%ebp)
 	pushl	%edx
 	call	*%eax
 .LVL4:
 	addl	$16, %esp
-	.loc 1 86 9
-	movl	-40(%ebp), %eax
-	.loc 1 86 5
+	.loc 1 83 9
+	movl	-36(%ebp), %eax
+	.loc 1 83 5
 	subl	$8, %esp
+	pushl	-20(%ebp)
 	pushl	-24(%ebp)
-	pushl	-28(%ebp)
 	call	*%eax
 .LVL5:
 	addl	$16, %esp
-	.loc 1 88 5
+	.loc 1 85 5
 	subl	$8, %esp
-	leal	was_read@GOTOFF(%ebx), %eax
+	movl	was_read@GOT(%ebx), %eax
 	pushl	%eax
 	leal	.LC11@GOTOFF(%ebx), %eax
 	pushl	%eax
 	call	printf@PLT
 	addl	$16, %esp
-	.loc 1 89 5
-	subl	$12, %esp
-	pushl	$0
-	call	task_lock@PLT
-	addl	$16, %esp
 .L9:
-	.loc 1 91 12
-	movl	was_read@GOTOFF(%ebx), %eax
-	.loc 1 91 11
+	.loc 1 87 12
+	movl	was_read@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	.loc 1 87 11
 	testl	%eax, %eax
 	je	.L8
-	.loc 1 92 22
-	movl	$0, was_read@GOTOFF(%ebx)
-	.loc 1 93 13
-	movl	serial@GOTOFF(%ebx), %eax
+	.loc 1 88 22
+	movl	was_read@GOT(%ebx), %eax
+	movl	$0, (%eax)
+	.loc 1 89 13
+	movl	serial@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	pushl	%eax
 	pushl	$16
 	pushl	$1
@@ -383,20 +383,25 @@ main:
 	pushl	%eax
 	call	fwrite@PLT
 	addl	$16, %esp
-	.loc 1 94 13
-	movl	service_file_buf@GOTOFF(%ebx), %eax
+	.loc 1 90 13
+	movl	service_file_buf@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	subl	$4, %esp
 	pushl	$1000
 	pushl	$0
 	pushl	%eax
 	call	memset@PLT
 	addl	$16, %esp
-	.loc 1 95 13
-	movl	num_reads@GOTOFF(%ebx), %eax
-	incl	%eax
-	movl	%eax, num_reads@GOTOFF(%ebx)
-	movl	num_reads@GOTOFF(%ebx), %edx
-	movl	service_file_buf@GOTOFF(%ebx), %eax
+	.loc 1 91 13
+	movl	num_reads@GOT(%ebx), %eax
+	movl	(%eax), %eax
+	leal	1(%eax), %edx
+	movl	num_reads@GOT(%ebx), %eax
+	movl	%edx, (%eax)
+	movl	num_reads@GOT(%ebx), %eax
+	movl	(%eax), %edx
+	movl	service_file_buf@GOT(%ebx), %eax
+	movl	(%eax), %eax
 	pushl	%edx
 	leal	.LC8@GOTOFF(%ebx), %edx
 	pushl	%edx
@@ -405,12 +410,12 @@ main:
 	call	snprintf@PLT
 	addl	$16, %esp
 .L8:
-	.loc 1 97 9
+	.loc 1 93 9
 	call	yield@PLT
-	.loc 1 91 11
+	.loc 1 87 11
 	jmp	.L9
 .L10:
-	.loc 1 99 1
+	.loc 1 95 1
 	leal	-8(%ebp), %esp
 	popl	%ecx
 	.cfi_restore 1
@@ -456,13 +461,13 @@ __x86.get_pc_thunk.bx:
 	.file 6 "/home/aidanb/Greenwood-OS/filesystem/usr/include/sys/task.h"
 	.section	.debug_info,"",@progbits
 .Ldebug_info0:
-	.long	0x572
+	.long	0x54c
 	.value	0x5
 	.byte	0x1
 	.byte	0x4
 	.long	.Ldebug_abbrev0
 	.uleb128 0x13
-	.long	.LASF64
+	.long	.LASF63
 	.byte	0x1d
 	.long	.LASF0
 	.long	.LASF1
@@ -593,7 +598,7 @@ __x86.get_pc_thunk.bx:
 	.long	0xee
 	.uleb128 0x3
 	.long	0xfa
-	.uleb128 0x7
+	.uleb128 0x6
 	.long	0xee
 	.long	0x143
 	.uleb128 0x1
@@ -753,7 +758,7 @@ __x86.get_pc_thunk.bx:
 	.long	0x191
 	.byte	0x14
 	.byte	0
-	.uleb128 0x7
+	.uleb128 0x6
 	.long	0x191
 	.long	0x277
 	.uleb128 0x1
@@ -761,7 +766,7 @@ __x86.get_pc_thunk.bx:
 	.byte	0
 	.uleb128 0x3
 	.long	0x268
-	.uleb128 0x7
+	.uleb128 0x6
 	.long	0x191
 	.long	0x290
 	.uleb128 0x1
@@ -771,7 +776,7 @@ __x86.get_pc_thunk.bx:
 	.byte	0
 	.uleb128 0x3
 	.long	0x27c
-	.uleb128 0x7
+	.uleb128 0x6
 	.long	0x200
 	.long	0x2ae
 	.uleb128 0x1
@@ -783,7 +788,7 @@ __x86.get_pc_thunk.bx:
 	.byte	0
 	.uleb128 0x3
 	.long	0x295
-	.uleb128 0x7
+	.uleb128 0x6
 	.long	0xee
 	.long	0x2c7
 	.uleb128 0x1
@@ -863,7 +868,7 @@ __x86.get_pc_thunk.bx:
 	.byte	0x3
 	.long	was_read
 	.uleb128 0x1d
-	.long	.LASF65
+	.long	.LASF64
 	.byte	0x6
 	.byte	0xd
 	.byte	0x6
@@ -960,30 +965,21 @@ __x86.get_pc_thunk.bx:
 	.long	0x38b
 	.uleb128 0xa
 	.byte	0
-	.uleb128 0x1e
-	.long	.LASF66
-	.byte	0x6
-	.byte	0xe
-	.byte	0x6
-	.long	0x445
-	.uleb128 0x1
-	.long	0xee
-	.byte	0
 	.uleb128 0x5
 	.long	.LASF51
 	.byte	0x2
 	.byte	0x1a
 	.byte	0x5
 	.long	0xee
-	.long	0x461
+	.long	0x44f
 	.uleb128 0x1
 	.long	0x324
 	.uleb128 0x1
 	.long	0x38b
 	.uleb128 0xa
 	.byte	0
-	.uleb128 0x1f
-	.long	.LASF57
+	.uleb128 0x1e
+	.long	.LASF56
 	.byte	0x1
 	.byte	0x2c
 	.byte	0x5
@@ -992,61 +988,50 @@ __x86.get_pc_thunk.bx:
 	.long	.LFE2-.LFB2
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x4d0
-	.uleb128 0x6
+	.long	0x4b0
+	.uleb128 0x7
 	.long	.LASF52
-	.byte	0x32
+	.byte	0x31
 	.byte	0xb
 	.long	0x324
 	.uleb128 0x2
 	.byte	0x75
 	.sleb128 -12
-	.uleb128 0x6
+	.uleb128 0x7
 	.long	.LASF53
-	.byte	0x37
+	.byte	0x36
 	.byte	0x17
 	.long	0x214
 	.uleb128 0x2
 	.byte	0x75
-	.sleb128 -52
-	.uleb128 0x6
+	.sleb128 -48
+	.uleb128 0x7
 	.long	.LASF54
-	.byte	0x42
+	.byte	0x41
 	.byte	0xb
 	.long	0x114
 	.uleb128 0x2
 	.byte	0x75
 	.sleb128 -16
-	.uleb128 0x6
+	.uleb128 0x7
 	.long	.LASF55
-	.byte	0x48
-	.byte	0xc
-	.long	0x4d1
+	.byte	0x4d
+	.byte	0xb
+	.long	0x114
 	.uleb128 0x2
 	.byte	0x75
 	.sleb128 -20
-	.uleb128 0x6
-	.long	.LASF56
+	.uleb128 0xb
+	.string	"dir"
 	.byte	0x50
 	.byte	0xb
 	.long	0x114
 	.uleb128 0x2
 	.byte	0x75
 	.sleb128 -24
-	.uleb128 0xb
-	.string	"dir"
-	.byte	0x53
-	.byte	0xb
-	.long	0x114
-	.uleb128 0x2
-	.byte	0x75
-	.sleb128 -28
 	.byte	0
-	.uleb128 0x20
-	.uleb128 0x3
-	.long	0x4d0
-	.uleb128 0x21
-	.long	.LASF58
+	.uleb128 0x1f
+	.long	.LASF57
 	.byte	0x1
 	.byte	0x28
 	.byte	0x6
@@ -1054,37 +1039,37 @@ __x86.get_pc_thunk.bx:
 	.long	.LFE1-.LFB1
 	.uleb128 0x1
 	.byte	0x9c
-	.long	0x521
+	.long	0x4fb
 	.uleb128 0xc
-	.long	.LASF59
+	.long	.LASF58
 	.byte	0x1e
 	.long	0x114
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 0
 	.uleb128 0xc
-	.long	.LASF60
+	.long	.LASF59
 	.byte	0x28
 	.long	0xee
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 4
 	.uleb128 0xc
-	.long	.LASF61
+	.long	.LASF60
 	.byte	0x34
 	.long	0xee
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 8
 	.uleb128 0xc
-	.long	.LASF62
+	.long	.LASF61
 	.byte	0x41
 	.long	0x116
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 12
 	.byte	0
-	.uleb128 0x22
+	.uleb128 0x20
 	.string	"fib"
 	.byte	0x1
 	.byte	0xb
@@ -1093,7 +1078,7 @@ __x86.get_pc_thunk.bx:
 	.long	.LFE0-.LFB0
 	.uleb128 0x1
 	.byte	0x9c
-	.uleb128 0x23
+	.uleb128 0x21
 	.string	"n"
 	.byte	0x1
 	.byte	0xb
@@ -1126,8 +1111,8 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0x2
 	.byte	0x91
 	.sleb128 -24
-	.uleb128 0x6
-	.long	.LASF63
+	.uleb128 0x7
+	.long	.LASF62
 	.byte	0x12
 	.byte	0x9
 	.long	0xee
@@ -1208,6 +1193,17 @@ __x86.get_pc_thunk.bx:
 	.byte	0
 	.byte	0
 	.uleb128 0x6
+	.uleb128 0x15
+	.byte	0x1
+	.uleb128 0x27
+	.uleb128 0x19
+	.uleb128 0x49
+	.uleb128 0x13
+	.uleb128 0x1
+	.uleb128 0x13
+	.byte	0
+	.byte	0
+	.uleb128 0x7
 	.uleb128 0x34
 	.byte	0
 	.uleb128 0x3
@@ -1223,17 +1219,6 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0x13
 	.uleb128 0x2
 	.uleb128 0x18
-	.byte	0
-	.byte	0
-	.uleb128 0x7
-	.uleb128 0x15
-	.byte	0x1
-	.uleb128 0x27
-	.uleb128 0x19
-	.uleb128 0x49
-	.uleb128 0x13
-	.uleb128 0x1
-	.uleb128 0x13
 	.byte	0
 	.byte	0
 	.uleb128 0x8
@@ -1553,27 +1538,6 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0xb
 	.uleb128 0x39
 	.uleb128 0xb
-	.uleb128 0x27
-	.uleb128 0x19
-	.uleb128 0x3c
-	.uleb128 0x19
-	.uleb128 0x1
-	.uleb128 0x13
-	.byte	0
-	.byte	0
-	.uleb128 0x1f
-	.uleb128 0x2e
-	.byte	0x1
-	.uleb128 0x3f
-	.uleb128 0x19
-	.uleb128 0x3
-	.uleb128 0xe
-	.uleb128 0x3a
-	.uleb128 0xb
-	.uleb128 0x3b
-	.uleb128 0xb
-	.uleb128 0x39
-	.uleb128 0xb
 	.uleb128 0x49
 	.uleb128 0x13
 	.uleb128 0x11
@@ -1588,14 +1552,7 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x20
-	.uleb128 0x15
-	.byte	0
-	.uleb128 0x27
-	.uleb128 0x19
-	.byte	0
-	.byte	0
-	.uleb128 0x21
+	.uleb128 0x1f
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1622,7 +1579,7 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0x13
 	.byte	0
 	.byte	0
-	.uleb128 0x22
+	.uleb128 0x20
 	.uleb128 0x2e
 	.byte	0x1
 	.uleb128 0x3f
@@ -1647,7 +1604,7 @@ __x86.get_pc_thunk.bx:
 	.uleb128 0x19
 	.byte	0
 	.byte	0
-	.uleb128 0x23
+	.uleb128 0x21
 	.uleb128 0x5
 	.byte	0
 	.uleb128 0x3
@@ -1682,7 +1639,7 @@ __x86.get_pc_thunk.bx:
 	.section	.debug_str,"MS",@progbits,1
 .LASF54:
 	.string	"cdev"
-.LASF56:
+.LASF55:
 	.string	"test"
 .LASF40:
 	.string	"serial"
@@ -1690,17 +1647,15 @@ __x86.get_pc_thunk.bx:
 	.string	"size_t"
 .LASF28:
 	.string	"SysFS_Meta"
-.LASF60:
+.LASF59:
 	.string	"offset"
 .LASF43:
 	.string	"was_read"
 .LASF38:
 	.string	"_Float128"
-.LASF18:
-	.string	"SysFS_Chardev"
-.LASF64:
-	.string	"GNU C17 14.2.0 -mtune=i386 -march=i386 -g -fPIE"
-.LASF62:
+.LASF63:
+	.string	"GNU C17 14.2.0 -mtune=i386 -march=i386 -g -fPIC"
+.LASF61:
 	.string	"head"
 .LASF44:
 	.string	"snprintf"
@@ -1718,7 +1673,7 @@ __x86.get_pc_thunk.bx:
 	.string	"FILE"
 .LASF25:
 	.string	"data"
-.LASF59:
+.LASF58:
 	.string	"file"
 .LASF32:
 	.string	"addChild"
@@ -1726,7 +1681,7 @@ __x86.get_pc_thunk.bx:
 	.string	"fprintf"
 .LASF20:
 	.string	"numChildren"
-.LASF61:
+.LASF60:
 	.string	"nbytes"
 .LASF4:
 	.string	"long unsigned int"
@@ -1746,8 +1701,6 @@ __x86.get_pc_thunk.bx:
 	.string	"num_reads"
 .LASF49:
 	.string	"fopen"
-.LASF55:
-	.string	"func"
 .LASF34:
 	.string	"root"
 .LASF27:
@@ -1758,7 +1711,7 @@ __x86.get_pc_thunk.bx:
 	.string	"malloc"
 .LASF47:
 	.string	"fclose"
-.LASF65:
+.LASF64:
 	.string	"yield"
 .LASF7:
 	.string	"CDEV_READ"
@@ -1772,12 +1725,12 @@ __x86.get_pc_thunk.bx:
 	.string	"char"
 .LASF13:
 	.string	"read_callback"
-.LASF63:
+.LASF18:
+	.string	"SysFS_Chardev"
+.LASF62:
 	.string	"nextTerm"
-.LASF57:
+.LASF56:
 	.string	"main"
-.LASF66:
-	.string	"task_lock"
 .LASF21:
 	.string	"SysFS_Inode"
 .LASF36:
@@ -1804,7 +1757,7 @@ __x86.get_pc_thunk.bx:
 	.string	"CDEV_WRITE"
 .LASF10:
 	.string	"owner_pid"
-.LASF58:
+.LASF57:
 	.string	"read_notification"
 .LASF9:
 	.string	"CDEV_PERMS"

@@ -76,6 +76,7 @@ int main(int argc, int argv[]){
     env_set(env, make_sym("EQ?"), make_builtin(builtin_eq));
     env_set(env, make_sym("PAIR?"), make_builtin(builtin_pair));
     env_set(env, make_sym("REAL"), make_builtin(builtin_real));
+    env_set(env, make_sym("VP_OPEN"), make_builtin(builtin_vp_open));
     
     
     Atom expr, result;

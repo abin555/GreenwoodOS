@@ -22,8 +22,7 @@ void __attribute__ ((optimize("-O3"))) select_program(int program_slot){
     program_active_slot = program_slot;
 }
 
-void exec(char *filename, int argc, char **argv){
-	//print_serial("\n[EXEC] Starting Program %s\n", filename);
+int program_findSlot(){
 	int slot = -1;
 	for(int i = 0; i < PROGRAM_MAX; i++){
 		if(program_slot_status[i] == false){
@@ -32,8 +31,11 @@ void exec(char *filename, int argc, char **argv){
 			break;
 		}
 	}
-	if(slot == -1) return;
-	print_serial("Loading Program %s to slot %d\n", filename, slot);
+	return slot;
+}
+
+void exec(char *filename, int argc, char **argv){
+	print_serial("\n[EXEC] Starting Program %s\n", filename);	
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);
@@ -41,15 +43,37 @@ void exec(char *filename, int argc, char **argv){
 	vfs_seek(file, 0, 0);
 	if(file == -1) return;
 	if(elf_check_supported(file)){
-		//print_serial("[PROGRAM] Is ELF Format!\n");
-		uint32_t entry = elf_get_entry_addr(file);
-		elf_load(file, (void *) (program_region_virt_base + 0x400000*slot));
-		//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
-		//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
-		vfs_close(file);
-		start_task((void *)entry, slot, argc, argv, filename);
+		if(elf_is_dyn(file)){
+			print_serial("[EXEC] Program %s is dynamic!\n", filename);
+			uint32_t entry = elf_get_entry_addr(file);
+			print_serial("[EXEC] Start is at 0x%x\n", entry);
+			void *base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(size), size, 0, PROGRAM);
+			bool status = elf_load_dyn(file, base);
+			if(status == true){
+				vfs_close(file);
+				MEM_printRegions();
+				start_task((void *) (((uint32_t) base) + entry), -1, argc, argv, filename);
+			}
+			else{
+				vfs_close(file);
+				MEM_freeRegionBlock((uint32_t) base, size);
+				print_serial("[EXEC] Error loading dynamic program!\n");
+			}
+		}	
+		else{
+			int slot = program_findSlot();
+			print_serial("Loading Program %s to slot %d\n", filename, slot);
+			//print_serial("[PROGRAM] Is ELF Format!\n");
+			uint32_t entry = elf_get_entry_addr(file);
+			elf_load(file, (void *) (program_region_virt_base + 0x400000*slot));
+			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
+			//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
+			vfs_close(file);
+			start_task((void *)entry, slot, argc, argv, filename);
+		}
 	}
 	else {
+		int slot = program_findSlot();
 		vfs_seek(file, 0, 0);
 		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);	
 		vfs_close(file);
