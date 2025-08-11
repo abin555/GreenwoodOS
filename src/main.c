@@ -82,11 +82,10 @@ void kernel_task(int argc, char **argv){
     //udp_init();
     //dhcp_init(ethernet_getDriver());
     //tcp_init();
-    //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,0,1,2}, 80, "GET", "/", "localhost");
-
+    
     //netfs_init();    
 
-    //monitors_init();
+    monitors_init();
 
 
     struct WINDOW *kernel_win = window_open("KERNEL", false);
@@ -101,7 +100,7 @@ void kernel_task(int argc, char **argv){
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
-    //audio_init();    
+    audio_init();    
     //IDT_dump();
     //netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
