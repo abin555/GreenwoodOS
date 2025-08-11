@@ -26,16 +26,22 @@ int main(int argc, char **argv){
     gui_setLocation(mainBar, 0, 0);
     gui_addChild(context, mainBar);
     struct GUIButton *mainButton = gui_makeButton("Test Button", 0x0, 0xb9b9b9);
+    struct GUIButton *reloadButton = gui_makeButton("Reload", 0x0, 0xb9b9b9);
     struct GUIButton *exitButton = gui_makeButton("Exit", 0x0, 0xb9b9b9);
     gui_setLocation(mainButton, 8, 2);
     gui_setScale(mainButton, 11*8, 8);
     gui_buttonSetHover(mainButton, 0xb9b9b9, 0x0);
 
-    gui_setLocation(exitButton, 13*8, 2);
+    gui_setLocation(reloadButton, 13*8, 2);
+    gui_setScale(reloadButton, 6*8, 8);
+    gui_buttonSetHover(reloadButton, 0xb9b9b9, 0x0);
+
+    gui_setLocation(exitButton, 21*8, 2);
     gui_setScale(exitButton, 4*8, 8);
     gui_buttonSetHover(exitButton, 0xb9b9b9, 0x0);
 
     gui_addChild(mainBar, mainButton);
+    gui_addChild(mainBar, reloadButton);
     gui_addChild(mainBar, exitButton);
 
     struct GUIScroll *mainScroll = gui_makeVScroll(12, 59*8-mainBar->location.h+7, 30, 0xc9c9c9, 0xb9b9b9, 0x0F0F0F);
@@ -49,6 +55,10 @@ int main(int argc, char **argv){
         if(mainButton->isClicked){
             printf("Button Click\n");
             mainButton->isClicked = 0;
+        }
+        if(reloadButton->isClicked){
+            editor_reload(&file);
+            reloadButton->isClicked = 0;
         }
         if(exitButton->isClicked){
             running = 0;

@@ -24,6 +24,13 @@ struct EditorFile editor_open(char *path){
     return file;
 }
 
+void editor_reload(struct EditorFile *editor){
+    if(editor == NULL) return;
+    fseek(editor->file, 0, SEEK_SET);
+    fread(editor->loaded_file, editor->size, 1, editor->file);
+    fseek(editor->file, 0, SEEK_SET);
+}
+
 void editor_close(struct EditorFile *file){
     if(file == NULL) return;
     fclose(file->file);

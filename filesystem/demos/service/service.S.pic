@@ -131,7 +131,7 @@ read_notification:
 .LC11:
 	.string	"was_read @ 0x%x\n"
 .LC12:
-	.string	"Read %d times!\n\n"
+	.string	"[SERVICE] READ!\n"
 	.text
 	.globl	main
 	.type	main, @function
@@ -285,12 +285,17 @@ main:
 	mov	eax, DWORD PTR [eax]
 	test	eax, eax
 	je	.L8
-	sub	esp, 12
-	push	1
-	call	task_lock@PLT
-	add	esp, 16
 	mov	eax, DWORD PTR was_read@GOT[ebx]
 	mov	DWORD PTR [eax], 0
+	mov	eax, DWORD PTR serial@GOT[ebx]
+	mov	eax, DWORD PTR [eax]
+	push	eax
+	push	16
+	push	1
+	lea	eax, .LC12@GOTOFF[ebx]
+	push	eax
+	call	fwrite@PLT
+	add	esp, 16
 	mov	eax, DWORD PTR service_file_buf@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	sub	esp, 4
@@ -309,15 +314,11 @@ main:
 	mov	eax, DWORD PTR service_file_buf@GOT[ebx]
 	mov	eax, DWORD PTR [eax]
 	push	edx
-	lea	edx, .LC12@GOTOFF[ebx]
+	lea	edx, .LC8@GOTOFF[ebx]
 	push	edx
 	push	1000
 	push	eax
 	call	snprintf@PLT
-	add	esp, 16
-	sub	esp, 12
-	push	0
-	call	task_lock@PLT
 	add	esp, 16
 .L8:
 	call	yield@PLT

@@ -85,10 +85,12 @@ int main(){
     printf("was_read @ 0x%x\n", &was_read);
     while(1){
         if(was_read){
+            task_lock(1);
             was_read = 0;
-            fprintf(serial, "[SERVICE] READ!\n");
+            //fprintf(serial, "[SERVICE] READ!\n");
             memset(service_file_buf, 0, SERVICE_FILE_SIZE);
-            snprintf(service_file_buf, SERVICE_FILE_SIZE, "Read %d times!", ++num_reads);
+            snprintf(service_file_buf, SERVICE_FILE_SIZE, "Read %d times!\n\n", ++num_reads);
+            task_lock(0);
         }
         yield();
     }
