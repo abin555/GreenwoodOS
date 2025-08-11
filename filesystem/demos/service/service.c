@@ -35,10 +35,9 @@ void fib(int n){
 char *service_file_buf;
 int num_reads;
 
-int was_read;
-
 void read_notification(void *file, int offset, int nbytes, int *head){
-    was_read = 1;
+    memset(service_file_buf, 0, SERVICE_FILE_SIZE);
+    snprintf(service_file_buf, SERVICE_FILE_SIZE, "Read %d times!\n\n", ++num_reads);
 }
 
 int main(){
@@ -57,7 +56,6 @@ int main(){
 
     service_file_buf = malloc(SERVICE_FILE_SIZE);
     num_reads = 0;
-    was_read = 0;
     
     memset(service_file_buf, 0, SERVICE_FILE_SIZE);
     snprintf(service_file_buf, SERVICE_FILE_SIZE, "Read %d times!", num_reads);
@@ -81,17 +79,8 @@ int main(){
     meta.addChild(meta.root, dir);
 
     meta.addChild(dir, test);
-
-    printf("was_read @ 0x%x\n", &was_read);
+    set_schedule(NEVER);
     while(1){
-        if(was_read){
-            task_lock(1);
-            was_read = 0;
-            //fprintf(serial, "[SERVICE] READ!\n");
-            memset(service_file_buf, 0, SERVICE_FILE_SIZE);
-            snprintf(service_file_buf, SERVICE_FILE_SIZE, "Read %d times!\n\n", ++num_reads);
-            task_lock(0);
-        }
-        yield();
+        
     }
 }

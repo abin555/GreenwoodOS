@@ -79,14 +79,14 @@ void kernel_task(int argc, char **argv){
 
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
-    udp_init();
-    dhcp_init(ethernet_getDriver());
-    tcp_init();
+    //udp_init();
+    //dhcp_init(ethernet_getDriver());
+    //tcp_init();
     //http_send_request(ethernet_getDriver(), (uint8_t [4]){10,0,1,2}, 80, "GET", "/", "localhost");
 
-    netfs_init();    
+    //netfs_init();    
 
-    monitors_init();
+    //monitors_init();
 
 
     struct WINDOW *kernel_win = window_open("KERNEL", false);
@@ -101,9 +101,9 @@ void kernel_task(int argc, char **argv){
     memset(kernel_task->currentDirectory.path, 0, sizeof(kernel_task->currentDirectory.path));
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
-    audio_init();    
-    IDT_dump();
-    netproc_init();
+    //audio_init();    
+    //IDT_dump();
+    //netproc_init();
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
     //exec("/A/wolf/wolf.elf", 0, NULL);
     MEM_printRegions();
@@ -135,7 +135,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     exceptions_init();
     set_PAT();
     MEM_populateRegions();
-    enable_apic();
+    //enable_apic();
 
 	fb_init(GRUB_tagfb);
 

@@ -113,7 +113,7 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             //print_serial("[TASK] Added to queue idx %d\n", i);
             tasks[i].slot_active = 1;
             tasks[i].keyboard_event_handler = NULL;
-            tasks[i].mouse_event_handler = NULL;
+            //tasks[i].mouse_event_handler = NULL;
             tasks[i].end_callback = NULL;
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;

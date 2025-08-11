@@ -148,6 +148,9 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 						kbd_callEventHandler(0x11);
+						if(KBD_flags.ctrl){
+							mouse_update(-2, 0, (struct MouseButtons) {0, 0, 0});
+						}
 					}
 					break;
 				case 0x74://Right Arrow
@@ -159,6 +162,9 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 						kbd_callEventHandler(0x12);
+						if(KBD_flags.ctrl){
+							mouse_update(2, 0, (struct MouseButtons) {0, 0, 0});
+						}
 					}
 					break;
 				case 0x75://Up Arrow
@@ -170,6 +176,9 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 						kbd_callEventHandler(0x13);
+						if(KBD_flags.ctrl){
+							mouse_update(0, 2, (struct MouseButtons) {0, 0, 0});
+						}
 					}
 					break;
 				case 0x72://Down Arrow
@@ -181,6 +190,9 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 						kbd_callEventHandler(0x14);
+						if(KBD_flags.ctrl){
+							mouse_update(0, -2, (struct MouseButtons) {0, 0, 0});
+						}
 					}
 					break;
 			}

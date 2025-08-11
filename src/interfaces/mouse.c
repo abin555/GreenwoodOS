@@ -60,23 +60,6 @@ void *mouse_createCDEV(){
     return (void *) mouse_cdev;
 }
 
-void mouse_callEventHandler(){
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(
-			tasks[i].slot_active && 
-			tasks[i].program_slot != -1 && 
-			tasks[i].mouse_event_handler != NULL && 
-			tasks[i].window == &windows[window_selected]
-		){
-            select_program(tasks[i].program_slot);
-			tasks[i].mouse_event_handler();
-			if(tasks[task_running_idx].program_slot != -1){
-				select_program(tasks[task_running_idx].program_slot);
-			}
-		}
-	}
-}
-
 void mouse_update(int deltaX, int deltaY, struct MouseButtons btns){
     mouseStatus.pos.x += deltaX;
     mouseStatus.pos.y -= deltaY;
@@ -89,7 +72,7 @@ void mouse_update(int deltaX, int deltaY, struct MouseButtons btns){
 
     mouseStatus.lastDelta.x = deltaX;
     mouseStatus.lastDelta.y = deltaY;
-    mouse_callEventHandler();
+    //mouse_callEventHandler();
 }
 
 struct IVec2 mouse_getPos(){
