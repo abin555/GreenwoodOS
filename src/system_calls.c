@@ -5,7 +5,7 @@ void init_syscalls(){
 	interrupt_add_handle(0x80, syscall_callback);
 }
 
-struct cpu_state syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	IRQ_OFF;
 	struct cpu_state cpu_state = *cpu;
 	struct task_state *task = &tasks[task_running_idx];
@@ -368,6 +368,7 @@ struct cpu_state syscall_callback(struct cpu_state *cpu __attribute__((unused)),
 			break;
 		}
 	}
+	*cpu = cpu_state;
 	IRQ_RES;
-	return cpu_state;
+	return;
 }

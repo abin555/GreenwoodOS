@@ -23,7 +23,7 @@ void page_init();
 struct cpu_state;
 struct stack_state;
 
-struct cpu_state page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
+void page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
 void create_page_entry(
 	uint32_t base_address, 
 	uint32_t target_address,

@@ -18,7 +18,7 @@ bool ethernet_assign_driver(struct ethernet_driver *driver) {
     return false;
 }
 
-struct cpu_state ethernet_handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void ethernet_handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
     //print_serial("[ETHERNET] interrupt\n");
     //pic_acknowledge(INT_currentInterrupt);
 
@@ -33,7 +33,7 @@ struct cpu_state ethernet_handler(struct cpu_state *cpu __attribute__((unused)),
         }
     }
     //print_serial("[ETHERNET] interrupt complete\n");
-    return *cpu;
+    return;
 }
 
 void ethernet_init(struct PCI_driver *pci){

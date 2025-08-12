@@ -395,7 +395,7 @@ void rebase_PORT(HBA_PORT *port, int portno);
 void start_CMD(HBA_PORT *port);
 void stop_CMD(HBA_PORT *port);
 
-struct cpu_state AHCI_Interrupt_Handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
+void AHCI_Interrupt_Handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
 bool AHCI_read(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint16_t *buf);
 bool AHCI_write(HBA_PORT *port, uint32_t startl, uint32_t starth, uint32_t count, uint32_t *buf);
 int find_cmdslot(HBA_PORT *port);

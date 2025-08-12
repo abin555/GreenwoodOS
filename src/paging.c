@@ -26,7 +26,7 @@ void page_holding_pen(){
     }
 }
 
-struct cpu_state page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
     register uint32_t eax asm("eax");
     asm("mov eax, cr2");
 
@@ -51,7 +51,7 @@ struct cpu_state page_error(struct cpu_state *cpu __attribute__((unused)), struc
     task_running_idx = 0;
 
     print_serial("Returning Task\n");
-    return *cpu;
+    return;
 }
 
 uint32_t get_physical(uint32_t address){

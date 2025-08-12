@@ -2,26 +2,26 @@
 
 void exception_holding();
 
-struct cpu_state exception_divide_by_zero(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void exception_divide_by_zero(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	print_serial("Divide by zero from %s @ 0x%x\n", tasks[task_running_idx].task_name, stack->eip);
 	print_console(tasks[task_running_idx].console, "Divide by zero, terminating.\n");
 	//print_stack_trace(cpu.ebx, 10);
 	stop_task(task_running_idx);
 	switch_to_task(&tasks[task_running_idx], &tasks[0], task_running_idx, 0);
-	return *cpu;
+	return;
 }
 
-struct cpu_state exception_invalid_opcode(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void exception_invalid_opcode(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	print_serial("Invalid Opcode @ 0x%x\n", stack->eip);
 	print_console(tasks[task_running_idx].console, "Invalid Opcode @ 0x%x\n", stack->eip);
 	print_stack_trace(cpu->ebx, 10);
 	stop_task(task_running_idx);
 	override_state_return = true;
 	most_recent_int_stack_state.eip = (uint32_t) &exception_holding;
-	return *cpu;
+	return;
 }
 
-struct cpu_state exception_gpf(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void exception_gpf(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	print_serial("General Protection Fault @ 0x%x Task %s\n", stack->eip, tasks[task_running_idx].task_name);
 	print_serial("ESP: 0x%x\nEBP: 0x%x\n", cpu->esp, cpu->ebp);
 	print_console(tasks[task_running_idx].console, "General Protection Fault @ 0x%x Task %s\n", stack->eip, tasks[task_running_idx].task_name);
@@ -31,15 +31,15 @@ struct cpu_state exception_gpf(struct cpu_state *cpu __attribute__((unused)), st
 	stop_task(task_running_idx);
 	//override_state_return = true;
 	//most_recent_int_stack_state.eip = (uint32_t) &exception_holding;
-	return *cpu;
+	return;
 }
 
-struct cpu_state exception_3(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
+void exception_3(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	print_serial("Exception #3 from %s @ %x\n", tasks[task_running_idx].task_name, stack->eip);
 	//print_stack_trace(cpu.ebx, 10);
 	stop_task(task_running_idx);
 	switch_to_task(&tasks[task_running_idx], &tasks[0], task_running_idx, 0);
-	return *cpu;
+	return;
 }
 
 void exceptions_init(){

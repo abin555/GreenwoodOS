@@ -18,6 +18,6 @@
 
 void init_syscalls();
 
-struct cpu_state syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
+void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
 
 #endif
