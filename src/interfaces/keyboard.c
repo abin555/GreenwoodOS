@@ -232,7 +232,7 @@ char kbd_getChar(){
 
 char getc_blk(){
 	uint32_t c = 0;
-	return (char) (c);
+	//return (char) (c);
 	uint32_t current_ascii_idx = KBD_ascii_buffer_idx;
 	while(1){
 		if(tasks[task_running_idx].window != &windows[window_selected]){
