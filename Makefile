@@ -75,7 +75,7 @@ OBJECTS = \
 		src/ap_trampoline.o
 		
 CC = i386-elf-gcc
-CFLAGS = -nostdlib -fno-builtin -fno-stack-protector \
+CFLAGS = -nostdlib -fno-builtin \
 	-nostartfiles -nodefaultlibs -Wall -Wextra -Werror -I./include -I./src/interfaces -I./src/drivers -I./src/desktop -I./src/networking/ -I./src/audio/ -I. -I./src/uACPI/include/ -masm=intel -g -c
 LDFLAGS = -T link.ld
 AS = nasm

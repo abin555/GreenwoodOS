@@ -368,13 +368,13 @@ char ps2_expect_ack(){
 
 uint8_t keyboard_scancode;
 
-struct cpu_state ps2_keyboard_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+struct cpu_state ps2_keyboard_handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	pic_acknowledge(33);
     //print_serial("[KEYBOARD]\n");
 	uint8_t scancode = inb(PS2_DATA);
 	////print_serial("[PS/2 Keyboard] Interrupt %x\n", scancode);
 	kbd_recieveScancode(scancode, PS2_KBD);
-	return cpu;
+	return *cpu;
 }
 
 void ps2_keyboard_init(int device){
@@ -408,7 +408,7 @@ uint8_t mouse_byte[3];
 #define MOUSE_F_BIT  0x20
 #define MOUSE_V_BIT  0x08
 
-void ps2_mouse_handler(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+struct cpu_state ps2_mouse_handler(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
     uint8_t status = ps2_read(MOUSE_STATUS);
     if(mouse_cycle > 2) mouse_cycle = 0;
 
@@ -418,7 +418,7 @@ void ps2_mouse_handler(struct cpu_state cpu __attribute__((unused)), struct stac
 			switch (mouse_cycle) {
 				case 0:
 					mouse_byte[0] = mouse_in;
-					if (!(mouse_in & MOUSE_V_BIT)) return;
+					if (!(mouse_in & MOUSE_V_BIT)) return *cpu;
 					mouse_cycle += 1;
 					break;
 				case 1:
@@ -450,6 +450,7 @@ void ps2_mouse_handler(struct cpu_state cpu __attribute__((unused)), struct stac
     
     
     pic_acknowledge(44);
+    return *cpu;
 }
 
 void ps2_mouse_init(int device){

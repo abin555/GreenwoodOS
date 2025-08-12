@@ -26,16 +26,16 @@ void page_holding_pen(){
     }
 }
 
-struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct stack_state stack __attribute__((unused))){
+struct cpu_state page_error(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
     register uint32_t eax asm("eax");
     asm("mov eax, cr2");
 
-    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", stack.eip, stack.error_code, eax, tasks[task_running_idx].task_name, task_running_idx);
+    print_serial("\nERROR: PAGE FAULT! @ INST 0x%x ERRNO: %x ADDR: 0x%x \"%s\" #%d\n", stack->eip, stack->error_code, eax, tasks[task_running_idx].task_name, task_running_idx);
     //print_console(kernel_console, "\nERROR: PAGE FAULT! @ 0x%x (SLOT %d OR %d)\n", stack.eip, tasks[task_running_idx].program_slot, program_active_slot);
-    print_stack_trace(cpu.ebp, 10);
+    print_stack_trace(cpu->ebp, 10);
     fb_print(0,0,"PAGE FAULT!");
     char errbuff[50];
-    snprintf(errbuff, sizeof(errbuff), "0x%x\n\0", stack.eip);
+    snprintf(errbuff, sizeof(errbuff), "0x%x\n\0", stack->eip);
     fb_print(0,8,errbuff);
     //asm("hlt");
     //stop_task(task_running_idx);
@@ -51,7 +51,7 @@ struct cpu_state page_error(struct cpu_state cpu __attribute__((unused)), struct
     task_running_idx = 0;
 
     print_serial("Returning Task\n");
-    return cpu;
+    return *cpu;
 }
 
 uint32_t get_physical(uint32_t address){

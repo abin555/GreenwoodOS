@@ -5,7 +5,7 @@ struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
 
 unsigned int BUFFER_COUNT;
-struct cpu_state (*interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT])(struct cpu_state, struct stack_state);
+int_hndl_t interrupt_handlers[INTERRUPT_DESCRIPTOR_COUNT];
 
 unsigned int INT_currentInterrupt;
 
@@ -79,7 +79,7 @@ void IRQ_clear_mask(unsigned char IRQline) {
     outb(port, value);     
 }
 
-void interrupt_add_handle(uint8_t interrupt, void* handler){
+void interrupt_add_handle(uint8_t interrupt, int_hndl_t handler){
 	interrupt_handlers[interrupt] = handler;
 }
 
@@ -175,7 +175,7 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
 	
 	if((uint32_t) interrupt_handlers[interrupt]){
-		cpu = interrupt_handlers[interrupt](cpu, stack);
+		cpu = interrupt_handlers[interrupt](&cpu, &stack);
 		
 		if(override_state_return == true){
 			*(struct stack_state *)(saved_stack_esp+sizeof(struct cpu_state)+sizeof(unsigned int)) = most_recent_int_stack_state;
