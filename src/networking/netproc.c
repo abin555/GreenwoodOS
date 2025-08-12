@@ -15,6 +15,7 @@
 #define NETACTION_QUEUE_LEN 100
 
 int netproc_queue_needs_attention;
+int nproc_tidx;
 
 struct NETPROC_QUEUE {
     struct netproc_req_entry {
@@ -52,6 +53,11 @@ struct NETPROC_PENDING {
     } entries[NETACTION_QUEUE_LEN];
 } netproc_pending;
 
+void netproc_task_resume(){
+    print_serial("[NETPROC] Resuming Task #%d\n", nproc_tidx);
+    tasks[nproc_tidx].schedule_type = ALWAYS;
+}
+
 int netproc_addToQueue(int caller_pid, struct netproc_request request){
     for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
         struct netproc_req_entry *req = &netproc_queue.entries[i];
@@ -71,6 +77,7 @@ int netproc_addToQueue(int caller_pid, struct netproc_request request){
                     break;
             }
             print_serial("[NETPROC] OS added to queue idx %d, PID %d, callback 0x%x\n", i, req->pid, callback);
+            netproc_task_resume();
             return 0;
         }
     }
@@ -90,6 +97,7 @@ int netproc_addToPending(int pid, struct netproc_request request){
                 pend->reply.http_reply.nparts = 0;
             }
             return 0;
+            netproc_task_resume();
         }
     }
     return 1;
@@ -231,14 +239,18 @@ void netprocess_pending(struct CONSOLE *con){
 }
 
 int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unused))){
-    print_serial("[NETPROC] Starting Process\n");
+    nproc_tidx = task_running_idx;
+    print_serial("[NETPROC] Starting Process (Task ID #%d)\n", nproc_tidx);
     set_schedule(ALWAYS);
     struct WINDOW *win = window_open("NETPROC", 1);
     struct CONSOLE *con = console_open(win);
 
     while(1){
         if(!netproc_queue_needs_attention && !netproc_pend_needs_attention){
+            //print_serial("[NETPROC] Nothing to do, pausing\n");
+            //set_schedule(NEVER);
             netprocess_yield();
+            continue;
         }
         if(netproc_queue_needs_attention){
             netprocess_queue(con);
@@ -296,6 +308,7 @@ int netproc_checkPending_icmp_reply(uint8_t source_ip[4], unsigned int packet_si
             pend->reply.icmp_reply.source_ip[3] = source_ip[3];
             netproc_pend_needs_attention = 1;       
             print_serial("[NETPROC interrupt backend] ICMP reply set in queue, awaiting addressing\n");     
+            netproc_task_resume();
             return 0;
         }
     }
@@ -319,6 +332,7 @@ int netproc_checkPending_http_response(uint16_t port, void *buf, size_t size){
             pend->reply.http_reply.nparts++;
             netproc_pend_needs_attention = 1;       
             print_serial("[NETPROC interrupt backend] HTTP reply set in queue, awaiting addressing\n");     
+            netproc_task_resume();
             return 0;
         }
     }

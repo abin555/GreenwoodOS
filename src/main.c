@@ -79,11 +79,6 @@ void kernel_task(int argc, char **argv){
 
     kernel_console = NULL;
     struct task_state *kernel_task = &tasks[task_running_idx];
-    //udp_init();
-    //dhcp_init(ethernet_getDriver());
-    //tcp_init();
-    
-    //netfs_init();    
 
     monitors_init();
 
@@ -102,7 +97,15 @@ void kernel_task(int argc, char **argv){
 
     audio_init();    
     IDT_dump();
+
+
+    udp_init();
+    dhcp_init(ethernet_getDriver());
+    tcp_init();
+    netfs_init();
     //netproc_init();
+    
+    
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
     //exec("/A/wolf/wolf.elf", 0, NULL);
     MEM_printRegions();
