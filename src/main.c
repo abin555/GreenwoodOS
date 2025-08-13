@@ -103,7 +103,7 @@ void kernel_task(int argc, char **argv){
     dhcp_init(ethernet_getDriver());
     tcp_init();
     netfs_init();
-    //netproc_init();
+    netproc_init();
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");

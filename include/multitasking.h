@@ -81,6 +81,7 @@ void multitask_start();
 void list_tasks();
 int task_get_slot(int task_idx);
 void set_schedule(ScheduleType type);
+void set_schedule_task(int taskID, ScheduleType type);
 
 void task_yield();
 

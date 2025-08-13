@@ -179,6 +179,11 @@ void set_schedule(ScheduleType type){
     tasks[task_running_idx].schedule_type = type;
 }
 
+void set_schedule_task(int taskID, ScheduleType type){
+    print_serial("[TASK] Set Task %d (\"%s\") schedule type to %d\n", taskID, tasks[taskID].task_name, type);
+    tasks[taskID].schedule_type = type;
+}
+
 void stop_task(int8_t task_idx){
     if(tasks[task_idx].end_callback != NULL){
         select_program(tasks[task_idx].program_slot);

@@ -55,7 +55,7 @@ struct NETPROC_PENDING {
 
 void netproc_task_resume(){
     print_serial("[NETPROC] Resuming Task #%d\n", nproc_tidx);
-    tasks[nproc_tidx].schedule_type = ALWAYS;
+    set_schedule_task(nproc_tidx, ALWAYS);
 }
 
 int netproc_addToQueue(int caller_pid, struct netproc_request request){
@@ -247,8 +247,8 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
 
     while(1){
         if(!netproc_queue_needs_attention && !netproc_pend_needs_attention){
-            //print_serial("[NETPROC] Nothing to do, pausing\n");
-            //set_schedule(NEVER);
+            print_serial("[NETPROC] Nothing to do, pausing\n");
+            set_schedule(NEVER);
             netprocess_yield();
             continue;
         }
