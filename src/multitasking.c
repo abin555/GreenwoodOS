@@ -396,3 +396,7 @@ int task_get_slot(int task_idx){
     print_serial("[TASK] Got slot %d\n", slot);
     return slot;
 }
+
+int task_getCurrentID(){
+    return task_running_idx;
+}

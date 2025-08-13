@@ -72,7 +72,8 @@ OBJECTS = \
 		src/monitors.o \
 		src/audio/mic.o \
 		src/ap_startup.o \
-		src/ap_trampoline.o
+		src/ap_trampoline.o \
+		src/drivers/kernel_fn.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin \

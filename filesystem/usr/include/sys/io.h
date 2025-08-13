@@ -1,8 +1,8 @@
 #ifndef SYS_IO_H
 #define SYS_IO_H
 
-#define O_READ 0b1
-#define O_WRITE 0b10
+#define O_READ 1
+#define O_WRITE 2
 
 int open(char *file, int flags);
 void close(int fd);

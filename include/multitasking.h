@@ -95,4 +95,6 @@ int fork();
 int task_fork(struct task_state *task);
 void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stack_state *stack);
 void tasking_setup_kernel_stack();
+
+int task_getCurrentID();
 #endif

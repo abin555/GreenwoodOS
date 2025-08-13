@@ -42,6 +42,7 @@
 #include "netproc.h"
 #include "stddef.h"
 #include "monitors.h"
+#include "kernel_fn.h"
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -68,7 +69,7 @@ void kernel_task(int argc, char **argv){
             '-'
         )
     );
-
+    kernel_fn_init();
 
     window_init();
     console_init();
