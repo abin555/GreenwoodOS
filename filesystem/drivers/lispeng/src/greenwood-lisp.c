@@ -16,7 +16,7 @@ char *slurp(const char *path){
     if(!buf)
         return NULL;
     
-    fread(buf, 1, len, file);
+    fread(buf, len, 1, file);
     buf[len] = 0;
     fclose(file);
     return buf;
@@ -331,6 +331,13 @@ Atom make_real(float real){
     Atom a;
     a.type = Atom_REAL;
     a.value.real = real;
+    return a;
+}
+
+Atom make_ptr(void *ptr){
+    Atom a;
+    a.type = Atom_PTR;
+    a.value.ptr = ptr;
     return a;
 }
 

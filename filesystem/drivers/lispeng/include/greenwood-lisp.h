@@ -29,7 +29,8 @@ struct Atom{
         Atom_STRING,
         Atom_BUILTIN,
         Atom_CLOSURE,
-        Atom_MACRO
+        Atom_MACRO,
+        Atom_PTR
     } type;
 
     union {
@@ -39,6 +40,7 @@ struct Atom{
         Builtin builtin;
         char *string;
         float real;
+        void *ptr;
     } value;
 };
 
@@ -62,6 +64,7 @@ Atom make_sym(const char *s);
 Atom make_string(char *s);
 Atom make_builtin(Builtin fn);
 Atom make_real(float real);
+Atom make_ptr(void *ptr);
 
 Atom copy_list(Atom list);
 

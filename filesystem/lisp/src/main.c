@@ -6,11 +6,11 @@
 #include <sys/console.h>
 #include <sys/task.h>
 
-#include "greenwood-lisp.h"
+#include "client.h"
 
 
-#define WIDTH 400
-#define HEIGHT 400
+#define WIDTH 496
+#define HEIGHT 418
 
 void draw_cursor(int i);
 struct Viewport *vp;
@@ -20,7 +20,7 @@ int term_width;
 int term_height;
 
 struct LISP_DRIVER {
-    Atom env;
+    Atom *env;
 
     int (*env_set)(Atom, Atom, Atom);
     int (*env_get)(Atom env, Atom symbol, Atom *result);
@@ -55,24 +55,30 @@ int main(int argc, int argv[]){
     fclose(lisp_driver_file);
 
     printf("Opening Greenwood LISP Client\n");
-    vp = vp_open(400, 400, "Greenwood LISP Client");
+    vp = vp_open(WIDTH, HEIGHT, "Greenwood LISP Client");
     backbuf = (uint32_t *) malloc(WIDTH * HEIGHT *sizeof(uint32_t));
+    memset(backbuf, 0, WIDTH * HEIGHT *sizeof(uint32_t));
 	vp_set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
     vp_add_event_handler(vp, event_handler);
+    vp->loc.h = 400;
     console = console_open_vp(vp);
+    vp->loc.h = 418;
 
 	term_width = WIDTH / 8;
 	term_height = HEIGHT / 8;
 
     printf("Greenwood LISP Version 0.2\n");
+    FILE *serial = fopen("/-/dev/serial", "w");
+    fprintf(serial, "env @ 0x%x\n", driver.env);
+    fclose(serial);
     
     Atom expr, result;
     const char *p = "(* 4 5)";
     Error err;
 
     int idx = 0;
-    char *termbuf = malloc(term_width);
-    memset(termbuf, 0, term_width);
+    char *termbuf = malloc(term_width*3);
+    memset(termbuf, 0, term_width*3);
     set_schedule(ONFOCUS);
 
     running = 1;
@@ -87,20 +93,20 @@ int main(int argc, int argv[]){
 		}
 		else{
 			termbuf[idx++] = c;
-			if(idx > term_width) idx = 0;
+			if(idx > term_width*3) idx = 0;
 			
 		}
-		for(int i = 0; i < term_width; i++){
-			vp_drawChar(vp, 8*i,(term_height-1)*8, termbuf[i], 0xFFFFFF, 0x0);
+		for(int i = 0; i < term_width*3; i++){
+			vp_drawChar(vp, 8*(i % term_width),(term_height-4 + (i / term_width))*8, termbuf[i], 0xFFFFFF, 0x0);
 		}
 
         if(c == 10){
             p = termbuf;
-            err = driver.read_expr(p, &p, &expr);
+            err = read_expr(p, &p, &expr);
             puts(termbuf);
             yield();
             if(!err)
-                err = driver.eval_expr(expr, driver.env, &result);
+                err = eval_expr(expr, driver.env, &result);
             switch(err){
                 case Error_OK:
                     print_expr(result);
@@ -135,7 +141,7 @@ int main(int argc, int argv[]){
 
 void draw_cursor(int i){
 	for(int x = 0; x < 8; x++){
-		backbuf[WIDTH * ((term_height) * 8 - 2) + (i*8) + x] = 0xFFFFFF;
+		backbuf[WIDTH * ((term_height + (i / term_width)) * 8 - 2) + ((i % term_width)*8) + x] = 0xFFFFFF;
 	}
 }
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){

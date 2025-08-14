@@ -29,7 +29,8 @@ struct Atom{
         Atom_STRING,
         Atom_BUILTIN,
         Atom_CLOSURE,
-        Atom_MACRO
+        Atom_MACRO,
+        Atom_PTR
     } type;
 
     union {
@@ -39,6 +40,7 @@ struct Atom{
         Builtin builtin;
         char *string;
         float real;
+        void *ptr;
     } value;
 };
 
@@ -53,34 +55,14 @@ static const Atom nil = { Atom_NIL };
 #define car(p) ((p).value.pair->atom[0])
 #define cdr(p) ((p).value.pair->atom[1])
 #define nilp(atom) ((atom).type == Atom_NIL)
-int listp(Atom expr);
-
-Atom cons(Atom car_val, Atom cdr_val);
-
-Atom make_int(int x);
-Atom make_sym(const char *s);
-Atom make_string(char *s);
-Atom make_builtin(Builtin fn);
-Atom make_real(float real);
-
-Atom copy_list(Atom list);
-
-Atom env_create(Atom parent);
-int env_get(Atom env, Atom symbol, Atom *result);
-int env_set(Atom env, Atom symbol, Atom value);
 
 void print_expr(Atom atom);
-
-int make_closure(Atom env, Atom args, Atom body, Atom *result);
-int apply(Atom fn, Atom args, Atom *result);
 
 int lex(const char *str, const char **start, const char **end);
 int parse_simple(const char *start, const char *end, Atom *result);
 int read_list(const char *start, const char **end, Atom *result);
 int read_expr(const char *input, const char **end, Atom *result);
-int eval_expr(Atom expr, Atom env, Atom *result);
+int eval_expr(Atom expr, Atom *env, Atom *result);
 
-char *slurp(const char *path);
-void load_file(Atom env, const char *path);
 
 #endif

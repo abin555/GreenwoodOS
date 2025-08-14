@@ -411,7 +411,7 @@ char elf_do_reloc(int file, Elf32_Ehdr hdr, Elf32_Shdr shdr, void *buffer){
 				break;
 			case R_386_32:
 				offset = DO_386_32(symval, (uint32_t) buffer);
-				//printf("Reloc 0x%x @ 0x%x from 0x%x (0x%x) to 0x%x\n", rel.r_offset, ref, symval, *ref, offset);
+				printf("Reloc 0x%x @ 0x%x from 0x%x (0x%x) to 0x%x\n", rel.r_offset, ref, symval, *ref, offset);
 				*ref = offset;
 				break;
 			default:

@@ -28,8 +28,10 @@ char *defaultlib[] = {
     "(defmacro (let defs . body) `((lambda ,(map car defs) ,@body) ,@(map cadr defs)))"
 };
 
+Atom env;
+
 struct LISP_DRIVER {
-    Atom env;
+    Atom *env;
 
     int (*env_set)(Atom, Atom, Atom);
     int (*env_get)(Atom env, Atom symbol, Atom *result);
@@ -40,6 +42,7 @@ struct LISP_DRIVER {
     Atom (*make_string)(char *s);
     Atom (*make_builtin)(Builtin fn);
     Atom (*make_real)(float real);
+    Atom (*make_ptr)(void *ptr);
     Atom (*copy_list)(Atom list);
     int (*make_closure)(Atom env, Atom args, Atom body, Atom *result);
     int (*apply)(Atom fn, Atom args, Atom *result);
@@ -50,6 +53,7 @@ struct LISP_DRIVER {
 struct LISP_DRIVER driver;
 
 int init_driver(){
+    printf("Lisp Driver Init\n");
     FILE *metaFile = fopen("/-/fsCTRL", "r");
     if(metaFile == NULL){
         printf("Cannot open file!\n");
@@ -59,6 +63,7 @@ int init_driver(){
     fread(&meta, sizeof(meta), 1, metaFile);
     fclose(metaFile);
 
+    driver.env = &env;
     driver.env_set = env_set;
     driver.env_get = env_get;
     driver.listp = listp;
@@ -68,6 +73,7 @@ int init_driver(){
     driver.make_string = make_string;
     driver.make_builtin = make_builtin;
     driver.make_real = make_real;
+    driver.make_ptr = make_ptr;
     driver.copy_list = copy_list;
     driver.make_closure = make_closure;
     driver.apply = apply;
@@ -92,45 +98,53 @@ int main(int argc, int argv[]){
     printf("Greenwood LISP Version 0.2\n");
 
 
-    driver.env = env_create(nil);
+    env = env_create(nil);
     
-    env_set(driver.env, make_sym("CAR"), make_builtin(builtin_car));
-    env_set(driver.env, make_sym("CDR"), make_builtin(builtin_cdr));
-    env_set(driver.env, make_sym("CONS"), make_builtin(builtin_cons));
-    env_set(driver.env, make_sym("+"), make_builtin(builtin_add));
-    env_set(driver.env, make_sym("-"), make_builtin(builtin_sub));
-    env_set(driver.env, make_sym("*"), make_builtin(builtin_mult));
-    env_set(driver.env, make_sym("/"), make_builtin(builtin_div));
-    env_set(driver.env, make_sym("T"), make_sym("T"));
-    env_set(driver.env, make_sym("="), make_builtin(builtin_numeq));
-    env_set(driver.env, make_sym("<"), make_builtin(builtin_less));
-    env_set(driver.env, make_sym("TYPE?"), make_builtin(builtin_type));
-    env_set(driver.env, make_sym("TYPE_STR"), make_builtin(builtin_typeToStr));
-    env_set(driver.env, make_sym("STR"), make_builtin(builtin_strConv));
-    env_set(driver.env, make_sym("NTH"), make_builtin(builtin_nth));
-    env_set(driver.env, make_sym("APPLY"), make_builtin(builtin_apply));
-    env_set(driver.env, make_sym("EQ?"), make_builtin(builtin_eq));
-    env_set(driver.env, make_sym("PAIR?"), make_builtin(builtin_pair));
-    env_set(driver.env, make_sym("REAL"), make_builtin(builtin_real));
+    env_set(env, make_sym("CAR"), make_builtin(builtin_car));
+    env_set(env, make_sym("CDR"), make_builtin(builtin_cdr));
+    env_set(env, make_sym("CONS"), make_builtin(builtin_cons));
+    env_set(env, make_sym("+"), make_builtin(builtin_add));
+    env_set(env, make_sym("-"), make_builtin(builtin_sub));
+    env_set(env, make_sym("*"), make_builtin(builtin_mult));
+    env_set(env, make_sym("/"), make_builtin(builtin_div));
+    env_set(env, make_sym("T"), make_sym("T"));
+    env_set(env, make_sym("="), make_builtin(builtin_numeq));
+    env_set(env, make_sym("<"), make_builtin(builtin_less));
+    env_set(env, make_sym("TYPE?"), make_builtin(builtin_type));
+    env_set(env, make_sym("TYPE_STR"), make_builtin(builtin_typeToStr));
+    env_set(env, make_sym("STR"), make_builtin(builtin_strConv));
+    env_set(env, make_sym("NTH"), make_builtin(builtin_nth));
+    env_set(env, make_sym("APPLY"), make_builtin(builtin_apply));
+    env_set(env, make_sym("EQ?"), make_builtin(builtin_eq));
+    env_set(env, make_sym("PAIR?"), make_builtin(builtin_pair));
+    env_set(env, make_sym("REAL"), make_builtin(builtin_real));
 
     if(init_driver()){
         printf("Error setting up driver!\n");
         return 1;
     }
     
+    printf("LISP Driver Setup!\n");
+
     Atom expr, result;
     const char *p = "(* 4 5)";
     Error err;
 
-    //load_file(env, "/A/LISP/LIB.GWL");
+    printf("Lib @ 0x%x\n", defaultlib);
+    p = "(defmacro (defun name args expr) (cons \'define (cons name (cons (cons \'lambda (cons args (cons expr NIL))) NIL))))";
+    read_expr(p, &p, &expr);
+    eval_expr(expr, env, &result);
+    load_file(env, "/A/drivers/lispeng/lib.gwl");
+    /*
     for(int i = 0; i < 15; i++){
         p = defaultlib[i];
+        printf("Parsing: 0x%x \"%s\"\n", p, p);
         err = read_expr(p, &p, &expr);
         if(err){
             printf("Error while reading! %d\n", err);
             continue;
         }
-        err = eval_expr(expr, driver.env, &result);
+        err = eval_expr(expr, env, &result);
         if(err){
             printf("Error in expression:\n\t");
             print_expr(expr);
@@ -141,7 +155,8 @@ int main(int argc, int argv[]){
             printf("\n");
         }
     }
-    
+    */
+    printf("Moving into the background!\n");
     set_schedule(NEVER);
     yield();
     while(1){
