@@ -10,5 +10,3 @@
 (defun append (a b) (foldr cons b a))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
-(defmacro (quasiquote x) (if (pair? x) (if (eq? (car x) 'unquote) (cadr x) (if (eq? (caar x) 'unquote-splicing) (list 'append (cadr (car x)) (list 'quasiquote (cdr x))) (list 'cons (list 'quasiquote (car x)) (list 'quasiquote (cdr x))))) (list 'quote x)))
-(defmacro (let defs . body) `((lambda ,(map car defs) ,@body) ,@(map cadr defs)))

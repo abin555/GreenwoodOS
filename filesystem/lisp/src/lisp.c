@@ -254,8 +254,7 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
             if(!nilp(args)){
                 return Error_Args;
             }
-            print_expr(*env);
-            putchar('\n');
+            *result = *env;
             return Error_OK;
         }
         else if(!strcmp(op.value.symbol, "LAMBDA")){

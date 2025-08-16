@@ -32,6 +32,55 @@ int builtin_vp_close(struct Atom args, struct Atom *result){
     return Error_OK;
 }
 
+int builtin_malloc(struct Atom args, struct Atom *result){
+    if(nilp(args) || nilp(car(args)) || !nilp(cdr(args))) return Error_Args;
+    Atom size = car(args);
+    if(size.type != Atom_INT) return Error_Type;
+    void *ptr = malloc(size.value.integer);
+    *result = driver.make_ptr(ptr);
+    return Error_OK;
+}
+
+int builtin_vp_set_buffer(struct Atom args, struct Atom *result){
+    if(nilp(args) || nilp(car(args)) || nilp(cdr(args)) || nilp(car(cdr(args))) || nilp(cdr(cdr(args))) || nilp(car(cdr(cdr(args)))) || !nilp(cdr(cdr(cdr(args))))) return Error_Args;
+    Atom vp = car(args);
+    Atom ptr = car(cdr(args));
+    Atom size = car(cdr(cdr(args)));
+    if(
+        vp.type != Atom_PTR ||
+        ptr.type != Atom_PTR ||
+        size.type != Atom_INT
+    ) return Error_Type;
+    vp_set_buffer(
+        vp.value.ptr,
+        ptr.value.ptr,
+        size.value.integer
+    );
+    *result = nil;
+    return Error_OK;
+}
+
+int buuiltin_putstring(struct Atom args, struct Atom *result){
+    if(nilp(args) || nilp(car(args)) || nilp(cdr(args)) || nilp(car(cdr(args))) || nilp(cdr(cdr(args))) || nilp(car(cdr(cdr(args)))) || nilp(car(cdr(cdr(cdr(args))))) || !nilp(cdr(cdr(cdr(cdr(args)))))) return Error_Args;
+    Atom vp = car(args);
+    Atom x = car(cdr(args));
+    Atom y = car(cdr(cdr(args)));
+    Atom c = car(cdr(cdr(cdr(args))));
+    if(
+        vp.type != Atom_PTR ||
+        x.type != Atom_INT ||
+        y.type != Atom_INT ||
+        c.type != Atom_STRING
+    ) return Error_Type;
+    int len = strlen(c.value.string);
+    for(int i = 0; i < len; i++){
+        vp_drawChar(vp.value.ptr, x.value.integer+i*8, y.value.integer, c.value.string[i], 0xFFFFFFFF, 0x0);
+    }
+    vp_copy(vp.value.ptr);
+    *result = nil;
+    return Error_OK;
+}
+
 int main(int argc, char **argv){
     FILE *lisp_driver_file = fopen("/-/lisp/env", "r");
     if(lisp_driver_file == NULL){
@@ -42,5 +91,8 @@ int main(int argc, char **argv){
     fclose(lisp_driver_file);
     driver.env_set(*driver.env, driver.make_sym("VP_OPEN"), driver.make_builtin(builtin_vp_open));
     driver.env_set(*driver.env, driver.make_sym("VP_CLOSE"), driver.make_builtin(builtin_vp_close));
+    driver.env_set(*driver.env, driver.make_sym("MALLOC"), driver.make_builtin(builtin_malloc));
+    driver.env_set(*driver.env, driver.make_sym("VP_BUF"), driver.make_builtin(builtin_vp_set_buffer));
+    driver.env_set(*driver.env, driver.make_sym("VP_WRITE"), driver.make_builtin(buuiltin_putstring));
     return 0;
 }

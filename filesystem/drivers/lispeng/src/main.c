@@ -134,6 +134,12 @@ int main(int argc, int argv[]){
     p = "(defmacro (defun name args expr) (cons \'define (cons name (cons (cons \'lambda (cons args (cons expr NIL))) NIL))))";
     read_expr(p, &p, &expr);
     eval_expr(expr, env, &result);
+    p = "(defmacro (quasiquote x) (if (pair? x) (if (eq? (car x) 'unquote) (cadr x) (if (eq? (caar x) 'unquote-splicing) (list 'append (cadr (car x)) (list 'quasiquote (cdr x))) (list 'cons (list 'quasiquote (car x)) (list 'quasiquote (cdr x))))) (list 'quote x)))";
+    read_expr(p, &p, &expr);
+    eval_expr(expr, env, &result);
+    p = "(defmacro (let defs . body) `((lambda ,(map car defs) ,@body) ,@(map cadr defs)))";
+    read_expr(p, &p, &expr);
+    eval_expr(expr, env, &result);
     load_file(env, "/A/drivers/lispeng/lib.gwl");
     /*
     for(int i = 0; i < 15; i++){

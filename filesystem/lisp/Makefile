@@ -6,8 +6,8 @@ OUTPUT = greenwoodLISP
 
 build:
 	$(CC) $(CFLAGS) src/main.c -o main.o
-	$(CC) $(CFLAGS) src/greenwood-lisp.c -o greenwood-lisp.o
-	$(CC) main.o greenwood-lisp.o -o lisp_client.elf
+	$(CC) $(CFLAGS) src/lisp.c -o lisp.o
+	$(CC) main.o lisp.o -o lisp.elf
 	rm *.o
 
 default: build
