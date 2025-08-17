@@ -212,6 +212,26 @@ int vfs_creat(char *path){
     return -1;
 }
 
+int vfs_creatDirRel(struct DIRECTORY *dir, char *path){
+    char big_path[200];
+	memset(big_path, 0, sizeof(big_path));
+	expandPath(big_path, sizeof(big_path), dir, path);
+    return vfs_creatdir(big_path);
+}
+
+int vfs_creatdir(char *path){
+    print_serial("[VFS] Create directory %s\n", path);
+
+    if(path == NULL) return -1;
+    char driveLetter = path[0];
+    path += 2;
+    struct VFS_Inode *root = vfs_findRoot(driveLetter);
+
+    if(root->interface->fs_creat != NULL)
+        return root->interface->fs_creatDir(root->interface->root, path);
+    return -1;
+}
+
 int vfs_mkpipe(int *writer_fd, int *reader_fd){
     if(writer_fd == NULL || reader_fd == NULL) return -1;
     *writer_fd = vfs_allocFileD();

@@ -927,6 +927,13 @@ int ext2_truncate(void *f, unsigned int len){
 	return 0;
 }
 
+int ext2_creatDir(void *f, char *path){
+	struct EXT2_FS *ext2 = f;
+	ext2_createDirectory(ext2, path);
+	return 0;
+}
+
+
 void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
 	print_serial("[EXT2] Generating Interface for VFS\n");
 	struct VFS_RootInterface *interface = malloc(sizeof(struct VFS_RootInterface));
@@ -940,6 +947,7 @@ void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
 	interface->fs_write = ext2_write;
 	interface->fs_seek = ext2_seek;
 	interface->fs_creat = ext2_createFile;
+	interface->fs_creatDir = ext2_creatDir;
 	interface->fs_listDirectory = ext2_advListDirectory;
 	interface->fs_truncate = ext2_truncate;
 	return interface;

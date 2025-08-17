@@ -33,6 +33,7 @@ struct VFS_RootInterface {
     int (*fs_write)(void *f, void *buf, int nbytes);
     int (*fs_seek)(void *f, int offset, int whence);
     int (*fs_creat)(void *fs, char *path, unsigned int size);
+    int (*fs_creatDir)(void *fs, char *path);
     struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
     int (*fs_truncate)(void *f, unsigned int len);
 };
@@ -77,6 +78,8 @@ int vfs_write(int fd, void *buf, uint32_t nbytes);
 int vfs_seek(int fd, int offset, int whence);
 int vfs_creatRel(struct DIRECTORY *dir, char *path);
 int vfs_creat(char *path);
+int vfs_creatDirRel(struct DIRECTORY *dir, char *path);
+int vfs_creatdir(char *path);
 int vfs_mkpipe(int *writer_fd, int *reader_fd);
 struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path);
 struct DirectoryListing vfs_taskListDirectory(char *path);

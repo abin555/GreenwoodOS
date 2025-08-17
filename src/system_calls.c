@@ -206,6 +206,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 			break;
 		}
 		case 0x1A:{
+			cpu_state.eax = (unsigned int) vfs_creatDirRel(&task->currentDirectory, (char *) cpu->ebx);
 			break;
 		}
 		case 0x1B:{

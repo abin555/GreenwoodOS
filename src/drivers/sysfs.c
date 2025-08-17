@@ -329,6 +329,7 @@ void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
 	interface->fs_write = sysfs_write;
 	interface->fs_seek = sysfs_seek;
 	interface->fs_creat = NULL;
+	interface->fs_creatDir = NULL;
 	interface->fs_listDirectory = sysfs_advListDirectory;
 	interface->fs_truncate = NULL;
 	return interface;
