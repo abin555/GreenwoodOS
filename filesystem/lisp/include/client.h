@@ -58,6 +58,7 @@ static const Atom nil = { Atom_NIL };
 
 void print_expr(Atom atom);
 
+void load_file(Atom *env, char *path);
 int lex(const char *str, const char **start, const char **end);
 int parse_simple(const char *start, const char *end, Atom *result);
 int read_list(const char *start, const char **end, Atom *result);

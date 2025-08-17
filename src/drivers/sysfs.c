@@ -202,7 +202,7 @@ int sysfs_write(void *f, void *buf, int nbytes){
     return i;
 }
 
-void *sysfs_find(void *r, char *path){
+void *sysfs_find(void *r, char *path, unsigned int *meta __attribute__((unused))){
     struct SysFS_Inode *root = r;
     if(root == NULL) return NULL;
     if(path == NULL) return root;
@@ -236,7 +236,7 @@ void *sysfs_find(void *r, char *path){
             //print_serial("[SYSFS] Checking #%d - %s=%s\n", i, root->data.dir.children[i]->name, buf);
             if(!strcmp(buf, root->data.dir.children[i]->name)){
                 if(root->data.dir.children[i]->type == SysFS_Directory){
-                    struct SysFS_Inode *inode_candidate = sysfs_find(root->data.dir.children[i], path+part_len+1);
+                    struct SysFS_Inode *inode_candidate = sysfs_find(root->data.dir.children[i], path+part_len+1, NULL);
                     if(inode_candidate != NULL) return inode_candidate;
                 }
                 else{
@@ -253,7 +253,7 @@ struct DirectoryListing sysfs_advListDirectory(void *fs, char *path){
     struct SysFS_Inode *sysfs = fs;
     struct DirectoryListing listing = {0};
     if(sysfs == NULL || path == NULL) return listing;
-    struct SysFS_Inode *target = sysfs_find(sysfs, path);
+    struct SysFS_Inode *target = sysfs_find(sysfs, path, NULL);
     if(target == NULL) return listing;
 
     if(target->type != SysFS_Directory) return listing;

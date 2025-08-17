@@ -10,7 +10,7 @@ void kernel_fn_init(){
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
     struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
 
-    struct SysFS_Inode *devdir = sysfs_find(sysfs, "dev\0");
+    struct SysFS_Inode *devdir = sysfs_find(sysfs, "dev\0", NULL);
 
     struct SysFS_Chardev *kernel_fn_dev = sysfs_createCharDevice((char *) &kernel_fn_list, sizeof(kernel_fn_list), CDEV_READ);
     struct SysFS_Inode *kernel_fn_inode = sysfs_mkcdev("kernel", kernel_fn_dev);

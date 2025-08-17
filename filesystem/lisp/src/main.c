@@ -45,7 +45,7 @@ int running;
 
 //static char input[2048];
 
-int main(int argc, int argv[]){
+int main(int argc, char **argv){
     FILE *lisp_driver_file = fopen("/-/lisp/env", "r");
     if(lisp_driver_file == NULL){
         printf("Error: lisp engine not running!\n");
@@ -75,6 +75,10 @@ int main(int argc, int argv[]){
     Atom expr, result;
     const char *p = "(* 4 5)";
     Error err;
+
+    if(argc == 2 && argv[1] != NULL){
+        load_file(driver.env, argv[1]);
+    }
 
     int idx = 0;
     char *termbuf = malloc(term_width*3);

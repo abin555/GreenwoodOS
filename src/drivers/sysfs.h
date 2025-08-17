@@ -63,7 +63,7 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
 );
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth);
 
-void *sysfs_find(void *r, char *path);
+void *sysfs_find(void *r, char *path, unsigned int *meta);
 
 struct VFS_File;
 int sysfs_read(void *f, void *buf, int nbytes);

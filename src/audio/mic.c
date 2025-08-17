@@ -21,5 +21,5 @@ void microphone_init(void *audio_device){
     );
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
     struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
-    sysfs_addChild(sysfs_find(sysfs, "dev\0"), micFile);
+    sysfs_addChild(sysfs_find(sysfs, "dev\0", NULL), micFile);
 }

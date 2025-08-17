@@ -2,6 +2,62 @@
 #include "client.h"
 #include "lisp_driver.h"
 
+char *slurp(const char *path){
+    FILE *file;
+    char *buf;
+    long len;
+    file = fopen(path, "r");
+    if(!file)
+        return NULL;
+    fseek(file, 0, SEEK_END);
+    len = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    buf = malloc(len + 1);
+    if(!buf)
+        return NULL;
+    
+    fread(buf, len, 1, file);
+    buf[len] = 0;
+    fclose(file);
+    return buf;
+}
+
+void load_file(Atom *env, char *path){
+    char *text;
+    printf("Reading %s...\n", (char *) path);
+    text = slurp(path);
+    if(text != NULL) {
+        const char *p = text;
+        Atom expr;
+        puts("Evaluating\n");
+        Error err = Error_OK;
+        while(err == Error_OK){
+            err = read_expr(p, &p, &expr);
+            if(err){
+                puts("Error while reading!\n");
+                break;
+            }
+            else{
+                print_expr(expr);
+                putchar('\n');
+            }
+            Atom result;
+            err = eval_expr(expr, env, &result);
+            if(err){
+                puts("Error in expression:\n\t");
+                print_expr(expr);
+                putchar('\n');
+            }
+            else{
+                print_expr(result);
+                putchar('\n');
+            }
+        }
+        free(text);
+    }
+}
+
 int lex(const char *str, const char **start, const char **end){
     const char *ws = " \t\n";
     const char *delim = "() \t\n";
@@ -210,7 +266,7 @@ void print_expr(Atom atom){
     }
     //putchar('\n');
 }
-
+extern int running;
 int eval_expr(Atom expr, Atom *env, Atom *result){
     Atom op, args, p;
     Error err;
@@ -318,6 +374,10 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
 
 
             return eval_expr(expr, env, result);
+        }
+        else if(!strcmp(op.value.symbol, "EXIT")){
+            running = 0;
+            return Error_OK;
         }
     }
 

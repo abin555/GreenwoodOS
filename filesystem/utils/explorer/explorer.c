@@ -449,12 +449,13 @@ void drawRect(
     }
 }
 
-static char *options[3] = {
+static char *options[4] = {
     "New File",
     "New Folder",
-    "Monitor"
+    "Monitor",
+    "Run LISP"
 };
-int num_options = 3;
+int num_options = 4;
 
 void drawRightClickMenu(struct RightClickMenu *rightClickMenu){
     drawRect(
@@ -571,6 +572,17 @@ int handleRightClickMenu(struct RightClickMenu *rightClickMenu){
             for(int i = 0; i < dir.entries[rclick_selection+2].name_len; i++) arg[1][i] = dir.entries[rclick_selection+2].filename[i];
             //sel = -1;
             exec("/A/utils/monitor/monitor.elf", 2, arg);
+        }
+    }
+    if(mouse_entry_hover == 3){
+        printf("Selection %d %s\n", rclick_selection, dir.entries[rclick_selection+2].filename);
+        if(dir.entries[rclick_selection+2].type == 0){
+            char **arg = malloc(sizeof(char *) * 2);
+            arg[0] = 0x0;
+            arg[1] = malloc(dir.entries[rclick_selection+2].name_len);
+            for(int i = 0; i < dir.entries[rclick_selection+2].name_len; i++) arg[1][i] = dir.entries[rclick_selection+2].filename[i];
+            //sel = -1;
+            exec("/A/lisp/lisp.elf", 2, arg);
         }
     }
 

@@ -178,7 +178,7 @@ struct DirectoryListing ext2_advListDirectory(void *fs, char *path);
 
 int ext2_read(void *f, void *buf, int nbytes);
 int ext2_write(void *f, void *buf, int nbytes);
-void *ext2_getInode(void *fs, char *path);
+void *ext2_getInode(void *fs, char *path, uint32_t *meta);
 int ext2_seek(void *f, int offset, int whence);
 void *ext2_generateVFSRoot(struct EXT2_FS *ext2);
 

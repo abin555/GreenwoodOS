@@ -62,7 +62,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         )
     );
     sysfs_setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
-    sysfs_addChild(sysfs_find(sysfs, "sys\0"), desktopCDEV);
+    sysfs_addChild(sysfs_find(sysfs, "sys\0", NULL), desktopCDEV);
     struct SysFS_Inode *cursorCDEV = sysfs_mkcdev(
         "cursorBM",
         sysfs_createCharDevice(
@@ -72,7 +72,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         )
     );
     sysfs_setCallbacks(cursorCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) cursorbmap_write_callback, NULL, NULL, NULL);
-    sysfs_addChild(sysfs_find(sysfs, "sys\0"), cursorCDEV);
+    sysfs_addChild(sysfs_find(sysfs, "sys\0", NULL), cursorCDEV);
     sysfs_debugTree(sysfs, 0);   
 
     struct Icon icons[numIcons];
@@ -199,7 +199,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         exec("/A/utils/clock/clock.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'L'){
-        exec("/A/lisp/LISP.elf", 0, NULL);
+        exec("/A/lisp/lisp.elf", 0, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
@@ -208,9 +208,6 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
                     viewport_toggle_size(global_viewport_list->elements[i].vp);
             }
         }
-    }
-    else if(KBD_flags.ctrl && ascii == 'V'){
-        exec("/A/utils/vaporwave/vaporwave.elf", 0, NULL);
     }
     else if(global_viewport_list->elements[0].inUse){
         if(global_viewport_list->elements[0].vp == NULL) return;

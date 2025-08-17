@@ -90,7 +90,7 @@ uint32_t ext2_get_direntry_inode(struct EXT2_FS *ext2, uint32_t parent_inodeIdx,
 void ext2_debug_print_inode(struct EXT2_Inode *inode){
 	print_serial("[EXT2] Type Perms %x\n", inode->type_perms);
 	print_serial("[EXT2] User Id %x\n", inode->userId);
-	print_serial("[EXT2] Lsb Size %x\n", inode->lsbSize);
+	print_serial("[EXT2] Lsb Size %d\n", inode->lsbSize);
 	print_serial("[EXT2] Last Access %x\n", inode->lastAccessTime);
 	print_serial("[EXT2] Creation %x\n", inode->creationTime);
 	print_serial("[EXT2] Modification %x\n", inode->lastModificationTime);
@@ -739,13 +739,15 @@ int ext2_read(void *f, void *buf, int nbytes){
 
 int ext2_write(void *f, void *buf, int nbytes){
 	struct VFS_File *file = f;
-    //print_serial("[VFS] Writing %d bytes\n", nbytes);
+    //print_serial("[EXT2] Writing %d bytes\n", nbytes);
     struct EXT2_FS *ext2 = file->inode.interface->drive->format_info.ext2;
     struct EXT2_Inode *inode = file->inode.fs.fs;
-
+	
     if((uint32_t)(file->head + nbytes) >= inode->lsbSize){
-        ext2_extendFile(ext2, file->inode.ext2_inode_idx, file->head + nbytes - inode->lsbSize);
+        ext2_extendFile(ext2, file->inode.meta, file->head + nbytes - inode->lsbSize);
+		*inode = ext2_read_inode_data(ext2, file->inode.meta);
     }
+	
     
     uint32_t block_idx = 0;
     uint32_t single_indirect_idx = 0;
@@ -795,7 +797,7 @@ int ext2_write(void *f, void *buf, int nbytes){
         block = ext2_read_block(ext2, indirect_block);
         last_real_block_idx = indirect_block;
     }
-
+	//print_serial("[EXT2] Write Start: %d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
     while((uint32_t) block_head < ext2->block_size && idx < (uint32_t) nbytes){
         ((uint8_t *)block)[block_head] = ((uint8_t *)buf)[idx];
         //print_serial("%d,%d - %c @ %d\n", block_head, idx, block[block_head], last_real_block_idx);
@@ -879,7 +881,7 @@ int ext2_write(void *f, void *buf, int nbytes){
     return idx;
 }
 
-void *ext2_getInode(void *fs, char *path){
+void *ext2_getInode(void *fs, char *path, uint32_t *meta){
 	struct EXT2_FS *ext2 = fs;
 	//print_serial("[EXT2] Looking for %s\n", path);
 	uint32_t inodeIdx = ext2_get_inodeIdx_from_path(ext2, path);
@@ -888,9 +890,9 @@ void *ext2_getInode(void *fs, char *path){
 		return NULL;
 	}
 	//print_serial("[EXT2] Found at inode %d\n", inodeIdx);
-	//int ext2_inode_idx = inodeIdx;
 	struct EXT2_Inode *inode = malloc(sizeof(struct EXT2_Inode));
 	*inode = ext2_read_inode_data(ext2, inodeIdx);
+	*meta = inodeIdx;
 	return inode;
 }
 
@@ -912,6 +914,19 @@ int ext2_seek(void *f, int offset, int whence){
 	return file_idx->head;
 }
 
+int ext2_truncate(void *f, unsigned int len){
+	struct VFS_File *file = f;
+    print_serial("[EXT2] Resizing to %d bytes\n", len);
+    struct EXT2_FS *ext2 = file->inode.interface->drive->format_info.ext2;
+    struct EXT2_Inode *inode = file->inode.fs.fs;
+
+    if((uint32_t)(len) >= inode->lsbSize){
+        ext2_extendFile(ext2, file->inode.meta, inode->lsbSize + len);
+		*inode = ext2_read_inode_data(ext2, file->inode.meta);
+    }
+	return 0;
+}
+
 void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
 	print_serial("[EXT2] Generating Interface for VFS\n");
 	struct VFS_RootInterface *interface = malloc(sizeof(struct VFS_RootInterface));
@@ -926,6 +941,6 @@ void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
 	interface->fs_seek = ext2_seek;
 	interface->fs_creat = ext2_createFile;
 	interface->fs_listDirectory = ext2_advListDirectory;
-	interface->fs_truncate = NULL;
+	interface->fs_truncate = ext2_truncate;
 	return interface;
 }

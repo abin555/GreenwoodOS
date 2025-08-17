@@ -28,7 +28,7 @@ struct VFS_RootInterface {
     char *fs_label;
     void *root;
 
-    void *(*fs_getLink)(void *, char *path);
+    void *(*fs_getLink)(void *, char *path, uint32_t *meta);
     int (*fs_read)(void *f, void *buf, int nbytes);
     int (*fs_write)(void *f, void *buf, int nbytes);
     int (*fs_seek)(void *f, int offset, int whence);
@@ -45,7 +45,7 @@ struct VFS_Inode {
         void *fs;
         struct Pipe *pipe;
     } fs;
-    int ext2_inode_idx;
+    uint32_t meta;
 
     struct VFS_Inode *root;
     struct VFS_RootInterface *interface;

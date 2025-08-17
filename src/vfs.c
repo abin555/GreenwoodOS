@@ -90,7 +90,7 @@ struct VFS_Inode vfs_followLink(struct VFS_Inode *root, char *path){
     result.interface = result.root->interface;
     void *queried = NULL;
     if(root->interface->fs_getLink != NULL)
-        queried = root->interface->fs_getLink(root->interface->root, path);
+        queried = root->interface->fs_getLink(root->interface->root, path, &result.meta);
     
     if(queried != NULL){
         result.isValid = 1;
