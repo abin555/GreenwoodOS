@@ -10,3 +10,4 @@
 (defun append (a b) (foldr cons b a))
 (defun caar (x) (car (car x)))
 (defun cadr (x) (car (cdr x)))
+(exec "/A/drivers/loader.elf" "/A/drivers/lisp_vp/vp.elf")

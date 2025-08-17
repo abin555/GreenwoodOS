@@ -108,7 +108,6 @@ void kernel_task(int argc, char **argv){
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
-    //exec("/A/wolf/wolf.elf", 0, NULL);
     MEM_printRegions();
 
     task_lock = 0;

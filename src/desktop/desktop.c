@@ -108,6 +108,12 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     */
     exec("/A/utils/explorer/explorer.elf", 0, NULL);
 
+    char *loader_argv[] = {
+        "/A/drivers/loader.elf",
+        "/A/drivers/lispeng/lisp.elf"
+    };
+    exec("/A/drivers/loader.elf", 2, loader_argv);
+
     //print_serial("Netprocess is at 0x%x\n", &netprocess);
     //exec("/A/utils/clock/clock.elf", 0, NULL);
 

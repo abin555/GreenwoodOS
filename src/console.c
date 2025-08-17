@@ -237,16 +237,17 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 		}
 	}
 	if(console == NULL || vp == NULL || vp->backbuf == NULL) return NULL;
+	print_serial("[CONSOLE] Opening vp console VP: 0x%x, buffer: 0x%x, size: %d Con: 0x%x\n", vp, vp->backbuf, vp->buf_size, console);
 	memset(console->buf, 0, console->buf_size);
+	memset(vp->backbuf, 0, vp->buf_size);
 	console->view_type = CONSOLE_VIEWPORT;
 	console->active = true;
 	console->cursor = 0;
 	console->last_cursor = 0;
 	console->window = NULL;
 	console->viewport = vp;
-	memset(console->viewport->backbuf, 0, console->viewport->buf_size);
 	console->width = console->viewport->loc.w / CHAR_W;
-	console->height = console->viewport->loc.h / CHAR_H - CHAR_H;
+	console->height = console->viewport->loc.h / CHAR_H;
 
 	console->Line = 0;
 	console->Start = 0;

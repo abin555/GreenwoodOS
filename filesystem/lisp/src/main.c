@@ -55,23 +55,7 @@ int main(int argc, char **argv){
     fclose(lisp_driver_file);
 
     printf("Opening Greenwood LISP Client\n");
-    vp = vp_open(WIDTH, HEIGHT, "Greenwood LISP Client");
-    backbuf = (uint32_t *) malloc(WIDTH * HEIGHT *sizeof(uint32_t));
-    memset(backbuf, 0, WIDTH * HEIGHT *sizeof(uint32_t));
-	vp_set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
-    vp_add_event_handler(vp, event_handler);
-    vp->loc.h = 400;
-    console = console_open_vp(vp);
-    vp->loc.h = 418;
 
-	term_width = WIDTH / 8;
-	term_height = HEIGHT / 8;
-
-    printf("Greenwood LISP Version 0.2\n");
-    FILE *serial = fopen("/-/dev/serial", "w");
-    fprintf(serial, "env @ 0x%x\n", driver.env);
-    fclose(serial);
-    
     Atom expr, result;
     const char *p = "(* 4 5)";
     Error err;
@@ -86,6 +70,20 @@ int main(int argc, char **argv){
         free(backbuf);
         return 0;
     }
+
+    vp = vp_open(WIDTH, HEIGHT, "Greenwood LISP Client");
+    backbuf = (uint32_t *) malloc(WIDTH * HEIGHT *sizeof(uint32_t));
+    memset(backbuf, 0, WIDTH * HEIGHT *sizeof(uint32_t));
+	vp_set_buffer(vp, backbuf, WIDTH * HEIGHT * sizeof(uint32_t));
+    vp_add_event_handler(vp, event_handler);
+    vp->loc.h = 400;
+    console = console_open_vp(vp);
+    vp->loc.h = 418;
+
+	term_width = WIDTH / 8;
+	term_height = HEIGHT / 8;
+
+    printf("Greenwood LISP Version 0.2\n");
 
     int idx = 0;
     char *termbuf = malloc(term_width*3);

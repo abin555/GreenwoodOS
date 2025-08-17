@@ -52,6 +52,7 @@ int builtin_vp_set_buffer(struct Atom args, struct Atom *result){
         ptr.type != Atom_PTR ||
         size.type != Atom_INT
     ) return Error_Type;
+    printf("Setting Buffer 0x%x - 0x%x %d\n", vp.value.ptr, ptr.value.ptr, size.value.ptr);
     vp_set_buffer(
         vp.value.ptr,
         ptr.value.ptr,

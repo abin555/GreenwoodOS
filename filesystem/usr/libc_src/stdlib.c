@@ -149,6 +149,48 @@ char* itoa(int k, char *buf, int radix){
     return buf;
 }
 
+char *utoa(unsigned int k, char *buf, int radix){
+  unsigned int i = k;
+  if (i == 0)
+  {
+      buf[0] = '0';
+      buf[1] = '\0';
+      return buf;
+  }
+
+  int idx = k < 0 ? 1 : 0;
+  int j = i;
+  while (j)
+  {
+      j /= radix;
+      idx++;
+  }
+  buf[idx] = '\0';
+
+  if (radix == 10)
+  {
+      while (i)
+      {
+          buf[--idx] = '0' + (i % 10);
+          i /= 10;
+      }
+  }
+  else
+  {
+      while (i)
+      {
+          int k = (i & 0xF);
+          if (k >= 10)
+              buf[--idx] = 'A' + ((i & 0xF) - 10);
+          else
+              buf[--idx] = '0' + (i & 0xF);
+          i >>= 4;
+      }
+  }
+
+  return buf;
+}
+
 void exit(int code){
 	register unsigned int eax asm("eax");
 	register unsigned int ebx asm("ebx");
