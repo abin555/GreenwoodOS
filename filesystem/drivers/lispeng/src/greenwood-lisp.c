@@ -454,6 +454,21 @@ int env_set(Atom env, Atom symbol, Atom value){
     return Error_OK;
 }
 
+int env_unset(Atom env, Atom symbol){
+    Atom *prev = &cdr(env);
+    Atom bs = *prev;
+    while(!nilp(bs)){
+        Atom b = car(bs);
+        if(!strcmp(car(b).value.symbol, symbol.value.symbol)){
+            *prev = cdr(bs);
+            return Error_OK;
+        }
+        prev = &cdr(bs);
+        bs = cdr(bs);
+    }
+    return Error_OK;
+}
+
 int eval_expr(Atom expr, Atom env, Atom *result){
     Atom op, args, p;
     Error err;

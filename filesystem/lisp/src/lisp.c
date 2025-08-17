@@ -196,14 +196,16 @@ void print_expr(Atom atom){
             printf("\"%s\"", atom.value.string);
             break;
         case Atom_REAL:
-            printf("%d", atom.value.real);
-            printf(".%d", (atom.value.real - ((int) atom.value.real)) * 100);
+            printf("%d.%d", atom.value.real, (atom.value.real - ((int) atom.value.real)) * 100);
             break;
         case Atom_CLOSURE:
             puts("<Closure Fn>");
             break;
         case Atom_MACRO:
             puts("<MACRO>");
+            break;
+        case Atom_PTR:
+            printf("#<PTR: 0x%x>", (uint32_t) atom.value.ptr);
             break;
     }
     //putchar('\n');
@@ -249,6 +251,16 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
                 return err;
             *result = sym;
             return driver.env_set(*env, sym, val);
+        }
+        else if(!strcmp(op.value.symbol, "UNDEF")){
+            Atom sym;
+            if(nilp(args) || !nilp(cdr(args))){
+                return Error_Args;
+            }
+            sym = car(args);
+            if(sym.type != Atom_SYMBOL) return Error_Type;
+            *result = nil;
+            return driver.env_unset(*env, sym);
         }
         else if(!strcmp(op.value.symbol, "ENV?")){
             if(!nilp(args)){

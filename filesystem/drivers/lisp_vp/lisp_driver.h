@@ -61,6 +61,7 @@ struct LISP_DRIVER {
 
     int (*env_set)(Atom, Atom, Atom);
     int (*env_get)(Atom env, Atom symbol, Atom *result);
+    int (*env_unset)(Atom, Atom);
     int (*listp)(Atom expr);
     Atom (*cons)(Atom car_val, Atom cdr_val);
     Atom (*make_int)(int x);

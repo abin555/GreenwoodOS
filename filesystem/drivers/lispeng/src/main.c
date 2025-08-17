@@ -35,6 +35,7 @@ struct LISP_DRIVER {
 
     int (*env_set)(Atom, Atom, Atom);
     int (*env_get)(Atom env, Atom symbol, Atom *result);
+    int (*env_unset)(Atom, Atom);
     int (*listp)(Atom expr);
     Atom (*cons)(Atom car_val, Atom cdr_val);
     Atom (*make_int)(int x);
@@ -66,6 +67,7 @@ int init_driver(){
     driver.env = &env;
     driver.env_set = env_set;
     driver.env_get = env_get;
+    driver.env_unset = env_unset;
     driver.listp = listp;
     driver.cons = cons;
     driver.make_int = make_int;
@@ -141,27 +143,7 @@ int main(int argc, int argv[]){
     read_expr(p, &p, &expr);
     eval_expr(expr, env, &result);
     load_file(env, "/A/drivers/lispeng/lib.gwl");
-    /*
-    for(int i = 0; i < 15; i++){
-        p = defaultlib[i];
-        printf("Parsing: 0x%x \"%s\"\n", p, p);
-        err = read_expr(p, &p, &expr);
-        if(err){
-            printf("Error while reading! %d\n", err);
-            continue;
-        }
-        err = eval_expr(expr, env, &result);
-        if(err){
-            printf("Error in expression:\n\t");
-            print_expr(expr);
-            printf("\n");
-        }
-        else{
-            print_expr(result);
-            printf("\n");
-        }
-    }
-    */
+    
     printf("Moving into the background!\n");
     set_schedule(NEVER);
     yield();
