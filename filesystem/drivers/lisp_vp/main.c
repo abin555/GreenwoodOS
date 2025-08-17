@@ -1,4 +1,5 @@
 #include <sys/vp.h>
+#include <sys/console.h>
 #include "lisp_driver.h"
 
 struct LISP_DRIVER driver;
@@ -60,7 +61,7 @@ int builtin_vp_set_buffer(struct Atom args, struct Atom *result){
     return Error_OK;
 }
 
-int buuiltin_putstring(struct Atom args, struct Atom *result){
+int builtin_putstring(struct Atom args, struct Atom *result){
     if(nilp(args) || nilp(car(args)) || nilp(cdr(args)) || nilp(car(cdr(args))) || nilp(cdr(cdr(args))) || nilp(car(cdr(cdr(args)))) || nilp(car(cdr(cdr(cdr(args))))) || !nilp(cdr(cdr(cdr(cdr(args)))))) return Error_Args;
     Atom vp = car(args);
     Atom x = car(cdr(args));
@@ -81,6 +82,22 @@ int buuiltin_putstring(struct Atom args, struct Atom *result){
     return Error_OK;
 }
 
+int builtin_console_open(struct Atom args, struct Atom *result){
+    if(nilp(args) || nilp(car(args)) || !nilp(cdr(args))) return Error_Args;
+    Atom vp = car(args);
+    if(vp.type != Atom_PTR) return Error_Type;
+    void *con = console_open_vp(vp.value.ptr);
+    *result = driver.make_ptr(con);
+    return Error_OK;
+}
+
+int builtin_console_close(struct Atom args, struct Atom *result){
+    if(!nilp(args)) return Error_Args;
+    console_close();
+    *result = nil;
+    return Error_OK;
+}
+
 int main(int argc, char **argv){
     FILE *lisp_driver_file = fopen("/-/lisp/env", "r");
     if(lisp_driver_file == NULL){
@@ -93,6 +110,8 @@ int main(int argc, char **argv){
     driver.env_set(*driver.env, driver.make_sym("VP_CLOSE"), driver.make_builtin(builtin_vp_close));
     driver.env_set(*driver.env, driver.make_sym("MALLOC"), driver.make_builtin(builtin_malloc));
     driver.env_set(*driver.env, driver.make_sym("VP_BUF"), driver.make_builtin(builtin_vp_set_buffer));
-    driver.env_set(*driver.env, driver.make_sym("VP_WRITE"), driver.make_builtin(buuiltin_putstring));
+    driver.env_set(*driver.env, driver.make_sym("VP_WRITE"), driver.make_builtin(builtin_putstring));
+    driver.env_set(*driver.env, driver.make_sym("CON_OPEN"), driver.make_builtin(builtin_console_open));
+    driver.env_set(*driver.env, driver.make_sym("CON_CLOSE"), driver.make_builtin(builtin_console_close));
     return 0;
 }

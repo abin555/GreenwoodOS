@@ -1,0 +1,5 @@
+(define netwin (vp_open (* 16 8) (* 5 8) "NETINFO"))
+(define netbuf (malloc (* 4 16 8 5 8)))
+(vp_buf netwin netbuf (* 4 16 8 5 8))
+(define netcon (con_open netwin))
+(exec "/A/net/netstat.elf")

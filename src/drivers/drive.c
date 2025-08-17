@@ -34,8 +34,8 @@ int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_s
 	if(drive == NULL || buf == NULL)
 		return -1;
 	
-	if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
-	while(drive->locked || !drive->ready);
+	//if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
+	//while(drive->locked || !drive->ready);
 
 	drive->locked = 1;
 
@@ -59,8 +59,8 @@ int drive_write(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_
 	if(drive == NULL || buf == NULL)
 		return -1;
 
-	if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
-	while(drive->locked || !drive->ready);
+	//if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
+	//while(drive->locked || !drive->ready);
 
 	drive->locked = 1;
 	int err = -1;

@@ -377,6 +377,7 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
         }
         else if(!strcmp(op.value.symbol, "EXIT")){
             running = 0;
+            printf("Exiting!\n");
             return Error_OK;
         }
     }

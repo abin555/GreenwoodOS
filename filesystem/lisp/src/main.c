@@ -76,8 +76,15 @@ int main(int argc, char **argv){
     const char *p = "(* 4 5)";
     Error err;
 
+    running = 1;
     if(argc == 2 && argv[1] != NULL){
         load_file(driver.env, argv[1]);
+    }
+    if(running == 0){
+        console_close();
+        vp_close(vp);
+        free(backbuf);
+        return 0;
     }
 
     int idx = 0;
@@ -85,7 +92,6 @@ int main(int argc, char **argv){
     memset(termbuf, 0, term_width*3);
     set_schedule(ONFOCUS);
 
-    running = 1;
     while(running){
         vp_copy(vp);
 		char c = vp_getc(vp);

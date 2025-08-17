@@ -421,14 +421,34 @@ int builtin_real(Atom args, Atom *result){
     }
 }
 
-#include <sys/vp.h>
-int builtin_vp_open(Atom args, Atom *result){
-    if(car(args).type == Atom_STRING){
-        struct Viewport *vp = vp_open(200, 200, car(args).value.string);
-        *result = make_int((int) vp);
-        return Error_OK;
-    }
-    else{
+#include <sys/task.h>
+int builtin_exec(struct Atom args, struct Atom *result){
+    int n_args = 0;
+    struct Atom args_walker = args;
+    if(nilp(args)){
         return Error_Args;
     }
+    while(!nilp(args_walker)){
+        n_args++;
+        args_walker = cdr(args_walker);
+    }
+    
+    char **argv = malloc(sizeof(char *) * (n_args+1));
+    args_walker = args;
+    for(int i = 0; i < n_args; i++){
+        Atom arg = car(args_walker);
+        if(arg.type == Atom_STRING && arg.value.string != NULL){
+            argv[i] = strdup(arg.value.string);
+        }
+        else{
+            argv[i] = NULL;
+        }
+        args_walker = cdr(args_walker);
+    }
+    argv[n_args] = NULL;
+    exec(argv[0], n_args, argv);
+    char buf[1000];
+    snprintf(buf, 1000, "%s %d", argv[0], n_args);
+    *result = make_string(strdup(buf));
+    return Error_OK;
 }

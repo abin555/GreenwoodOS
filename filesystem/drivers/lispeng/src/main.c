@@ -120,6 +120,7 @@ int main(int argc, int argv[]){
     env_set(env, make_sym("EQ?"), make_builtin(builtin_eq));
     env_set(env, make_sym("PAIR?"), make_builtin(builtin_pair));
     env_set(env, make_sym("REAL"), make_builtin(builtin_real));
+    env_set(env, make_sym("EXEC"), make_builtin(builtin_exec));
 
     if(init_driver()){
         printf("Error setting up driver!\n");

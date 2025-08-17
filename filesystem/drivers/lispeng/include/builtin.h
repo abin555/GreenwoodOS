@@ -20,5 +20,6 @@ int builtin_eq(Atom args, Atom *result);
 int builtin_pair(Atom args, Atom *result);
 int builtin_real(Atom args, Atom *result);
 int builtin_vp_open(Atom args, Atom *result);
+int builtin_exec(Atom args, Atom *result);
 
 #endif
