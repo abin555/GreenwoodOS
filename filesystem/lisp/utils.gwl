@@ -1,0 +1,5 @@
+(defun bg (x) (exec "/A/utils/SetBG/setbg.elf" x))
+(defun img (x) (exec "/A/utils/image/image.elf" x))
+(defun bliss () (bg "/A/Pictures/bliss.tga"))
+(defun vaporwave () (bg "/A/Pictures/vaporwave.tga"))
+(exit)
