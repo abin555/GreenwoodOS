@@ -43,6 +43,7 @@
 #include "stddef.h"
 #include "monitors.h"
 #include "kernel_fn.h"
+#include "proc.h"
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -105,6 +106,7 @@ void kernel_task(int argc, char **argv){
     tcp_init();
     netfs_init();
     netproc_init();
+    proc_fs_init();
     
     
     start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
