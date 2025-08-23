@@ -1,11 +1,11 @@
 CC = i386-gwos-gcc
 PROG = taskmgr
 
-SRCS += main.c
+SRCS += main.c gui.c
 
 
 build:
-	$(CC) -g $(SRCS) -o $(PROG).elf
+	$(CC) -O0 -g $(SRCS) -o $(PROG).elf
 	
 clean:
 	rm $(SRCS)

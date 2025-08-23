@@ -117,6 +117,12 @@ int proc_task_read_callback(void *cdev, void *buf, int roffset, int nbytes, int 
     int nread = 0;
     switch(entry->req.cmd){
         case PROC_GET_TASK: {
+            int real_id = 0;
+            for(int i = 0; i < MAX_TASKS; i++){
+                if(real_id == entry->req.task_id) break;
+                if(tasks[i].slot_running == 0) continue;
+                real_id++;
+            }
             struct PROC_Response_Task_Info task_info;
             task_info.cmd = entry->req.cmd;
             task_info.task_id = entry->req.task_id;

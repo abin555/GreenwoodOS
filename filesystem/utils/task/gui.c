@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <sys/io.h>
 #include <sys/task.h>
+#include <string.h>
 #include "gui.h"
 
-struct ViewportFunctions *vp_funcs;
 int mouse_fd;
 
 void gui_setup(){
@@ -32,6 +32,7 @@ struct WindowContext *gui_makeContext(char *text, int width, int height, int max
     context->height = height;
 
     context->children.children = malloc(sizeof(struct GUIElement *) * maxChildren);
+    memset(context->children.children, 0, sizeof(struct GUIElement *) * maxChildren);
     context->children.maxChildren = maxChildren;
     context->children.numChildren = 0;
 
@@ -347,6 +348,7 @@ void gui_processInteraction(int mouseX, int mouseY, struct WindowContext *contex
         }
     }
     else if(elem->type == GUI_SCROLLV){
+        //printf("Scroll\n");
         struct GUIScroll *scroll = (struct GUIScroll *) elem;
         if(
             mouseX > scroll->location.x + x && mouseX < scroll->location.x + x + scroll->location.w &&
@@ -412,10 +414,10 @@ void gui_event(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
         set_schedule(ALWAYS);
     }
     else if(event == VP_FOCUSED){
-        set_schedule(ALWAYS);
+        //set_schedule(ALWAYS);
     }
     else if(event == VP_UNFOCUSED){
-        set_schedule(NEVER);
+        //set_schedule(NEVER);
     }
 }
 

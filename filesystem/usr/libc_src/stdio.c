@@ -261,6 +261,12 @@ int snprintf(char *str, size_t size, const char *format, ...){
 					}
 					break;
 				}
+				case 'c':{
+					char val = (char) va_arg(listpd, int);
+					str[idx++] = val;
+					n++;
+					break;
+				}
 			}
 			format++;
 		}

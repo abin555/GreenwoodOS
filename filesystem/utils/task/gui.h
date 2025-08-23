@@ -20,13 +20,13 @@ typedef enum {
 struct GUIElement {
     GUI_ELEMENT type;
     uint32_t tag_size;
-};
+}  __attribute__((packed));
 
 struct GUIChildren {
     struct GUIElement **children;
     int numChildren;
     int maxChildren;
-};
+}  __attribute__((packed));
 
 struct GUIButton {
     GUI_ELEMENT type;
@@ -45,7 +45,7 @@ struct GUIButton {
     char isClicked;
     char clickLocked;
     char isHovered;
-};
+}  __attribute__((packed));
 
 struct GUIBar {
     GUI_ELEMENT type;
@@ -55,7 +55,7 @@ struct GUIBar {
     uint32_t outerColor;
     struct Location location;
     struct GUIChildren children;
-};
+}  __attribute__((packed));
 
 struct GUIScroll {
     GUI_ELEMENT type;
@@ -75,7 +75,7 @@ struct GUIScroll {
         int x;
         int y;
     } mouseStart;
-};
+} __attribute__((packed));
 
 struct WindowContext {
     GUI_ELEMENT type;
@@ -95,7 +95,7 @@ struct WindowContext {
 
     int localMouseX;
     int localMouseY;
-};
+} __attribute__((packed));
 
 void gui_setup();
 

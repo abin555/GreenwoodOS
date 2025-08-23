@@ -275,6 +275,7 @@ void __attribute__ ((optimize("-O3"))) viewport_close(struct ViewportList *viewp
         viewport_list->elements[i] = temp;
     }
     viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
+    //print_serial("[VP] Close\n");
 }
 
 void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
