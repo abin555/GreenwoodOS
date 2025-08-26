@@ -4,11 +4,13 @@
 #include <sys/task.h>
 #include <sys/window.h>
 #include <sys/memory.h>
+#include <sys/vp.h>
 
 struct FEATURE_INFO FONT_INFO;
 
 uint32_t *win_buf;
 struct WINDOW *window;
+struct Viewport *vp;
 //char (*FONT)[128][8];
 typedef char FONT_T[128][8];
 FONT_T *FONT;
@@ -22,11 +24,14 @@ void drawCharBig(int idx, int size, int x, int y);
 
 int main(int argc, char *argv[]){
     printf("Opening Font Editor\n");
-    window = window_open("FONTED", 0);
-    win_buf = window->backbuffer;
+    //window = window_open("FONTED", 0);
+    vp = vp_open(FontScale*10,FontScale*10,"Font Editor");
+    win_buf = malloc(sizeof(uint32_t) * FontScale*10 * FontScale*10);
+    vp_set_buffer(vp, win_buf, sizeof(uint32_t) * FontScale*10 * FontScale*10);
+    //win_buf = window->backbuffer;
 
-    window_update();
-    set_schedule(ONFOCUS);
+    //window_update();
+    //set_schedule(ONFOCUS);
 
     FONT_INFO = getKernelFeature(FEAT_FONT);
     printf("Font is at memory %x\n", (uint32_t) FONT_INFO.addr);
@@ -55,45 +60,50 @@ int main(int argc, char *argv[]){
         }
         drawCharBig(letter, FontScale, 1, 1);
         drawPixelScaled(IndicatorScale + x*IndicatorScale, IndicatorScale + y*IndicatorScale, FontScale/IndicatorScale, 0x4040FF);
-        window_update();
+        //window_update();
+        vp_copy(vp);
 
-        input = window_getc();
-
-        if(input == 'q' || input == 'Q'){
-            letter--;
-        }
-        else if(input == 'e' || input == 'E'){
-            letter++;
-        }
-        if(input == 'w'){
-            y--;
-            if(y<0) y = 7;
-        }
-        if(input == 's'){
-            y++;
-            if(y>7) y = 0;
-        }
-        if(input == 'a'){
-            x--;
-            if(x<0) x = 7;
-        }
-        if(input == 'd'){
-            x++;
-            if(x>7) x = 0;
-        }
-        if(input == ' '){
-            char current = (((*FONT)[letter][y] >> x) & 1);
-            char mask;
-            if(current){
-                mask = ~(1 << x);
-                (*FONT)[letter][y] &= mask;
+        input = vp->ascii;
+        if(vp->ascii != '\0'){
+            if(input == 'q' || input == 'Q'){
+                letter--;
             }
-            else{
-                mask = 1 << x;
-                (*FONT)[letter][y] |= mask;
+            else if(input == 'e' || input == 'E'){
+                letter++;
             }
+            if(input == 'w'){
+                y--;
+                if(y<0) y = 7;
+            }
+            if(input == 's'){
+                y++;
+                if(y>7) y = 0;
+            }
+            if(input == 'a'){
+                x--;
+                if(x<0) x = 7;
+            }
+            if(input == 'd'){
+                x++;
+                if(x>7) x = 0;
+            }
+            if(input == ' '){
+                char current = (((*FONT)[letter][y] >> x) & 1);
+                char mask;
+                if(current){
+                    mask = ~(1 << x);
+                    (*FONT)[letter][y] &= mask;
+                }
+                else{
+                    mask = 1 << x;
+                    (*FONT)[letter][y] |= mask;
+                }
+            }
+            vp->ascii = '\0';
         }
+        
     }
+    vp_close(vp);
 }
     
 
@@ -112,7 +122,7 @@ void drawPixelScaled(int x, int y, int size, uint32_t color){
     y *= size;
     for(int dx = 0; dx < size; dx++){
         for(int dy = 0; dy < size; dy++){
-            win_buf[x+dx + (y+dy)*window->width] = color;
+            win_buf[x+dx + (y+dy)*vp->loc.w] = color;
         }
     }
 }
@@ -141,11 +151,11 @@ void render_font(){
     for(int i = 0; i < 128; i++){
         for(int layer = 0; layer < 8; layer++){
             for(int pixel = 0; pixel < 8; pixel++){
-                win_buf[window->width*(y+layer) + x+pixel] = (((*FONT)[(int)i][layer] >> pixel) & 1) ? 0xFFFFFF : 0;
+                win_buf[vp->loc.w*(y+layer) + x+pixel] = (((*FONT)[(int)i][layer] >> pixel) & 1) ? 0xFFFFFF : 0;
             }
         }
         x += 8;
-        if(x >= window->width - 8){
+        if(x >= vp->loc.w - 8){
             x = 0;
             y += 8;
         }

@@ -35,8 +35,8 @@ struct DRIVE{
 		struct ISO9660 *ISO;
 		struct EXT2_FS *ext2;
 	} format_info;
-	bool locked;
-	bool ready;
+	char locked;
+	char ready;
 	char identity;
 };
 

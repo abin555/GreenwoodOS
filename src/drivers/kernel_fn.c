@@ -23,6 +23,12 @@ void kernel_fn_init(){
     kernel_fn_add(vfs_seek, 3, "lseek");
     kernel_fn_add(set_schedule_task, 2, "set_schedule_task");
     kernel_fn_add(task_getCurrentID, 0, "get_task_id");
+    kernel_fn_add(vfs_addFS, 1, "vfs_addFS");
+    kernel_fn_add(drive_read, 4, "drive_read");
+    kernel_fn_add(drive_write, 4, "drive_write");
+    kernel_fn_add(drives, -1, "drives_s");
+    kernel_fn_add(&drive_count, -1, "drive_count_s");
+    kernel_fn_add(malloc, 1, "kmalloc");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){
