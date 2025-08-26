@@ -146,9 +146,17 @@ int main(int argc, char **argv){
                 dir = getDirectoryListing(".");
                 break;
                 case 'A':
-                changeDirectory("/A/");
-                path = getDirectory();
-                dir = getDirectoryListing(".");
+                case 'B':
+                case 'C':
+                case 'D':
+                {
+                    char buf[4] = "";
+                    snprintf(buf, sizeof(buf), "/%c/", c);
+                    changeDirectory(buf);
+                    path = getDirectory();
+                    dir = getDirectoryListing(".");
+                }
+                break;
             }
         }
         if(mouseStatus.buttons.left && !last_mouse_left && isFocus){

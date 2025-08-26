@@ -133,4 +133,8 @@ make_ext2:
 	sudo umount fs_ext2
 	rmdir fs_ext2
 
+make_fsos:
+	truncate -s 1G fsos.img
+	mkfs.ext2 -r 1 -b 1024 fsos.img
+
 fs: make_fs make_ext2
