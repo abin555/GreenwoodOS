@@ -1,4 +1,9 @@
-#include "libc.h"
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <sys/task.h>
+#include <sys/window.h>
+#include <sys/memory.h>
 
 struct FEATURE_INFO FONT_INFO;
 
@@ -16,7 +21,7 @@ void drawCharBig(int idx, int size, int x, int y);
 #define IndicatorScale 2
 
 int main(int argc, char *argv[]){
-    print("Opening Font Editor\n");
+    printf("Opening Font Editor\n");
     window = window_open("FONTED", 0);
     win_buf = window->backbuffer;
 
@@ -24,7 +29,7 @@ int main(int argc, char *argv[]){
     set_schedule(ONFOCUS);
 
     FONT_INFO = getKernelFeature(FEAT_FONT);
-    print_arg("Font is at memory %x\n", (uint32_t) FONT_INFO.addr);
+    printf("Font is at memory %x\n", (uint32_t) FONT_INFO.addr);
 
     FONT = (char (*)[128][8]) FONT_INFO.addr;
 
@@ -52,7 +57,7 @@ int main(int argc, char *argv[]){
         drawPixelScaled(IndicatorScale + x*IndicatorScale, IndicatorScale + y*IndicatorScale, FontScale/IndicatorScale, 0x4040FF);
         window_update();
 
-        input = getc();
+        input = window_getc();
 
         if(input == 'q' || input == 'Q'){
             letter--;

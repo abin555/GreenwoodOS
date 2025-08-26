@@ -39,7 +39,7 @@ void updateTaskContext(FILE *task_file, struct Context *ctx){
     fwrite(&req_ntasks, sizeof(req_ntasks), 1, task_file);
     int n_tasks;
     fread(&n_tasks, sizeof(n_tasks), 1, task_file);
-    printf("There are %d tasks!\n", n_tasks);
+    //printf("There are %d tasks!\n", n_tasks);
     ctx->ntasks = n_tasks;
 
     for(int i = 0; i < ctx->ntasks && i < 20; i++){
@@ -49,7 +49,7 @@ void updateTaskContext(FILE *task_file, struct Context *ctx){
         fwrite(&req_task, sizeof(req_task), 1, task_file);
         struct PROC_Response_Task_Info task_info;
         fread(&ctx->taskInfo[i], sizeof(task_info), 1, task_file);
-        printf("#%d - Slot: %d \"%s\"\n", i, ctx->taskInfo[i].slot, ctx->taskInfo[i].name);
+        //printf("#%d - Slot: %d \"%s\"\n", i, ctx->taskInfo[i].slot, ctx->taskInfo[i].name);
     }
 }
 #define ColorText 0x0

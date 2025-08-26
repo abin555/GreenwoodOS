@@ -1,5 +1,5 @@
 CC = i386-gwos-gcc
-PROG = fonte
+PROG = tetris
 
 SRCS += main.c
 
