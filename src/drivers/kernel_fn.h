@@ -6,7 +6,7 @@ struct kernel_fn_def {
     int n_args;
     int name_len;
     char name[];
-};
+} __attribute__((packed));
 
 struct kernel_fn_list {
     int num_fns;

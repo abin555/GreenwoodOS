@@ -164,7 +164,7 @@ struct kernel_fn_def {
     int n_args;
     int name_len;
     char name[];
-};
+} __attribute__((packed));
 
 struct DRIVE **drives;
 int *drive_count;
@@ -186,12 +186,42 @@ void ISO_write_sector(struct DRIVE *drive, char *buf, int sector){
 	drive_write(drive, (char *) buf, sector*4, 4);
 }
 
+int check_iso(struct DRIVE *drive){
+    printf("[ISO] Checking format on drive %c\n", drive->identity);
+	struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) (ISO_read_sector(drive, (char *) sector_buf, 0x10));
+    if(
+        primary_vol->hdr.magic[0] == 'C' &&
+        primary_vol->hdr.magic[1] == 'D' &&
+        primary_vol->hdr.magic[2] == '0' &&
+        primary_vol->hdr.magic[3] == '0' &&
+        primary_vol->hdr.magic[4] == '1'
+    ){
+        printf("[ISO] Drive %c Type: %d Is ISO Format: ", drive->identity, primary_vol->hdr.type);
+		for(int i = 0; i < 5; i++){
+			printf("%c", primary_vol->hdr.magic[i]);
+		}
+		printf("\n");
+        /*
+		struct ISO9660 *fmt = (struct ISO9660 *) malloc(sizeof(struct ISO9660));
+		if(fmt == NULL){
+			print_serial("[ISO] Error Getting Memory!\n");
+			return 0;
+		}
+        */
+        return 1;
+    }
+    else{
+        return 0;
+    }
+}
+
 void setup_iso(int drive_id){
     task_lock(1);
+    struct DRIVE *drive = drives[drive_id];
+    check_iso(drive);
     
-    struct ISO_Primary_Volume_Descriptor *primary_vol = (struct ISO_Primary_Volume_Descriptor*) ISO_read_sector(drives[drive_id], sector_buf, 0x10);
-    uint32_t root_dir_sector = getLe32(primary_vol->root_dir_ent.sector);
-    printf("Root Directory Sector: 0x%x\n", root_dir_sector);
+    //struct ISO9660 *fmt = drives[drive_id]->format_info.ISO;
+    //printf("Root Directory Sector: 0x%x\nNext Table Sector: 0x%x\n Next File Sector: 0x%x\n", fmt->root_directory_sector, fmt->nextTableSector, fmt->nextFileSector);
     
 
     task_lock(0);
@@ -205,6 +235,7 @@ int main(int argc, char **argv){
         struct kernel_fn_def *def;
         for(int i = 0; i < num_fns; i++){
             fread(&def, sizeof(def), 1, kernel_fn_file);
+            printf("#%d: 0x%x - \"%s\"\n", i, def->fn, def->name);
             if(!strcmp("vfs_addFS", def->name)){
                 vfs_addFS = def->fn;
                 printf("Found vfs_addFS!\n");
@@ -219,7 +250,7 @@ int main(int argc, char **argv){
             }
             if(!strcmp("drives_s", def->name)){
                 drives = def->fn;
-                printf("Found drives_s!\n");
+                printf("Found drives_s @ 0x%x!\n", (uint32_t) drives);
             }
             if(!strcmp("drive_count_s", def->name)){
                 drive_count = def->fn;

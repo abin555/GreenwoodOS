@@ -6,7 +6,7 @@ struct kernel_fn_def {
     int n_args;
     int name_len;
     char name[];
-};
+} __attribute__((packed));
 
 int main(int argc, char **argv){
     int kernel_fn_fd = open("/-/dev/kernel", O_READ);

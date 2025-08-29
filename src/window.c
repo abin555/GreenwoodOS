@@ -20,7 +20,7 @@ void window_init(){
 	window_buf_size = (fb_width * fb_height * sizeof(uint32_t)) - window_bar_size;
 	for(int i = 0; i < MAX_WINDOWS; i++){
 		windows[i].backbuffer = (uint32_t *) (address + (i*(window_buf_size+window_bar_size)));
-		memset(windows[i].backbuffer, 0xAA, window_buf_size);
+		//memset(windows[i].backbuffer, 0x10, window_buf_size);
 		//windows[i].name = 0;
 		memset(windows[i].name, 0, sizeof(windows[i].name));
 		windows[i].width = fb_width;
@@ -34,7 +34,7 @@ void window_init(){
 		print_serial("[WINDOW] Cursor image unavailable!\n");
 	}
 
-	timer_attach(100, window_timer_callback);
+	timer_attach(500, window_timer_callback);
 	
 }
 
