@@ -1,17 +1,10 @@
-#ifndef ISO9660_H
-#define ISO9660_H
+#ifndef STRUCTURES_H
+#define STRUCTURES_H
 
-#include "drive.h"
-#include "allocator.h"
-#include "serial.h"
-#include "console.h"
-#include "utils.h"
+#include <stdint.h>
 
-struct DRIVE;
-
-#define ISO9660_SECTOR_SIZE_BYTES 512*4
-
-extern uint8_t ISO9660_sector_buffer[ISO9660_SECTOR_SIZE_BYTES];
+#define getLe32(x) *((uint32_t *) &x.le)
+#define getLe16(x) *((uint16_t *) &x.le)
 
 typedef struct { uint16_t le; }__attribute__((packed))          l9660_luint16;
 typedef struct { uint16_t be; }__attribute__((packed))          l9660_buint16;
@@ -96,20 +89,33 @@ union ISO_Volume_Descriptor{
     char _bits[2048];
 }__attribute__((packed));
 
-struct ISO9660_FS_Entry{
-	char name[20];
+struct ISO9660;
+
+struct DRIVE {
 	enum{
-		File = 1,
-		Folder = 2,
-        Root = 3,
-        Special = 4
+		Drive_AHCI
 	} type;
-	uint32_t sector;
-	uint32_t size;
-	uint32_t sector_count;
-    int num_children;
-    struct ISO9660_FS_Entry *parent;
-	struct ISO9660_FS_Entry *children;
+	union {
+		void *ahci;
+	} driver;
+
+	enum{
+		FAT32,
+		FAT16,
+		FAT12,
+		exFAT,
+		ISO9660,
+		RAW,
+		EXT2
+	} format;
+	union{
+		void *fat32;
+		struct ISO9660 *ISO;
+		void *ext2;
+	} format_info;
+	char locked;
+	char ready;
+	char identity;
 };
 
 struct ISO9660{
@@ -121,22 +127,81 @@ struct ISO9660{
     uint32_t nextFileSector;
 };
 
+struct ISO9660_File {
+    uint32_t sector;
+    uint32_t size;
+};
 
-uint8_t *ISO_read_sector(struct DRIVE *drive, char *buf, int sector);
-void ISO_write_sector(struct DRIVE *drive, char *buf, int sector);
+struct DirectoryEntry{
+	char filename[50];
+	int name_len;
+	uint32_t type;
+};
 
-int ISO9660_check_format(struct DRIVE *drive);
-void ISO9660_read_volume(struct ISO9660 *iso);
-void ISO9660_print_tree(struct ISO9660_FS_Entry *fs);
-uint32_t ISO9660_getDirectorySector(struct ISO9660 *iso, uint32_t dir_sector, char *folder);
-struct File_Info ISO9660_GetFile(struct ISO9660 *iso, char *path);
-void ISO9660_printTree(struct ISO9660 *iso);
-int ISO9660_openFileName(struct ISO9660 *iso, char *name, char *buf, int buf_size);
-int ISO9660_openFile(struct ISO9660 *iso, struct File_Info file, char *buf, int buf_size);
-int ISO9660_checkExists(struct ISO9660 *iso, char *path);
-void ISO9660_printFileList(struct CONSOLE *console, struct ISO9660 *iso, char *path);
-int ISO9660_createDirectory(struct ISO9660 *iso, char *path);
-int ISO9660_createFile(struct ISO9660 *iso, char *path, uint32_t size);
+struct DirectoryListing{
+	char *directory_path;
+	int directory_path_len;
+	struct DirectoryEntry *entries;
+	int num_entries;
+};
 
-int iso9660_read(void *f, void *buf, int nbytes);
+typedef enum {
+    VFS_FLAG_READ = 0b1,
+    VFS_FLAG_WRITE = 0b10
+} VFS_Inode_Flags;
+
+typedef enum {
+    VFS_ISO9660,
+    VFS_EXT2,
+    VFS_SYS,
+    VFS_NET,
+    VFS_PIPE
+} VFS_InodeType;
+
+struct VFS_Inode;
+struct VFS_Inode {
+    VFS_InodeType type;
+
+    union {
+        void *fs;
+        struct Pipe *pipe;
+    } fs;
+    uint32_t meta;
+
+    struct VFS_Inode *root;
+    struct VFS_RootInterface *interface;
+    int isRoot;
+    int isValid;
+    int flags;
+};
+
+struct VFS_File {
+    struct VFS_Inode inode;
+    int head;
+    int status;//1 = Free 0 = Used
+};
+
+struct VFS_RootInterface {
+    struct DRIVE *drive;
+    char vfsLetter;
+    char *fs_label;
+    void *root;
+
+    void *(*fs_getLink)(void *, char *path, uint32_t *meta);
+    int (*fs_read)(void *f, void *buf, int nbytes);
+    int (*fs_write)(void *f, void *buf, int nbytes);
+    int (*fs_seek)(void *f, int offset, int whence);
+    int (*fs_creat)(void *fs, char *path, unsigned int size);
+    int (*fs_creatDir)(void *fs, char *path);
+    struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
+    int (*fs_truncate)(void *f, unsigned int len);
+};
+
+struct kernel_fn_def {
+    void *fn;
+    int n_args;
+    int name_len;
+    char name[];
+} __attribute__((packed));
+
 #endif

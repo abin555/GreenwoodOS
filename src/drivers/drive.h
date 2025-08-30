@@ -7,7 +7,6 @@
 #include "serial.h"
 #include "ahci.h"
 #include "FAT32.h"
-#include "ISO9660.h"
 #include "ext2.h"
 #include "console.h"
 
@@ -32,7 +31,6 @@ struct DRIVE{
 	} format;
 	union{
 		struct FAT32 *fat32;
-		struct ISO9660 *ISO;
 		struct EXT2_FS *ext2;
 	} format_info;
 	char locked;

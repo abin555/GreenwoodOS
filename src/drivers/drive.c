@@ -91,10 +91,6 @@ void drive_get_format(struct DRIVE *drive){
 		drive->format = FAT32;
 		return;
 	}
-	else if(ISO9660_check_format(drive)){
-		drive->format = ISO9660;
-		return;
-	}
 	else if(ext2_check_format(drive)){
 		drive->format = EXT2;
 		return;

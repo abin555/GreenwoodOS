@@ -1,7 +1,6 @@
 #ifndef VFS_H
 #define VFS_H
 
-#include "ISO9660.h"
 #include "ext2.h"
 #include "sysfs.h"
 #include "netfs.h"

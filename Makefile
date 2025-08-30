@@ -25,7 +25,6 @@ OBJECTS = \
 		src/drivers/ahci.o \
 		src/drivers/drive.o \
 		src/drivers/FAT32.o \
-		src/drivers/ISO9660.o \
 		src/drivers/ext2.o \
 		src/program.o \
 		src/window.o \

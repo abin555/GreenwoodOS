@@ -29,6 +29,7 @@ void kernel_fn_init(){
     kernel_fn_add(drives, -1, "drives_s");
     kernel_fn_add(&drive_count, -1, "drive_count_s");
     kernel_fn_add(malloc, 1, "kmalloc");
+    kernel_fn_add(print_serial, 100, "print_serial");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){
