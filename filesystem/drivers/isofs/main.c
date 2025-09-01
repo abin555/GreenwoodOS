@@ -193,12 +193,14 @@ int iso9660_vfs_read(void *f, void *buf, int nbytes){
     if(f == NULL || buf == NULL) return -1;
     struct VFS_File *file_idx = f;
     struct ISO9660_File *file = (struct ISO9660_File *) file_idx->inode.fs.fs;
-    char *iso_buf = ISO_read_sector(file_idx->inode.interface->drive, sector_buf, file->sector);
-    if(iso_buf == NULL) return -1;
+    //print_serial("[ISO FS] Reading sector %d for %d bytes starting from %d to 0x%x\n", file->sector, nbytes, file_idx->head, buf);
     int idx = 0;
-    int sector_offset = 0;
-    int walk_head = file_idx->head;
-    while(file_idx->head < 512*4 && idx < nbytes){
+    int sector_offset = file_idx->head / (512*4);
+    char *iso_buf = ISO_read_sector(file_idx->inode.interface->drive, sector_buf, file->sector+sector_offset);
+    if(iso_buf == NULL) return -1;
+    int walk_head = file_idx->head % (512*4);
+    //print_serial("[ISO FS] Sector Offset: %d, walker head: %d\n", sector_offset, walk_head);
+    while(walk_head < 512*4 && idx < nbytes){
         ((char *) buf)[idx] = iso_buf[walk_head];
         walk_head++;
         idx++;

@@ -6,8 +6,8 @@
 
 struct Viewport make_viewport(int w, int h, char *title){
     struct Viewport viewport;
-    viewport.loc.x = 50;
-    viewport.loc.y = 50;
+    viewport.loc.x = 10;
+    viewport.loc.y = 10;
     viewport.loc.w = w;
     viewport.loc.h = h;
     viewport.resizeable = 1;

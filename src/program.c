@@ -63,8 +63,8 @@ void exec(char *filename, int argc, char **argv){
 		else{
 			int slot = program_findSlot();
 			print_serial("Loading Program %s to slot %d\n", filename, slot);
-			//print_serial("[PROGRAM] Is ELF Format!\n");
 			uint32_t entry = elf_get_entry_addr(file);
+			print_serial("[PROGRAM] Is ELF Format, entry @ 0x%x!\n", entry);
 			elf_load(file, (void *) (program_region_virt_base + 0x400000*slot));
 			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
 			//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	

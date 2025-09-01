@@ -234,7 +234,10 @@ void HandleSelection(char *work_buf, int sel){
     else if(dir.entries[sel+2].type == 0){
         printf("Opening %s\n", (uint32_t) dir.entries[sel+2].filename);
         printf("Checking extension: %s\n", (uint32_t) dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4);
-        if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".tga")){
+        if(
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".tga") ||
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".TGA")
+        ){
             
             arg[0] = 0x0;
             arg[1] = malloc(dir.entries[sel+2].name_len);
@@ -243,12 +246,20 @@ void HandleSelection(char *work_buf, int sel){
             exec("/A/utils/image/image.elf", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".exe") || !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".elf")){
+        else if(
+            !strcmp((dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4), ".exe") || 
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".elf") ||
+            !strcmp((dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4), ".EXE") || 
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".ELF")
+        ){
             exec(dir.entries[sel+2].filename, 0, NULL);
             sel = -1;
             return;
         }
-        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".obj")){
+        else if(
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".obj") ||
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".OBJ")
+        ){
             char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
             arg[1] = malloc(dir.entries[sel+2].name_len);
@@ -257,7 +268,10 @@ void HandleSelection(char *work_buf, int sel){
             exec("/A/utils/3D/3Dvp.elf", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".gif")){
+        else if(
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".gif") ||
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".GIF")
+        ){
             char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
             arg[1] = malloc(dir.entries[sel+2].name_len);
@@ -266,7 +280,10 @@ void HandleSelection(char *work_buf, int sel){
             exec("/A/utils/gif/gif.elf", 2, arg);
             return;
         }
-        else if(!strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".wav")){
+        else if(
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".wav") ||
+            !strcmp(dir.entries[sel+2].filename+dir.entries[sel+2].name_len-4, ".WAV")
+        ){
             char **arg = malloc(sizeof(char *) * 2);
             arg[0] = 0x0;
             arg[1] = malloc(dir.entries[sel+2].name_len);
