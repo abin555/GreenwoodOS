@@ -1,7 +1,10 @@
-#include "libc.h"
+#include <stdio.h>
+#include <sys/window.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <sys/task.h>
+#include <string.h>
 
-char *heap;
-int heap_idx = 0;
 uint32_t *win_buf;
 struct WINDOW *window;
 int size;
@@ -10,8 +13,19 @@ char *file_buf;
 int scan;
 
 void *alloc(int size);
-void memset(void *mem, char v, int size);
 void render_file(char *buf, int line);
+
+void drawChar(uint32_t x, uint32_t y, char c){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	register uint32_t edx asm("edx");
+	edx = c;
+	ecx = y;
+	ebx = x;
+	eax = 0x04;
+	asm("int $0x80");
+}
 
 #define BYTES_PER_LINE 16
 #define marginX 5
@@ -19,21 +33,22 @@ void render_file(char *buf, int line);
 
 int main(int argc, char **argv){
 	if(argc < 2){
-		print("Hex Editor, needs file path!\n");
+		printf("Hex Editor, needs file path!\n");
 		return 1;
 	}
-	print("Opening Hex\n");
-	heap = (char *) 0x4000;
-	print_arg("Opening file %s\n", (uint32_t) argv[1]);
-	struct FILE *text = fopen(argv[1]);
+	printf("Opening Hex\n");
+	printf("Opening file %s\n", (uint32_t) argv[1]);
+	struct FILE *text = fopen(argv[1], "rw");
 	if(text == NULL){
-		print("File does not exist!\n");
+		printf("File does not exist!\n");
 		return 1;
 	}
-	size = fsize(text);
-	print_arg("File size is %d\n", size);
-	file_buf = alloc(size);
-	fcopy(text, file_buf, size);
+    fseek(text, 0, SEEK_END);
+	size = ftell(text);
+    fseek(text, 0, SEEK_SET);
+	printf("File size is %d\n", size);
+	file_buf = malloc(size);
+	fread(file_buf, size, 1, text);
 
 	window = window_open("HexED", 0);
 	win_buf = window->backbuffer;
@@ -49,7 +64,7 @@ int main(int argc, char **argv){
 
 
         window_update();
-        char c = getc();
+        char c = window_getc();
 		if(c == 0x13 && line > 0){
 			line--;
             if(scan >= 0){
@@ -81,24 +96,12 @@ int main(int argc, char **argv){
                 //byte = 0x12;
             }
             file_buf[idx] = byte;
-            fseek(text, idx);
-            fputc(text, byte);
+            fseek(text, idx, SEEK_SET);
+            fputc(byte, text);
             scan++;
         }
 
     }
-}
-
-void *alloc(int size){
-	void *address = (void *) &heap[heap_idx];
-	heap_idx += size;
-	return address;
-}
-
-void memset(void *mem, char v, int size){
-	for(int i = 0; i < size; i++){
-		((char *) mem)[i] = v;
-	}
 }
 
 /*
