@@ -98,8 +98,23 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
 
     viewport_init_sys(global_viewport_list);
+    
+    /*
+    static char *isofs_loader_argv[] = {
+        "/A/drivers/loader.elf",
+        "/A/drivers/isofs/isofs.elf"
+    };
+    exec(isofs_loader_argv[0], 2, isofs_loader_argv);
+    static char *isofs_loader_argv[] = {
+        "/A/drivers/loader.elf",
+        "/A/drivers/isofs/isofs.elf"
+    };
+    exec(isofs_loader_argv[0], 2, isofs_loader_argv);
+
 
     exec("/A/utils/explorer/explorer.elf", 0, NULL);
+    */
+    exec("/A/OS/init/init.elf", 0, NULL);
 
     struct {
         int startX;
