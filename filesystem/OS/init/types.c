@@ -12,6 +12,11 @@ Symbol_t type_createExec(){
     return s;
 }
 
+Symbol_t type_createWExec(){
+    Symbol_t s = {WEXEC, NULL};
+    return s;
+}
+
 Symbol_t type_createStr(char *str){
     Symbol_t s = {STR, str};
     return s;
@@ -40,12 +45,18 @@ bool is_execkeyword(char *s){
     return !strncmp(s, exec_keyword, 4);
 }
 
+bool is_wexeckeyword(char *s){
+    return !strncmp(s, wexec_keyword, 5);
+}
+
 char *typeToStr(SYMS_e t){
     switch(t){
         case VAR:
             return "VAR";
         case EXEC:
             return "EXEC";
+        case WEXEC:
+            return "WEXEC";
         case STR:
             return "STR";
         case IDEN:

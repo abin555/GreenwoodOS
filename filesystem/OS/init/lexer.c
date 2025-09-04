@@ -85,15 +85,20 @@ struct TokenStream lex(char *s, int len){
             start += sizeof(var_keyword)-1;
             continue;
         }
-        if(is_execkeyword(start) && isBlankSpace(*(start+sizeof(exec_keyword)-1))){//match for VAR (variable keyword)
+        if(is_execkeyword(start) && isBlankSpace(*(start+sizeof(exec_keyword)-1))){//match for EXEC (execute keyword)
             stream.tokens[stream.ntokens++] = type_createExec();
             start += sizeof(exec_keyword)-1;
+            continue;
+        }
+        if(is_wexeckeyword(start) && isBlankSpace(*(start+sizeof(wexec_keyword)-1))){//match for EXEC (execute keyword)
+            stream.tokens[stream.ntokens++] = type_createWExec();
+            start += sizeof(wexec_keyword)-1;
             continue;
         }
         if(isLetterOrNumber(*start)){
             char *iden_start = start;
             char *iden_end = iden_start;
-            while(*iden_end < end && isLetterOrNumber(*iden_end)){
+            while(iden_end < end && isLetterOrNumber(*iden_end)){
                 iden_end++;
             }
             int len = iden_end - iden_start;
@@ -121,6 +126,9 @@ void printTokenStream(struct TokenStream s){
                 printf("VAR\n");
                 break;
             case EXEC:
+                printf("EXEC\n");
+                break;
+            case WEXEC:
                 printf("EXEC\n");
                 break;
             case STR:

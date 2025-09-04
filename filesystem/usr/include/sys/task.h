@@ -8,7 +8,8 @@ typedef enum {
 	NEVER = 4
 } ScheduleType;
 
-void exec(char *filename, int argc, char **argv);
+int exec(char *filename, int argc, char **argv);
+void waitpid(int pid);//Program does not run while given pid is alive.
 void set_schedule(ScheduleType type);
 void yield();
 void task_lock(int state);

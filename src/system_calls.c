@@ -49,7 +49,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 		}
 		//Execute Program
 		case 0x06:{
-			exec((char *)cpu->ebx, cpu->ecx, (char **) cpu->edx);
+			cpu_state.ebx = exec((char *)cpu->ebx, cpu->ecx, (char **) cpu->edx);
 			break;
 		}
 		//Set Scheduling Type
@@ -366,6 +366,13 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 		}
 		case 0x3F:{
 			cpu_state.eax = (unsigned int) vfs_ftruncate(cpu->ebx, cpu->ecx);
+			break;
+		}
+		//Program requests to wait until passed pid ends
+		case 0x40:{
+			int id = task_getCurrentID();
+			print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
+			tasks[id].waitpid = cpu->ebx;
 			break;
 		}
 	}

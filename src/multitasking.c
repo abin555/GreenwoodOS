@@ -8,6 +8,7 @@ char task_fxsave_region[MAX_TASKS][512] __attribute__((aligned(16)));
 struct task_state tasks[MAX_TASKS];
 
 extern uint32_t kernel_stack_base;
+int pid_counter;
 
 #define TASK_STACK_VIRTUAL_BASE 0x40000000
 
@@ -22,6 +23,7 @@ void multitask_init(){
     task_stack_base = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE * MAX_TASKS), PAGE_SIZE * MAX_TASKS, 0, STACK));
     //tasks = (struct task_state *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(sizeof(struct task_state) * MAX_TASKS), sizeof(struct task_state) * MAX_TASKS, 0, KERNEL));
     memset(tasks, 0, sizeof(struct task_state) * MAX_TASKS);
+    pid_counter = 1;
     MEM_printRegions();
     print_serial("[TASK] Setting Stack! - 0x%x\n", (uint32_t *) task_stack_base);
     for(int i = 0; i < MAX_TASKS; i++){
@@ -64,8 +66,9 @@ void save_task_state(struct task_state *task, struct cpu_state *cpu __attribute_
     task->registers.esp = cpu->esp;
 }
 
-void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
-	for(int i = 0; i < MAX_TASKS; i++){
+int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
+	int retpid = 0;
+    for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
             tasks[i].registers.eax = 0;
             tasks[i].registers.ebx = 0;
@@ -118,10 +121,14 @@ void start_task(void *address, int8_t program_slot, int argc, char **argv, char*
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;
             }
-            print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x)\n", tasks[i].task_name, i, tasks[i].registers.esp, tasks[i].registers.ebp);
+            tasks[i].pid = pid_counter++;
+            retpid = tasks[i].pid;
+            tasks[i].waitpid = 0;
+            print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", tasks[i].task_name, i, tasks[i].registers.esp, tasks[i].registers.ebp, tasks[i].pid);
             break;
         }
     }
+    return retpid;
 }
 
 int fork_ret(){
@@ -182,6 +189,18 @@ void set_schedule(ScheduleType type){
 void set_schedule_task(int taskID, ScheduleType type){
     print_serial("[TASK] Set Task %d (\"%s\") schedule type to %d\n", taskID, tasks[taskID].task_name, type);
     tasks[taskID].schedule_type = type;
+}
+
+int taskID_fromPID(int pid){
+    //print_serial("[TASK] Looking for PID #%d\n", pid);
+    if(pid == 0) return -1;
+    for(int i = 0; i < MAX_TASKS; i++){
+        if(tasks[i].slot_active && tasks[i].pid == pid){
+            //print_serial("[TASK] PID #%d -> Task ID %d\n", pid, i);
+            return i;
+        }
+    }
+    return -1;
 }
 
 void stop_task(int8_t task_idx){
@@ -333,11 +352,24 @@ void task_callback(){
                 print_serial("[TASK] Funny thing... the next program is at the end of executable space...\n");
                 print_serial("[TASK] %s\n", tasks[next_idx].task_name);
             }
+            
+            if(tasks[next_idx].waitpid > 0){
+                int waittask = taskID_fromPID(tasks[next_idx].waitpid);
+                if(waittask != -1){
+                    next_idx++;
+                    continue;
+                }
+                else{
+                    tasks[next_idx].waitpid = 0;
+                }
+            }
+            
             switch_to_task((struct task_state*) &tasks[running_idx], (struct task_state*) &tasks[next_idx], running_idx, next_idx);
             tasks[running_idx].slot_running = 0;
             tasks[next_idx].slot_running = 1;
             running_idx = next_idx;
             task_running_idx = running_idx;
+            //print_serial("[TASK] Switching to PID %d\n", tasks[next_idx].pid);
             break;
         }
         else{

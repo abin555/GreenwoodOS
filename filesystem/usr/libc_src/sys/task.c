@@ -1,7 +1,7 @@
 #include <sys/task.h>
 #include <stdint.h>
 
-void exec(char *filename, int argc, char **argv){
+int exec(char *filename, int argc, char **argv){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	register uint32_t ecx asm("ecx");
@@ -11,7 +11,18 @@ void exec(char *filename, int argc, char **argv){
 	ebx = (uint32_t) filename;
 	eax = 0x06;
 	asm("int 0x80");
+	return (int) ebx;
 }
+
+void waitpid(int pid){
+	register uint32_t eax asm("eax");
+	register int ebx asm("ebx");
+	ebx = pid;
+	eax = 0x40;
+	asm("int 0x80");
+	yield();
+}
+
 void set_schedule(ScheduleType type){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");

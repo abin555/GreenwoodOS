@@ -55,6 +55,8 @@ struct task_state{
     bool own_console;
     int file_descs[MT_maxDescriptors];
     int num_used;
+    int pid;//Unique program ID
+    int waitpid;//If <= 0, don't worry about it. Otherwise, program does not run until program referenced by pid is ended.
 };
 
 #define MAX_TASKS 30
@@ -68,7 +70,7 @@ extern bool task_lock;
 //Switch from active task to passed task pointer.
 void switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id);
 //Create new task instance and execute it.
-void start_task(void *address, int8_t program_slot, int argc, char **argv, char* name);
+int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name);
 //Remove task from the run queue
 void stop_task(int8_t task_idx);
 void task_end();
@@ -82,6 +84,8 @@ void list_tasks();
 int task_get_slot(int task_idx);
 void set_schedule(ScheduleType type);
 void set_schedule_task(int taskID, ScheduleType type);
+
+int taskID_fromPID(int pid);
 
 void task_yield();
 

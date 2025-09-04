@@ -34,14 +34,15 @@ int program_findSlot(){
 	return slot;
 }
 
-void exec(char *filename, int argc, char **argv){
+int exec(char *filename, int argc, char **argv){
 	print_serial("\n[EXEC] Starting Program %s\n", filename);	
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);
 	int size = vfs_seek(file, 0, 2);
 	vfs_seek(file, 0, 0);
-	if(file == -1) return;
+	if(file == -1) return 0;
+	int pid = 0;
 	if(elf_check_supported(file)){
 		if(elf_is_dyn(file)){
 			print_serial("[EXEC] Program %s is dynamic!\n", filename);
@@ -69,7 +70,7 @@ void exec(char *filename, int argc, char **argv){
 			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
 			//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
 			vfs_close(file);
-			start_task((void *)entry, slot, argc, argv, filename);
+			pid = start_task((void *)entry, slot, argc, argv, filename);
 		}
 	}
 	else {
@@ -77,7 +78,9 @@ void exec(char *filename, int argc, char **argv){
 		vfs_seek(file, 0, 0);
 		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);	
 		vfs_close(file);
-		start_task(0, slot, argc, argv, filename);
+		pid = start_task(0, slot, argc, argv, filename);
 	}
+	print_serial("[EXEC] New Program PID is %d\n", pid);
+	return pid;
 	//print_serial("[EXEC] Program started!\n\n");
 }

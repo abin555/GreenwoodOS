@@ -14,6 +14,6 @@ extern uint8_t program_active_slot;
 
 void program_init();
 void select_program(int program_slot);
-void exec(char *filename, int argc, char **argv);
+int exec(char *filename, int argc, char **argv);
 
 #endif

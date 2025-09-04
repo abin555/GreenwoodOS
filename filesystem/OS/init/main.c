@@ -12,6 +12,7 @@ struct Variable {
 };
 
 struct Execute {
+    char should_wait;
     char *prog;
     int argc;
     char **argv;
@@ -64,12 +65,14 @@ void parse(struct Program *p, struct TokenStream *s){
                 break;
             }
         }
-        if(s->tokens[hidx].type == EXEC && hidx <= s->ntokens - 2){//Execute Calls.
+        if((s->tokens[hidx].type == EXEC || s->tokens[hidx].type == WEXEC) && hidx <= s->ntokens - 2){//Execute Calls.
+            SYMS_e exec_type = s->tokens[hidx].type;
             if(
                 s->tokens[hidx + 1].type == IDEN ||
                 s->tokens[hidx + 1].type == STR
             ){
                 struct Execute exec = {
+                    (exec_type == WEXEC) ? 1 : 0,
                     NULL,
                     0,
                     NULL
@@ -135,8 +138,15 @@ void parse(struct Program *p, struct TokenStream *s){
 void run(struct Program *p){
     if(p == NULL) return;
     for(int i = 0; i < p->numExecutes; i++){
-        exec(p->execs[i].prog, p->execs[i].argc, p->execs[i].argv);
-        yield();
+        int pid = exec(p->execs[i].prog, p->execs[i].argc, p->execs[i].argv);
+        printf("[INIT] Exec'd with PID %d\n", pid);
+        if(p->execs[i].should_wait){
+            waitpid(pid);
+            printf("[INIT] Wait complete!\n");
+        }
+        else{
+            yield();
+        }
     }
 }
 
