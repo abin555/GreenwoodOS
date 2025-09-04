@@ -1,2 +1,2 @@
 build:
-	i386-gwos-gcc main.c -o init.elf
+	i386-gwos-gcc main.c types.c lexer.c -o init.elf

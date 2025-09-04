@@ -10,7 +10,9 @@ typedef enum {
     VAR,
     EXEC,
     STR,
-    IDEN
+    IDEN,
+    ENDL,
+    UNKN
 } SYMS_e;
 
 typedef struct Symbol {
@@ -25,8 +27,11 @@ Symbol_t type_createVar();
 Symbol_t type_createExec();
 Symbol_t type_createStr(char *str);
 Symbol_t type_createIden(char *iden);
+Symbol_t type_createEndl();
+Symbol_t type_createUnkn();
 
 bool is_varkeyword(char *s);
 bool is_execkeyword(char *s);
+char *typeToStr(SYMS_e t);
 
 #endif
