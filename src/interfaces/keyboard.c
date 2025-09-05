@@ -34,7 +34,7 @@ void kbd_init(uint32_t buffer_size){
 	print_serial("[KBD] buffer size: %d\n", keyboard_buffer_size);
 }
 
-void kbd_callEventHandler(unsigned char ascii){
+void kbd_callEventHandler(struct KBD_flags flags){
 	for(int i = 0; i < MAX_TASKS; i++){
 		if(
 			tasks[i].slot_active &&
@@ -44,7 +44,7 @@ void kbd_callEventHandler(unsigned char ascii){
 			//print_serial("Switching to program %d and calling keyboard handler at 0x%x, and keycode 0x%x (%c)\n", tasks[i].program_slot, (uint32_t) tasks[i].keyboard_event_handler, ascii, ascii);
 			if(tasks[i].program_slot != -1)
 				select_program(tasks[i].program_slot);
-			tasks[i].keyboard_event_handler(ascii);
+			tasks[i].keyboard_event_handler(flags.key);
 			if(tasks[task_running_idx].program_slot != -1){
 				select_program(tasks[task_running_idx].program_slot);
 			}
@@ -100,7 +100,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 			
 			KBD_ascii_buffer_idx++;
 			keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-			kbd_callEventHandler(KBD_flags.key);
+			kbd_callEventHandler(KBD_flags);
 		}
 		else{
 			switch(scancode){
@@ -143,11 +143,11 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 					if(KBD_flags.special){
 						KBD_flags.arrow = LEFT;
 						//print_serial("Left Arrow\n");
-						//KBD_flags.key = 0x11;
+						KBD_flags.key = 0x11;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x11;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x11);
+						kbd_callEventHandler(KBD_flags);
 						if(KBD_flags.ctrl){
 							mouse_update(-2, 0, (struct MouseButtons) {0, 0, 0});
 						}
@@ -157,11 +157,11 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 					if(KBD_flags.special){
 						KBD_flags.arrow = RIGHT;
 						//print_serial("Right Arrow\n");
-						//KBD_flags.key = 0x12;
+						KBD_flags.key = 0x12;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x12;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x12);
+						kbd_callEventHandler(KBD_flags);
 						if(KBD_flags.ctrl){
 							mouse_update(2, 0, (struct MouseButtons) {0, 0, 0});
 						}
@@ -171,11 +171,11 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 					if(KBD_flags.special){
 						KBD_flags.arrow = UP;
 						//print_serial("Up Arrow\n");
-						//KBD_flags.key = 0x13;
+						KBD_flags.key = 0x13;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x13;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x13);
+						kbd_callEventHandler(KBD_flags);
 						if(KBD_flags.ctrl){
 							mouse_update(0, 2, (struct MouseButtons) {0, 0, 0});
 						}
@@ -185,11 +185,11 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 					if(KBD_flags.special){
 						KBD_flags.arrow = DOWN;
 						//print_serial("Down Arrow\n");
-						//KBD_flags.key = 0x14;
+						KBD_flags.key = 0x14;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x14;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x14);
+						kbd_callEventHandler(KBD_flags);
 						if(KBD_flags.ctrl){
 							mouse_update(0, -2, (struct MouseButtons) {0, 0, 0});
 						}
