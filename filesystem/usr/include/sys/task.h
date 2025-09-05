@@ -13,6 +13,6 @@ void waitpid(int pid);//Program does not run while given pid is alive.
 void set_schedule(ScheduleType type);
 void yield();
 void task_lock(int state);
-void manual_task(void *address, char *name);
+int manual_task(void *address, char *name);
 
 #endif

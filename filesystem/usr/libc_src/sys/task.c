@@ -45,7 +45,7 @@ void task_lock(int state){
 	asm("int 0x80");
 }
 
-void manual_task(void *address, char *name){
+int manual_task(void *address, char *name){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	register uint32_t ecx asm("ecx");
@@ -53,4 +53,5 @@ void manual_task(void *address, char *name){
 	ebx = (uint32_t) address;
 	eax = 0x26;
 	asm("int 0x80");
+	return (int) ebx;
 }

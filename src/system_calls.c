@@ -266,7 +266,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 			break;
 		}
 		case 0x26:{
-			start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx);
+			cpu_state.ebx = start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx);
 			break;
 		}
 		case 0x27:{

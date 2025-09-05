@@ -26,6 +26,7 @@ void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, stru
 }
 
 struct Bitmap background;
+struct DesktopConfig desktopConfig;
 
 void desktopbg_write_callback(void *cdev, int offset, int nbytes, int *head){
     struct SysFS_Chardev *bg = cdev;
@@ -36,6 +37,12 @@ void desktopbg_write_callback(void *cdev, int offset, int nbytes, int *head){
 void cursorbmap_write_callback(void *cdev, int offset, int nbytes, int *head){
     struct SysFS_Chardev *cursor = cdev;
     print_serial("[DESKTOP] [CURSOR] Write to cursor of size %d at offset %d @ 0x%x\n", nbytes, offset, cursor->buf);
+    *head = 0;
+}
+
+void screen_write_callback(void *cdev, int offset, int nbytes, int *head){
+    struct SysFS_Chardev *screen = cdev;
+    print_serial("[DESKTOP] [SCREEN] Write to screen of size %d at offset %d @ 0x%x\nROOT X: %d ROOT Y: %d\n", nbytes, offset, screen->buf, desktopConfig.vp_root_x, desktopConfig.vp_root_y);
     *head = 0;
 }
 
@@ -50,6 +57,13 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     background = loadBitmap(BACKGROUND_FILE);
     struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
+
+    desktopConfig = (struct DesktopConfig) {
+        10, 10, //VP origins are at (10,10)
+        //Screen dimensions
+        window->width,
+        window->height
+    };
     
     struct VFS_Inode *vfs_sysroot = vfs_findRoot('-');
     struct SysFS_Inode *sysfs = vfs_sysroot->root->interface->root;
@@ -73,7 +87,18 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     );
     sysfs_setCallbacks(cursorCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) cursorbmap_write_callback, NULL, NULL, NULL);
     sysfs_addChild(sysfs_find(sysfs, "sys\0", NULL), cursorCDEV);
+    struct SysFS_Inode *screenCDEV = sysfs_mkcdev(
+        "screen",
+        sysfs_createCharDevice(
+            (char *) &desktopConfig,
+            sizeof(desktopConfig),
+            CDEV_READ | CDEV_WRITE
+        )
+    );
+    sysfs_setCallbacks(screenCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) screen_write_callback, NULL, NULL, NULL);
+    sysfs_addChild(sysfs_find(sysfs, "sys\0", NULL), screenCDEV);
     sysfs_debugTree(sysfs, 0);   
+
 
     struct Icon icons[numIcons];
     memset(icons, 0, sizeof(struct Icon) * numIcons);

@@ -4,6 +4,7 @@
 #include <sys/task.h>
 #include <stdint.h>
 #include <sys/io.h>
+#include <string.h>
 
 typedef uint16_t Elf32_Half;	// Unsigned half int
 typedef uint32_t Elf32_Off;	// Unsigned offset
@@ -461,10 +462,16 @@ char elf_load(int file, void *buffer){
 extern struct FILE **fileListing;
 
 int main(int argc, char **argv){
-	if(argc != 2){
+	if(argc < 2){
 		printf("Loader Error! No provided binary!\n");
 		return 1;
 	}	
+	char wait = 0;
+	if(argc == 3){
+		if(!strcmp(argv[2], "-w")){
+			wait = 1;
+		}
+	}
     printf("[Loader] Loading \"%s\"\n", argv[1]);
     int service_fd = open(argv[1], O_READ);
     if(service_fd == -1){
@@ -480,7 +487,11 @@ int main(int argc, char **argv){
 		elf_load(service_fd, service_address);
         close(service_fd);
         //*((uint32_t *) (service_address + 0x365c)) = (uint32_t) service_address;
-        manual_task(service_address + entry, "Service");
+
+        int pid = manual_task(service_address + entry, "Service");
+		if(wait){
+			waitpid(pid);
+		}
     }
     else{
         printf("Not valid ELF file!\n");
