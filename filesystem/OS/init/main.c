@@ -44,13 +44,13 @@ int prog_addVariable(struct Program *p, char *name, Symbol_t s){
     p->vars[p->num_variables++] = (struct Variable) {
         name, s
     };
-    printf("Added Variable %s = (%d) %s\n", name, s.type, s.str);
+    //printf("Added Variable %s = (%d) %s\n", name, s.type, s.str);
     return 0;
 }
 
 void parse(struct Program *p, struct TokenStream *s){
     for(int hidx = 0; hidx < s->ntokens; hidx++){
-        printf("HIDX: %d - %d\n", hidx, s->tokens[hidx].type);
+        //printf("HIDX: %d - %d\n", hidx, s->tokens[hidx].type);
         if(s->tokens[hidx].type == VAR && hidx <= s->ntokens - 4){//Create Variable
             if(
                 s->tokens[hidx + 1].type == IDEN &&
@@ -79,21 +79,21 @@ void parse(struct Program *p, struct TokenStream *s){
                 };
                 hidx++;
                 if(s->tokens[hidx].type == IDEN){//Need to resolve a variable for program name.
-                    printf("EXEC program - Looking for variable %s\n", exec.argc, s->tokens[hidx].iden);
+                    //printf("EXEC program - Looking for variable %s\n", exec.argc, s->tokens[hidx].iden);
                     Symbol_t sym = prog_getVariable(p, s->tokens[hidx].iden);
                     if(sym.type == STR){
-                        printf("Found: \"%s\"\n", sym.str);
+                        //printf("Found: \"%s\"\n", sym.str);
                         exec.prog = sym.str;
                     }
                     else{
-                        printf("Error resolving type in EXEC, expected string got %s\n", typeToStr(sym.type));
+                        //printf("Error resolving type in EXEC, expected string got %s\n", typeToStr(sym.type));
                         break;
                     }                    
                 }
                 else if(s->tokens[hidx].type == STR){
                     exec.prog = s->tokens[hidx].str;
                 }
-                printf("Exec Program: %s\n", exec.prog);
+                //printf("Exec Program: %s\n", exec.prog);
 
                 exec.argc = 1;
                 exec.argv = malloc(sizeof(char *));
@@ -106,10 +106,10 @@ void parse(struct Program *p, struct TokenStream *s){
                         exec.argv[exec.argc++] = s->tokens[hidx].str;
                     }
                     else if(s->tokens[hidx].type == IDEN){
-                        printf("EXEC arg #%d - Looking for variable %s\n", exec.argc, s->tokens[hidx].iden);
+                        //printf("EXEC arg #%d - Looking for variable %s\n", exec.argc, s->tokens[hidx].iden);
                         Symbol_t sym = prog_getVariable(p, s->tokens[hidx].iden);
                         if(sym.type == STR){  
-                            printf("Found: \"%s\"\n", sym.str);
+                            //printf("Found: \"%s\"\n", sym.str);
                             exec.argv = realloc(exec.argv, sizeof(char *) * exec.argc);
                             exec.argv[exec.argc++] = sym.str;
                         }
@@ -139,10 +139,10 @@ void run(struct Program *p){
     if(p == NULL) return;
     for(int i = 0; i < p->numExecutes; i++){
         int pid = exec(p->execs[i].prog, p->execs[i].argc, p->execs[i].argv);
-        printf("[INIT] Exec'd with PID %d\n", pid);
+        //printf("[INIT] Exec'd with PID %d\n", pid);
         if(p->execs[i].should_wait){
             waitpid(pid);
-            printf("[INIT] Wait complete!\n");
+            //printf("[INIT] Wait complete!\n");
         }
         else{
             yield();
@@ -165,19 +165,19 @@ int main(int argc, char **argv){
     fread(text, size, 1, autostart);
     fclose(autostart);
 
-    printf("Autostart File:\n%s\n", text);
+    //printf("Autostart File:\n%s\n", text);
 
     struct TokenStream s = lex(text, size);
 
-    printf("Token Parse\n");
-    printTokenStream(s);
+    //printf("Token Parse\n");
+    //printTokenStream(s);
 
     struct Program p = {
         0, 0
     };
 
     parse(&p, &s);
-    printf("There are %d variables and %d exec statements\n", p.num_variables, p.numExecutes);
+    printf("[INIT] There are %d variables and %d exec statements\n", p.num_variables, p.numExecutes);
     run(&p);
 
     return 0;

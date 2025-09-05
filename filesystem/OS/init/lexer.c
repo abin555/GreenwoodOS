@@ -33,7 +33,7 @@ struct TokenStream lex(char *s, int len){
         return stream;
     }
 
-    printf("Lexing\n%s\n\nStart:\n", s);
+    //printf("Lexing\n%s\n\nStart:\n", s);
     int err = 0;
 
     char *start = s;
