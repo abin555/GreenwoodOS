@@ -44,7 +44,7 @@ void kbd_callEventHandler(struct KBD_flags *flags){
 			//print_serial("Switching to program %d and calling keyboard handler at 0x%x, and keycode 0x%x (%c)\n", tasks[i].program_slot, (uint32_t) tasks[i].keyboard_event_handler, ascii, ascii);
 			if(tasks[i].program_slot != -1)
 				select_program(tasks[i].program_slot);
-			tasks[i].keyboard_event_handler(flags->key);
+			tasks[i].keyboard_event_handler(flags);
 			if(tasks[task_running_idx].program_slot != -1){
 				select_program(tasks[task_running_idx].program_slot);
 			}

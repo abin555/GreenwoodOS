@@ -49,7 +49,7 @@ void screen_write_callback(void *cdev, int offset, int nbytes, int *head){
 int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
-    window_task->keyboard_event_handler = desktop_kbd_event;
+    window_task->keyboard_event_handler = (void (*)(void *)) desktop_kbd_event;
     window_task->window = window;
     window_task->console = kernel_console;
     set_schedule(ALWAYS);
@@ -215,24 +215,25 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     }
 }
 
-void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
+void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags){
+    char ascii = flags->key;
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
-    if(KBD_flags.ctrl && ascii == 'T'){
+    if(flags->ctrl && ascii == 'T'){
         exec("/A/OS/termvp/term.elf", 0, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'E'){
+    else if(flags->ctrl && ascii == 'E'){
         exec("/A/utils/explorer/explorer.elf", 0, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'Q'){
+    else if(flags->ctrl && ascii == 'Q'){
         exec("/A/utils/task/taskmgr.elf", 0, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'C'){
+    else if(flags->ctrl && ascii == 'C'){
         exec("/A/utils/clock/clock.elf", 0, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'L'){
+    else if(flags->ctrl && ascii == 'L'){
         exec("/A/lisp/lisp.elf", 0, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'M'){
+    else if(flags->ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
             if(global_viewport_list->elements[i].inUse){
                 if(!global_viewport_list->elements[i].vp->minimized)

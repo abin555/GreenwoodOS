@@ -48,7 +48,7 @@ struct task_state{
     struct WINDOW *window;
     struct CONSOLE *console;
     struct DIRECTORY currentDirectory;
-    void (*keyboard_event_handler)(char);
+    void (*keyboard_event_handler)(void *);
     //void (*mouse_event_handler)(void);
     void (*end_callback)(void);
     bool own_window;
@@ -101,4 +101,7 @@ void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stac
 void tasking_setup_kernel_stack();
 
 int task_getCurrentID();
+void task_setCurrentID(int idx);
+int task_get_program_slot(int task_id);
+
 #endif

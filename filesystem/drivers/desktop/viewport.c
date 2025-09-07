@@ -1,8 +1,10 @@
+#include <stdio.h>
+#include <sys/window.h>
+#include <sys/task.h>
+#include <sys/memory.h>
 #include "viewport.h"
-#include "framebuffer.h"
 #include "bitmap.h"
-#include "window.h"
-#include "multitasking.h"
+#include "hooks.h"
 
 struct Viewport make_viewport(int w, int h, char *title){
     struct Viewport viewport;
@@ -19,8 +21,8 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.backbuf = NULL;
     viewport.frontbuf = NULL;
     viewport.buf_size = 0;
-    viewport.owner_program_slot = tasks[task_running_idx].program_slot;
-    viewport.owner_task_id = task_running_idx;
+    viewport.owner_program_slot = get_program_slot(get_task_id());
+    viewport.owner_task_id = get_task_id();
     viewport.event_handler = NULL;
     viewport.ascii = '\0';
     viewport.click_events_enabled = false;
@@ -150,6 +152,7 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
 }
 
 struct ViewportList *global_viewport_list;
+
 struct ViewportFunctions global_viewport_functions = {
     viewport_indirect_open,
     viewport_indirect_close,
@@ -165,7 +168,7 @@ char viewport_getc(struct Viewport *vp){
     while(vp->ascii == '\0'){}
     char c = vp->ascii;
     vp->ascii = '\0';
-    //print_serial("[VIEWPORT] %s getc call returns %c\n", vp->title, c);
+    //printf("[VIEWPORT] %s getc call returns %c\n", vp->title, c);
     return c;
 }
 
@@ -188,15 +191,14 @@ bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
 
 void viewport_init_sys(struct ViewportList *viewport_list){
     if(viewport_list == NULL){
-        //print_serial("[VIEWPORT] List is null!\n");
+        //printf("[VIEWPORT] List is null!\n");
     }
     viewport_list->max = MAX_VIEWPORTS;
     viewport_list->count = 0;
 
-    print_serial("[VIEWPORT] Init System %x %d %d\n", viewport_list, viewport_list->max, viewport_list->count);
+    printf("[VIEWPORT] Init System %x %d %d\n", viewport_list, viewport_list->max, viewport_list->count);
 
-    int block = MEM_findRegionIdx(MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t));
-    uint32_t addr = MEM_reserveRegionBlock(block, MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t), 0, FRAMEBUFFER);
+    uint32_t addr = (uint32_t) memory_requestRegion(MAX_VIEWPORTS * desktop_win->width * desktop_win->height * sizeof(uint32_t));
 
     viewport_list->frontbuf_region = (uint32_t *) addr;
     //MEM_printRegions();
@@ -219,13 +221,13 @@ struct Viewport *viewport_indirect_open(int w, int h, char *title){
 }
 
 struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
-    //print_serial("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
-    if(w > (int) fb_width || h > (int) fb_height || w < 0 || h < 0) return NULL;
+    //printf("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
+    if(w > (int) desktop_win->width || h > (int) desktop_win->height || w < 0 || h < 0) return NULL;
     int element_idx = -1;
     int viewport_idx = -1;
     for(int i = 0; i < viewport_list->max; i++){
         if(viewport_list->elements[i].inUse == false){
-            //print_serial("[VIEWPORT] Element %d is not in use\n", i);
+            //printf("[VIEWPORT] Element %d is not in use\n", i);
             element_idx = i;
             viewport_list->count++;
             break;
@@ -242,7 +244,7 @@ struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct Viewport
     viewport_list->elements[element_idx].vp = &viewport_list->viewports[viewport_idx];
     
     viewport_list->viewports[viewport_idx] = make_viewport(w, h, title);
-    //print_serial("[VIEWPORT] Opened - Elem: %d - VP: %d & %x Count: %d\n", element_idx, viewport_idx, viewport_list->elements[element_idx].vp, viewport_list->count);
+    //printf("[VIEWPORT] Opened - Elem: %d - VP: %d & %x Count: %d\n", element_idx, viewport_idx, viewport_list->elements[element_idx].vp, viewport_list->count);
     viewport_move_element_to_front(viewport_list, element_idx);
     return &viewport_list->viewports[viewport_idx];
 }
@@ -272,7 +274,7 @@ void __attribute__ ((optimize("-O3"))) viewport_close(struct ViewportList *viewp
         viewport_list->elements[i] = temp;
     }
     viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
-    //print_serial("[VP] Close\n");
+    //printf("[VP] Close\n");
 }
 
 void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
@@ -290,15 +292,15 @@ void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct Vie
 void __attribute__ ((optimize("-O3"))) viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
     for(int i = viewport_list->count - 1; i >= 0; i--){
         if(!viewport_list->elements[i].inUse){
-            //print_serial("[VIEWPORT] %d not in use\n", i);
+            //printf("[VIEWPORT] %d not in use\n", i);
             continue;
         }
         if(viewport_list->elements[i].vp == NULL){
-            //print_serial("[VIEWPORT] %d is NULL\n", i);
+            //printf("[VIEWPORT] %d is NULL\n", i);
             continue;
         }
         if(!viewport_list->elements[i].vp->open){
-            //print_serial("[VIEWPORT] %d is not open\n", i);
+            //printf("[VIEWPORT] %d is not open\n", i);
             continue;
         }
         draw_viewport(viewport_list->elements[i].vp, window);
@@ -357,7 +359,7 @@ void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t b
     viewport->backbuf = buffer;
     viewport->buf_size = buf_size;
     int frontbuf_idx = viewport - global_viewport_list->viewports;
-    viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
+    viewport->frontbuf = global_viewport_list->frontbuf_region + (desktop_win->width * desktop_win->height * frontbuf_idx);
 }
 
 void __attribute__ ((optimize("-O3"))) viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
@@ -402,27 +404,28 @@ void viewport_copy_buffer(struct Viewport *viewport){
 
 void viewport_add_event_handler(struct Viewport *viewport, void (*handler)(struct Viewport *, VIEWPORT_EVENT_TYPE)){
     if(viewport == NULL || handler == NULL) return;
-    //print_serial("[VIEWPORT] %s (SLOT %d) added event handler 0x%x\n", viewport->title, viewport->owner_program_slot, (uint32_t) handler);
+    //printf("[VIEWPORT] %s (SLOT %d) added event handler 0x%x\n", viewport->title, viewport->owner_program_slot, (uint32_t) handler);
     viewport->event_handler = handler;
 }
 
 void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event){
     if(viewport == NULL || viewport->event_handler == NULL) return;
-    //print_serial("[VIEWPORT] Sending event %d to viewport %s (SLOT %d) @ 0x%x\n", event, viewport->title, viewport->owner_program_slot, viewport->event_handler);
-    task_lock = 1;
-    int current_task_id = task_running_idx;
+    //printf("[VIEWPORT] Sending event %d to viewport %s (SLOT %d) @ 0x%x\n", event, viewport->title, viewport->owner_program_slot, viewport->event_handler);
+    task_lock(1);
+    int current_task_id = get_task_id();
 
     if(viewport->owner_program_slot != -1){
-        task_running_idx = viewport->owner_task_id;
+        //task_running_idx = viewport->owner_task_id;
+        set_task_id(viewport->owner_task_id);
         select_program(viewport->owner_program_slot);
     }
     
     viewport->event_handler(viewport, event);
     
-    task_running_idx = current_task_id;
-    if(tasks[task_running_idx].program_slot != -1){
-        select_program(tasks[task_running_idx].program_slot);
+    set_task_id(current_task_id);
+    if(get_program_slot(get_task_id()) != -1){
+        select_program(get_program_slot(get_task_id()));
     }
-    task_lock = 0;
-    //print_serial("[VIEWPORT] Sent event\n");
+    task_lock(0);
+    //printf("[VIEWPORT] Sent event\n");
 }

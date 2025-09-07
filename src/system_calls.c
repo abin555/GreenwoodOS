@@ -242,7 +242,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 		//Add Keyboard Event Listener
 		case 0x21:{
 			print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu->ebx);
-			tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) cpu->ebx;
+			tasks[task_running_idx].keyboard_event_handler = (void (*)(void *)) cpu->ebx;
 			break;
 		}
 		//Extend Files

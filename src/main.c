@@ -109,8 +109,12 @@ void kernel_task(int argc, char **argv){
 
     proc_fs_init();
     
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
-    MEM_printRegions();
+    //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+    char *dtop_argv[] = {
+        "drivers/loader.elf",
+        "drivers/desktop/desktop.elf"
+    };
+    exec(dtop_argv[0], 2, dtop_argv);
 
     task_lock = 0;
     set_schedule(NEVER);

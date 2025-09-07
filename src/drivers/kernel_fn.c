@@ -30,6 +30,12 @@ void kernel_fn_init(){
     kernel_fn_add(&drive_count, -1, "drive_count_s");
     kernel_fn_add(malloc, 1, "kmalloc");
     kernel_fn_add(print_serial, 100, "print_serial");
+    kernel_fn_add(buf_putChar, 6, "buf_putChar");
+    kernel_fn_add(buf_w_putChar, 7, "buf_w_putChar");
+    kernel_fn_add(select_program, 1, "select_program");
+    kernel_fn_add(task_setCurrentID, 1, "set_task_id");
+    kernel_fn_add(task_get_program_slot, 1, "get_program_slot");
+    kernel_fn_add(memfcpy, 3, "memfcpy");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){

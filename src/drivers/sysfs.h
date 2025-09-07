@@ -48,6 +48,7 @@ struct SysFS_Meta {
         int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head)
     );
     struct SysFS_Inode *root;
+    void *(*find)(void *r, char *path, unsigned int *meta);
 };
 
 struct SysFS_Inode *sysfs_createRoot();

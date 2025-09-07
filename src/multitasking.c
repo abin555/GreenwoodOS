@@ -432,3 +432,11 @@ int task_get_slot(int task_idx){
 int task_getCurrentID(){
     return task_running_idx;
 }
+
+void task_setCurrentID(int idx){
+    task_running_idx = idx;
+}
+
+int task_get_program_slot(int task_id){
+    return tasks[task_id].program_slot;
+}
