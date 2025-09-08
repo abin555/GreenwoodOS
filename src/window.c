@@ -7,6 +7,8 @@ struct WINDOW windows[MAX_WINDOWS] = {0};
 uint32_t window_bar_size;
 uint32_t window_buf_size;
 
+char window_bar_text[WINDOW_BAR_SIZE];
+
 void window_timer_callback();
 
 struct Bitmap cursor_bitmap_s;
@@ -33,8 +35,10 @@ void window_init(){
 	if(cursor_bitmap_s.bitmap == NULL){
 		print_serial("[WINDOW] Cursor image unavailable!\n");
 	}
+	memset(window_bar_text, 0, sizeof(window_bar_size));
+	memcpy(window_bar_text, "1234567", 7);
 
-	timer_attach(500, window_timer_callback);
+	timer_attach(250, window_timer_callback);
 	
 }
 
@@ -61,6 +65,9 @@ void window_render_bar(){
 		}
 	}
 	fb_print(CHAR_W*(MAX_WINDOWS + 2), y, windows[window_selected].name);
+	for(int i = 0; i < WINDOW_BAR_SIZE; i++){
+		fb_putChar(CHAR_W*i+fb_width-(CHAR_W*sizeof(window_bar_text)), y, window_bar_text[i], 0xFFFFFF, 0x0000AA);
+	}
 }
 
 void window_copy_buffer(struct WINDOW *window){

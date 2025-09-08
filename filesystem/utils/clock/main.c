@@ -30,8 +30,10 @@ struct RealTimeClock rtc;
 
 int drawDecimal(int data, int x, int y);
 
-int main(int argc, char **argv){
+void taskBarClock(int clock_fd);
 
+int main(int argc, char **argv){
+    freopen("/-/dev/serial", "w", stdout);
 	backbuffer = (uint32_t *) malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
     memset(backbuffer, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
 
@@ -39,6 +41,11 @@ int main(int argc, char **argv){
     if(clock_fd == -1){
         printf("Unable to open clock RTC file!\n");
         return 1;
+    }
+
+    if(argc == 2){
+        printf("Clock via taskbar!\n");
+        taskBarClock(clock_fd);
     }
 
 	win = vp_open(WIDTH, HEIGHT, "CLOCK");
@@ -102,4 +109,24 @@ int drawDecimal(int data, int x, int y){
         idx++;
     }
     return idx;
+}
+
+void taskBarClock(int clock_fd){
+    char wbuf[14];
+
+    FILE *taskbar = fopen("/-/sys/winbar", "w");
+    if(taskbar == NULL) return;
+
+    while(1){
+        read(clock_fd, &rtc, sizeof(rtc));
+
+        memset(wbuf, 0, sizeof(wbuf));
+        snprintf(wbuf, sizeof(wbuf), "%d:%d:%d", rtc.hour, rtc.minute, rtc.second);
+
+        fseek(taskbar, 0, SEEK_SET);
+        fwrite(wbuf, sizeof(wbuf), 1, taskbar);
+
+
+        yield();
+    }
 }

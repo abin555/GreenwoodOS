@@ -47,6 +47,13 @@ struct SysFS_Inode *sysroot_init(){
             CDEV_READ
         )
     );
+    struct SysFS_Inode *window_bar_cdev = sysfs_mkcdev("winbar", 
+        sysfs_createCharDevice(
+            (char *) window_bar_text,
+            sizeof(window_bar_text),
+            CDEV_READ | CDEV_WRITE
+        )
+    );
     struct SysFS_Inode *font = sysfs_mkcdev("font",
         sysfs_createCharDevice(
             (char *) FONT,
@@ -64,6 +71,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, kbdTxt);
     sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
+    sysfs_addChild(systems, window_bar_cdev);
     sysfs_addChild(root, devs);
     sysfs_addChild(root, systems);
     sysfs_addChild(root, sysfs_createMetaFile(root));

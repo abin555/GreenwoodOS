@@ -76,7 +76,7 @@ uint32_t ISO9660_getDirectorySector(struct ISO9660 *iso, uint32_t dir_sector, ch
 		return 0;
 	}
 	struct ISO_Directory_Entry *dir = (struct ISO_Directory_Entry *) ISO_read_sector(iso->drive, iso->buf, dir_sector);
-	print_serial("[ISO] Looking For %s\n", folder);
+	//print_serial("[ISO] Looking For %s\n", folder);
 	char tempbuf[20];
 	while(dir->length != 0){
 		memset(tempbuf, 0, sizeof(tempbuf));
@@ -91,7 +91,7 @@ uint32_t ISO9660_getDirectorySector(struct ISO9660 *iso, uint32_t dir_sector, ch
 			memcpy(tempbuf, dir->name, dir->name_len);
 		}		
 
-		print_serial("Entry: %s\n", tempbuf);
+		//print_serial("Entry: %s\n", tempbuf);
 
 		if(!(strcmp(tempbuf, folder))){
 			return getLe32(dir->sector);
@@ -118,7 +118,7 @@ struct ISO9660_File iso9660_getFile(struct ISO9660 *iso, uint32_t dir_sector, ch
 	}
 	namebuf[namebuf_idx] = ';';
 	namebuf[namebuf_idx+1] = '1';
-	print_serial("[ISO] Looking For %s\n", namebuf);
+	//print_serial("[ISO] Looking For %s\n", namebuf);
 	while(dir->length != 0){
 		memset(tempbuf, 0, sizeof(tempbuf));
 		if(dir->name_len == 1 && dir->name[0] == 0){
@@ -133,7 +133,7 @@ struct ISO9660_File iso9660_getFile(struct ISO9660 *iso, uint32_t dir_sector, ch
 		}	
 
 		if(!strcmp(tempbuf, namebuf)){
-			print_serial("Found %s\n", tempbuf);
+			//print_serial("Found %s\n", tempbuf);
 			goto foundFile;
 		}
 
@@ -175,7 +175,7 @@ void *iso9660_vfs_get(void *fs, char *path, uint32_t *meta){
 		}
 		idx++;
 		work_idx = 0;
-		print_serial("[ISO] Opening Folder %s\n", work_buf);
+		//print_serial("[ISO] Opening Folder %s\n", work_buf);
 		dirSector = ISO9660_getDirectorySector(iso, dirSector, work_buf);
 	}
 	OpenFile:

@@ -36,6 +36,9 @@ extern int window_selected;
 extern struct WINDOW windows[MAX_WINDOWS];
 extern struct Bitmap cursor_bitmap_s;
 
+#define WINDOW_BAR_SIZE 14
+extern char window_bar_text[WINDOW_BAR_SIZE];
+
 void window_render_bar();
 void window_init();
 struct WINDOW *window_open(char *name, bool copyPromptOnly);
