@@ -105,8 +105,10 @@ int main(int argc, char **argv){
 
     write(icmp_fd, &ping, sizeof(ping));
 
-    while(has_reply == 0){
-
+    yield();
+    has_reply = 0;
+    while(!has_reply){
+        yield();
     }
     has_reply = 0;
 

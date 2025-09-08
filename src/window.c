@@ -36,7 +36,7 @@ void window_init(){
 		print_serial("[WINDOW] Cursor image unavailable!\n");
 	}
 	memset(window_bar_text, 0, sizeof(window_bar_size));
-	memcpy(window_bar_text, "1234567", 7);
+	//memcpy(window_bar_text, "1234567", 7);
 
 	timer_attach(250, window_timer_callback);
 	

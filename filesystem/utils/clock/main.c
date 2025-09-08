@@ -34,8 +34,6 @@ void taskBarClock(int clock_fd);
 
 int main(int argc, char **argv){
     freopen("/-/dev/serial", "w", stdout);
-	backbuffer = (uint32_t *) malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
-    memset(backbuffer, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
 
     int clock_fd = open("/-/dev/RTC", O_READ);
     if(clock_fd == -1){
@@ -47,6 +45,10 @@ int main(int argc, char **argv){
         printf("Clock via taskbar!\n");
         taskBarClock(clock_fd);
     }
+
+
+	backbuffer = (uint32_t *) malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
+    memset(backbuffer, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
 
 	win = vp_open(WIDTH, HEIGHT, "CLOCK");
 	vp_add_event_handler(win, event_handler);
@@ -111,6 +113,38 @@ int drawDecimal(int data, int x, int y){
     return idx;
 }
 
+int bufDecimal(int data, char *buf){
+    int idx = 0;
+    int pow = 1;
+    int i = 0;
+
+    if(data < 0){
+		buf[i] = '-';
+		i++;
+        idx++;
+        data *= -1;
+    }
+
+	if(data < 10){
+		buf[i] = '0';
+        i++;
+	}
+
+    while(pow * 10 <= data)
+        pow *= 10;
+    while(pow != 0){
+        if(pow == 0) return 0;
+        int d = data / pow;
+        buf[i] = '0' + d;
+        i++;
+        data = data - d * pow;
+        pow /= 10;
+        if(pow == 0) return 0;
+        idx++;
+    }
+    return idx;
+}
+
 void taskBarClock(int clock_fd){
     char wbuf[14];
 
@@ -121,7 +155,15 @@ void taskBarClock(int clock_fd){
         read(clock_fd, &rtc, sizeof(rtc));
 
         memset(wbuf, 0, sizeof(wbuf));
-        snprintf(wbuf, sizeof(wbuf), "%d:%d:%d", rtc.hour, rtc.minute, rtc.second);
+        bufDecimal(rtc.hour, wbuf);
+        wbuf[2] = ':';
+        bufDecimal(rtc.minute, wbuf+3);
+        wbuf[5] = ':';
+        bufDecimal(rtc.second, wbuf+6);
+
+        bufDecimal(rtc.month, wbuf+9);
+        wbuf[11] = '/';
+        bufDecimal(rtc.day, wbuf+12);
 
         fseek(taskbar, 0, SEEK_SET);
         fwrite(wbuf, sizeof(wbuf), 1, taskbar);

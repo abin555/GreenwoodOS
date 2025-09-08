@@ -198,6 +198,7 @@ int main(int argc, char **argv){
         }
 
         vp_copy(vp);
+        yield();
 	}
     puts("Explorer Close\n");
 }
