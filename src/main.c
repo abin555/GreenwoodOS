@@ -101,11 +101,11 @@ void kernel_task(int argc, char **argv){
     IDT_dump();
 
 
-    //udp_init();
-    //dhcp_init(ethernet_getDriver());
-    //tcp_init();
-    //netfs_init();
-    //netproc_init();
+    udp_init();
+    dhcp_init(ethernet_getDriver());
+    tcp_init();
+    netfs_init();
+    netproc_init();
 
     proc_fs_init();
     

@@ -2,10 +2,12 @@
 #include "utils.h"
 #include "netproc.h"
 
+int http_reqno = 0;
+
 void http_send_request(struct ethernet_driver *driver __attribute__((unused)), uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host) {
     print_serial("http_send_request\n");
     char *request = malloc(1024 * sizeof(char));
-    uint16_t source_port = 10101;
+    uint16_t source_port = 10101 + http_reqno++;
     sprintf(request, "%s %s HTTP/1.1\r\nHost: %s\r\nConnection: close\r\n\r\n", method, path, host);
     print_serial("%s\n", request);
     tcp_install_listener(source_port, http_receive_request);

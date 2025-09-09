@@ -17,4 +17,5 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -
 -netdev user,id=mynet0,net=10.0.1.0/24,dhcpstart=10.0.1.10 \
 -device rtl8139,netdev=mynet0 \
 -object filter-dump,id=f1,netdev=mynet0,file=netdump.dat \
--smp sockets=1,cores=2,threads=1
+-smp sockets=1,cores=2,threads=1 \
+-device usb-ehci,id=ehci

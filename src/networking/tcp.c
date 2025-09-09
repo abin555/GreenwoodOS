@@ -131,7 +131,7 @@ void __attribute__ ((optimize("-O0"))) tcp_receive_packet(struct ethernet_driver
 
     uint16_t port = ntohs(packet->destination_port);
     size_t len = ntohs(ipv4_packet->total_length) - sizeof(ipv4_packet) - sizeof(struct tcp_packet);
-    size_t data_len = ntohs(ipv4_packet->total_length) - sizeof(ipv4_packet) - packet->data_offset * sizeof(uint32_t);
+    size_t data_len = ntohs(ipv4_packet->total_length) - sizeof(ipv4_packet) - sizeof(struct tcp_packet) - packet->data_offset * sizeof(uint32_t) + 4;
     /*
     uint16_t checksum = packet->checksum;
     print_serial("tcp_receive_packet %d (%x) Checksum %x\n", port, len, checksum);
@@ -145,7 +145,7 @@ void __attribute__ ((optimize("-O0"))) tcp_receive_packet(struct ethernet_driver
     */
 
     
-    print_serial("tcp_receive_packet %d %x (%x) Checksum %x\n", port, port, len, packet->checksum);
+    print_serial("tcp_receive_packet %d %x (%x) Checksum %x Data Len: %d\n", port, port, len, packet->checksum, data_len);
 
     uint16_t calculated_checksum = tcp_calculate_checksum(packet, ipv4_packet->source_ip, ipv4_packet->destination_ip, data, len);
     if (packet->checksum != calculated_checksum) {
