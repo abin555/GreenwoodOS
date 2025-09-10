@@ -2,6 +2,7 @@
 #include "hda.h"
 #include "ethernet.h"
 #include "audio.h"
+#include "drivers/usb.h"
 
 
 int PCI_numDevices;
@@ -76,7 +77,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 			print_serial("\n");
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "USB Device";
-			pdriver->init_driver = NULL;
+			pdriver->init_driver = USB_initialize;
 			goto generic_installation;
 			break;
 		case 0x0106://AHCI Controller
