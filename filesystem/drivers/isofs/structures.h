@@ -2,6 +2,7 @@
 #define STRUCTURES_H
 
 #include <stdint.h>
+#include <gwos/vfs.h>
 
 #define getLe32(x) *((uint32_t *) &x.le)
 #define getLe16(x) *((uint16_t *) &x.le)
@@ -91,33 +92,6 @@ union ISO_Volume_Descriptor{
 
 struct ISO9660;
 
-struct DRIVE {
-	enum{
-		Drive_AHCI
-	} type;
-	union {
-		void *ahci;
-	} driver;
-
-	enum{
-		FAT32,
-		FAT16,
-		FAT12,
-		exFAT,
-		ISO9660,
-		RAW,
-		EXT2
-	} format;
-	union{
-		void *fat32;
-		struct ISO9660 *ISO;
-		void *ext2;
-	} format_info;
-	char locked;
-	char ready;
-	char identity;
-};
-
 struct ISO9660{
 	struct DRIVE *drive;
 	char *buf;
@@ -131,77 +105,5 @@ struct ISO9660_File {
     uint32_t sector;
     uint32_t size;
 };
-
-struct DirectoryEntry{
-	char filename[50];
-	int name_len;
-	uint32_t type;
-};
-
-struct DirectoryListing{
-	char *directory_path;
-	int directory_path_len;
-	struct DirectoryEntry *entries;
-	int num_entries;
-};
-
-typedef enum {
-    VFS_FLAG_READ = 0b1,
-    VFS_FLAG_WRITE = 0b10
-} VFS_Inode_Flags;
-
-typedef enum {
-    VFS_ISO9660,
-    VFS_EXT2,
-    VFS_SYS,
-    VFS_NET,
-    VFS_PIPE
-} VFS_InodeType;
-
-struct VFS_Inode;
-struct VFS_Inode {
-    VFS_InodeType type;
-
-    union {
-        void *fs;
-        struct Pipe *pipe;
-    } fs;
-    uint32_t meta;
-
-    struct VFS_Inode *root;
-    struct VFS_RootInterface *interface;
-    int isRoot;
-    int isValid;
-    int flags;
-};
-
-struct VFS_File {
-    struct VFS_Inode inode;
-    int head;
-    int status;//1 = Free 0 = Used
-};
-
-struct VFS_RootInterface {
-    struct DRIVE *drive;
-    char vfsLetter;
-    char *fs_label;
-    void *root;
-
-    void *(*fs_getLink)(void *, char *path, uint32_t *meta);
-    int (*fs_read)(void *f, void *buf, int nbytes);
-    int (*fs_write)(void *f, void *buf, int nbytes);
-    int (*fs_seek)(void *f, int offset, int whence);
-    int (*fs_creat)(void *fs, char *path, unsigned int size);
-    int (*fs_creatDir)(void *fs, char *path);
-    struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
-    int (*fs_truncate)(void *f, unsigned int len);
-};
-
-struct kernel_fn_def {
-    void *fn;
-    int n_args;
-    int name_len;
-    char name[];
-} __attribute__((packed));
 
 #endif

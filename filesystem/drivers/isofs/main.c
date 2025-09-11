@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/memory.h>
 #include <sys/task.h>
+#include <sys/kernfns.h>
 #include "structures.h"
 
 struct DRIVE **drives;
