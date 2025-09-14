@@ -11,4 +11,8 @@
 #include "buffs.h"
 #include "hooks.h"
 
-//void *buffs_getLink(void *fs, char *)
+void *buffs_getLink(void *fs, char *path, uint32_t *meta){
+    if(fs == NULL || path == NULL) return NULL;
+    struct BUFFS *buffs = fs;
+    
+}

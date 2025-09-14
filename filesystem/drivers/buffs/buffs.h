@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+struct BUFFS_Inode;
+
 struct BUFFS_file {
     char *name;
     int creator_pid;
@@ -14,23 +16,9 @@ struct BUFFS_file {
 
 };
 
-struct BUFFS_directory;
-
-struct BUFFS_DirEntry {
-    enum {
-        BUFFS_File,
-        BUFFS_Dir
-    } type;
-    union {
-        struct BUFFS_file *file;
-        struct BUFFS_directory *dir;
-    };
-};
-
 struct BUFFS_llist;
-
 struct BUFFS_llist {
-    struct BUFFS_DirEntry entry;
+    struct BUFFS_Inode *entry;
     struct BUFFS_llist *next;
 };
 
@@ -42,8 +30,20 @@ struct BUFFS_directory {
     struct BUFFS_llist *head;
 };
 
+struct BUFFS_Inode {
+    enum {
+        BUFFS_File,
+        BUFFS_Dir
+    } type;
+    union {
+        struct BUFFS_file *file;
+        struct BUFFS_directory *dir;
+    };
+};
+
+
 struct BUFFS {
-    struct BUFFS_directory root;
+    struct BUFFS_Inode *root;
 };
 
 #endif

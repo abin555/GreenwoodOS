@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/kernfns.h>
+#include <string.h>
+
 #include "hooks.h"
 
 void (*vfs_addFS)(struct VFS_RootInterface *interface);
