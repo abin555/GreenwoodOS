@@ -41,7 +41,7 @@ int main(int argc, char **argv){
     void *buffs_sysfs_file = meta.mkcdev("buffs", NULL);
     meta.addChild(meta.root, buffs_sysfs_file);
 
-    struct BUFFS *root = kmalloc(sizeof(struct BUFFS));
+    struct BUFFS_Inode *root = kmalloc(sizeof(struct BUFFS_Inode));
 
     struct VFS_RootInterface *buffs_root = kmalloc(sizeof(struct VFS_RootInterface));
     *buffs_root = (struct VFS_RootInterface) {
@@ -50,7 +50,7 @@ int main(int argc, char **argv){
         "BUFFS",
         root,
         //Interfaces
-        NULL,
+        buffs_getLink,
         NULL,
         NULL,
         NULL,
@@ -62,5 +62,10 @@ int main(int argc, char **argv){
     vfs_addFS(buffs_root);
 
     printf("BUFFS added successfully\n");
+    printf("Suspending to keep local memory alive.\n");
+    set_schedule(NEVER);
+    while(1){
+        yield();
+    }
     return 0;
 }

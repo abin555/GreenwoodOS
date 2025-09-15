@@ -30,6 +30,10 @@ int hooks_load(){
                 print_serial = def->fn;
                 printf("Found print_serial!\n");
             }
+            if(!strcmp("get_task_id", def->name)){
+                get_task_id = def->fn;
+                printf("Get Task ID Found!\n");
+            }
         }
     }
     fclose(kernel_fn_file);
