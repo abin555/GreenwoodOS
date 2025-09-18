@@ -46,4 +46,6 @@ void MEM_freeRegionBlock(uint32_t virtual, uint32_t size);
 
 void MEM_printRegions();
 
+void *MEM_sysfs_createMapFile();
+
 #endif

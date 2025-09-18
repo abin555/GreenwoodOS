@@ -55,6 +55,7 @@ void MEM_freeRegion(uint32_t virtual){
 	virtual = virtual & 0xFFC00000;
 	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
 		if(MEMORY_REGIONS[i].virtual_addr == virtual){
+			//print_serial("[MEM] Freeing Memory @ 0x%x\n", virtual);
 			MEMORY_REGIONS[i].exists = 1;
 			MEMORY_REGIONS[i].available = 1;
 			delete_page_entry(virtual);
@@ -244,4 +245,19 @@ void MEM_freeRegionBlock(uint32_t virtual, uint32_t size){
 	for(int i = 0; i < needed_blocks; i++){
 		MEM_freeRegion(virtual + i * PAGE_SIZE);
 	}
+}
+
+#include "sysfs.h"
+
+void *MEM_sysfs_createMapFile(){
+	struct SysFS_Chardev *cdev = sysfs_createCharDevice(
+		(char *) &MEMORY_REGIONS,
+		sizeof(MEMORY_REGIONS),
+		CDEV_READ
+	);
+	struct SysFS_Inode *cdev_file = sysfs_mkcdev(
+		"mmap",
+		cdev
+	);
+	return cdev_file;
 }
