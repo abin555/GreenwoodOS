@@ -9,6 +9,7 @@
 #include "mouse.h"
 #include "keyboard.h"
 #include "console.h"
+#include "memory.h"
 
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
@@ -72,6 +73,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
     sysfs_addChild(systems, window_bar_cdev);
+    sysfs_addChild(systems, MEM_sysfs_createMapFile());
     sysfs_addChild(root, devs);
     sysfs_addChild(root, systems);
     sysfs_addChild(root, sysfs_createMetaFile(root));
