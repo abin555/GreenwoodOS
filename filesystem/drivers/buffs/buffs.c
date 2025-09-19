@@ -5,6 +5,7 @@
 #include <string.h>
 #include <sys/memory.h>
 #include <sys/task.h>
+#include <stdlib.h>
 
 #include <gwos/vfs.h>
 
