@@ -8,6 +8,7 @@
 void (*vfs_addFS)(struct VFS_RootInterface *interface);
 void *(*kmalloc)(size_t size);
 void (*print_serial)(char *fmt, ...);
+int (*get_task_id)();
 
 int hooks_load(){
     FILE *kernel_fn_file = fopen("/-/dev/kernel", "r");

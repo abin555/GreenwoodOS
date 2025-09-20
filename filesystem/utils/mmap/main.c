@@ -139,9 +139,14 @@ int main(void){
         int idx = 0;
         for(int y = 0; y < 32; y++){
             for(int x = 0; x < 32; x++){
-                uint32_t color = type_to_color(region_state[idx].type);
-                char c = type_to_char(region_state[idx].type);
-                vp_drawChar(vp, x*8, y*8, c, 0xFFFFFF, color);
+                if(region_state[idx].available){
+                    vp_drawChar(vp, x*8, y*8, 'A', 0xFFFFFF, 0x0);
+                }
+                else{
+                    uint32_t color = type_to_color(region_state[idx].type);
+                    char c = type_to_char(region_state[idx].type);
+                    vp_drawChar(vp, x*8, y*8, c, 0xFFFFFF, color);
+                }                
                 idx++;
             }
         }

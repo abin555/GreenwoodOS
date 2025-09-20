@@ -147,7 +147,7 @@ int bufDecimal(int data, char *buf){
 
 void taskBarClock(int clock_fd){
     char wbuf[14];
-
+    set_schedule(ONFOCUS);
     FILE *taskbar = fopen("/-/sys/winbar", "w");
     if(taskbar == NULL) return;
 

@@ -323,6 +323,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 		}
 		case 0x35:{
 			cpu_state.eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu->ebx, (int) cpu->ecx));
+			print_serial("[SYSCALL] Opened \"%s\" into process FD %d, SYS FD %d\n", (char *) cpu->ebx, (int) cpu_state.eax, tasks[task_running_idx].file_descs[cpu_state.eax]);
 			break;
 		}
 		case 0x36:{
