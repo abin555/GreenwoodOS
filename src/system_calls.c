@@ -1,8 +1,100 @@
 #include "system_calls.h"
 
+syscall_fn syscall_functions[0xFF];
+
+void syscall_window_open(struct cpu_state *cpu, struct task_state *task){
+	struct WINDOW *window = window_open((char *) cpu->ebx, cpu->ecx);
+	print_serial("Name address is: 0x%x\n", cpu->ebx);
+	cpu->eax = (uint32_t) window;
+	task->window = window;
+	task->own_window = true;
+	print_serial("[SYS] Open Window %s\n", window->name);
+	return;
+}
+
+void syscall_window_close(struct cpu_state *cpu, struct task_state *task){
+	print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) cpu->ebx)->name);
+	window_close((struct WINDOW *) cpu->ebx);
+	task->window = NULL;
+	task->own_console = false;
+	return;
+}
+
+void syscall_window_copy(struct cpu_state *cpu, struct task_state *task){
+	window_copy_buffer(task->window);
+	return;
+}
+
+void syscall_buf_putChar(struct cpu_state *cpu, struct task_state *task){
+	buf_putChar(task->window->backbuffer, cpu->ebx, cpu->ecx, (char) cpu->edx, 0xFFFFFFFF, 0);
+	return;
+}
+
+void syscall_getc_blk(struct cpu_state *cpu, struct task_state *task){
+	cpu->eax = (unsigned int) getc_blk;
+	return;
+}
+
+void syscall_exec(struct cpu_state *cpu, struct task_state *task){
+	cpu->ebx = exec((char *) cpu->ebx, cpu->eax, (char **) cpu->edx);
+	return;
+}
+
+void syscall_set_schedule(struct cpu_state *cpu, struct task_state *task){
+	set_schedule(cpu->ebx);
+	return;
+}
+
+void syscall_print_to_console(struct cpu_state *cpu, struct task_state *task){
+	if(task->console != NULL)
+		print_console(task->console, (char*) cpu->ebx);
+}
+
+void syscall_console_open(struct cpu_state *cpu, struct task_state *task){
+	if(task->window == NULL) return;
+	struct CONSOLE *console = console_open(task->window);
+	cpu->eax = (uint32_t) console;
+	task->console = console;
+	task->own_console = true;
+	return;
+}
+
+void syscall_console_close(struct cpu_state *cpu, struct task_state *task){
+	if(task->console == NULL) return;
+	console_close(task->console);
+	task->console = NULL;
+	task->own_console = false;
+	return
+}
+
+void syscall_kmalloc(struct cpu_state *cpu, struct task_state *task){
+	cpu->eax = (uint32_t) malloc(cpu->ebx);
+}
+
+void syscall_console_printargs(struct cpu_state *cpu, struct task_state *task){
+	if(task->console != NULL)
+		print_console(task->console, (char*) cpu->ebx, cpu->ecx);
+	return;
+}
+
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
+	syscall_set(0x01, syscall_window_open);
+	syscall_set(0x02, syscall_window_close);
+	syscall_set(0x03, syscall_window_copy);
+	syscall_set(0x04, syscall_buf_putChar);
+	syscall_set(0x05, syscall_getc_blk);
+	syscall_set(0x06, syscall_exec);
+	syscall_set(0x07, syscall_set_schedule);
+	syscall_set(0x08, syscall_print_to_console);
+	syscall_set(0x09, syscall_console_open);
+	syscall_set(0x0A, syscall_console_close);
+	syscall_set(0x0B, syscall_kmalloc);
 	interrupt_add_handle(0x80, syscall_callback);
+}
+
+void syscall_set(uint8_t call_id, syscall_fn fn){
+	syscall_functions[call_id] = fn;
 }
 
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
@@ -12,57 +104,18 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 	//save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
 	//print_serial("[SYSCALL] #%x\n", cpu->eax);
+
+	if(syscall_functions[cpu->eax] != NULL){
+		syscall_functions[cpu->eax](cpu, task);
+	}
+	else{
+		print_serial("[SYSCALL] Invalid call to syscall id %d from process pid %d (@0x%x)\n", cpu->eax, task->pid, stack->eip);
+	}
+	//*cpu = cpu_state;
+	IRQ_RES;
+	return;
+
 	switch(cpu->eax){
-		//Open Window
-		case 0x01:{
-			struct WINDOW *window = window_open((char *) cpu->ebx, cpu->ecx);
-			print_serial("Name address is: 0x%x\n", cpu->ebx);
-			cpu_state.eax = (uint32_t) window;
-			task->window = window;
-			task->own_window = true;
-			print_serial("[SYS] Open Window %s\n", window->name);
-			break;
-		}
-		//Close Window
-		case 0x02:{
-			print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) cpu->ebx)->name);
-			window_close((struct WINDOW *) cpu_state.ebx);
-			task->window = NULL;
-			task->own_console = false;
-			break;
-		}
-		//Copy Buffer
-		case 0x03:{
-			window_copy_buffer(task->window);
-			break;
-		}
-		//Put Char
-		case 0x04:{
-			//print_serial("[SYS] Put Character X: %x Y: %x %c %x\n", cpu->ebx, cpu->ecx, cpu->edx, cpu->edx);
-			buf_putChar(task->window->backbuffer, cpu->ebx, cpu->ecx, (char) cpu->edx, 0xFFFFFFFF, 0);
-			break;
-		}
-		//Get Kbd Char
-		case 0x05:{
-			cpu_state.eax = (unsigned int) getc_blk;
-			break;
-		}
-		//Execute Program
-		case 0x06:{
-			cpu_state.ebx = exec((char *)cpu->ebx, cpu->ecx, (char **) cpu->edx);
-			break;
-		}
-		//Set Scheduling Type
-		case 0x07:{
-			set_schedule(cpu->ebx);
-			break;
-		}
-		//Print to console
-		case 0x08:{
-			if(task->console != NULL)
-				print_console(task->console, (char*) cpu->ebx);
-			break;
-		}
 		//Open Console
 		case 0x09:{
 			if(task->window == NULL) break;
@@ -377,7 +430,5 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 			break;
 		}
 	}
-	*cpu = cpu_state;
-	IRQ_RES;
-	return;
+	
 }
