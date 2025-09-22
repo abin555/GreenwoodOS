@@ -13,6 +13,7 @@ struct Bitmap{
 struct WINDOW;
 
 struct Bitmap loadBitmap(char *filename);
+struct Bitmap loadBigBitmap(char *filename, int max_x, int max_y);
 void drawBitmap(int x, int y, struct Bitmap *bitmap, struct WINDOW *window);
 
 #endif

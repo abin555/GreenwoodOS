@@ -30,6 +30,9 @@ void kernel_fn_init(){
     kernel_fn_add(&drive_count, -1, "drive_count_s");
     kernel_fn_add(malloc, 1, "kmalloc");
     kernel_fn_add(print_serial, 100, "print_serial");
+    kernel_fn_add(MEM_findRegionIdx, 1, "MEM_findRegionIdx");
+    kernel_fn_add(MEM_reserveRegionBlock, 4, "MEM_reserveRegionBlock");
+    kernel_fn_add(MEM_freeRegion, 2, "MEM_freeRegionBlock");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){

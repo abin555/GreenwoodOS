@@ -343,6 +343,7 @@ struct SysFS_Meta sysfs_createMeta(struct SysFS_Inode *root){
         sysfs_createCharDevice,
         sysfs_addChild,
         sysfs_setCallbacks,
+        (struct SysFS_Inode *(*)(struct SysFS_Inode *r, char *path, unsigned int *meta)) sysfs_find,
         root
     };
     return meta;

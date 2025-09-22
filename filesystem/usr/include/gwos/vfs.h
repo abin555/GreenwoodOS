@@ -30,6 +30,11 @@ struct DRIVE {
 	char identity;
 };
 
+enum DirEntryType{
+	ENTRY_FILE = 0,
+	ENTRY_DIRECTORY = 1
+};
+
 struct DirectoryEntry{
 	char filename[50];
 	int name_len;

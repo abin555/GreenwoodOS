@@ -60,7 +60,7 @@ void *realloc(void *ptr, size_t size){
 
 int atoi(const char *arr){
   int val = 0;
-  char neg;
+  char neg = 0;
   if(*arr == '-'){
     arr++;
     neg = 1;

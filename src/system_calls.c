@@ -366,7 +366,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 			break;
 		}
 		case 0x3F:{
-			cpu_state.eax = (unsigned int) vfs_ftruncate(cpu->ebx, cpu->ecx);
+			cpu_state.eax = (unsigned int) vfs_ftruncate(task_getSysFD(task, cpu->ebx), cpu->ecx);
 			break;
 		}
 		//Program requests to wait until passed pid ends

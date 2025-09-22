@@ -43,6 +43,30 @@ struct Bitmap loadBitmap(char *filename){
     return bitmap;
 }
 
+struct Bitmap loadBigBitmap(char *filename, int max_x, int max_y){
+    struct Bitmap bitmap = {
+        NULL,
+        NULL,
+        0,
+        0
+    };
+    int file = vfs_open(filename, VFS_FLAG_READ);
+    if(file == -1) return bitmap;
+    int size = vfs_seek(file, 0, 2);
+    vfs_seek(file, 0, 0);
+
+    bitmap.file = (uint8_t *) MEM_reserveRegionBlock(MEM_findRegionIdx((max_x * max_y * sizeof(uint32_t)) + sizeof(tga_header_t) + 100), (max_x * max_y * sizeof(uint32_t)) + sizeof(tga_header_t) + 100, 0, SYSTEM);
+    vfs_read(file, (char *) bitmap.file, size);
+    vfs_close(file);
+    tga_header_t *header = ((tga_header_t *) bitmap.file);
+    bitmap.width = header->w;
+    bitmap.height = header->h;
+    bitmap.bitmap = (uint32_t *) (bitmap.file + sizeof(tga_header_t) + header->magic1);
+    print_serial("[DESKTOP] Loaded Icon %s - W: %d H: %d\n", filename, bitmap.width, bitmap.height);
+    
+    return bitmap;
+}
+
 
 void __attribute__ ((optimize("-O3"))) drawBitmap(int x, int y, struct Bitmap *bitmap, struct WINDOW *window){
     if(bitmap->bitmap == NULL || window == NULL) return;

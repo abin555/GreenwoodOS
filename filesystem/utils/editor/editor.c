@@ -42,7 +42,7 @@ void editor_reload(struct EditorFile *editor){
 void editor_save(struct EditorFile *editor){
     if(editor == NULL) return;
     printf("Saving - %d bytes (%d original, %d new)\n", editor->size + editor->growth, editor->size, editor->growth);
-    //ftruncate(editor->file->fd, editor->size + editor->growth);
+    ftruncate(editor->file->fd, editor->size + editor->growth);
     fseek(editor->file, 0, SEEK_SET);
     fwrite(editor->loaded_file, editor->size + editor->growth, 1, editor->file);
 }

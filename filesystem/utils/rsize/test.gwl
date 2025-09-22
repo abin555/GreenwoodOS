@@ -1,0 +1,5 @@
+(define rsize "/A/utils/rsize/rsize.elf")
+(define in "/A/AJB/gs1.tga")
+(define out "/+/gs1_r.tga")
+(exec rsize in out "400" "300")
+(exit)
