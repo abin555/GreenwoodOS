@@ -145,6 +145,11 @@ int main(int argc, char **argv){
                 path = getDirectory();
                 dir = getDirectoryListing(".");
                 break;
+                case '+':
+                changeDirectory("/+/");
+                path = getDirectory();
+                dir = getDirectoryListing(".");
+                break;
                 case 'A':
                 case 'B':
                 case 'C':

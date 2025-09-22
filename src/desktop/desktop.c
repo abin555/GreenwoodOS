@@ -55,7 +55,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     set_schedule(ALWAYS);
     print_console(kernel_console, "Starting Desktop Environment!\n");
 
-    background = loadBitmap(BACKGROUND_FILE);
+    background = loadBigBitmap(BACKGROUND_FILE, window->width, window->height);
     struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
 
     desktopConfig = (struct DesktopConfig) {

@@ -9,6 +9,9 @@ void (*vfs_addFS)(struct VFS_RootInterface *interface);
 void *(*kmalloc)(size_t size);
 void (*print_serial)(char *fmt, ...);
 int (*get_task_id)();
+int (*MEM_findRegionIdx)(uint32_t size);
+uint32_t (*MEM_reserveRegionBlock)(int idx, uint32_t size, uint32_t virtual_base, int type);
+void (*MEM_freeRegionBlock)(uint32_t virtual, uint32_t size);
 
 int hooks_load(){
     FILE *kernel_fn_file = fopen("/-/dev/kernel", "r");
@@ -35,13 +38,25 @@ int hooks_load(){
                 get_task_id = def->fn;
                 printf("Get Task ID Found!\n");
             }
+            if(!strcmp("MEM_findRegionIdx", def->name)){
+                MEM_findRegionIdx = def->fn;
+            }
+            if(!strcmp("MEM_reserveRegionBlock", def->name)){
+                MEM_reserveRegionBlock = def->fn;
+            }
+            if(!strcmp("MEM_freeRegionBlock", def->name)){
+                MEM_freeRegionBlock = def->fn;
+            }
         }
     }
     fclose(kernel_fn_file);
     if(
         vfs_addFS == NULL ||
         print_serial == NULL ||
-        kmalloc == NULL
+        kmalloc == NULL ||
+        MEM_findRegionIdx == NULL ||
+        MEM_reserveRegionBlock == NULL ||
+        MEM_freeRegionBlock == NULL
     ){
         printf("Critical Error, undefined symbols!\n");
         return 1;

@@ -327,7 +327,7 @@ int vfs_chdir(struct DIRECTORY *dir, char *path){
 
 int vfs_ftruncate(int fd, unsigned int length){
     if(fd == -1 || fd >= VFS_maxFiles || VFS_fileTable[fd].status == 1) return -1;
-
+    print_serial("[VFS] truncate %d\n", fd);
     struct VFS_File *file = &VFS_fileTable[fd];
     if(file->inode.interface->fs_truncate != NULL){
         return file->inode.interface->fs_truncate(file, length);

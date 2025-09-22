@@ -7,6 +7,7 @@
 #include <sys/task.h>
 #include <sys/kernfns.h>
 #include <sys/sysfs.h>
+#include <stdlib.h>
 
 #include <gwos/vfs.h>
 
@@ -41,7 +42,8 @@ int main(int argc, char **argv){
     void *buffs_sysfs_file = meta.mkcdev("buffs", NULL);
     meta.addChild(meta.root, buffs_sysfs_file);
 
-    struct BUFFS_Inode *root = kmalloc(sizeof(struct BUFFS_Inode));
+    struct BUFFS_Inode *root = buffs_createDir("/");    
+    root->parent = root;
 
     struct VFS_RootInterface *buffs_root = kmalloc(sizeof(struct VFS_RootInterface));
     *buffs_root = (struct VFS_RootInterface) {
@@ -51,21 +53,20 @@ int main(int argc, char **argv){
         root,
         //Interfaces
         buffs_getLink,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL,
-        NULL
+        buffs_read,
+        buffs_write,
+        buffs_seek,
+        buffs_creat,
+        buffs_creatDir,
+        buffs_advListDirectory,
+        buffs_truncate
     };
     vfs_addFS(buffs_root);
 
     printf("BUFFS added successfully\n");
-    printf("Suspending to keep local memory alive.\n");
-    set_schedule(NEVER);
-    while(1){
-        yield();
-    }
+    printf("Force Exiting to keep local memory alive.\n");
+    
+    exit(0);
+
     return 0;
 }
