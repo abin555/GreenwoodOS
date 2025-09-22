@@ -2,7 +2,7 @@
 
 syscall_fn syscall_functions[0xFF];
 
-void syscall_window_open(struct cpu_state *cpu, struct task_state *task){
+void syscall_window_open(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	struct WINDOW *window = window_open((char *) cpu->ebx, cpu->ecx);
 	print_serial("Name address is: 0x%x\n", cpu->ebx);
 	cpu->eax = (uint32_t) window;
@@ -12,7 +12,7 @@ void syscall_window_open(struct cpu_state *cpu, struct task_state *task){
 	return;
 }
 
-void syscall_window_close(struct cpu_state *cpu, struct task_state *task){
+void syscall_window_close(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	print_serial("[SYS] Close Window %s\n", ((struct WINDOW *) cpu->ebx)->name);
 	window_close((struct WINDOW *) cpu->ebx);
 	task->window = NULL;
@@ -20,37 +20,37 @@ void syscall_window_close(struct cpu_state *cpu, struct task_state *task){
 	return;
 }
 
-void syscall_window_copy(struct cpu_state *cpu, struct task_state *task){
+void syscall_window_copy(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	window_copy_buffer(task->window);
 	return;
 }
 
-void syscall_buf_putChar(struct cpu_state *cpu, struct task_state *task){
+void syscall_buf_putChar(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	buf_putChar(task->window->backbuffer, cpu->ebx, cpu->ecx, (char) cpu->edx, 0xFFFFFFFF, 0);
 	return;
 }
 
-void syscall_getc_blk(struct cpu_state *cpu, struct task_state *task){
+void syscall_getc_blk(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	cpu->eax = (unsigned int) getc_blk;
 	return;
 }
 
-void syscall_exec(struct cpu_state *cpu, struct task_state *task){
+void syscall_exec(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	cpu->ebx = exec((char *) cpu->ebx, cpu->eax, (char **) cpu->edx);
 	return;
 }
 
-void syscall_set_schedule(struct cpu_state *cpu, struct task_state *task){
+void syscall_set_schedule(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	set_schedule(cpu->ebx);
 	return;
 }
 
-void syscall_print_to_console(struct cpu_state *cpu, struct task_state *task){
+void syscall_print_to_console(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	if(task->console != NULL)
 		print_console(task->console, (char*) cpu->ebx);
 }
 
-void syscall_console_open(struct cpu_state *cpu, struct task_state *task){
+void syscall_console_open(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	if(task->window == NULL) return;
 	struct CONSOLE *console = console_open(task->window);
 	cpu->eax = (uint32_t) console;
@@ -59,22 +59,229 @@ void syscall_console_open(struct cpu_state *cpu, struct task_state *task){
 	return;
 }
 
-void syscall_console_close(struct cpu_state *cpu, struct task_state *task){
+void syscall_console_close(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	if(task->console == NULL) return;
 	console_close(task->console);
 	task->console = NULL;
 	task->own_console = false;
-	return
+	return;
 }
 
-void syscall_kmalloc(struct cpu_state *cpu, struct task_state *task){
+void syscall_kmalloc(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	cpu->eax = (uint32_t) malloc(cpu->ebx);
 }
 
-void syscall_console_printargs(struct cpu_state *cpu, struct task_state *task){
+void syscall_console_printargs(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	if(task->console != NULL)
 		print_console(task->console, (char*) cpu->ebx, cpu->ecx);
 	return;
+}
+
+void syscall_chdir(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	char *change = (char *) cpu->ebx;
+	print_serial("Task %s Changing Directory to %s\n", task->task_name, change);
+	cpu->eax = vfs_chdir(&task->currentDirectory, change);
+}
+
+void syscall_get_dir(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (uint32_t) task->currentDirectory.path;
+}
+
+void syscall_print_serial(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial((char *) cpu->ebx);
+}
+
+void syscall_get_kernel_feature(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	switch(cpu->ebx){
+		//Font Memory
+		case 0x01:{
+			cpu->eax = (uint32_t) FONT;
+			cpu->ebx = (uint32_t) sizeof(FONT);
+			break;
+		};
+		//Keyboard
+		case 0x02:{
+			cpu->eax = (uint32_t) keyboard_KEYBuffer;
+			cpu->ebx = (uint32_t) keyboard_buffer_size;
+			break;
+		};
+		//Paging Memory
+		case 0x03:{
+			cpu->eax = (uint32_t) page_directory;
+			cpu->ebx = 0;
+			break;
+		};
+		//Task Table
+		case 0x04:{
+			cpu->eax = (uint32_t) &tasks;
+			cpu->ebx = sizeof(tasks);
+			break;
+		};
+		//Program Memory Base
+		case 0x05:{
+			cpu->eax = PROGRAM_VIRT_REGION_BASE;
+			cpu->ebx = PROGAM_MAX_SIZE;
+			break;
+		}
+		//Raw Framebuffer
+		case 0x06:{
+			cpu->eax = (uint32_t) fb_frontbuffer;
+			cpu->ebx = fb_width * fb_height * sizeof(uint32_t);
+			break;
+		}
+		//Timer Function Buffer
+		case 0x07:{
+			cpu->eax = (uint32_t) &timer_attached_functions;
+			cpu->ebx = timer_attached_functions_num;
+			break;
+		}
+		//Keyboard Pressed Buffer
+		case 0x08:{
+			cpu->eax = (uint32_t) &key_pressed_map;
+			cpu->ebx = sizeof(key_pressed_map);
+			break;
+		}
+	}
+}
+
+void syscall_creatdir(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_creatDirRel(&task->currentDirectory, (char *) cpu->ebx);
+}
+
+void syscall_getArrow(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = getArrow();
+}
+
+void syscall_srand(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	srand(cpu->ebx);
+}
+
+void syscall_rand(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = rand();
+}
+
+void syscall_exit(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial("EXIT Syscall\n");
+	task_lock = 0;
+	stop_task(task_running_idx);
+	task_yield();
+}
+
+void syscall_mem_request(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int block = MEM_findRegionIdx(cpu->ebx);
+	uint32_t addr = MEM_reserveRegionBlock(block, cpu->ebx, 0, PROGRAM);
+	cpu->eax = addr;
+}
+
+void syscall_keyboard_add_event(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu->ebx);
+	tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) cpu->ebx;
+}
+
+void syscall_mem_reserve(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int block = MEM_findRegionIdx(cpu->ebx);
+	MEM_reserveRegionBlock(block, cpu->ebx, cpu->ecx, PROGRAM);
+	//MEM_printRegions();
+	cpu->eax = cpu->ecx;
+}
+
+void syscall_timer_attach(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	timer_attach((int) cpu->ebx, (void *) cpu->ecx);
+}
+
+void syscall_start_task(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->ebx = start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx);
+}
+
+void syscall_get_pcspeaker(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (uint32_t) &PCSpeaker_Handle;
+	print_serial("[SYSCALL] Program requested handle to PCspeaker - returned 0x%x\n", cpu->eax);
+}
+
+void syscall_get_timerticks(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (uint32_t) &timer_ticks;
+	print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", cpu->eax);
+}
+
+void syscall_mouse_event(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial("[SYSCALL] Program requested mouse event handler @%x\n", cpu->ebx);
+	//tasks[task_running_idx].mouse_event_handler = (void (*)(void)) cpu->ebx;
+}
+
+void syscall_mem_free(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial("[SYSCALL] Free Region\n");
+	MEM_freeRegionBlock(cpu->ebx, cpu->ecx);
+}
+
+void syscall_end_event(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	print_serial("[SYSCALL] Program requested program end event handler @%x\n", cpu->ebx);
+	tasks[task_running_idx].end_callback = (void (*)(void)) cpu->ebx;
+}
+
+void syscall_console_open_vp(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	struct CONSOLE *console = console_open_vp((struct Viewport *) cpu->ebx);
+	cpu->eax = (uint32_t) console;
+	task->console = console;
+	task->own_console = true;
+}
+
+void syscall_get_vfsListDir(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (uint32_t) &vfs_taskListDirectory;
+}
+
+void syscall_task_lock(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	task_lock = cpu->ebx & 1;
+}
+
+void syscall_yield(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	task_yield();
+}
+
+void syscall_open(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu->ebx, (int) cpu->ecx));
+	print_serial("[SYSCALL] Opened \"%s\" into process FD %d, SYS FD %d\n", (char *) cpu->ebx, (int) cpu->eax, tasks[task_running_idx].file_descs[cpu->eax]);
+}
+
+void syscall_close(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	vfs_close(task_getSysFD(task, (int) cpu->ebx));
+	task_freeFD(task, (int) cpu->ebx);
+}
+
+void syscall_read(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_read(task_getSysFD(task, (int) cpu->ebx), (void *) cpu->ecx, (int) cpu->edx);
+}
+
+void syscall_write(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_write(task_getSysFD(task, (int) cpu->ebx), (void *) cpu->ecx, (int) cpu->edx);
+}
+
+void syscall_seek(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_seek(task_getSysFD(task, (int) cpu->ebx), cpu->ecx, (int) cpu->edx);
+}
+
+void syscall_creat(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) cpu->ebx);
+}
+
+void syscall_dupfd(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) task_dupFD(task, (int) cpu->ebx);
+}
+
+void syscall_fork(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	//print_serial("EIP: 0x%x\n", stack.eip);
+	//task->registers.eip = stack.eip;
+	print_serial("[SYSCALL] Fork\n");
+	cpu->eax = 0;//(unsigned int) fork();
+}
+
+void syscall_truncate(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_ftruncate(task_getSysFD(task, cpu->ebx), cpu->ecx);
+}
+
+void syscall_wait(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int id = task_getCurrentID();
+	print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
+	tasks[id].waitpid = cpu->ebx;
 }
 
 void init_syscalls(){
@@ -90,6 +297,40 @@ void init_syscalls(){
 	syscall_set(0x09, syscall_console_open);
 	syscall_set(0x0A, syscall_console_close);
 	syscall_set(0x0B, syscall_kmalloc);
+	syscall_set(0x0C, syscall_console_printargs);
+	syscall_set(0x12, syscall_chdir);
+	syscall_set(0x13, syscall_get_dir);
+	syscall_set(0x16, syscall_print_serial);
+	syscall_set(0x17, syscall_get_kernel_feature);
+	syscall_set(0x1A, syscall_creatdir);
+	syscall_set(0x1C, syscall_getArrow);
+	syscall_set(0x1D, syscall_srand);
+	syscall_set(0x1E, syscall_rand);
+	syscall_set(0x1F, syscall_exit);
+	syscall_set(0x20, syscall_mem_request);
+	syscall_set(0x21, syscall_keyboard_add_event);
+	syscall_set(0x23, syscall_mem_reserve);
+	syscall_set(0x24, syscall_timer_attach);
+	syscall_set(0x26, syscall_start_task);
+	syscall_set(0x28, syscall_get_pcspeaker);
+	syscall_set(0x29, syscall_get_timerticks);
+	syscall_set(0x2A, syscall_mouse_event);
+	syscall_set(0x2B, syscall_mem_free);
+	syscall_set(0x2C, syscall_end_event);
+	syscall_set(0x2E, syscall_console_open_vp);
+	syscall_set(0x30, syscall_get_vfsListDir);
+	syscall_set(0x32, syscall_task_lock);
+	syscall_set(0x34, syscall_yield);
+	syscall_set(0x35, syscall_open);
+	syscall_set(0x36, syscall_close);
+	syscall_set(0x37, syscall_read);
+	syscall_set(0x38, syscall_write);
+	syscall_set(0x39, syscall_seek);
+	syscall_set(0x3A, syscall_creat);
+	syscall_set(0x3B, syscall_dupfd);
+	syscall_set(0x3C, syscall_fork);
+	syscall_set(0x3F, syscall_truncate);
+	syscall_set(0x40, syscall_wait);
 	interrupt_add_handle(0x80, syscall_callback);
 }
 
@@ -99,7 +340,6 @@ void syscall_set(uint8_t call_id, syscall_fn fn){
 
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	IRQ_OFF;
-	struct cpu_state cpu_state = *cpu;
 	struct task_state *task = &tasks[task_running_idx];
 	//save_task_state(task, &cpu, &stack);
 	//save_task_state(task, cpu, stack);
@@ -113,322 +353,5 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 	}
 	//*cpu = cpu_state;
 	IRQ_RES;
-	return;
-
-	switch(cpu->eax){
-		//Open Console
-		case 0x09:{
-			if(task->window == NULL) break;
-			struct CONSOLE *console = console_open(task->window);
-			cpu_state.eax = (uint32_t) console;
-			task->console = console;
-			task->own_console = true;
-			break;
-		}
-		//Close Console
-		case 0x0A:{
-			if(task->console == NULL) break;
-			console_close(task->console);
-			task->console = NULL;
-			task->own_console = false;
-			break;
-		}
-		//Malloc
-		case 0x0B:{
-			cpu_state.eax = (uint32_t) malloc(cpu->ebx);
-			break;
-		}
-		//Print to console w/t args=
-		case 0x0C:{
-			if(task->console != NULL)
-				print_console(task->console, (char*) cpu->ebx, cpu->ecx);
-			break;
-		}
-		//File Open
-		case 0x0D:{
-			break;
-		}
-		//File Close
-		case 0x0E:{
-			break;
-		}
-		//File GetC
-		case 0x0F:{
-			break;
-		}
-		//File Get Size
-		case 0x10:{
-			break;
-		}
-		//File Copy
-		case 0x11:{
-			break;
-		}
-		//Change Directory
-		case 0x12:{
-			char *change = (char *) cpu->ebx;
-			print_serial("Task %s Changing Directory to %s\n", task->task_name, change);
-			cpu_state.eax = vfs_chdir(&task->currentDirectory, change);
-			break;
-		}
-		//Get Directory
-		case 0x13:{
-			//return currentDirectory string
-			cpu_state.eax = (uint32_t) task->currentDirectory.path;
-			break;
-		}
-		//List Directory
-		case 0x14:{
-			//Return string of files and folders in current directory.
-			break;
-		}
-		//File Exists
-		case 0x15:{
-			break;
-		}
-		//Print Serial
-		case 0x16:{
-			print_serial((char *) cpu->ebx);
-			break;
-		}
-		//Get Raw Kernel Feature
-		//Arguments:
-		// EBX = Feature
-		//Returns:
-		// EAX = Pointer
-		// EBX = Size
-		case 0x17:{
-			switch(cpu->ebx){
-				//Font Memory
-				case 0x01:{
-					cpu_state.eax = (uint32_t) FONT;
-					cpu_state.ebx = (uint32_t) sizeof(FONT);
-					break;
-				};
-				//Keyboard
-				case 0x02:{
-					cpu_state.eax = (uint32_t) keyboard_KEYBuffer;
-					cpu_state.ebx = (uint32_t) keyboard_buffer_size;
-					break;
-				};
-				//Paging Memory
-				case 0x03:{
-					cpu_state.eax = (uint32_t) page_directory;
-					cpu_state.ebx = 0;
-					break;
-				};
-				//Task Table
-				case 0x04:{
-					cpu_state.eax = (uint32_t) &tasks;
-					cpu_state.ebx = sizeof(tasks);
-					break;
-				};
-				//Program Memory Base
-				case 0x05:{
-					cpu_state.eax = PROGRAM_VIRT_REGION_BASE;
-					cpu_state.ebx = PROGAM_MAX_SIZE;
-					break;
-				}
-				//Raw Framebuffer
-				case 0x06:{
-					cpu_state.eax = (uint32_t) fb_frontbuffer;
-					cpu_state.ebx = fb_width * fb_height * sizeof(uint32_t);
-					break;
-				}
-				//Timer Function Buffer
-				case 0x07:{
-					cpu_state.eax = (uint32_t) &timer_attached_functions;
-					cpu_state.ebx = timer_attached_functions_num;
-					break;
-				}
-				//Keyboard Pressed Buffer
-				case 0x08:{
-					cpu_state.eax = (uint32_t) &key_pressed_map;
-					cpu_state.ebx = sizeof(key_pressed_map);
-					break;
-				}
-			}
-			break;
-		}
-		//File Seek
-		case 0x18:{
-			break;
-		}
-		//File Put Character
-		case 0x19:{
-			break;
-		}
-		case 0x1A:{
-			cpu_state.eax = (unsigned int) vfs_creatDirRel(&task->currentDirectory, (char *) cpu->ebx);
-			break;
-		}
-		case 0x1B:{
-			break;
-		}
-		case 0x1C:{
-			cpu_state.eax = getArrow();
-			break;
-		}
-		case 0x1D:{
-			srand(cpu->ebx);
-			break;
-		}
-		case 0x1E:{
-			cpu_state.eax = rand();
-			break;
-		}
-		case 0x1F:{
-			print_serial("EXIT Syscall\n");
-			task_lock = 0;
-			stop_task(task_running_idx);
-			task_yield();
-			break;
-		}
-		//Request Memory Block, takes number of bytes, returns void pointer to region
-		case 0x20:{
-			int block = MEM_findRegionIdx(cpu->ebx);
-			uint32_t addr = MEM_reserveRegionBlock(block, cpu->ebx, 0, PROGRAM);
-			cpu_state.eax = addr;
-			//MEM_printRegions();
-			break;
-		}
-		//Add Keyboard Event Listener
-		case 0x21:{
-			print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu->ebx);
-			tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) cpu->ebx;
-			break;
-		}
-		//Extend Files
-		case 0x22:{
-			break;
-		}
-		//Request Memory Block of size to be alloced to requested virtual memory region
-		case 0x23:{
-			int block = MEM_findRegionIdx(cpu->ebx);
-			MEM_reserveRegionBlock(block, cpu->ebx, cpu->ecx, PROGRAM);
-			//MEM_printRegions();
-			cpu_state.eax = cpu->ecx;
-			break;
-		}
-		//Add timer callback
-		case 0x24:{
-			timer_attach((int) cpu->ebx, (void *) cpu->ecx);
-			break;
-		}
-		case 0x25:{
-			break;
-		}
-		case 0x26:{
-			cpu_state.ebx = start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx);
-			break;
-		}
-		case 0x27:{
-			break;
-		}
-		case 0x28:{
-			cpu_state.eax = (uint32_t) &PCSpeaker_Handle;
-			print_serial("[SYSCALL] Program requested handle to PCspeaker - returned 0x%x\n", cpu_state.eax);
-			break;
-		}
-		case 0x29:{
-			cpu_state.eax = (uint32_t) &timer_ticks;
-			print_serial("[SYSCALL] Program requested handle to timer ticks - returned 0x%x\n", cpu_state.eax);
-			break;
-		}
-		case 0x2A:{
-			print_serial("[SYSCALL] Program requested mouse event handler @%x\n", cpu->ebx);
-			//tasks[task_running_idx].mouse_event_handler = (void (*)(void)) cpu->ebx;
-			break;
-		}
-		case 0x2B:{
-			print_serial("[SYSCALL] Free Region\n");
-			MEM_freeRegionBlock(cpu->ebx, cpu->ecx);
-			//MEM_printRegions();
-			break;
-		}
-		case 0x2C:{
-			print_serial("[SYSCALL] Program requested program end event handler @%x\n", cpu->ebx);
-			tasks[task_running_idx].end_callback = (void (*)(void)) cpu->ebx;
-			break;
-		}
-		case 0x2E:{
-			struct CONSOLE *console = console_open_vp((struct Viewport *) cpu->ebx);
-			cpu_state.eax = (uint32_t) console;
-			task->console = console;
-			task->own_console = true;
-			break;
-		}
-		case 0x30:{
-			cpu_state.eax = (uint32_t) &vfs_taskListDirectory;
-			break;
-		}
-		case 0x32:{
-			task_lock = cpu->ebx & 1;
-			//print_serial("[SYSCALL] Task Lock %d\n", task_lock);
-			break;
-		}
-		case 0x33:{
-			break;
-		}
-		case 0x34:{
-			task_yield();
-			break;
-		}
-		case 0x35:{
-			cpu_state.eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu->ebx, (int) cpu->ecx));
-			print_serial("[SYSCALL] Opened \"%s\" into process FD %d, SYS FD %d\n", (char *) cpu->ebx, (int) cpu_state.eax, tasks[task_running_idx].file_descs[cpu_state.eax]);
-			break;
-		}
-		case 0x36:{
-			vfs_close(task_getSysFD(task, (int) cpu->ebx));
-			task_freeFD(task, (int) cpu->ebx);
-			break;
-		}
-		case 0x37:{
-			cpu_state.eax = (unsigned int) vfs_read(task_getSysFD(task, (int) cpu->ebx), (void *) cpu->ecx, (int) cpu->edx);
-			break;
-		}
-		case 0x38:{
-			cpu_state.eax = (unsigned int) vfs_write(task_getSysFD(task, (int) cpu->ebx), (void *) cpu->ecx, (int) cpu->edx);
-			break;
-		}
-		case 0x39:{
-			cpu_state.eax = (unsigned int) vfs_seek(task_getSysFD(task, (int) cpu->ebx), cpu->ecx, (int) cpu->edx);
-			break;
-		}
-		case 0x3A:{
-			cpu_state.eax = (unsigned int) vfs_creatRel(&task->currentDirectory, (char *) cpu->ebx);
-			break;
-		}
-		case 0x3B:{
-			cpu_state.eax = (unsigned int) task_dupFD(task, (int) cpu->ebx);
-			break;
-		}
-		case 0x3C:{
-			//print_serial("EIP: 0x%x\n", stack.eip);
-			//task->registers.eip = stack.eip;
-			print_serial("[SYSCALL] Fork\n");
-			cpu_state.eax = 0;//(unsigned int) fork();
-			break;
-		}
-		//Print to console
-		case 0x3D:{
-			break;
-		}
-		case 0x3E:{
-			break;
-		}
-		case 0x3F:{
-			cpu_state.eax = (unsigned int) vfs_ftruncate(task_getSysFD(task, cpu->ebx), cpu->ecx);
-			break;
-		}
-		//Program requests to wait until passed pid ends
-		case 0x40:{
-			int id = task_getCurrentID();
-			print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
-			tasks[id].waitpid = cpu->ebx;
-			break;
-		}
-	}
-	
+	return;	
 }
