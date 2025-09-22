@@ -289,18 +289,18 @@ void init_syscalls(){
 	syscall_set(0x01, syscall_window_open);
 	syscall_set(0x02, syscall_window_close);
 	syscall_set(0x03, syscall_window_copy);
-	syscall_set(0x04, syscall_buf_putChar);
+	//syscall_set(0x04, syscall_buf_putChar);
 	syscall_set(0x05, syscall_getc_blk);
 	syscall_set(0x06, syscall_exec);
 	syscall_set(0x07, syscall_set_schedule);
-	syscall_set(0x08, syscall_print_to_console);
-	syscall_set(0x09, syscall_console_open);
+	//syscall_set(0x08, syscall_print_to_console);
+	//syscall_set(0x09, syscall_console_open);
 	syscall_set(0x0A, syscall_console_close);
-	syscall_set(0x0B, syscall_kmalloc);
-	syscall_set(0x0C, syscall_console_printargs);
+	//syscall_set(0x0B, syscall_kmalloc);
+	//syscall_set(0x0C, syscall_console_printargs);
 	syscall_set(0x12, syscall_chdir);
 	syscall_set(0x13, syscall_get_dir);
-	syscall_set(0x16, syscall_print_serial);
+	//syscall_set(0x16, syscall_print_serial);
 	syscall_set(0x17, syscall_get_kernel_feature);
 	syscall_set(0x1A, syscall_creatdir);
 	syscall_set(0x1C, syscall_getArrow);
@@ -310,13 +310,13 @@ void init_syscalls(){
 	syscall_set(0x20, syscall_mem_request);
 	syscall_set(0x21, syscall_keyboard_add_event);
 	syscall_set(0x23, syscall_mem_reserve);
-	syscall_set(0x24, syscall_timer_attach);
+	//syscall_set(0x24, syscall_timer_attach);
 	syscall_set(0x26, syscall_start_task);
-	syscall_set(0x28, syscall_get_pcspeaker);
-	syscall_set(0x29, syscall_get_timerticks);
-	syscall_set(0x2A, syscall_mouse_event);
+	//syscall_set(0x28, syscall_get_pcspeaker);
+	//syscall_set(0x29, syscall_get_timerticks);
+	//syscall_set(0x2A, syscall_mouse_event);
 	syscall_set(0x2B, syscall_mem_free);
-	syscall_set(0x2C, syscall_end_event);
+	//syscall_set(0x2C, syscall_end_event);
 	syscall_set(0x2E, syscall_console_open_vp);
 	syscall_set(0x30, syscall_get_vfsListDir);
 	syscall_set(0x32, syscall_task_lock);
@@ -341,17 +341,12 @@ void syscall_set(uint8_t call_id, syscall_fn fn){
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	IRQ_OFF;
 	struct task_state *task = &tasks[task_running_idx];
-	//save_task_state(task, &cpu, &stack);
-	//save_task_state(task, cpu, stack);
-	//print_serial("[SYSCALL] #%x\n", cpu->eax);
-
 	if(syscall_functions[cpu->eax] != NULL){
 		syscall_functions[cpu->eax](cpu, task);
 	}
 	else{
 		print_serial("[SYSCALL] Invalid call to syscall id %d from process pid %d (@0x%x)\n", cpu->eax, task->pid, stack->eip);
 	}
-	//*cpu = cpu_state;
 	IRQ_RES;
 	return;	
 }
