@@ -36,7 +36,7 @@ void syscall_getc_blk(struct cpu_state *cpu __attribute__((unused)), struct task
 }
 
 void syscall_exec(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	cpu->ebx = exec((char *) cpu->ebx, cpu->eax, (char **) cpu->edx);
+	cpu->ebx = exec((char *) cpu->ebx, cpu->ecx, (char **) cpu->edx);
 	return;
 }
 
@@ -289,28 +289,24 @@ void init_syscalls(){
 	syscall_set(0x01, syscall_window_open);
 	syscall_set(0x02, syscall_window_close);
 	syscall_set(0x03, syscall_window_copy);
-	//syscall_set(0x04, syscall_buf_putChar);
 	syscall_set(0x05, syscall_getc_blk);
 	syscall_set(0x06, syscall_exec);
 	syscall_set(0x07, syscall_set_schedule);
-	//syscall_set(0x08, syscall_print_to_console);
-	//syscall_set(0x09, syscall_console_open);
+	syscall_set(0x08, syscall_print_to_console);
+	syscall_set(0x09, syscall_console_open);
 	syscall_set(0x0A, syscall_console_close);
-	//syscall_set(0x0B, syscall_kmalloc);
-	//syscall_set(0x0C, syscall_console_printargs);
+	syscall_set(0x0B, syscall_kmalloc);
+	syscall_set(0x0C, syscall_console_printargs);
 	syscall_set(0x12, syscall_chdir);
 	syscall_set(0x13, syscall_get_dir);
-	//syscall_set(0x16, syscall_print_serial);
 	syscall_set(0x17, syscall_get_kernel_feature);
 	syscall_set(0x1A, syscall_creatdir);
-	syscall_set(0x1C, syscall_getArrow);
 	syscall_set(0x1D, syscall_srand);
 	syscall_set(0x1E, syscall_rand);
 	syscall_set(0x1F, syscall_exit);
 	syscall_set(0x20, syscall_mem_request);
 	syscall_set(0x21, syscall_keyboard_add_event);
 	syscall_set(0x23, syscall_mem_reserve);
-	//syscall_set(0x24, syscall_timer_attach);
 	syscall_set(0x26, syscall_start_task);
 	//syscall_set(0x28, syscall_get_pcspeaker);
 	//syscall_set(0x29, syscall_get_timerticks);

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <sys/memory.h>
 #include <ctype.h>
+#include <sys/syscall.h>
 
 struct STDLIB_Memory {
     void *region_base;
@@ -195,7 +196,7 @@ void exit(int code){
 	register unsigned int eax asm("eax");
 	register unsigned int ebx asm("ebx");
 	ebx = (unsigned int) code;
-	eax = 0x1F;
+	eax = SYSCALL_EXIT;
 	asm("int 0x80");
 	return;
 }
@@ -204,13 +205,13 @@ void srand(unsigned int seed){
 	register unsigned int eax asm("eax");
 	register unsigned int ebx asm("ebx");
 	ebx = seed;
-	eax = 0x1D;
+	eax = SYSCALL_SRAND;
 	asm("int 0x80");
 }
 
 int rand(){
 	register unsigned int eax asm("eax");
-	eax = 0x1E;
+	eax = SYSCALL_RAND;
 	asm("int 0x80");
 	return eax;
 }

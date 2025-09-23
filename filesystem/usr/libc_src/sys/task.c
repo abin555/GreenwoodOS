@@ -1,5 +1,6 @@
 #include <sys/task.h>
 #include <stdint.h>
+#include <sys/syscall.h>
 
 int exec(char *filename, int argc, char **argv){
 	register uint32_t eax asm("eax");
@@ -9,7 +10,7 @@ int exec(char *filename, int argc, char **argv){
 	edx = (uint32_t) argv;
 	ecx = (uint32_t) argc;
 	ebx = (uint32_t) filename;
-	eax = 0x06;
+	eax = SYSCALL_EXEC;
 	asm("int 0x80");
 	return (int) ebx;
 }
@@ -18,7 +19,7 @@ void waitpid(int pid){
 	register uint32_t eax asm("eax");
 	register int ebx asm("ebx");
 	ebx = pid;
-	eax = 0x40;
+	eax = SYSCALL_WAIT;
 	asm("int 0x80");
 	yield();
 }
@@ -27,13 +28,13 @@ void set_schedule(ScheduleType type){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	ebx = type;
-	eax = 0x07;
+	eax = SYSCALL_SET_SCHEDULE;
 	asm("int 0x80");
 }
 
 void yield(){
 	register uint32_t eax asm("eax");
-	eax = 0x34;
+	eax = SYSCALL_YIELD;
 	asm("int 0x80");
 }
 
@@ -41,7 +42,7 @@ void task_lock(int state){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	ebx = (uint32_t) state;
-	eax = 0x32;
+	eax = SYSCALL_TASK_LOCK;
 	asm("int 0x80");
 }
 
@@ -51,7 +52,7 @@ int manual_task(void *address, char *name){
 	register uint32_t ecx asm("ecx");
 	ecx = (uint32_t) name;
 	ebx = (uint32_t) address;
-	eax = 0x26;
+	eax = SYSCALL_START_TASK;
 	asm("int 0x80");
 	return (int) ebx;
 }

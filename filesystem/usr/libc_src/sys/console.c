@@ -1,11 +1,11 @@
 #include <sys/console.h>
 #include <internal/stdio.h>
 #include <stdio.h>
-
+#include <sys/syscall.h>
 
 struct CONSOLE *console_open(){
 	register uint32_t eax asm("eax");
-	eax = 0x09;
+	eax = SYSCALL_CONSOLE_OPEN;
 	asm("int 0x80");
 	struct CONSOLE *console = (struct CONSOLE *) eax;
 	return console;
@@ -13,7 +13,7 @@ struct CONSOLE *console_open(){
 
 void console_close(){
 	register uint32_t eax asm("eax");
-	eax = 0x0A;
+	eax = SYSCALL_CONSOLE_CLOSE;
 	asm("int 0x80");
 }
 
@@ -21,7 +21,7 @@ struct CONSOLE *console_open_vp(struct Viewport *vp){
 	register uint32_t eax asm("eax");
 	register uint32_t ebx asm("ebx");
 	ebx = (uint32_t) vp;
-	eax = 0x2E;
+	eax = SYSCALL_CONSOLE_OPEN_VP;
 	asm("int 0x80");
 	struct CONSOLE *console = (struct CONSOLE *) eax;
 	return console;
@@ -33,7 +33,7 @@ void console_print(struct CONSOLE *console, char *str){
 	register uint32_t ecx asm("ecx");
 	ecx = (uint32_t) str;
     ebx = (uint32_t) console;
-	eax = 0x3D;
+	eax = 0x08;
 	asm("int 0x80");
 }
 
