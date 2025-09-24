@@ -1,5 +1,6 @@
 #include <sys/io.h>
 #include <stdint.h>
+#include <sys/syscall.h>
 
 int open(char *path, int flags){
 	register uint32_t eax asm("eax");
@@ -8,7 +9,7 @@ int open(char *path, int flags){
 	register uint32_t edx asm("edx");
 	ecx = (uint32_t) flags;
 	ebx = (uint32_t) path;
-	eax = 0x35;
+	eax = SYSCALL_OPEN;
 	asm("int 0x80");
 	return (int) eax;
 }
@@ -19,7 +20,7 @@ void close(int fd){
 	register uint32_t ecx asm("ecx");
 	register uint32_t edx asm("edx");
 	ebx = (uint32_t) fd;
-	eax = 0x36;
+	eax = SYSCALL_CLOSE;
 	asm("int 0x80");
 }
 
@@ -31,7 +32,7 @@ int read(int fd, void *buf, int nbytes){
 	edx = (uint32_t) nbytes;
 	ecx = (uint32_t) buf;
 	ebx = (uint32_t) fd;
-	eax = 0x37;
+	eax = SYSCALL_READ;
 	asm("int 0x80");
 	return (int) eax;
 }
@@ -44,7 +45,7 @@ int write(int fd, void *buf, int nbytes){
 	edx = (uint32_t) nbytes;
 	ecx = (uint32_t) buf;
 	ebx = (uint32_t) fd;
-	eax = 0x38;
+	eax = SYSCALL_WRITE;
 	asm("int 0x80");
 	return (int) eax;
 }
@@ -57,7 +58,7 @@ int lseek(int fd, int off, int whence){
 	edx = (uint32_t) whence;
 	ecx = (uint32_t) off;
 	ebx = (uint32_t) fd;
-	eax = 0x39;
+	eax = SYSCALL_SEEK;
 	asm("int 0x80");
 	return (int) eax;
 }
@@ -68,7 +69,7 @@ int creat(char *path){
 	register uint32_t ecx asm("ecx");
 	register uint32_t edx asm("edx");
 	ebx = (uint32_t) path;
-	eax = 0x3A;
+	eax = SYSCALL_CREAT;
 	asm("int 0x80");
 	return (int) eax;
 }
@@ -80,7 +81,7 @@ int ftruncate(int fd, unsigned int length){
 	register uint32_t edx asm("edx");
 	ecx = (uint32_t) length;
 	ebx = (uint32_t) fd;
-	eax = 0x3F;
+	eax = SYSCALL_TRUNCATE;
 	asm("int 0x80");
 	return (int) eax;
 }
