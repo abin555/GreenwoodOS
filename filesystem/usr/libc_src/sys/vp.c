@@ -4,11 +4,12 @@
 struct ViewportFunctions {
     struct Viewport *(*open)(int, int, char*);
     void (*close)(struct Viewport*);
-    void (*set_buffer)(struct Viewport* viewport, uint32_t* buf, uint32_t size);
+    void (*set_buffer)(struct Viewport*, uint32_t*, uint32_t);
     void (*copy)(struct Viewport*);
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
     void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
     char (*getc)(struct Viewport *);
+    void (*set_options)(struct Viewport*, VIEWPORT_OPTIONS);
 };
 
 struct ViewportFunctions vp_functions;
@@ -55,4 +56,9 @@ void vp_drawChar(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_
 char vp_getc(struct Viewport *vp){
     if(!sys_vp_initialized) vp_init();
     vp_functions.getc(vp);
+}
+
+void vp_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options){
+    if(!sys_vp_initialized) vp_init();
+    vp_functions.set_options(vp, options);
 }

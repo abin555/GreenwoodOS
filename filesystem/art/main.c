@@ -7,6 +7,9 @@
 #define WIDTH 300
 #define HEIGHT 300
 
+unsigned int width, height;
+unsigned int buf_size;
+
 #define BUF_SIZE WIDTH * HEIGHT * sizeof(uint32_t)
 
 struct Viewport *win;
@@ -19,14 +22,20 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 int main(int argc, char **argv){
     printf("Opening ART Window\n");
     set_schedule(ALWAYS);
+
+    width = 300;
+    height = 300;
+    buf_size = width * height * sizeof(uint32_t);
+
     backbuffer = (uint32_t *) 0x6000;
     win = vp_open(WIDTH, HEIGHT, "ART");
     vp_add_event_handler(win, event_handler);
     if(win == NULL) return 1;
     uint32_t *buf = backbuffer;
-    vp_set_buffer(win, buf, BUF_SIZE);
-    uint32_t x = WIDTH/2;
-    uint32_t y = HEIGHT/2;
+    vp_set_buffer(win, buf, buf_size);
+    vp_set_options(win, VP_OPT_RESIZE);
+    uint32_t x = width/2;
+    uint32_t y = height/2;
     int dx = 1;
     int dy = -1;
     uint32_t color = 0;
@@ -37,29 +46,29 @@ int main(int argc, char **argv){
     int i = 0;
     while(running){
         i++;
-        buf[x + y*WIDTH] = old_color; 
+        buf[x + y*width] = old_color; 
         old_color = color;
         color++;
 
         x += dx;
         y += dy;
         //fb_setPixel(x, y, color);
-        buf[x + y*WIDTH] = color;
+        buf[x + y*width] = color;
         
         if(x <= 0){
             dx = -dx;
             x = 1;
         }
-        if(x >= WIDTH){
+        if(x >= width){
             dx = -dx;
-            x = WIDTH - 1;
+            x = width - 1;
         }
         if(y <= 0){
             dy = -dy;
         }
-        if(y >= HEIGHT){
+        if(y >= height){
             dy = -dy;
-            y = HEIGHT - 1;
+            y = height - 1;
         }
         if(i > 5000){
             vp_copy(win);
@@ -78,6 +87,14 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     }
     else if(event == VP_EXIT){
         running = 0;
+    }
+    else if(event == VP_RESIZE){
+        width = vp->resizeLoc.w;
+        height = vp->resizeLoc.h;
+        buf_size = width * height * sizeof(uint32_t);
+        vp_set_buffer(vp, backbuffer, buf_size);
+        vp->loc.w = width;
+        vp->loc.h = height;
     }
     
 }

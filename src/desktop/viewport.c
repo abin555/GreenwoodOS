@@ -25,6 +25,7 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.ascii = '\0';
     viewport.click_events_enabled = false;
     viewport.transparent = false;
+    viewport.options = 0;
     return viewport;
 }
 
@@ -101,6 +102,16 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             0xFFFFFF,
             0xFF0000
         );
+        if((viewport->options & VP_OPT_RESIZE) != 0){
+            buf_putChar(
+                window->backbuffer,
+                viewport->loc.x + viewport->loc.w,
+                viewport->loc.y + viewport->loc.h + 8,
+                '*',
+                0xFFFFFF,
+                0xFF
+            );
+        }        
     }
 
     for(int i = 0; viewport->title[i] != '\0' && viewport->title != NULL; i++){
@@ -160,7 +171,8 @@ struct ViewportFunctions global_viewport_functions = {
     viewport_copy_buffer,
     viewport_add_event_handler,
     vp_draw_char,
-    viewport_getc
+    viewport_getc,
+    viewport_set_options
 };
 
 char viewport_getc(struct Viewport *vp){
@@ -334,6 +346,13 @@ struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_c
             if(vp->click_events_enabled) viewport_send_event(vp, VP_CLICK);
             return interaction;
         }
+        else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0){
+            print_serial("[DESKTOP] Resize Interaction!\n");
+            interaction.clickType = VP_Scale;
+            interaction.vp = vp;
+            viewport_move_element_to_front(viewport_list, i);
+            return interaction;
+        }
     }
     return interaction;
 }
@@ -428,4 +447,20 @@ void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event){
     }
     task_lock = 0;
     //print_serial("[VIEWPORT] Sent event\n");
+}
+
+void viewport_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options){
+    if(vp == NULL) return;
+    vp->options = options;
+}
+
+bool getViewportResizeClick(struct Viewport *viewport, int x, int y){
+    if(viewport == NULL) return false;
+    if(
+        x > viewport->loc.x + viewport->loc.w && 
+        x < viewport->loc.x + viewport->loc.w + 8 && 
+        y > viewport->loc.y + viewport->loc.h + 10 && 
+        y < viewport->loc.y + viewport->loc.h + 18
+    ) return true;
+    return false;
 }

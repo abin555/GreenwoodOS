@@ -16,12 +16,20 @@ typedef enum {
     VP_EXIT,
     VP_MINIMIZE,
     VP_MAXIMIZE,
-    VP_CLICK
+    VP_CLICK,
+    VP_RESIZE
 } VIEWPORT_EVENT_TYPE;
+
+typedef enum {
+    VP_OPT_NONE = 0,
+    VP_OPT_RESIZE = 1
+} VIEWPORT_OPTIONS;
 
 struct Viewport {
     struct Location loc;
     struct Location oldLoc;
+    struct Location resizeLoc;
+    
     uint32_t *frontbuf;
     uint32_t *backbuf;
     uint32_t buf_size;
@@ -35,6 +43,8 @@ struct Viewport {
     int owner_task_id;
     char ascii;
 
+    VIEWPORT_OPTIONS options;
+
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
 	char click_events_enabled;
     char transparent;
@@ -47,5 +57,6 @@ void vp_copy(struct Viewport *vp);
 void vp_add_event_handler(struct Viewport *vp, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
 void vp_drawChar(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32_t bg);
 char vp_getc(struct Viewport *vp);
+void vp_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options);
 
 #endif

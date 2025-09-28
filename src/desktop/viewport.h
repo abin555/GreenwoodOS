@@ -14,18 +14,26 @@ typedef enum {
     VP_EXIT,
     VP_MINIMIZE,
     VP_MAXIMIZE,
-    VP_CLICK
+    VP_CLICK,
+    VP_RESIZE
 } VIEWPORT_EVENT_TYPE;
+
+typedef enum {
+    VP_OPT_NONE = 0,
+    VP_OPT_RESIZE = 1
+} VIEWPORT_OPTIONS;
 
 struct Viewport {
     struct Location loc;
     struct Location oldLoc;
+    struct Location resizeLoc;
+    
     uint32_t *frontbuf;
     uint32_t *backbuf;
     uint32_t buf_size;
     uint8_t resizeable;
-    bool minimized;
-    bool open;
+    char minimized;
+    char open;
     int minimized_w;
     int minimized_h;
     char *title;
@@ -33,9 +41,11 @@ struct Viewport {
     int owner_task_id;
     char ascii;
 
+    VIEWPORT_OPTIONS options;
+
     void (*event_handler)(struct Viewport *, VIEWPORT_EVENT_TYPE);
-	bool click_events_enabled;
-    bool transparent;
+	char click_events_enabled;
+    char transparent;
 };
 
 #define MAX_VIEWPORTS 100
@@ -74,6 +84,7 @@ struct ViewportFunctions {
     void (*add_event_handler)(struct Viewport *, void (*)(struct Viewport *, VIEWPORT_EVENT_TYPE));
     void (*drawChar)(struct Viewport *, int, int, char, uint32_t, uint32_t);
     char (*getc)(struct Viewport *);
+    void (*set_options)(struct Viewport*, VIEWPORT_OPTIONS);
 };
 
 extern struct ViewportFunctions global_viewport_functions;
@@ -91,12 +102,14 @@ void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewpor
 void viewport_move_element_to_front(struct ViewportList *viewport_list, int elemIdx);
 struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y);
 void viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window);
+void viewport_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options);
 
 struct Viewport make_viewport(int w, int h, char *title);
 void draw_viewport(struct Viewport *viewport, struct WINDOW *window);
 void viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window);
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y);
 bool getViewportBodyClick(struct Viewport *viewport, int x, int y);
+bool getViewportResizeClick(struct Viewport *viewport, int x, int y);
 VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport, int x, int y);
 void viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y);
 void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t buf_size);

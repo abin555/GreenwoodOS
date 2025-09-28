@@ -131,7 +131,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         int startX;
         int startY;
         char dragging;
-        int dragType;//0 = icon, 1 = viewport
+        int dragType;//0 = icon, 1 = viewport, 2 = resize
         struct Viewport *selected_vp;
     } ClickDrag = {
         0,
@@ -161,26 +161,47 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
             else if(vp_interaction.clickType == VP_Header && vp_interaction.vp != NULL){
                 ClickDrag.selected_vp = vp_interaction.vp;
                 ClickDrag.selected_vp->oldLoc = ClickDrag.selected_vp->loc;
+                ClickDrag.dragType = 1;
+            }
+            else if(vp_interaction.clickType == VP_Scale && vp_interaction.vp != NULL){
+                ClickDrag.selected_vp = vp_interaction.vp;
+                ClickDrag.dragType = 2;
             }
             ClickDrag.dragging = 1;
             ClickDrag.startX = mouseStatus.pos.x;
             ClickDrag.startY = mouseStatus.pos.y;
         }
         if(!mouseStatus.buttons.left && ClickDrag.dragging) {
+            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == 2){
+                ClickDrag.selected_vp->resizeLoc.w = mouseStatus.pos.x - ClickDrag.selected_vp->loc.x;
+                ClickDrag.selected_vp->resizeLoc.h = mouseStatus.pos.y - ClickDrag.selected_vp->loc.y;
+                viewport_send_event(ClickDrag.selected_vp, VP_RESIZE);
+            }
             ClickDrag.dragging = 0;
             ClickDrag.dragType = -1;
             ClickDrag.selected_vp = NULL;
         }
 
         if(ClickDrag.dragging){
-            if(ClickDrag.selected_vp != NULL){
+            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == 1){
                 viewport_set_position(ClickDrag.selected_vp, window,
                     ClickDrag.selected_vp->oldLoc.x - (ClickDrag.startX - mouseStatus.pos.x),
                     ClickDrag.selected_vp->oldLoc.y - (ClickDrag.startY - mouseStatus.pos.y)
                 );
             }
-            else{
-                /*
+            else if(ClickDrag.dragType == 2){
+                drawRect(
+                    0xFF0000,
+                    0x000000,
+                    ClickDrag.selected_vp->loc.x,
+                    ClickDrag.selected_vp->loc.y,
+                    mouseStatus.pos.x,
+                    mouseStatus.pos.y,
+                    window->backbuffer,
+                    window->width
+                );
+            }
+            else {
                 drawRect(
                     0x0000FF,
                     0x0000DD,
@@ -191,7 +212,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                     window->backbuffer,
                     window->width
                 );
-                */
             }
         }
 

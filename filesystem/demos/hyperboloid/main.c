@@ -8,8 +8,9 @@
 #include <string.h>
 #include <sys/mouse.h>
 
-#define HEIGHT 300
-#define WIDTH 300
+unsigned int HEIGHT;
+unsigned int WIDTH;
+uint32_t *drawbuf;
 
 typedef struct {
     double x;
@@ -204,6 +205,13 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
         case VP_MINIMIZE:
             set_schedule(NEVER);
             break;
+        case VP_RESIZE:
+            WIDTH = vp->resizeLoc.w;
+            HEIGHT = vp->resizeLoc.h;
+            vp_set_buffer(vp, drawbuf, WIDTH * HEIGHT * sizeof(uint32_t));
+            vp->loc.w = WIDTH;
+            vp->loc.h = HEIGHT;
+            break;
         default:
             return;
     }
@@ -288,6 +296,8 @@ void handleMouseInteraction(FILE *mouseFile, struct Hyperboloid *h, struct Rende
 
 int main(int argc, char **argv){
     printf("Hyperboloid Renderer Test!\n");
+    WIDTH = 300;
+    HEIGHT = 300;
     struct Hyperboloid *h = init_hyperboloid(50, 1);
     struct RenderContext *ctx = init_renderContext();
 
@@ -299,8 +309,9 @@ int main(int argc, char **argv){
 
     struct Viewport *vp = vp_open(WIDTH, HEIGHT, "Hyperboloid");
     if(vp == NULL) return 1;
-    uint32_t *drawbuf = malloc(sizeof(uint32_t) * HEIGHT * WIDTH);
+    drawbuf = malloc(sizeof(uint32_t) * HEIGHT * WIDTH);
     vp_set_buffer(vp, drawbuf, sizeof(uint32_t) * HEIGHT * WIDTH);
+    vp_set_options(vp, VP_OPT_RESIZE);
     vp_add_event_handler(vp, event_handler);
     running = 1;
     while(running){
