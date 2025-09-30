@@ -9,9 +9,14 @@
 //#define DOOM_IMPLEMENTATION
 #include "PureDOOM.h"
 
-#define WIDTH 320
-#define HEIGHT 200
+#define START_W 320
+#define START_H 200
+#define MAXSCALE 3
+
+unsigned int WIDTH;
+unsigned int HEIGHT;
 #define SCALE 4
+uint32_t *frontbuf;
 
 int running;
 
@@ -141,6 +146,21 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
     case VP_UNFOCUSED:
       set_schedule(NEVER);
       break;
+    case VP_RESIZE:
+      if(vp->resizeLoc.w < START_W || vp->resizeLoc.h < START_H) break;
+      WIDTH = vp->resizeLoc.w;
+      HEIGHT = vp->resizeLoc.h;
+      if(WIDTH > START_W * MAXSCALE) WIDTH = START_W * MAXSCALE;
+      if(HEIGHT > START_W * MAXSCALE) HEIGHT = START_W * MAXSCALE;
+      vp_set_buffer(
+        vp,
+        frontbuf,
+        SCALE * WIDTH * HEIGHT
+      );
+
+      vp->loc.w = WIDTH;
+      vp->loc.h = HEIGHT;
+      break;
   }
 }
 
@@ -226,6 +246,22 @@ void impl_exit(int code){
   exit(code);
 }
 
+void resize_buf(uint32_t *dest, uint32_t *src, uint32_t orig_w, uint32_t orig_h, uint32_t targ_w, uint32_t targ_h){
+  if(dest == NULL || src == NULL) return;
+  float x_scale, y_scale;
+  x_scale = ((float) orig_w / (float) targ_w);
+  y_scale = ((float) orig_h / (float) targ_h);
+
+  for(int y = 0; y < targ_h; y++){
+    for(int x = 0; x < targ_w; x++){
+      int src_x = (int) ((float) x * x_scale);
+      int src_y = (int) ((float) y * y_scale);
+
+      dest[x + (y * targ_w)] = src[src_x + (src_y * orig_w)];
+    }
+  }
+}
+
 int main(int argc, char **argv){
   rtc_fd = open("/-/dev/RTC", O_READ);
   if(rtc_fd == -1){
@@ -238,6 +274,9 @@ int main(int argc, char **argv){
     printf("Cannot access keyboard file!\n");
     return 1;
   }
+
+  WIDTH = 320;
+  HEIGHT = 200;
 
   //freopen("/-/dev/serial", "a+", stdout);
 
@@ -266,6 +305,9 @@ int main(int argc, char **argv){
   window->loc.x = 400-160;
   window->loc.y = 300-120;
   vp_add_event_handler(window, event_handler);
+  frontbuf = memory_requestRegion(SCALE * START_W * START_H * MAXSCALE);
+  vp_set_buffer(window, frontbuf, WIDTH * HEIGHT * SCALE);
+  vp_set_options(window, VP_OPT_RESIZE);
   //addEndCallback(end_callback);
 
   uint32_t* framebuffer;
@@ -278,11 +320,26 @@ int main(int argc, char **argv){
     fseek(kbd, 0, SEEK_SET);
     handle_key();
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
-    vp_set_buffer(window, framebuffer, WIDTH * HEIGHT * SCALE);
+
+    task_lock(1);
+    
+    resize_buf(
+      frontbuf,
+      framebuffer,
+      START_W,
+      START_H,
+      WIDTH,
+      HEIGHT
+    );
+    
+    //memcpy(frontbuf, framebuffer, SCALE * START_W * START_H);
+    task_lock(0);
+
     vp_copy(window);
     for(int i = 0; i < 0x8FFFFF; i++){}
   }
 
   vp_close(window);
   close(rtc_fd);
+  memory_returnRegion(frontbuf, SCALE * START_W * START_H * MAXSCALE);
 }

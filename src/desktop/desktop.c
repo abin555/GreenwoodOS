@@ -201,7 +201,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                     window->width
                 );
             }
-            else {
+            else if(ClickDrag.dragType == 1){
                 drawRect(
                     0x0000FF,
                     0x0000DD,

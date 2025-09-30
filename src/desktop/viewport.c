@@ -346,7 +346,7 @@ struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_c
             if(vp->click_events_enabled) viewport_send_event(vp, VP_CLICK);
             return interaction;
         }
-        else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0){
+        else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0 && vp->minimized == 0){
             print_serial("[DESKTOP] Resize Interaction!\n");
             interaction.clickType = VP_Scale;
             interaction.vp = vp;
