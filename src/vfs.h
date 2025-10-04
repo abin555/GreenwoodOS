@@ -58,6 +58,7 @@ struct VFS_File {
     struct VFS_Inode inode;
     int head;
     int status;//1 = Free 0 = Used
+    int owner_pid;
 };
 
 void vfs_init();

@@ -18,8 +18,8 @@ FILE *internal_createFileFD(int fd){
 void init_stdio(){
 	fileListing = malloc(sizeof(FILE *) * MAX_FILE_LISTING);
 	memset(fileListing, 0, sizeof(fileListing));
-	fileListing[0] = NULL;
-	fileListing[1] = internal_createFileFD(open("/-/dev/console", O_WRITE));
+	fileListing[0] = internal_createFileFD(0);
+	fileListing[1] = internal_createFileFD(1);
 	fileListing[2] = fileListing[1];
 	openFiles = 3;
 }

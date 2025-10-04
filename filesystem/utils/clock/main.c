@@ -44,6 +44,8 @@ int main(int argc, char **argv){
     if(argc == 2){
         printf("Clock via taskbar!\n");
         taskBarClock(clock_fd);
+        close(clock_fd);
+        return 0;
     }
 
 

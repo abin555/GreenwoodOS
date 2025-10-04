@@ -152,6 +152,13 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
       HEIGHT = vp->resizeLoc.h;
       if(WIDTH > START_W * MAXSCALE) WIDTH = START_W * MAXSCALE;
       if(HEIGHT > START_W * MAXSCALE) HEIGHT = START_W * MAXSCALE;
+      if(WIDTH <= HEIGHT){
+        HEIGHT = WIDTH * ((float) START_H / (float) START_W);
+      }
+      else if(HEIGHT > WIDTH){
+        WIDTH = HEIGHT * ((float) START_W / (float) START_H);
+      }
+
       vp_set_buffer(
         vp,
         frontbuf,
@@ -337,6 +344,7 @@ int main(int argc, char **argv){
 
     vp_copy(window);
     for(int i = 0; i < 0x8FFFFF; i++){}
+    //yield();
   }
 
   vp_close(window);

@@ -1,4 +1,5 @@
 #include "multitasking.h"
+#include "vfs.h"
 
 bool task_lock;
 int8_t task_running_idx;
@@ -121,10 +122,21 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
             for(int j = 0; j < MT_maxDescriptors; j++){
                 tasks[i].file_descs[j] = -1;
             }
+            tasks[i].file_descs[0] = vfs_openRel(&tasks[i].currentDirectory, "/-/sys/kbd", VFS_FLAG_WRITE);
+            tasks[i].file_descs[1] = vfs_openRel(&tasks[i].currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
+            //task_allocFD(&tasks[i], vfs_openRel(&tasks[i].currentDirectory, "/-/dev/console", VFS_FLAG_WRITE));
             tasks[i].pid = pid_counter++;
             retpid = tasks[i].pid;
             tasks[i].waitpid = 0;
             print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", tasks[i].task_name, i, tasks[i].registers.esp, tasks[i].registers.ebp, tasks[i].pid);
+            for(int j = 0; j < MT_maxDescriptors; j++){
+                print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, tasks[i].file_descs[j]);
+            }
+            print_serial("[TASK] Args: \n");
+            for(int i = 0; i < argc; i++){
+                if(argv == NULL || argv[i] == NULL) continue;
+                print_serial("\t%d - %s\n", i, argv[i]);
+            }
             break;
         }
     }
@@ -256,6 +268,12 @@ void task_end(){
     else 
         freeProgramSlot(tasks[task_running_idx].program_slot);
     */
+
+    for(int i = 0; i < MT_maxDescriptors; i++){
+        if(tasks[task_running_idx].file_descs[i] != -1){
+            vfs_close(tasks[task_running_idx].file_descs[i]);
+        }
+    }
     
 	while(1){}
 }
