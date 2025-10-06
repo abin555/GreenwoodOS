@@ -284,6 +284,40 @@ void syscall_wait(struct cpu_state *cpu __attribute__((unused)), struct task_sta
 	tasks[id].waitpid = cpu->ebx;
 }
 
+void syscall_pipe(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int sys_fildesc[2];
+	int (*fildesc)[2];
+	fildesc = (int (*)[2]) cpu->ebx;
+	vfs_mkpipe(&sys_fildesc[0], &sys_fildesc[1]);
+	if(sys_fildesc[0] == -1 || sys_fildesc[1] == -1){
+		cpu->eax = -1;
+		return;
+	}
+	(*fildesc)[0] = task_allocFD(task, sys_fildesc[0]);
+	(*fildesc)[1] = task_allocFD(task, sys_fildesc[1]);
+	if((*fildesc)[0] == -1 || (*fildesc)[1] == -1){
+		cpu->eax = -1;
+		return;
+	}
+	cpu->eax = 0;
+	return;	
+}
+
+void syscall_dup2(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int oldfd = cpu->ebx;
+	if(task->file_descs[oldfd] == -1){
+		cpu->eax = -1;
+		return;
+	}
+	int newfd = cpu->ecx;
+	if(task->file_descs[newfd] != -1){
+		vfs_close(task->file_descs[newfd]);
+	}
+	task->file_descs[newfd] = task->file_descs[oldfd];
+	cpu->eax = newfd;
+	return;
+}
+
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
 	memset(syscall_functions, 0, sizeof(syscall_functions));
@@ -328,6 +362,8 @@ void init_syscalls(){
 	syscall_set(0x3C, syscall_fork);
 	syscall_set(0x3F, syscall_truncate);
 	syscall_set(0x40, syscall_wait);
+	syscall_set(0x41, syscall_pipe);
+	syscall_set(0x42, syscall_dup2);
 	interrupt_add_handle(0x80, syscall_callback);
 }
 

@@ -37,6 +37,11 @@ typedef enum {
 
 #define MT_maxDescriptors 10
 
+struct task_file_ctx {
+    int creator_pid;
+    
+};
+
 struct task_state{
     struct task_registers registers;
     int program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
@@ -49,7 +54,6 @@ struct task_state{
     struct CONSOLE *console;
     struct DIRECTORY currentDirectory;
     void (*keyboard_event_handler)(char);
-    //void (*mouse_event_handler)(void);
     void (*end_callback)(void);
     bool own_window;
     bool own_console;

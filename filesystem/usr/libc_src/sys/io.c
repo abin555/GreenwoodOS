@@ -85,3 +85,32 @@ int ftruncate(int fd, unsigned int length){
 	asm("int 0x80");
 	return (int) eax;
 }
+
+int pipe(int fildesc[2]){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) fildesc;
+	eax = SYSCALL_PIPE;
+	asm("int 0x80");
+	return (int) eax;
+}
+
+int dup(int oldfd){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) oldfd;
+	eax = SYSCALL_DUPFD;
+	asm("int 0x80");
+	return (int) eax;
+}
+
+int dup2(int oldfd, int newfd){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	register uint32_t ecx asm("ecx");
+	ecx = (uint32_t) newfd;
+	ebx = (uint32_t) oldfd;
+	eax = SYSCALL_DUP2FD;
+	asm("int 0x80");
+	return (int) eax;
+}

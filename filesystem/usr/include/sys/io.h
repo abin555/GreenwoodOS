@@ -17,5 +17,9 @@ int lseek(int fd, int off, int whence);
 int creat(char *path);
 
 int ftruncate(int fd, unsigned int length);
+int pipe(int fildesc[2]);
+
+int dup(int oldfd);
+int dup2(int oldfd, int newfd);
 
 #endif

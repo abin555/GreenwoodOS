@@ -15,5 +15,6 @@ int pipe_read(struct Pipe *pipe, void *buf, int nbytes);
 int pipe_write(struct Pipe *pipe, void *buf, int nbytes);
 void pipe_close(struct Pipe *pipe);
 
+void *pipe_getInterface();
 
 #endif

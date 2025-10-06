@@ -1,4 +1,5 @@
 #include "pipe.h"
+#include "vfs.h"
 
 struct Pipe *pipe_create(int size){
     struct Pipe *pipe = malloc(sizeof(struct Pipe));
@@ -35,6 +36,15 @@ int pipe_read(struct Pipe *pipe, void *buf, int nbytes){
     return count;
 }
 
+int pipe_vfs_read(void *f, void *buf, int nbytes){
+    print_serial("[PIPEFS] Read!\n");
+    struct VFS_File *file = f;
+    if(file->inode.type == VFS_PIPE){
+        return pipe_read(file->inode.fs.pipe, buf, nbytes);
+    }
+    return 0;
+}
+
 int pipe_write(struct Pipe *pipe, void *buf, int nbytes){
     if(pipe == NULL || buf == NULL) return -1;
     print_serial("[PIPE] Writing %d bytes, %s\n", nbytes, buf);
@@ -48,8 +58,37 @@ int pipe_write(struct Pipe *pipe, void *buf, int nbytes){
     return count;
 }
 
+int pipe_vfs_write(void *f, void *buf, int nbytes){
+    print_serial("[PIPEFS] Write!\n");
+    struct VFS_File *file = f;
+    if(file->inode.type == VFS_PIPE){
+        return pipe_write(file->inode.fs.pipe, buf, nbytes);
+    }
+    return 0;
+}
+
 void pipe_close(struct Pipe *pipe){
     pipe->buf = NULL;
     pipe->buf_size = 0;
     pipe->write_head = 0;
+}
+
+struct VFS_RootInterface pipe_interface = {
+    NULL,
+    'P',
+    "OS PIPE",
+    NULL,
+
+    NULL,
+    pipe_vfs_read,
+    pipe_vfs_write,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+};
+
+void *pipe_getInterface(){
+    return (void *) &pipe_interface;
 }

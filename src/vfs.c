@@ -247,14 +247,14 @@ int vfs_mkpipe(int *writer_fd, int *reader_fd){
     writer_file->inode.type = VFS_PIPE;
     writer_file->inode.fs.pipe = pipe;
     writer_file->inode.root = NULL;
-    writer_file->inode.interface->drive = NULL;
+    writer_file->inode.interface = pipe_getInterface();
     writer_file->inode.isValid = 1;
 
     reader_file->inode.flags = VFS_FLAG_READ;
     reader_file->inode.type = VFS_PIPE;
     reader_file->inode.fs.pipe = pipe;
     reader_file->inode.root = NULL;
-    reader_file->inode.interface->drive = NULL;
+    reader_file->inode.interface = pipe_getInterface();
     reader_file->inode.isValid = 1;
     return 0;
 }

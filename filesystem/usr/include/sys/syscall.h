@@ -38,5 +38,6 @@
 #define SYSCALL_FORK 0x3C
 #define SYSCALL_TRUNCATE 0x3F
 #define SYSCALL_WAIT 0x40
-
+#define SYSCALL_PIPE 0x41
+#define SYSCALL_DUP2FD 0x42
 #endif
