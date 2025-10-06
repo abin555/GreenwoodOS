@@ -67,79 +67,89 @@ void save_task_state(struct task_state *task, struct cpu_state *cpu __attribute_
     task->registers.esp = cpu->esp;
 }
 
-int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name __attribute__((unused))){
-	int retpid = 0;
+int task_get_available(){
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_active == 0){
-            tasks[i].registers.eax = 0;
-            tasks[i].registers.ebx = 0;
-            tasks[i].registers.ecx = 0;
-            tasks[i].registers.edx = 0;
-            tasks[i].registers.eip = (uint32_t) address;
-            register uint32_t esi asm("esi");
-            register uint32_t edi asm("edi");
-            tasks[i].registers.edi = edi;
-            tasks[i].registers.esi = esi;
-            
-            tasks[i].stack_region = (uint32_t) task_stack_array[i];
-            tasks[i].registers.ebp = (uint32_t) task_stack_array[i]+TASK_STACK_SIZE-(3*4);
-            //tasks[i].registers.ebp = (uint32_t) TASK_STACK_VIRTUAL_BASE+TASK_STACK_SIZE-(3*4);
-            tasks[i].registers.esp = (uint32_t) tasks[i].registers.ebp-(8*4);
-
-            uint32_t *return_instruction = (uint32_t *) tasks[i].registers.ebp;
-            return_instruction[1] = tasks[i].registers.ebp;
-            return_instruction[-1] = (uint32_t) argv;
-            return_instruction[-2] = (uint32_t) argc;
-            return_instruction[-3] = (uint32_t) &task_end;
-
-
-            tasks[i].program_slot = program_slot;
-            tasks[i].schedule_type = ALWAYS;
-            //tasks[i].task_name = name; //"Task\0";
-            
-            if(name == NULL){
-                tasks[i].task_name = "UNKNOWN TASK NAME\0";
-            }
-            else{
-                int len = strlen(name);
-                char *namebuf = malloc(len+1);
-                memset(namebuf, 0, len+1);
-                memcpy(namebuf, name, len);
-                tasks[i].task_name = namebuf;
-            }
-            
-            
-            tasks[i].window = tasks[task_running_idx].window;
-            tasks[i].own_window = false;
-            tasks[i].console = tasks[task_running_idx].console;
-            tasks[i].own_console = false;
-            memcpy(tasks[i].currentDirectory.path, tasks[task_running_idx].currentDirectory.path, sizeof(tasks[i].currentDirectory.path));
-            //print_serial("[TASK] Added to queue idx %d\n", i);
-            tasks[i].slot_active = 1;
-            tasks[i].keyboard_event_handler = NULL;
-            //tasks[i].mouse_event_handler = NULL;
-            tasks[i].end_callback = NULL;
-            for(int j = 0; j < MT_maxDescriptors; j++){
-                tasks[i].file_descs[j] = -1;
-            }
-            tasks[i].file_descs[0] = vfs_openRel(&tasks[i].currentDirectory, "/-/sys/kbd", VFS_FLAG_WRITE);
-            tasks[i].file_descs[1] = vfs_openRel(&tasks[i].currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
-            //task_allocFD(&tasks[i], vfs_openRel(&tasks[i].currentDirectory, "/-/dev/console", VFS_FLAG_WRITE));
-            tasks[i].pid = pid_counter++;
-            retpid = tasks[i].pid;
-            tasks[i].waitpid = 0;
-            print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", tasks[i].task_name, i, tasks[i].registers.esp, tasks[i].registers.ebp, tasks[i].pid);
-            for(int j = 0; j < MT_maxDescriptors; j++){
-                print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, tasks[i].file_descs[j]);
-            }
-            print_serial("[TASK] Args: \n");
-            for(int i = 0; i < argc; i++){
-                if(argv == NULL || argv[i] == NULL) continue;
-                print_serial("\t%d - %s\n", i, argv[i]);
-            }
-            break;
+            return i;
         }
     }
+    return -1;
+}
+
+int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name){
+	int retpid = 0;
+    int task_idx = task_get_available();
+    if(task_idx == -1) return -1;
+    struct task_state *task = &tasks[task_idx];
+
+    task->registers.eax = 0;
+    task->registers.ebx = 0;
+    task->registers.ecx = 0;
+    task->registers.edx = 0;
+    task->registers.eip = (uint32_t) address;
+    register uint32_t esi asm("esi");
+    register uint32_t edi asm("edi");
+    task->registers.edi = edi;
+    task->registers.esi = esi;
+    
+    task->stack_region = (uint32_t) task_stack_array[task_idx];
+    task->registers.ebp = (uint32_t) task_stack_array[task_idx]+TASK_STACK_SIZE-(3*4);
+    //task->registers.ebp = (uint32_t) TASK_STACK_VIRTUAL_BASE+TASK_STACK_SIZE-(3*4);
+    task->registers.esp = (uint32_t) task->registers.ebp-(8*4);
+
+    uint32_t *return_instruction = (uint32_t *) task->registers.ebp;
+    return_instruction[1] = task->registers.ebp;
+    return_instruction[0] = task->registers.esp;
+    return_instruction[-1] = (uint32_t) argv;
+    return_instruction[-2] = (uint32_t) argc;
+    return_instruction[-3] = (uint32_t) &task_end;
+
+
+    task->program_slot = program_slot;
+    task->schedule_type = ALWAYS;
+    //task->task_name = name; //"Task\0";
+    
+    if(name == NULL){
+        task->task_name = "UNKNOWN TASK NAME\0";
+    }
+    else{
+        int len = strlen(name);
+        char *namebuf = malloc(len+1);
+        memset(namebuf, 0, len+1);
+        memcpy(namebuf, name, len);
+        task->task_name = namebuf;
+    }
+    
+    
+    task->window = tasks[task_running_idx].window;
+    task->own_window = false;
+    task->console = tasks[task_running_idx].console;
+    task->own_console = false;
+    memcpy(task->currentDirectory.path, tasks[task_running_idx].currentDirectory.path, sizeof(task->currentDirectory.path));
+    //print_serial("[TASK] Added to queue idx %d\n", i);
+    task->slot_active = 1;
+    task->keyboard_event_handler = NULL;
+    //task->mouse_event_handler = NULL;
+    task->end_callback = NULL;
+    for(int j = 0; j < MT_maxDescriptors; j++){
+        task->file_descs[j] = -1;
+    }
+    task->file_descs[0] = vfs_openRel(&task->currentDirectory, "/-/sys/kbd", VFS_FLAG_READ);
+    task->file_descs[1] = vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
+    //task_allocFD(&tasks[i], vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE));
+    task->pid = pid_counter++;
+    retpid = task->pid;
+    task->waitpid = 0;
+    print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", task->task_name, task_idx, task->registers.esp, task->registers.ebp, task->pid);
+    for(int j = 0; j < MT_maxDescriptors; j++){
+        print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, task->file_descs[j]);
+    }
+    print_serial("[TASK] Args: \n");
+    for(int i = 0; i < argc; i++){
+        if(argv == NULL || argv[i] == NULL) continue;
+        print_serial("\t%d - %s\n", i, argv[i]);
+    }
+
     return retpid;
 }
 
