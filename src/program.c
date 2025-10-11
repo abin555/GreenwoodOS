@@ -34,7 +34,8 @@ int program_findSlot(){
 	return slot;
 }
 
-int exec(char *filename, int argc, char **argv){
+int exec(char *filename, int argc, char **argv, void *vctx){
+	struct task_file_ctx *file_ctx = vctx;
 	print_serial("\n[EXEC] Starting Program %s\n", filename);	
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
@@ -53,7 +54,7 @@ int exec(char *filename, int argc, char **argv){
 			if(status == true){
 				vfs_close(file);
 				MEM_printRegions();
-				start_task((void *) (((uint32_t) base) + entry), -1, argc, argv, filename);
+				start_task((void *) (((uint32_t) base) + entry), -1, argc, argv, filename, file_ctx);
 			}
 			else{
 				vfs_close(file);
@@ -70,7 +71,7 @@ int exec(char *filename, int argc, char **argv){
 			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
 			//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
 			vfs_close(file);
-			pid = start_task((void *)entry, slot, argc, argv, filename);
+			pid = start_task((void *)entry, slot, argc, argv, filename, file_ctx);
 		}
 	}
 	else {
@@ -78,9 +79,19 @@ int exec(char *filename, int argc, char **argv){
 		vfs_seek(file, 0, 0);
 		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);	
 		vfs_close(file);
-		pid = start_task(0, slot, argc, argv, filename);
+		pid = start_task(0, slot, argc, argv, filename, file_ctx);
 	}
 	print_serial("[EXEC] New Program PID is %d\n", pid);
 	return pid;
 	//print_serial("[EXEC] Program started!\n\n");
+}
+
+int exec_spec(struct exec_spec_ctx *ctx){
+	if(ctx == NULL) return -1;
+	return exec(
+		ctx->filename,
+		ctx->argc,
+		ctx->argv,
+		ctx->file_ctx
+	);
 }

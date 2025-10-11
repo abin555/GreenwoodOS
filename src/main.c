@@ -109,7 +109,7 @@ void kernel_task(int argc, char **argv){
 
     proc_fs_init();
     
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop");
+    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);
     MEM_printRegions();
 
     task_lock = 0;
@@ -169,7 +169,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     multitask_init();
     IRQ_RES;
 
-    start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel");
+    start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel", NULL);
     multitask_start();
 
     while(1){}

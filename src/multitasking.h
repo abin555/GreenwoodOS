@@ -37,9 +37,14 @@ typedef enum {
 
 #define MT_maxDescriptors 10
 
+struct task_file_association {
+    int creator_fd;
+    int new_fd;
+};
+
 struct task_file_ctx {
-    int creator_pid;
-    
+    int num_fds;
+    struct task_file_association fds[];
 };
 
 struct task_state{
@@ -74,7 +79,7 @@ extern bool task_lock;
 //Switch from active task to passed task pointer.
 void switch_to_task(struct task_state* old_task, struct task_state* new_task, int old_id, int new_id);
 //Create new task instance and execute it.
-int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name);
+int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name, struct task_file_ctx *file_ctx);
 //Remove task from the run queue
 void stop_task(int8_t task_idx);
 void task_end();

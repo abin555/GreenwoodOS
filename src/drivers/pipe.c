@@ -15,7 +15,7 @@ struct Pipe *pipe_create(int size){
 
 int pipe_read(struct Pipe *pipe, void *buf, int nbytes){
     if(pipe == NULL) return -1;
-    print_serial("[PIPE] Reading %d bytes, %s\n", nbytes, pipe->buf);
+    //print_serial("[PIPE] Reading %d bytes, %s\n", nbytes, pipe->buf);
     int count = 0;
     if(buf != NULL){
         for(int i = 0; i < nbytes && ((char*)pipe->buf)[i] != '\0'; i++){
@@ -37,7 +37,7 @@ int pipe_read(struct Pipe *pipe, void *buf, int nbytes){
 }
 
 int pipe_vfs_read(void *f, void *buf, int nbytes){
-    print_serial("[PIPEFS] Read!\n");
+    //print_serial("[PIPEFS] Read!\n");
     struct VFS_File *file = f;
     if(file->inode.type == VFS_PIPE){
         return pipe_read(file->inode.fs.pipe, buf, nbytes);
@@ -59,7 +59,7 @@ int pipe_write(struct Pipe *pipe, void *buf, int nbytes){
 }
 
 int pipe_vfs_write(void *f, void *buf, int nbytes){
-    print_serial("[PIPEFS] Write!\n");
+    //print_serial("[PIPEFS] Write!\n");
     struct VFS_File *file = f;
     if(file->inode.type == VFS_PIPE){
         return pipe_write(file->inode.fs.pipe, buf, nbytes);

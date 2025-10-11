@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <sys/io.h>
 #include <string.h>
+#include <sys/task.h>
 
 int main(int argc, char **argv){
     printf("Pipe test program!\n");
@@ -19,9 +20,25 @@ int main(int argc, char **argv){
     int nread = read(pipedescs[1], readbuf, sizeof(readbuf));
     printf("Read %d bytes from pipe\n\"%s\"\n", nread, readbuf);
 
-    dup2(pipedescs[0], 1);
-    printf("Test print!\n");
+    struct exec_spec_ctx *proc_ctx = malloc(sizeof(struct exec_spec_ctx));
+    proc_ctx->filename = "/A/demos/pipe/child.elf";
+    proc_ctx->argc = 0;
+    proc_ctx->argv = NULL;
+    proc_ctx->file_ctx = malloc(sizeof(struct task_file_ctx) + 2*sizeof(struct task_file_association));
+    proc_ctx->file_ctx->num_fds = 2;
+    proc_ctx->file_ctx->fds[0] = (struct task_file_association) {0, 0};
+    proc_ctx->file_ctx->fds[1] = (struct task_file_association) {pipedescs[0], 1};
+    int child_pid = exec_spec(proc_ctx);
+    //waitpid(child_pid);
 
+    int reads = 0;
+    char c[2] = "\0";
+    while(c[0] != '\n'){
+        int n = read(pipedescs[1], c, 1);
+        if(n != 0)
+            printf("%s", c);
+        reads += n;
+    }
 
     close(pipedescs[0]);
     close(pipedescs[1]);

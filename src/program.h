@@ -1,7 +1,6 @@
 #ifndef PROGRAM_H
 #define PROGRAM_H
 #include "stdbool.h"
-#include "multitasking.h"
 #include "drive.h"
 #include "memory.h"
 
@@ -14,6 +13,16 @@ extern uint8_t program_active_slot;
 
 void program_init();
 void select_program(int program_slot);
-int exec(char *filename, int argc, char **argv);
+int exec(char *filename, int argc, char **argv, void *vctx);
+
+struct exec_spec_ctx {
+    char *filename;
+    int argc;
+    char **argv;
+    void *file_ctx;
+};
+
+int exec_spec(struct exec_spec_ctx *ctx);
+
 
 #endif

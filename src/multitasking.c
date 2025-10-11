@@ -76,7 +76,7 @@ int task_get_available(){
     return -1;
 }
 
-int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name){
+int start_task(void *address, int8_t program_slot, int argc, char **argv, char* name, struct task_file_ctx *file_ctx){
 	int retpid = 0;
     int task_idx = task_get_available();
     if(task_idx == -1) return -1;
@@ -134,8 +134,16 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
     for(int j = 0; j < MT_maxDescriptors; j++){
         task->file_descs[j] = -1;
     }
-    task->file_descs[0] = vfs_openRel(&task->currentDirectory, "/-/sys/kbd", VFS_FLAG_READ);
-    task->file_descs[1] = vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
+    if(file_ctx == NULL){
+        task->file_descs[0] = vfs_openRel(&task->currentDirectory, "/-/sys/kbd", VFS_FLAG_READ);
+        task->file_descs[1] = vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
+    }
+    else {
+        for(int i = 0; i < file_ctx->num_fds; i++){
+            print_serial("[TASK] Association #%d - Creator FD %d -> Child FD %d\n", i, file_ctx->fds[i].creator_fd, file_ctx->fds[i].new_fd);
+            task->file_descs[file_ctx->fds[i].new_fd] = tasks[task_running_idx].file_descs[file_ctx->fds[i].creator_fd];
+        }
+    }
     //task_allocFD(&tasks[i], vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE));
     task->pid = pid_counter++;
     retpid = task->pid;
@@ -281,7 +289,7 @@ void task_end(){
 
     for(int i = 0; i < MT_maxDescriptors; i++){
         if(tasks[task_running_idx].file_descs[i] != -1){
-            vfs_close(tasks[task_running_idx].file_descs[i]);
+            //vfs_close(tasks[task_running_idx].file_descs[i]);
         }
     }
     

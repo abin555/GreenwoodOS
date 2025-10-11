@@ -283,7 +283,8 @@ void netproc_init(){
         -1,
         0,
         NULL,
-        "Network Process"
+        "Network Process",
+        NULL
     );
 }
 

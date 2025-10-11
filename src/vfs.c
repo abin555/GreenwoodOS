@@ -238,7 +238,7 @@ int vfs_mkpipe(int *writer_fd, int *reader_fd){
     if(*writer_fd == -1 || *reader_fd == -1) return -1;
     print_serial("[VFS] Making Pipe Write FD = %d, Read FD = %d\n", *writer_fd, *reader_fd);
 
-    struct Pipe *pipe = pipe_create(200);
+    struct Pipe *pipe = pipe_create(1000);
     
     struct VFS_File *writer_file = &VFS_fileTable[*writer_fd];
     struct VFS_File *reader_file = &VFS_fileTable[*reader_fd];

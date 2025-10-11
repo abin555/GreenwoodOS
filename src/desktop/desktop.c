@@ -125,7 +125,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     viewport_init_sys(global_viewport_list);
 
     print_serial("\n\n[SYS] User Programs Start!\n\n");
-    exec("/A/OS/init/init.elf", 0, NULL);
+    exec("/A/OS/init/init.elf", 0, NULL, NULL);
 
     struct {
         int startX;
@@ -222,19 +222,19 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
     if(KBD_flags.ctrl && ascii == 'T'){
-        exec("/A/OS/termvp/term.elf", 0, NULL);
+        exec("/A/OS/termvp/term.elf", 0, NULL, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'E'){
-        exec("/A/utils/explorer/explorer.elf", 0, NULL);
+        exec("/A/utils/explorer/explorer.elf", 0, NULL, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'Q'){
-        exec("/A/utils/task/taskmgr.elf", 0, NULL);
+        exec("/A/utils/task/taskmgr.elf", 0, NULL, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'C'){
-        exec("/A/utils/clock/clock.elf", 0, NULL);
+        exec("/A/utils/clock/clock.elf", 0, NULL, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'L'){
-        exec("/A/lisp/lisp.elf", 0, NULL);
+        exec("/A/lisp/lisp.elf", 0, NULL, NULL);
     }
     else if(KBD_flags.ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){

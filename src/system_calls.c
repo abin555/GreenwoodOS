@@ -36,7 +36,7 @@ void syscall_getc_blk(struct cpu_state *cpu __attribute__((unused)), struct task
 }
 
 void syscall_exec(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	cpu->ebx = exec((char *) cpu->ebx, cpu->ecx, (char **) cpu->edx);
+	cpu->ebx = exec((char *) cpu->ebx, cpu->ecx, (char **) cpu->edx, NULL);
 	return;
 }
 
@@ -190,7 +190,7 @@ void syscall_timer_attach(struct cpu_state *cpu __attribute__((unused)), struct 
 }
 
 void syscall_start_task(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	cpu->ebx = start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx);
+	cpu->ebx = start_task((void *) cpu->ebx, -1, 0, NULL, (char *) cpu->ecx, NULL);
 }
 
 void syscall_get_pcspeaker(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
@@ -318,6 +318,15 @@ void syscall_dup2(struct cpu_state *cpu __attribute__((unused)), struct task_sta
 	return;
 }
 
+void syscall_exec_spec(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	struct exec_spec_ctx *ctx = (struct exec_spec_ctx *) cpu->ebx;
+	if(ctx == NULL){
+		cpu->eax = -1;
+		return;
+	}
+	cpu->eax = exec_spec(ctx);
+}
+
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
 	memset(syscall_functions, 0, sizeof(syscall_functions));
@@ -364,6 +373,8 @@ void init_syscalls(){
 	syscall_set(0x40, syscall_wait);
 	syscall_set(0x41, syscall_pipe);
 	syscall_set(0x42, syscall_dup2);
+	syscall_set(0x43, syscall_exec_spec);
+
 	interrupt_add_handle(0x80, syscall_callback);
 }
 

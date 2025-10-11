@@ -40,4 +40,5 @@
 #define SYSCALL_WAIT 0x40
 #define SYSCALL_PIPE 0x41
 #define SYSCALL_DUP2FD 0x42
+#define SYSCALL_EXEC_SPEC 0x43
 #endif

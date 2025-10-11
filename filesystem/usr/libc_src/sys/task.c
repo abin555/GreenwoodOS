@@ -15,6 +15,15 @@ int exec(char *filename, int argc, char **argv){
 	return (int) ebx;
 }
 
+int exec_spec(struct exec_spec_ctx *ctx){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) ctx;
+	eax = SYSCALL_EXEC_SPEC;
+	asm("int 0x80");
+	return (int) eax;
+}
+
 void waitpid(int pid){
 	register uint32_t eax asm("eax");
 	register int ebx asm("ebx");
