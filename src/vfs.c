@@ -48,7 +48,7 @@ void vfs_addFS(struct VFS_RootInterface *interface){
 
     inode->isRoot = 1;
     inode->root = inode;
-    inode->interface->vfsLetter = 'V';
+    inode->isValid = 1;
 
     print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->interface->vfsLetter == 0 ? inode->interface->drive->identity : inode->interface->vfsLetter, inode->interface->fs_label);
 }
