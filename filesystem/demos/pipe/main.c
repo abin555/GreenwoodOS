@@ -33,7 +33,7 @@ int main(int argc, char **argv){
 
     int reads = 0;
     char c[2] = "\0";
-    while(c[0] != '\n'){
+    while(c[0] != 0xff){
         int n = read(pipedescs[1], c, 1);
         if(n != 0)
             printf("%s", c);

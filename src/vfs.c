@@ -48,7 +48,7 @@ void vfs_addFS(struct VFS_RootInterface *interface){
 
     inode->isRoot = 1;
     inode->root = inode;
-    inode->isValid = 1;
+    inode->interface->vfsLetter = 'V';
 
     print_serial("[VFS] Add Root Inode For Drive %c format \"%s\"\n", inode->interface->vfsLetter == 0 ? inode->interface->drive->identity : inode->interface->vfsLetter, inode->interface->fs_label);
 }
@@ -153,8 +153,14 @@ void vfs_close(int fd){
     if(fd == -1) return;
     print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
-    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
+    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_READ)){
         pipe_close(file_idx->inode.fs.pipe);
+    }
+    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
+        char clear[2];
+        clear[0] = 0xff;
+        pipe_write(file_idx->inode.fs.pipe, clear, 1);
+        //pipe_close(file_idx->inode.fs.pipe);
     }
     vfs_freeFileD(fd);
     memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
