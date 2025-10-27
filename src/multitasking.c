@@ -468,3 +468,9 @@ int task_get_slot(int task_idx){
 int task_getCurrentID(){
     return task_running_idx;
 }
+
+void os_yield(){
+	register uint32_t eax asm("eax") __attribute__((unused));
+	eax = 0x34;
+	asm("int 0x80");
+}

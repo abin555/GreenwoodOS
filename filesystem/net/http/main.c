@@ -30,7 +30,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
-    char *request = "10.0.1.2 5000 GET / localhost";
+    char *request = "10.0.1.2 80 GET / localhost";
     struct http_request *hreq = malloc(sizeof(struct http_request) + strlen(request));
     hreq->callback = callback;
     hreq->str_len = strlen(request);

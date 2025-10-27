@@ -110,4 +110,5 @@ void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stac
 void tasking_setup_kernel_stack();
 
 int task_getCurrentID();
+void os_yield();
 #endif

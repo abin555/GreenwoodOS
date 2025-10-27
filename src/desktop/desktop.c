@@ -151,6 +151,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
             drawIcon(&icons[i], window);
         
         viewport_draw_all(global_viewport_list, window);
+
         task_lock = 0;
 
         if(mouseStatus.buttons.left && !ClickDrag.dragging){
@@ -216,6 +217,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
         }
 
         window_copy_buffer(window);
+        os_yield();
     }
 }
 
