@@ -278,6 +278,10 @@ void syscall_truncate(struct cpu_state *cpu __attribute__((unused)), struct task
 	cpu->eax = (unsigned int) vfs_ftruncate(task_getSysFD(task, cpu->ebx), cpu->ecx);
 }
 
+void syscall_fstat(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	cpu->eax = (unsigned int) vfs_stat(task_getSysFD(task, cpu->ebx), cpu->ecx);
+}
+
 void syscall_wait(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	int id = task_getCurrentID();
 	print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
@@ -374,6 +378,7 @@ void init_syscalls(){
 	syscall_set(0x41, syscall_pipe);
 	syscall_set(0x42, syscall_dup2);
 	syscall_set(0x43, syscall_exec_spec);
+	syscall_set(0x44, syscall_fstat);
 
 	interrupt_add_handle(0x80, syscall_callback);
 }

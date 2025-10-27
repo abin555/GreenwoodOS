@@ -153,17 +153,13 @@ void vfs_close(int fd){
     if(fd == -1) return;
     print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
-    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_READ)){
-        pipe_close(file_idx->inode.fs.pipe);
+    if(file_idx->inode.type == VFS_PIPE){
+        pipe_close(file_idx->inode.fs.pipe, file_idx->inode.flags);
     }
-    if(file_idx->inode.type == VFS_PIPE && (file_idx->inode.flags & VFS_FLAG_WRITE)){
-        char clear[2];
-        clear[0] = 0xff;
-        pipe_write(file_idx->inode.fs.pipe, clear, 1);
-        //pipe_close(file_idx->inode.fs.pipe);
+    else{
+        vfs_freeFileD(fd);
+        memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
     }
-    vfs_freeFileD(fd);
-    memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
 }
 
 int vfs_read(int fd, void *buf, uint32_t nbytes){
@@ -336,6 +332,16 @@ int vfs_ftruncate(int fd, unsigned int length){
     struct VFS_File *file = &VFS_fileTable[fd];
     if(file->inode.interface->fs_truncate != NULL){
         return file->inode.interface->fs_truncate(file, length);
+    }
+    return -1;
+}
+
+int vfs_stat(int fd, void *statbuf){
+    if(fd == -1 || fd >= VFS_maxFiles || VFS_fileTable[fd].status == 1) return -1;
+    print_serial("[VFS] stat %d\n", fd);
+    struct VFS_File *file = &VFS_fileTable[fd];
+    if(file->inode.interface->fs_stat != NULL){
+        return file->inode.interface->fs_stat(file, statbuf);
     }
     return -1;
 }

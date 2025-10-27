@@ -67,10 +67,25 @@ int pipe_vfs_write(void *f, void *buf, int nbytes){
     return 0;
 }
 
-void pipe_close(struct Pipe *pipe){
-    pipe->buf = NULL;
-    pipe->buf_size = 0;
-    pipe->write_head = 0;
+void pipe_close(struct Pipe *pipe, int side){
+    if(side == VFS_FLAG_READ){
+        pipe->read_open = false;
+        return 0;
+    }
+    else if(side == VFS_FLAG_WRITE){
+        pipe->write_open = false;
+        return 0;
+    }
+    if(!pipe->write_open && !pipe->read_open){
+        pipe->buf = NULL;
+        pipe->buf_size = 0;
+        pipe->write_head = 0;
+        return 1;
+    }
+}
+
+int pipe_vfs_stat(void *f, void *statbuf){
+    if(f == NULL || statbuf == NULL) return -1;
 }
 
 struct VFS_RootInterface pipe_interface = {
@@ -87,6 +102,7 @@ struct VFS_RootInterface pipe_interface = {
     NULL,
     NULL,
     NULL,
+    NULL
 };
 
 void *pipe_getInterface(){

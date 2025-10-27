@@ -77,6 +77,7 @@ struct VFS_RootInterface {
     int (*fs_creatDir)(void *fs, char *path);
     struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
     int (*fs_truncate)(void *f, unsigned int len);
+    int (*fs_stat)(void *f, void *statbuf);
 };
 
 struct VFS_Inode;

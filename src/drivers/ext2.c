@@ -950,5 +950,6 @@ void *ext2_generateVFSRoot(struct EXT2_FS *ext2){
 	interface->fs_creatDir = ext2_creatDir;
 	interface->fs_listDirectory = ext2_advListDirectory;
 	interface->fs_truncate = ext2_truncate;
+	interface->fs_stat = NULL;
 	return interface;
 }

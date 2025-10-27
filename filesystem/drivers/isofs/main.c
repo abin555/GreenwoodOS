@@ -359,6 +359,7 @@ void setup_iso(int drive_id){
     interface->fs_creatDir = NULL;
     interface->fs_listDirectory = iso9660_vfs_listDir;
     interface->fs_truncate = NULL;
+    interface->fs_stat = NULL;
     vfs_addFS(interface);
     return;
 }

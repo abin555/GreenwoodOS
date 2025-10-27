@@ -332,6 +332,7 @@ void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
 	interface->fs_creatDir = NULL;
 	interface->fs_listDirectory = sysfs_advListDirectory;
 	interface->fs_truncate = NULL;
+    interface->fs_stat = NULL;
 	return interface;
 }
 

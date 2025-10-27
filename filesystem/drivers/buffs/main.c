@@ -59,7 +59,8 @@ int main(int argc, char **argv){
         buffs_creat,
         buffs_creatDir,
         buffs_advListDirectory,
-        buffs_truncate
+        buffs_truncate,
+        NULL
     };
     vfs_addFS(buffs_root);
 

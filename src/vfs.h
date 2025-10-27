@@ -8,8 +8,8 @@
 #include "pipe.h"
 
 typedef enum {
-    VFS_FLAG_READ = 0b1,
-    VFS_FLAG_WRITE = 0b10
+    VFS_FLAG_READ = 0x1,
+    VFS_FLAG_WRITE = 0x2
 } VFS_Inode_Flags;
 
 typedef enum {
@@ -19,6 +19,12 @@ typedef enum {
     VFS_NET,
     VFS_PIPE
 } VFS_InodeType;
+
+struct VFS_stat {
+    char fs_ownerIden[10];
+    int open_stat;
+    uint32_t size;
+};
 
 struct VFS_File;
 struct VFS_RootInterface {
@@ -35,6 +41,7 @@ struct VFS_RootInterface {
     int (*fs_creatDir)(void *fs, char *path);
     struct DirectoryListing (*fs_listDirectory)(void *fs, char *path);
     int (*fs_truncate)(void *f, unsigned int len);
+    int (*fs_stat)(void *f, void *statbuf);
 };
 
 struct VFS_Inode;
@@ -85,6 +92,6 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path);
 struct DirectoryListing vfs_taskListDirectory(char *path);
 int vfs_chdir(struct DIRECTORY *dir, char *path);
 int vfs_ftruncate(int fd, unsigned int length);
-
+int vfs_stat(int fd, void *statbuf);
 
 #endif
