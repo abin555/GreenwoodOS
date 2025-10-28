@@ -9,6 +9,8 @@ struct Pipe *pipe_create(int size){
     memset(pipe->buf, 0, size);
     pipe->buf_size = size;
     pipe->write_head = 0;
+    pipe->write_open = 1;
+    pipe->read_open = 1;
     print_serial("[PIPE] Created of size %d\n", pipe->buf_size);
     return pipe;
 }
@@ -67,25 +69,42 @@ int pipe_vfs_write(void *f, void *buf, int nbytes){
     return 0;
 }
 
-void pipe_close(struct Pipe *pipe, int side){
+int pipe_close(struct Pipe *pipe, int side){
     if(side == VFS_FLAG_READ){
+        print_serial("[PIPE] Reader Closed\n");
         pipe->read_open = false;
         return 0;
     }
     else if(side == VFS_FLAG_WRITE){
+        print_serial("[PIPE] Writer Closed\n");
         pipe->write_open = false;
         return 0;
     }
     if(!pipe->write_open && !pipe->read_open){
+        print_serial("[PIPE] Both Ends are now Closed! Clearing Pipe!\n");
         pipe->buf = NULL;
         pipe->buf_size = 0;
         pipe->write_head = 0;
         return 1;
     }
+    return -1;
 }
 
 int pipe_vfs_stat(void *f, void *statbuf){
     if(f == NULL || statbuf == NULL) return -1;
+    struct VFS_File *file = f;
+    if(file->inode.type == VFS_PIPE){
+        struct Pipe *pipe = file->inode.fs.pipe;
+        struct VFS_stat *stat = statbuf;
+        memcpy(stat->fs_ownerIden, "OS PIPE", 8);
+        stat->open_stat = pipe->read_open && pipe->write_open;
+        print_serial("[PIPE] Stat: Open = %d\n", stat->open_stat);
+        stat->size = pipe->buf_size;
+        return 0;
+    }
+    else{
+        return -1;
+    }
 }
 
 struct VFS_RootInterface pipe_interface = {
@@ -102,7 +121,7 @@ struct VFS_RootInterface pipe_interface = {
     NULL,
     NULL,
     NULL,
-    NULL
+    pipe_vfs_stat
 };
 
 void *pipe_getInterface(){

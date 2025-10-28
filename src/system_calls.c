@@ -279,7 +279,7 @@ void syscall_truncate(struct cpu_state *cpu __attribute__((unused)), struct task
 }
 
 void syscall_fstat(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	cpu->eax = (unsigned int) vfs_stat(task_getSysFD(task, cpu->ebx), cpu->ecx);
+	cpu->eax = (unsigned int) vfs_stat(task_getSysFD(task, cpu->ebx), (void *) cpu->ecx);
 }
 
 void syscall_wait(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){

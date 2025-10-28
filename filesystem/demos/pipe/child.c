@@ -9,8 +9,5 @@ int main(int argc, char **argv){
     puts("This is the child process!");
     puts("This is the child process 2!");
     puts("This is the child process 3!");
-    for(int i = 0; i < 10; i++){
-        printf("Foobar %d\n", i);
-    }
     return 0;
 }

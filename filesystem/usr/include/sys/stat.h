@@ -9,4 +9,6 @@ struct stat {
     uint32_t size;
 };
 
+int fstat(int fd, struct stat *statbuf);
+
 #endif

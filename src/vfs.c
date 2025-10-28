@@ -154,7 +154,11 @@ void vfs_close(int fd){
     print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(file_idx->inode.type == VFS_PIPE){
-        pipe_close(file_idx->inode.fs.pipe, file_idx->inode.flags);
+        if(pipe_close(file_idx->inode.fs.pipe, file_idx->inode.flags)){
+            print_serial("[VFD] Pipe is fully closed. Clearing FD\n");
+            vfs_freeFileD(fd);
+            memset(&file_idx->inode, 0, sizeof(struct VFS_Inode));
+        }
     }
     else{
         vfs_freeFileD(fd);
@@ -338,7 +342,7 @@ int vfs_ftruncate(int fd, unsigned int length){
 
 int vfs_stat(int fd, void *statbuf){
     if(fd == -1 || fd >= VFS_maxFiles || VFS_fileTable[fd].status == 1) return -1;
-    print_serial("[VFS] stat %d\n", fd);
+    //print_serial("[VFS] stat %d\n", fd);
     struct VFS_File *file = &VFS_fileTable[fd];
     if(file->inode.interface->fs_stat != NULL){
         return file->inode.interface->fs_stat(file, statbuf);

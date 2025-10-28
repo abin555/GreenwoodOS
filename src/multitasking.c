@@ -289,7 +289,7 @@ void task_end(){
 
     for(int i = 0; i < MT_maxDescriptors; i++){
         if(tasks[task_running_idx].file_descs[i] != -1){
-            //vfs_close(tasks[task_running_idx].file_descs[i]);
+            vfs_close(tasks[task_running_idx].file_descs[i]);
         }
     }
     

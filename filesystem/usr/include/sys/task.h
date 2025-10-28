@@ -22,7 +22,7 @@ struct exec_spec_ctx {
     char *filename;
     int argc;
     char **argv;
-    struct task_file_ctx *file_ctx
+    struct task_file_ctx *file_ctx;
 };
 
 int exec(char *filename, int argc, char **argv);
