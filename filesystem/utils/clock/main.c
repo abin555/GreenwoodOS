@@ -162,7 +162,7 @@ void taskBarClock(int clock_fd){
         bufDecimal(rtc.minute, wbuf+3);
         wbuf[5] = ':';
         bufDecimal(rtc.second, wbuf+6);
-
+        wbuf[8] = ' ';
         bufDecimal(rtc.month, wbuf+9);
         wbuf[11] = '/';
         bufDecimal(rtc.day, wbuf+12);
