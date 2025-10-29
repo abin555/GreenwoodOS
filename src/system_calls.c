@@ -388,7 +388,7 @@ void syscall_set(uint8_t call_id, syscall_fn fn){
 }
 
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
-	IRQ_OFF;
+	//IRQ_OFF;
 	struct task_state *task = &tasks[task_running_idx];
 	if(syscall_functions[cpu->eax] != NULL){
 		syscall_functions[cpu->eax](cpu, task);
@@ -396,6 +396,6 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 	else{
 		print_serial("[SYSCALL] Invalid call to syscall id %d from process pid %d (@0x%x)\n", cpu->eax, task->pid, stack->eip);
 	}
-	IRQ_RES;
+	//IRQ_RES;
 	return;	
 }

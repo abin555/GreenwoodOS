@@ -235,7 +235,8 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             bar->location.x + x + bar->location.w,
             bar->location.y + y + bar->location.h,
             context->buffer,
-            context->width
+            context->width,
+            context->buffer_size
         );
         for(int i = 0; i < bar->children.numChildren; i++){
             gui_drawElement(context, bar->children.children[i], bar->location.x + x + 1, bar->location.y + y + 1);
@@ -257,7 +258,8 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             button->location.x + x + button->location.w,
             button->location.y + y + button->location.h,
             context->buffer,
-            context->width
+            context->width,
+            context->buffer_size
         );
         if(button->text != NULL){
             for(int i = 0; button->text[i] != '\0'; i++){
@@ -284,7 +286,8 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             scroll->location.x + x + scroll->location.w,
             scroll->location.y + y + scroll->location.h,
             context->buffer,
-            context->width
+            context->width,
+            context->buffer_size
         );
         
         
@@ -298,7 +301,8 @@ void gui_drawElement(struct WindowContext *context, struct GUIElement *elem, int
             scroll->location.x + x + scroll->location.w,
             scroll->location.y + y + barY + scroll->barSize,
             context->buffer,
-            context->width
+            context->width,
+            context->buffer_size
         );
         
         //printf("Finish Draw Scroll\n");
@@ -458,7 +462,8 @@ void fillRect(
     int x2,
     int y2,
     uint32_t *buf,
-    uint32_t buf_width
+    uint32_t buf_width,
+    uint32_t buf_size
 ){
     if(x1 > x2){
         int temp = x1;
@@ -473,9 +478,13 @@ void fillRect(
 
     for(int x = x1; x <= x2; x++){
         for(int y = y1; y <= y2; y++){
-            buf[y*buf_width + x] = innerColor;
+            int offset = y*buf_width + x;
+            if(offset < 0 || offset > buf_size) continue;
             if(x == x1 || y == y1 || x == x2 || y == y2){
-                buf[y*buf_width + x] = outerColor;
+                buf[offset] = outerColor;
+            }
+            else{
+                buf[offset] = innerColor;
             }
         }
     }

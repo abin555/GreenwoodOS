@@ -135,7 +135,8 @@ void fillRect(
     int x2,
     int y2,
     uint32_t *buf,
-    uint32_t buf_width
+    uint32_t buf_width,
+    uint32_t buf_size
 );
 
 #endif

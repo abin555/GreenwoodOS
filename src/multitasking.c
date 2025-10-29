@@ -346,10 +346,8 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
 }
 
 
-void task_callback(){
+void __attribute__ ((optimize("-O3"))) task_callback(){
     if(task_lock) return;
-    //print_serial("[TASK] Callback\n");
-    //print_tasks();
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
         if(tasks[i].slot_running){
@@ -383,12 +381,7 @@ void task_callback(){
             && (tasks[next_idx].schedule_type == ALWAYS 
             || (tasks[next_idx].schedule_type == ONFOCUS && tasks[next_idx].window == &windows[window_selected]))
             && (tasks[next_idx].schedule_type != NEVER)
-        ){
-            if(tasks[next_idx].registers.eip == 0x400000){
-                print_serial("[TASK] Funny thing... the next program is at the end of executable space...\n");
-                print_serial("[TASK] %s\n", tasks[next_idx].task_name);
-            }
-            
+        ){            
             if(tasks[next_idx].waitpid > 0){
                 int waittask = taskID_fromPID(tasks[next_idx].waitpid);
                 if(waittask != -1){
@@ -405,7 +398,6 @@ void task_callback(){
             tasks[next_idx].slot_running = 1;
             running_idx = next_idx;
             task_running_idx = running_idx;
-            //print_serial("[TASK] Switching to PID %d\n", tasks[next_idx].pid);
             break;
         }
         else{

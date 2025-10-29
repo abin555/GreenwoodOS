@@ -58,6 +58,7 @@ common_interrupt_handler:
 	add esp, 8
 
 	;return the system
+	sti
 	iret
 
 err_int_handler 0 ; Divide by Zero
