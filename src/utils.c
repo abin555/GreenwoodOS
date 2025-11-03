@@ -175,6 +175,48 @@ char* itoa(int k, char *buf, int radix){
     return buf;
 }
 
+char *utoa(unsigned int k, char *buf, int radix){
+	unsigned int i = k;
+	if (i == 0)
+	{
+		buf[0] = '0';
+		buf[1] = '\0';
+		return buf;
+	}
+  
+	int idx = 0;
+	int j = i;
+	while (j)
+	{
+		j /= radix;
+		idx++;
+	}
+	buf[idx] = '\0';
+  
+	if (radix == 10)
+	{
+		while (i)
+		{
+			buf[--idx] = '0' + (i % 10);
+			i /= 10;
+		}
+	}
+	else
+	{
+		while (i)
+		{
+			int k = (i & 0xF);
+			if (k >= 10)
+				buf[--idx] = 'A' + ((i & 0xF) - 10);
+			else
+				buf[--idx] = '0' + (i & 0xF);
+			i >>= 4;
+		}
+	}
+  
+	return buf;
+  }
+
 int sprintf(char *str, const char *format, ...){
 	va_list listpd;
 	va_start(listpd, format);
@@ -241,8 +283,8 @@ int snprintf(char *str, size_t size, const char *format, ...){
 					break;
 				}
 				case 'x':{
-					int val = va_arg(listpd, int);
-					s = itoa(val, wbuf, 16);
+					unsigned int val = va_arg(listpd, unsigned int);
+					s = utoa(val, wbuf, 16);
 					int l = strlen(s);
 					for(int i = 0; i < l && n < size; i++){
 						str[idx++] = s[i];

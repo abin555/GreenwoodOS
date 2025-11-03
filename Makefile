@@ -75,7 +75,8 @@ OBJECTS = \
 		src/drivers/kernel_fn.o \
 		src/drivers/proc.o \
 		src/drivers/usb.o \
-		src/drivers/ehci.o
+		src/drivers/ehci.o \
+		src/drivers/pcifs.o
 		
 CC = i386-elf-gcc
 CFLAGS = -nostdlib -fno-builtin \

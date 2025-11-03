@@ -130,7 +130,6 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
     task->slot_active = 1;
     task->keyboard_event_handler = NULL;
     //task->mouse_event_handler = NULL;
-    task->end_callback = NULL;
     for(int j = 0; j < MT_maxDescriptors; j++){
         task->file_descs[j] = -1;
     }
@@ -234,14 +233,6 @@ int taskID_fromPID(int pid){
 }
 
 void stop_task(int8_t task_idx){
-    if(tasks[task_idx].end_callback != NULL){
-        select_program(tasks[task_idx].program_slot);
-        tasks[task_idx].end_callback();
-        if(tasks[task_running_idx].program_slot != -1){
-            select_program(tasks[task_running_idx].program_slot);
-        }
-    }
-
     tasks[task_idx].slot_active = 0;
     if(tasks[task_idx].program_slot != -1){
         program_slot_status[tasks[task_idx].program_slot] = false;

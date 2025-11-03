@@ -416,6 +416,7 @@ static void e1000_reset(struct ethernet_driver *driver) {
 
 struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     print_serial("[E1000] Init: \"%s\"\n", driver->name);
+    return NULL;
     print_serial("[E1000] Wants interrupt #%d\n", driver->interrupt);
     struct ethernet_driver *ether = malloc(sizeof(struct ethernet_driver));
     ether->int_number = driver->interrupt;

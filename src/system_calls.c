@@ -172,12 +172,12 @@ void syscall_mem_request(struct cpu_state *cpu __attribute__((unused)), struct t
 	uint32_t addr = MEM_reserveRegionBlock(block, cpu->ebx, 0, PROGRAM);
 	cpu->eax = addr;
 }
-
+/*
 void syscall_keyboard_add_event(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	print_serial("[SYSCALL] Program requested keyboard event handler @%x\n", cpu->ebx);
 	tasks[task_running_idx].keyboard_event_handler = (void (*)(char)) cpu->ebx;
 }
-
+*/
 void syscall_mem_reserve(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	int block = MEM_findRegionIdx(cpu->ebx);
 	MEM_reserveRegionBlock(block, cpu->ebx, cpu->ecx, PROGRAM);
@@ -213,10 +213,12 @@ void syscall_mem_free(struct cpu_state *cpu __attribute__((unused)), struct task
 	MEM_freeRegionBlock(cpu->ebx, cpu->ecx);
 }
 
+/*
 void syscall_end_event(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	print_serial("[SYSCALL] Program requested program end event handler @%x\n", cpu->ebx);
 	tasks[task_running_idx].end_callback = (void (*)(void)) cpu->ebx;
 }
+*/
 
 void syscall_console_open_vp(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	struct CONSOLE *console = console_open_vp((struct Viewport *) cpu->ebx);
@@ -353,14 +355,14 @@ void init_syscalls(){
 	syscall_set(0x1E, syscall_rand);
 	syscall_set(0x1F, syscall_exit);
 	syscall_set(0x20, syscall_mem_request);
-	syscall_set(0x21, syscall_keyboard_add_event);
+	//syscall_set(0x21, syscall_keyboard_add_event);
 	syscall_set(0x23, syscall_mem_reserve);
 	syscall_set(0x26, syscall_start_task);
 	syscall_set(0x28, syscall_get_pcspeaker);
 	syscall_set(0x29, syscall_get_timerticks);
 	syscall_set(0x2A, syscall_mouse_event);
 	syscall_set(0x2B, syscall_mem_free);
-	syscall_set(0x2C, syscall_end_event);
+	//syscall_set(0x2C, syscall_end_event);
 	syscall_set(0x2E, syscall_console_open_vp);
 	syscall_set(0x30, syscall_get_vfsListDir);
 	syscall_set(0x32, syscall_task_lock);

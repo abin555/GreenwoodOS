@@ -1,0 +1,1 @@
+(defun sort2 (lst) (if (<= (car lst) (cadr lst)) (cons (car lst) (cdr lst)) (cons (cadr lst) (cons (car lst) nil))))

@@ -10,6 +10,7 @@
 #include "keyboard.h"
 #include "console.h"
 #include "memory.h"
+#include "pcifs.h"
 
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
@@ -65,6 +66,7 @@ struct SysFS_Inode *sysroot_init(){
 
     sysfs_addChild(devs, serial);
     sysfs_addChild(devs, console);
+    sysfs_addChild(devs, pcifs_init());
     sysfs_addChild(systems, audio);
     sysfs_addChild(systems, mouse);
     sysfs_addChild(systems, mouseTxt);
