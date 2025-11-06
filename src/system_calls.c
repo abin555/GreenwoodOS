@@ -119,8 +119,8 @@ void syscall_get_kernel_feature(struct cpu_state *cpu __attribute__((unused)), s
 		};
 		//Program Memory Base
 		case 0x05:{
-			cpu->eax = PROGRAM_VIRT_REGION_BASE;
-			cpu->ebx = PROGAM_MAX_SIZE;
+			cpu->eax = program_region_virt_base;
+			cpu->ebx = PROGRAM_MAX_SIZE;
 			break;
 		}
 		//Raw Framebuffer
@@ -339,6 +339,7 @@ void init_syscalls(){
 	syscall_set(0x01, syscall_window_open);
 	syscall_set(0x02, syscall_window_close);
 	syscall_set(0x03, syscall_window_copy);
+	syscall_set(0x04, syscall_buf_putChar);
 	syscall_set(0x05, syscall_getc_blk);
 	syscall_set(0x06, syscall_exec);
 	syscall_set(0x07, syscall_set_schedule);

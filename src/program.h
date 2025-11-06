@@ -6,10 +6,11 @@
 
 #define PROGRAM_MAX 30
 #define PROGRAM_MAX_SIZE 0x400000
-#define PROGRAM_VIRT_REGION_BASE 0x0B000000
 
 extern bool program_slot_status[PROGRAM_MAX];
 extern uint8_t program_active_slot;
+extern uint32_t program_region_phys_base;
+extern uint32_t program_region_virt_base;
 
 void program_init();
 void select_program(int program_slot);

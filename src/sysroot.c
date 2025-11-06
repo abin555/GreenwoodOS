@@ -11,6 +11,7 @@
 #include "console.h"
 #include "memory.h"
 #include "pcifs.h"
+#include "pcspeaker.h"
 
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
@@ -63,6 +64,13 @@ struct SysFS_Inode *sysroot_init(){
             CDEV_READ | CDEV_WRITE
         )
     );
+    struct SysFS_Inode *pcspeaker = sysfs_mkcdev("pcspeaker", 
+        sysfs_createCharDevice(
+            (char *) &PCSpeaker_Handle,
+            sizeof(PCSpeaker_Handle),
+            CDEV_READ
+        )
+    );
 
     sysfs_addChild(devs, serial);
     sysfs_addChild(devs, console);
@@ -74,6 +82,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, kbdTxt);
     sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
+    sysfs_addChild(systems, pcspeaker);
     sysfs_addChild(systems, window_bar_cdev);
     sysfs_addChild(systems, MEM_sysfs_createMapFile());
     sysfs_addChild(root, devs);

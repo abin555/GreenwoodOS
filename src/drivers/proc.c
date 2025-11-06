@@ -165,7 +165,7 @@ struct SysFS_Inode *proc_fs_initSlotFiles(){
     struct SysFS_Inode *slot_dir = sysfs_mkdir("slot");
     char name[11];
     for(int i = 0; i < PROGRAM_MAX; i++){
-        struct SysFS_Chardev *slot_cdev = sysfs_createCharDevice((char *) (PROGRAM_VIRT_REGION_BASE + i*(PROGRAM_MAX_SIZE)), PROGRAM_MAX_SIZE, CDEV_READ | CDEV_WRITE);
+        struct SysFS_Chardev *slot_cdev = sysfs_createCharDevice((char *) (program_region_virt_base + i*(PROGRAM_MAX_SIZE)), PROGRAM_MAX_SIZE, CDEV_READ | CDEV_WRITE);
         memset(name, 0, sizeof(name));
         snprintf(name, sizeof(name)-1, "mem%d", i);
         struct SysFS_Inode *cdev_inode = sysfs_mkcdev(name, slot_cdev);

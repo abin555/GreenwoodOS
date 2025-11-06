@@ -147,7 +147,7 @@ void editor_draw(struct WindowContext *ctx, struct Location subbox, struct Edito
         if(cX >= mX-1){
             cX = 0;
             cY += 8;
-            while(file->loaded_file[i] != '\n'){
+            while(file->loaded_file[i] != '\n' && file->loaded_file[i] != '\0'){
                 i++;
             }
             i++;

@@ -28,7 +28,7 @@ int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child){
     if(parent == NULL || child == NULL) return 1;
     if(!(parent->type == SysFS_Directory)) return 1;
 
-    if(parent->data.dir.numChildren == 20) return 2;
+    if(parent->data.dir.numChildren == (sizeof(parent->data.dir.children) / sizeof(parent->data.dir.children[0]))) return 2;
     parent->data.dir.children[parent->data.dir.numChildren++] = child;
     child->parent = parent;
     print_serial("[SYSFS] Added Child \"%s\" to Parent \"%s\"\n", child->name, parent->name);

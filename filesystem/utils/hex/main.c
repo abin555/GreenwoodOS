@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <sys/task.h>
 #include <string.h>
+#include <sys/memory.h>
 
 uint32_t *win_buf;
 struct WINDOW *window;
@@ -47,7 +48,7 @@ int main(int argc, char **argv){
 	size = ftell(text);
     fseek(text, 0, SEEK_SET);
 	printf("File size is %d\n", size);
-	file_buf = malloc(size);
+	file_buf = (char *) memory_requestRegion(sizeof(char)*size);
 	fread(file_buf, size, 1, text);
 
 	window = window_open("HexED", 0);
