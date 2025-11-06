@@ -5,7 +5,7 @@
 #include "memory.h"
 
 #define PROGRAM_MAX 30
-#define PROGAM_MAX_SIZE 0x400000
+#define PROGRAM_MAX_SIZE 0x400000
 #define PROGRAM_VIRT_REGION_BASE 0x0B000000
 
 extern bool program_slot_status[PROGRAM_MAX];

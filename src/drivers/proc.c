@@ -3,6 +3,7 @@
 #include "vfs.h"
 #include "sysfs.h"
 #include "multitasking.h"
+#include "program.h"
 /*
 PROC file system:
 Command and control format:
@@ -160,6 +161,19 @@ int proc_task_read_callback(void *cdev, void *buf, int roffset, int nbytes, int 
     return nread;
 }
 
+struct SysFS_Inode *proc_fs_initSlotFiles(){
+    struct SysFS_Inode *slot_dir = sysfs_mkdir("slot");
+    char name[11];
+    for(int i = 0; i < PROGRAM_MAX; i++){
+        struct SysFS_Chardev *slot_cdev = sysfs_createCharDevice((char *) (PROGRAM_VIRT_REGION_BASE + i*(PROGRAM_MAX_SIZE)), PROGRAM_MAX_SIZE, CDEV_READ | CDEV_WRITE);
+        memset(name, 0, sizeof(name));
+        snprintf(name, sizeof(name)-1, "mem%d", i);
+        struct SysFS_Inode *cdev_inode = sysfs_mkcdev(name, slot_cdev);
+        sysfs_addChild(slot_dir, cdev_inode);
+    }
+    return slot_dir;
+}
+
 void proc_fs_init(){
     print_serial("[PROC] Init!\n");
     for(int i = 0; i < PROC_queue_len; i++){
@@ -183,4 +197,5 @@ void proc_fs_init(){
     );
     struct SysFS_Inode *task_file = sysfs_mkcdev("task", task_cdev);
     sysfs_addChild(proc_dir, task_file);
+    sysfs_addChild(proc_dir, proc_fs_initSlotFiles());
 }

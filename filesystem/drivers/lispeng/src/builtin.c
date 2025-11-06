@@ -446,9 +446,12 @@ int builtin_exec(struct Atom args, struct Atom *result){
         args_walker = cdr(args_walker);
     }
     argv[n_args] = NULL;
-    exec(argv[0], n_args, argv);
-    char buf[1000];
-    snprintf(buf, 1000, "%s %d", argv[0], n_args);
-    *result = make_string(strdup(buf));
+    int pid = exec(argv[0], n_args, argv);
+    
+    *result = make_int(pid);
     return Error_OK;
+}
+
+int builtin_waitpid(struct Atom args, struct Atom *result){
+    
 }

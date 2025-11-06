@@ -27,7 +27,7 @@ struct SysFS_Inode {
     int namelen;
     union {
         struct {
-            struct SysFS_Inode *children[20];
+            struct SysFS_Inode *children[50];
             int numChildren;
         } dir;
         struct SysFS_Chardev *chardev;

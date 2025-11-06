@@ -7,9 +7,9 @@ uint32_t program_region_phys_base;
 uint32_t program_region_virt_base;
 
 void program_init(){
-	int blockStart = MEM_findRegionIdx(0x400000 * PROGRAM_MAX);
-	program_region_virt_base = MEM_reserveRegionBlock(blockStart, 0x400000 * PROGRAM_MAX, 0, PROGRAM);
-	program_region_phys_base = blockStart * 0x400000;
+	int blockStart = MEM_findRegionIdx(PROGRAM_MAX_SIZE * PROGRAM_MAX);
+	program_region_virt_base = MEM_reserveRegionBlock(blockStart, PROGRAM_MAX_SIZE * PROGRAM_MAX, 0, PROGRAM);
+	program_region_phys_base = blockStart * PROGRAM_MAX_SIZE;
 	print_serial("[PROGRAM] Memory Region Initialized at Physical 0x%x\n", program_region_phys_base);
 	MEM_printRegions();
 }
@@ -17,8 +17,8 @@ void program_init(){
 uint8_t program_active_slot = 0;
 
 void __attribute__ ((optimize("-O3"))) select_program(int program_slot){
-    create_page_entry(program_region_phys_base + 0x400000*program_active_slot, program_region_virt_base + 0x400000*program_active_slot, 0x83);
-    create_page_entry(program_region_phys_base + 0x400000*program_slot, 0, 0x83);
+    create_page_entry(program_region_phys_base + PROGRAM_MAX_SIZE*program_active_slot, program_region_virt_base + PROGRAM_MAX_SIZE*program_active_slot, 0x83);
+    create_page_entry(program_region_phys_base + PROGRAM_MAX_SIZE*program_slot, 0, 0x83);
     program_active_slot = program_slot;
 }
 
@@ -67,7 +67,7 @@ int exec(char *filename, int argc, char **argv, void *vctx){
 			print_serial("Loading Program %s to slot %d\n", filename, slot);
 			uint32_t entry = elf_get_entry_addr(file);
 			print_serial("[PROGRAM] Is ELF Format, entry @ 0x%x!\n", entry);
-			elf_load(file, (void *) (program_region_virt_base + 0x400000*slot));
+			elf_load(file, (void *) (program_region_virt_base + PROGRAM_MAX_SIZE*slot));
 			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
 			//memcpy((void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot), (void *) (PROGRAM_VIRT_REGION_BASE + 0x400000*slot + 0x1000), fsize(file) - 0x1000);	
 			vfs_close(file);
@@ -77,7 +77,7 @@ int exec(char *filename, int argc, char **argv, void *vctx){
 	else {
 		int slot = program_findSlot();
 		vfs_seek(file, 0, 0);
-		vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);	
+		vfs_read(file, (char *) (program_region_virt_base + PROGRAM_MAX_SIZE*slot), size);	
 		vfs_close(file);
 		pid = start_task(0, slot, argc, argv, filename, file_ctx);
 	}
