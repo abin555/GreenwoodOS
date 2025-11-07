@@ -33,6 +33,7 @@ struct PROC_Response_Task_Info {
     uint8_t slot_active;
     int schedule_type;
     char *name;
+    int pid;
 };
 
 #define PROC_queue_len 10
@@ -131,6 +132,7 @@ int proc_task_read_callback(void *cdev, void *buf, int roffset, int nbytes, int 
             task_info.schedule_type = tasks[task_info.task_id].schedule_type;
             task_info.slot_active = tasks[task_info.task_id].slot_active;
             task_info.name = tasks[task_info.task_id].task_name;
+            task_info.pid = tasks[task_info.task_id].pid;
             memcpy(
                 buf,
                 &task_info,

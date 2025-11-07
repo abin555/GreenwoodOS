@@ -1,5 +1,7 @@
 #include "program.h"
 #include "elf.h"
+#include "multitasking.h"
+#include "vfs.h"
 
 bool program_slot_status[PROGRAM_MAX] = {0};
 

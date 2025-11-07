@@ -26,6 +26,7 @@ struct PROC_Response_Task_Info {
     uint8_t slot_active;
     int schedule_type;
     char *name;
+    int pid;
 };
 
 struct Context {
@@ -52,6 +53,21 @@ void updateTaskContext(FILE *task_file, struct Context *ctx){
         //printf("#%d - Slot: %d \"%s\"\n", i, ctx->taskInfo[i].slot, ctx->taskInfo[i].name);
     }
 }
+
+void pause_task(FILE *task_file, int tid){
+    struct PROC_Request req_task;
+    req_task.cmd = PROC_PAUSE_TASK;
+    req_task.task_id = tid;
+    fwrite(&req_task, sizeof(req_task), 1, task_file);
+}
+
+void resume_task(FILE *task_file, int tid){
+    struct PROC_Request req_task;
+    req_task.cmd = PROC_RESUME_TASK;
+    req_task.task_id = tid;
+    fwrite(&req_task, sizeof(req_task), 1, task_file);
+}
+
 #define ColorText 0x0
 #define ColorBG 0xb9b9b9
 
@@ -69,6 +85,36 @@ char sched_to_char(ScheduleType sched){
             return 'N';
         default:
             return '?';
+    }
+}
+
+void render_taskInfo(struct PROC_Response_Task_Info *tinfo, int scroll_step, struct WindowContext *context, struct Location *textBox, int *hovered_tid){
+    char infoBuf[20];
+    char mouse_over = 0;
+    if(context->localMouseX >= 0 && context->localMouseX < 8 && context->localMouseY > (textBox->y + tinfo->task_id*8) && context->localMouseY < ((textBox->y + tinfo->task_id*8) + 8)){
+        mouse_over = 1;
+        *hovered_tid = tinfo->task_id;
+    }
+    int info_len = snprintf(infoBuf, sizeof(infoBuf), "%c%d%c", mouse_over ? 'X' : 'O', tinfo->pid, sched_to_char(tinfo->schedule_type));
+    int len = strlen(tinfo->name);
+    int lscroll = scroll_step % len;
+    for(int c = 0; c < info_len; c++){
+        vp_drawChar(
+            context->viewport, 
+            c*8,
+            textBox->y+tinfo->task_id*8, 
+            infoBuf[c], 
+            0x0, mouse_over ? 0xFFFF00 : 0xFFFFFF
+        );
+    }
+    for(int c = lscroll; c < len && c-lscroll < 20; c++){
+        vp_drawChar(
+            context->viewport, 
+            textBox->x+(c-lscroll)*8, 
+            textBox->y+tinfo->task_id*8, 
+            tinfo->name[c], 
+            0xFFFFFF, 0x0
+        );
     }
 }
 
@@ -107,9 +153,11 @@ int main(int argc, char **argv){
     int reload_step = 0;
 
     char infoBuf[20];
-
+    int hovered_tid;
+    char click_lock = 0;
     running = 1;
     while(running){
+        hovered_tid = -1;
         gui_handleContext(context);
         if(reloadBtn->isClicked){
             updateTaskContext(task_file, &taskContext);
@@ -122,27 +170,7 @@ int main(int argc, char **argv){
 
         for(int i = 0; i < taskContext.ntasks && i < 30; i++){
             struct PROC_Response_Task_Info *tinfo = &taskContext.taskInfo[i];
-            snprintf(infoBuf, sizeof(infoBuf), "%c%d%c", 'X', tinfo->task_id, sched_to_char(tinfo->schedule_type));
-            int len = strlen(tinfo->name);
-            int lscroll = scroll_step % len;
-            for(int c = 0; c < 4; c++){
-                vp_drawChar(
-                    context->viewport, 
-                    c*8,
-                    textBox.y+tinfo->task_id*8, 
-                    infoBuf[c], 
-                    0x0, 0xFFFFFF
-                );
-            }
-            for(int c = lscroll; c < len && c-lscroll < 20; c++){
-                vp_drawChar(
-                    context->viewport, 
-                    textBox.x+(c-lscroll)*8, 
-                    textBox.y+tinfo->task_id*8, 
-                    tinfo->name[c], 
-                    0xFFFFFF, 0x0
-                );
-            }
+            render_taskInfo(tinfo, scroll_step, context, &textBox, &hovered_tid);
         }
         scroll_ministep += 0.02f;
         if(scroll_ministep > 1.0f){
@@ -153,6 +181,22 @@ int main(int argc, char **argv){
         if(reload_step == 4){
             updateTaskContext(task_file, &taskContext);
             reload_step = 0;
+        }
+        if(context->mouseStatus.buttons.left){
+            if(!click_lock){
+                click_lock = 1;
+                if(hovered_tid != -1){
+                    if(taskContext.taskInfo[hovered_tid].schedule_type == NEVER){
+                        resume_task(task_file, hovered_tid);
+                    }
+                    else{
+                        pause_task(task_file, hovered_tid);
+                    }
+                }
+            }
+        }
+        else{
+            click_lock = 0;
         }
 
         vp_copy(context->viewport);
