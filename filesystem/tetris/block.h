@@ -1,6 +1,8 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
+#include <stdint.h>
+
 typedef enum {
     GRAY,
     CYAN,
@@ -11,6 +13,8 @@ typedef enum {
     BLUE
 } Bcolor;
 
-void block_draw(int x, int y, Bcolor color, uint32_t *buf, uint32_t w, uint32_t h);
+void block_draw(uint8_t x, uint8_t y, uint32_t *buf, uint8_t mode);
+void draw_outline(uint32_t *buf);
+void invert_screen(uint32_t *buf);
 
 #endif

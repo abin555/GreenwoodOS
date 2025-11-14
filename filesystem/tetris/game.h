@@ -17,6 +17,6 @@ struct Tetris {
 };
 
 struct Tetris tetris_init();
-void tetris_draw(struct Viewport *vp, struct Tetris *tetris);
+void tetris_draw(uint32_t *buf, struct Tetris *tetris);
 
 #endif
