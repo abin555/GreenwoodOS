@@ -402,3 +402,47 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 	//IRQ_RES;
 	return;	
 }
+
+#include <sysfs.h>
+#include <vfs.h>
+
+struct SyscallHook syscall_hook_buf;
+
+int syscall_hooks_read(void *cdev, void *buf, int roffset, int nbytes, int *head){
+	struct SysFS_Chardev *syscall_cdev = cdev;
+	if(buf == NULL) return -1;
+	if(nbytes != sizeof(syscall_hook_buf) || roffset != 0) return -1;
+	syscall_hook_buf.fn = syscall_functions[syscall_hook_buf.call_id];
+	memcpy(buf, ((void *) &syscall_cdev->buf) + roffset, nbytes);
+	*head = 0;
+	return nbytes;
+}
+
+int syscall_hooks_write(void *cdev, void *buf, int woffset, int nbytes, int *head){
+	struct SysFS_Chardev *syscall_cdev = cdev;
+	if(buf == NULL) return -1;
+	//if((nbytes + woffset) > sizeof(syscall_hook_buf)) nbytes = (sizeof(syscall_hook_buf) - woffset);
+	if(nbytes != sizeof(syscall_hook_buf) || woffset != 0) return -1;
+	memcpy(((void *) &syscall_cdev->buf) + woffset, buf, nbytes);
+	syscall_functions[syscall_hook_buf.call_id] = syscall_hook_buf.fn;
+	*head = 0;
+	return nbytes;
+}
+
+void *syscall_init_hooks(){
+	syscall_hook_buf.call_id = 0;
+	syscall_hook_buf.fn = syscall_functions[syscall_hook_buf.call_id];
+	struct SysFS_Chardev *syscall_cdev = sysfs_createCharDevice(
+		(char *) &syscall_hook_buf,
+		sizeof(syscall_hook_buf),
+		CDEV_READ | CDEV_WRITE
+	);
+	sysfs_setCallbacks(syscall_cdev,
+		NULL,
+		NULL,
+		syscall_hooks_write,
+		syscall_hooks_read
+	);
+
+	return sysfs_mkcdev("syscall", syscall_cdev);
+}

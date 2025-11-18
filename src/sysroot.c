@@ -12,6 +12,7 @@
 #include "memory.h"
 #include "pcifs.h"
 #include "pcspeaker.h"
+#include "system_calls.h"
 
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
@@ -88,6 +89,6 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(root, devs);
     sysfs_addChild(root, systems);
     sysfs_addChild(root, sysfs_createMetaFile(root));
-
+    sysfs_addChild(systems, syscall_init_hooks());
     return root;
 }

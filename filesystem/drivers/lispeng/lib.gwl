@@ -28,3 +28,13 @@
         0
     )
 )
+(defun apply (f l)
+    (if (eq? l nil)
+        nil
+        (cons 
+            (f (car l))
+            (apply f (cdr l))
+        )
+    )
+)
+(defun ! (x) (if (= x 1) 1 (* x (! (- x 1)))))

@@ -294,6 +294,13 @@ struct DirectoryListing sysfs_advListDirectory(void *fs, char *path){
 int sysfs_seek(void *f, int offset, int whence){
 	struct VFS_File *file_idx = f;
     struct SysFS_Inode *inode = (struct SysFS_Inode *) file_idx->inode.fs.fs;
+    if(
+        inode->type == SysFS_Chardev && 
+        inode->data.chardev != NULL && 
+        inode->data.chardev->seek_callback != NULL
+    ){
+        return inode->data.chardev->seek_callback(inode->data.chardev, offset, whence);
+    }
 	if(whence == 0){//SEEK_SET
         file_idx->head = offset;
     }
@@ -317,6 +324,17 @@ int sysfs_seek(void *f, int offset, int whence){
 	return file_idx->head;
 }
 
+int sysfs_stat(void *f, void *statbuf){
+	struct VFS_File *file_idx = f;
+    struct SysFS_Inode *inode = (struct SysFS_Inode *) file_idx->inode.fs.fs;
+    if(inode->type != SysFS_Chardev) return -1;
+    struct SysFS_Chardev *cdev = inode->data.chardev;
+    if(cdev->stat_callback != NULL){
+        return cdev->stat_callback(cdev, statbuf);
+    }
+    return -1;
+}
+
 void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
     struct VFS_RootInterface *interface = malloc(sizeof(struct VFS_RootInterface));
 	interface->drive = NULL;
@@ -332,7 +350,7 @@ void *sysfs_generateVFSRoot(struct SysFS_Inode *root, char letter){
 	interface->fs_creatDir = NULL;
 	interface->fs_listDirectory = sysfs_advListDirectory;
 	interface->fs_truncate = NULL;
-    interface->fs_stat = NULL;
+    interface->fs_stat = sysfs_stat;
 	return interface;
 }
 

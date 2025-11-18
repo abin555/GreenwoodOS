@@ -22,4 +22,12 @@ void init_syscalls();
 void syscall_set(uint8_t call_id, syscall_fn fn);
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
 
+
+struct SyscallHook {
+    uint8_t call_id;
+    syscall_fn fn;
+};
+
+void *syscall_init_hooks();
+
 #endif
