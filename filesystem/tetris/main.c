@@ -4,53 +4,54 @@
 #include <string.h>
 #include <sys/vp.h>
 #include <sys/task.h>
-#include "block.h"
-#include "game.h"
+#include "tetris.h"
+#include "screen.h"
 
 int running;
-struct Tetris tetris = {
-    {0},
-    0,
-    0
-};
+struct Tetris t;
+extern struct Viewport *window;
 
-void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
-    switch(event){
-        case VP_EXIT:
-            running = 0;
-            set_schedule(ALWAYS);
-            break;
-        case VP_MAXIMIZE:
-            set_schedule(ALWAYS);
-            break;
-        case VP_MINIMIZE:
-            set_schedule(NEVER);
-            break;
-        default:
-            return;
+void fallEvent(){
+    if(!tetris_moveDown(&t)){
+        tetris_addBlock(&t);
+        tetris_checkClear(&t);
+        tetris_newBlock(&t);
     }
 }
 
 int main(int argc, char **argv){
     printf("TETRIS\n");
-    running = 1;
-    struct Viewport *window = vp_open(
-        64,
-        128,
-        "TETRIS"
-    );
-    uint32_t *drawbuf = malloc(sizeof(uint32_t) * window->loc.w * window->loc.h);
-    vp_set_buffer(window, drawbuf, sizeof(uint32_t) * window->loc.w * window->loc.h);
-    vp_add_event_handler(window, event_handler);
+    initScreen();
+    tetris_init(&t);
 
-    for(int i = 0; i < 4; i++){
-        tetris.board.b[5][19-i] = 1;
-    }
-
+    invertDisplay(1);
     while(running){
-        tetris_draw(drawbuf, &tetris);
-        vp_copy(window);
+        clearDisplay();
+        tetris_draw(&t);
+        
+        showScreen();
+
+        if(window->ascii == 's'){
+            window->ascii = '\0';
+            tetris_move(&t, Down);
+        }
+        if(window->ascii == 'w'){
+            window->ascii = '\0';
+            tetris_move(&t, Rotate);
+        }
+        if(window->ascii == 'f'){
+            window->ascii = '\0';
+            fallEvent();
+        }
+        if(window->ascii == 'a'){
+            window->ascii = '\0';
+            tetris_move(&t, Left);
+        }
+        if(window->ascii == 'd'){
+            window->ascii = '\0';
+            tetris_move(&t, Right);
+        }
+
         yield();
     }
-    vp_close(window);
 }
