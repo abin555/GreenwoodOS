@@ -11,39 +11,9 @@
 #include "icmp.h"
 #include "multitasking.h"
 #include "netproc.h"
+#include "utils.h"
 
-struct NetFS_System netfs_system;
-
-#define MAX_QUEUE_ENTRIES 10
-
-struct NETFS_programCallback {
-    int pid;
-    void *callback;
-};
-
-struct NETFS_http_request {
-    
-};
-
-struct NETFS_http_response {
-
-};
-
-int atoi(const char *arr){
-    int val = 0;
-    char neg = 0;
-    if(*arr == '-'){
-      arr++;
-      neg = 1;
-    }
-    while(*arr != 0 && *arr != ' ' && *arr != '\n'){
-      val = val * 10 + (*arr - '0');
-      arr++;
-    }
-    //print_arg("ATOI: %d\n", val);
-    if(neg) return -val;
-    return val;
-}
+struct NetFS_Connection NetFS_Connections[NETFS_MAXCONNECTIONS];
 
 void split_ip(char *ip, char *ip_parts[4]) {
     int part = 0;
@@ -190,7 +160,7 @@ struct NETFS_concstat {
     uint8_t dns[4];
 };
 
-int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *head){
+int netfs_net_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *head){
     struct SysFS_Chardev *sdev = cdev;
     if(sdev == NULL) return 0;
     struct NETFS_concstat cstat;
@@ -209,15 +179,13 @@ int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *he
     return i;
 }
 
-
-
-struct SysFS_Inode *netfs_conn(){
+struct SysFS_Inode *netfs_net(){
     struct SysFS_Chardev *conn_dev = sysfs_createCharDevice(NULL, 0, CDEV_READ);
     sysfs_setCallbacks(conn_dev,
         NULL,
         NULL,
         NULL,
-        netfs_conn_read_spec
+        netfs_net_read_spec
     );
     struct SysFS_Inode *conn_inode = sysfs_mkcdev("conn", conn_dev);
     return conn_inode;
@@ -261,6 +229,98 @@ struct SysFS_Inode *netfs_icmp(){
     return icmp_inode;
 }
 
+int netfs_freeConnection(struct NetFS_Connection *conn){
+    if(conn == NULL) return 0;
+    conn->active = 0;
+    conn->pending = 0;
+    conn->owner_pid = -1;
+    if(conn->buffer != NULL){
+        MEM_freeRegionBlock((uint32_t) conn->buffer, conn->buf_size);
+        conn->buffer = NULL;
+    }
+    conn->buf_size = 0;
+    conn->read_head = NULL;
+    conn->write_head = NULL;
+    conn->type = NETFS_Connection_None;
+    return 1;
+}
+
+struct NetFS_Connection *netfs_allocConnection(int type, int requestor_pid){
+    for(int i = 0; i < NETFS_MAXCONNECTIONS; i++){
+        if(NetFS_Connections[i].active == 0){
+            struct NetFS_Connection *conn_dev = &NetFS_Connections[i];
+            conn_dev->active = 1;
+            conn_dev->owner_pid = requestor_pid;
+            conn_dev->buf_size = PAGE_SIZE;
+            conn_dev->buffer = (char *) MEM_reserveRegionBlock(MEM_findRegionIdx(conn_dev->buf_size), conn_dev->buf_size, -1, OTHER);
+            conn_dev->read_head = conn_dev->buffer;
+            conn_dev->write_head = conn_dev->buffer;
+            conn_dev->type = type;
+            print_serial("[NETFS] Allocated Connection %d\n", i);
+            return conn_dev;
+        }
+    }
+    return NULL;
+}
+
+int netfs_conn_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *head){
+    struct SysFS_Chardev *conndev = cdev;
+    struct NetFS_Connection *conn = (struct NetFS_Connection *) conndev->buf;
+    print_serial("[NETFS] Write to connection %d from 0x%x:%d of %d @ 0x%x\n", conn->cid, buf, woffset, nbytes, *head);
+    return 0;
+}
+
+int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *head){
+    struct SysFS_Chardev *conndev = cdev;
+    struct NetFS_Connection *conn = (struct NetFS_Connection *) conndev->buf;
+    print_serial("[NETFS] Read from connection %d from 0x%x:%d of %d @ 0x%x\n", conn->cid, buf, roffset, nbytes, *head);
+    return 0;
+}
+
+int netfs_conn_stat(void *cdev, void *statbuf){
+    if(cdev == NULL) return -1;
+    if(statbuf == NULL) return -1;
+    struct SysFS_Chardev *conndev = cdev;
+    struct NetFS_Connection *conn = (struct NetFS_Connection *) conndev->buf;
+    struct VFS_stat *stat = statbuf;
+
+    
+    memcpy(stat->fs_ownerIden, "NETFS", 6);
+    stat->open_stat = conn->active;
+    if(stat->open_stat)
+        stat->size = conn->write_head - conn->buffer;
+    else
+        stat->size = 0;
+    return 0;
+};
+
+struct SysFS_Inode *netfs_makeConnections(){
+    struct SysFS_Inode *conn_folder = sysfs_mkdir("C");
+    for(int i = 0; i < NETFS_MAXCONNECTIONS; i++){
+        char conn_filename[10];
+        memset(conn_filename, 0, sizeof(conn_filename));
+        snprintf(conn_filename, sizeof(conn_filename), "conn%d", i);
+        struct NetFS_Connection *conn_dev = &NetFS_Connections[i];
+        netfs_freeConnection(conn_dev);
+        conn_dev->cid = i;
+        struct SysFS_Chardev *cdev = sysfs_createCharDevice((char *) conn_dev, sizeof(NetFS_Connections[0]), CDEV_READ | CDEV_WRITE);
+        sysfs_setCallbacks(
+            cdev,
+            NULL,
+            NULL,
+            netfs_conn_write_spec,
+            netfs_conn_read_spec
+        );
+        sysfs_setCallbacksExtra(
+            cdev,
+            NULL,
+            netfs_conn_stat
+        );
+        struct SysFS_Inode *cdev_inode = sysfs_mkcdev(conn_filename, cdev);
+        sysfs_addChild(conn_folder, cdev_inode);
+    }
+    return conn_folder;
+}
 
 void netfs_init(){
     print_serial("[NETFS] Init\n");
@@ -270,63 +330,7 @@ void netfs_init(){
     struct SysFS_Inode *netdir = sysfs_mkdir("net");
     sysfs_addChild(sysfs, netdir);
     sysfs_addChild(netdir, netfs_http());
-    sysfs_addChild(netdir, netfs_conn());
+    sysfs_addChild(netdir, netfs_net());
     sysfs_addChild(netdir, netfs_icmp());
-    sysfs_addChild(netdir, sysfs_mkdir("conns"));
-}
-
-
-struct NetFS_Inode *netfs_createRoot(){
-    struct NetFS_Inode *root = malloc(sizeof(struct NetFS_Inode));
-    root->type = NETFS_Inode_Type_ROOT;
-    root->root = &netfs_system;
-    root->root->numConnections = 0;
-    memset(root->root->connections, 0, sizeof(root->root->connections));
-    return root;
-}
-
-struct NetFS_Inode *netfs_find(struct NetFS_Inode *root, char *path){
-    print_serial("[NETFS] Looking for %s\n", path);
-    if(!strcmp(path, ".")) return root;
-
-    if(!strcmp(path, "ctrl") && root == vfs_findRoot('@')->fs.fs){
-        print_serial("[NETFS] Looking for CTRL file\n");
-        //return root->ctrl;
-    }
-    return root;
-}
-
-struct DirectoryListing netfs_advListDirectory(struct NetFS_Inode *netfs, char *path){
-    struct DirectoryListing listing = {0};
-    if(netfs == NULL || path == NULL) return listing;
-    struct NetFS_Inode *target = netfs_find(netfs, path);
-    if(target == NULL) return listing;
-
-    //if(target->type != NETFS_Inode_Type_FILE) return listing;
-
-    listing.directory_path_len = strlen(path);
-	listing.directory_path = strdup(path);
-	listing.num_entries = 3;
-	listing.entries = malloc(sizeof(struct DirectoryEntry) * listing.num_entries);
-	memset(listing.entries, 0, sizeof(struct DirectoryEntry) * listing.num_entries);
-
-    const char *dotfiles[3] = {
-        ".",
-        "..",
-        "ctrl"
-    };
-    int dotfileTypes[3] = {
-        ENTRY_DIRECTORY,
-        ENTRY_DIRECTORY,
-        ENTRY_FILE
-    };
-    for(int i = 0; i < 3; i++){
-        memset(listing.entries[i].filename, 0, 50);
-        memcpy(listing.entries[i].filename, (void *) dotfiles[i], sizeof(dotfiles[i])); 
-        listing.entries[i].name_len = sizeof(dotfiles[i]);       
-        listing.entries[i].type = dotfileTypes[i];
-        print_serial("%s\n", listing.entries[i].filename);
-    }
-
-    return listing;
+    sysfs_addChild(netdir, netfs_makeConnections());
 }

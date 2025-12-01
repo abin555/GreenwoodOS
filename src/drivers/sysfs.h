@@ -64,6 +64,11 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
     int (*write_specialized_callback)(void *cdev, void *buf, int woffset, int nbytes, int *head),
     int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head)
 );
+void sysfs_setCallbacksExtra(struct SysFS_Chardev *cdev,
+    int (*seek_callback)(void *cdev, int offset, int whence),
+    int (*stat_callback)(void *cdev, void *statbuf)
+);
+
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth);
 
 void *sysfs_find(void *r, char *path, unsigned int *meta);

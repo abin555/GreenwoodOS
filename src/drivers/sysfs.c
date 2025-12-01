@@ -102,6 +102,15 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
     );
 }
 
+void sysfs_setCallbacksExtra(struct SysFS_Chardev *cdev,
+    int (*seek_callback)(void *cdev, int offset, int whence),
+    int (*stat_callback)(void *cdev, void *statbuf)
+){
+    if(cdev == NULL) return;
+    cdev->seek_callback = seek_callback;
+    cdev->stat_callback = stat_callback;
+}
+
 void sysfs_debugTree(struct SysFS_Inode *fs, int depth){
     for(int i = 0; i < depth; i++){
         print_serial(" ");

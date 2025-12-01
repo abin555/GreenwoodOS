@@ -72,7 +72,6 @@ void vfs_init();
 void vfs_addFS(struct VFS_RootInterface *interface);
 void vfs_addRoot(struct DRIVE *drive);
 void vfs_addSysRoot(struct SysFS_Inode *sysfs, char letter);
-void vfs_addNetRoot(struct NetFS_Inode *netfs, char letter);
 struct VFS_Inode *vfs_findRoot(char driveLetter);
 
 struct VFS_Inode vfs_followLink(struct VFS_Inode *parent, char *path);

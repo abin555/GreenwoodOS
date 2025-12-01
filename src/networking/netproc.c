@@ -139,8 +139,11 @@ void netprocess_queue(struct CONSOLE *con){
                         req->request.request.http_request.path,
                         req->request.request.http_request.host
                     );
+                    struct NetFS_Connection *conn_dev = netfs_allocConnection(NETFS_Connection_HTTP, req->pid);
+                    req->request.request.http_request.conn_dev = conn_dev;
                     netproc_addToPending(req->pid, req->request);
                     
+
                     http_send_request(
                         ethernet_getDriver(),
                         req->request.request.http_request.dst_ip,
@@ -200,9 +203,10 @@ void netprocess_pending(struct CONSOLE *con){
         }
         else if(pend->request.type == NETPROC_HTTP_REQUEST){
             int actionIdx = ++pend->reply.http_reply.lastAttended;
-            PRINT("HTTP reply #%d of %d\n", actionIdx, pend->reply.http_reply.nparts);
+            PRINT("*** HTTP reply #%d of %d\n", actionIdx, pend->reply.http_reply.nparts);
             PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.callback));
-            list_tasks();
+            //list_tasks();
+            PRINT("[NETPROC] HTTP Response goes to connection #%d\n", pend->request.request.http_request.conn_dev->cid);
             if(tasks[pend->pid].slot_active || 1){
                 int current_task_id = task_running_idx;
                 task_running_idx = pend->pid;
@@ -214,7 +218,6 @@ void netprocess_pending(struct CONSOLE *con){
                 }
 
                 PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.callback));
-                
                 PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.callback, task_running_idx);
                 //viewport->event_handler(viewport, event);
                 int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);

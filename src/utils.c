@@ -298,3 +298,19 @@ int snprintf(char *str, size_t size, const char *format, ...){
 	}
 	return n;
 }
+
+int atoi(const char *arr){
+    int val = 0;
+    char neg = 0;
+    if(*arr == '-'){
+      arr++;
+      neg = 1;
+    }
+    while(*arr != 0 && *arr != ' ' && *arr != '\n'){
+      val = val * 10 + (*arr - '0');
+      arr++;
+    }
+    //print_arg("ATOI: %d\n", val);
+    if(neg) return -val;
+    return val;
+}
