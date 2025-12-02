@@ -252,15 +252,23 @@ struct NetFS_Connection *netfs_allocConnection(int type, int requestor_pid){
             conn_dev->active = 1;
             conn_dev->owner_pid = requestor_pid;
             conn_dev->buf_size = PAGE_SIZE;
-            conn_dev->buffer = (char *) MEM_reserveRegionBlock(MEM_findRegionIdx(conn_dev->buf_size), conn_dev->buf_size, -1, OTHER);
+            conn_dev->buffer = (char *) MEM_reserveRegionBlock(MEM_findRegionIdx(conn_dev->buf_size), conn_dev->buf_size, 0, OTHER);
             conn_dev->read_head = conn_dev->buffer;
             conn_dev->write_head = conn_dev->buffer;
             conn_dev->type = type;
-            print_serial("[NETFS] Allocated Connection %d\n", i);
+            print_serial("[NETFS] Allocated Connection %d, buffer @ 0x%x\n", i, conn_dev->buffer);
             return conn_dev;
         }
     }
     return NULL;
+}
+
+int netfs_connectionFill(struct NetFS_Connection *conn, char *buf, size_t bufsize){
+    if(conn == NULL || buf == NULL) return -1;
+    print_serial("[NETFS] Filling connection %d buffer!\nBuffer Base @ 0x%x\nBuffer Write @ 0x%x\n", conn->cid, conn->buffer, conn->write_head);
+    memcpy(conn->write_head, buf, bufsize);
+    conn->write_head += bufsize;
+    return bufsize;
 }
 
 int netfs_conn_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *head){
@@ -274,7 +282,37 @@ int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *he
     struct SysFS_Chardev *conndev = cdev;
     struct NetFS_Connection *conn = (struct NetFS_Connection *) conndev->buf;
     print_serial("[NETFS] Read from connection %d from 0x%x:%d of %d @ 0x%x\n", conn->cid, buf, roffset, nbytes, *head);
-    return 0;
+    if(buf == NULL) return 0;
+    size_t avail = conn->write_head - conn->buffer;
+    if((size_t) (roffset + nbytes) > avail) nbytes = avail - roffset;
+    memcpy(buf, conn->buffer + roffset, nbytes);
+    *head += nbytes;
+    return nbytes;
+}
+
+int netfs_conn_seek(void *vfs_file, void *cdev, int offset, int whence){
+    if(cdev == NULL || vfs_file == NULL) return -1;
+    struct VFS_File *file_idx = vfs_file;
+    struct SysFS_Chardev *conndev = cdev;
+    struct NetFS_Connection *conn = (struct NetFS_Connection *) conndev->buf;
+
+    print_serial("[NETFS] Connection seek in connection %d\n", conn->cid);
+
+    if(whence == 0){//SEEK_SET
+        file_idx->head = offset;
+    }
+    else if(whence == 1){//SEEK_CUR
+        file_idx->head += offset;
+    }
+    else if(whence == 2){//SEEK_END
+        file_idx->head = conn->write_head - conn->buffer + offset;
+        if(file_idx->head > conn->write_head - conn->buffer)
+            file_idx->head = conn->write_head - conn->buffer;
+    }
+    else{
+        return -1;
+    }
+	return file_idx->head;
 }
 
 int netfs_conn_stat(void *cdev, void *statbuf){
@@ -313,7 +351,7 @@ struct SysFS_Inode *netfs_makeConnections(){
         );
         sysfs_setCallbacksExtra(
             cdev,
-            NULL,
+            netfs_conn_seek,
             netfs_conn_stat
         );
         struct SysFS_Inode *cdev_inode = sysfs_mkcdev(conn_filename, cdev);

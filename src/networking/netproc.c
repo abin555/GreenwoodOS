@@ -141,10 +141,8 @@ void netprocess_queue(struct CONSOLE *con){
                     );
                     struct NetFS_Connection *conn_dev = netfs_allocConnection(NETFS_Connection_HTTP, req->pid);
                     req->request.request.http_request.conn_dev = conn_dev;
-                    netproc_addToPending(req->pid, req->request);
-                    
 
-                    http_send_request(
+                    req->request.request.http_request.src_port = http_send_request(
                         ethernet_getDriver(),
                         req->request.request.http_request.dst_ip,
                         req->request.request.http_request.dst_port,
@@ -152,6 +150,7 @@ void netprocess_queue(struct CONSOLE *con){
                         req->request.request.http_request.path,
                         req->request.request.http_request.host
                     );
+                    netproc_addToPending(req->pid, req->request);
                     
                     break;
             }
@@ -220,6 +219,12 @@ void netprocess_pending(struct CONSOLE *con){
                 PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.callback));
                 PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.callback, task_running_idx);
                 //viewport->event_handler(viewport, event);
+                netfs_connectionFill(
+                    pend->request.request.http_request.conn_dev,
+                    pend->reply.http_reply.parts[actionIdx].buf,
+                    pend->reply.http_reply.parts[actionIdx].size
+                );
+                
                 int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);
                 PRINT("[NETPROC] Result: %d\n", response);
                 task_running_idx = current_task_id;
@@ -250,8 +255,10 @@ int netprocess(int argc __attribute__((unused)), char **argv __attribute__((unus
 
     while(1){
         if(!netproc_queue_needs_attention && !netproc_pend_needs_attention){
+            IRQ_OFF;
             print_serial("[NETPROC] Nothing to do, pausing\n");
             set_schedule(NEVER);
+            IRQ_RES;
             netprocess_yield();
             continue;
         }
@@ -327,7 +334,7 @@ int netproc_checkPending_http_response(uint16_t port, void *buf, size_t size){
         if(pend->request.type != NETPROC_HTTP_REQUEST) continue;
 
         if(
-            pend->request.request.http_request.dst_port == port
+            pend->request.request.http_request.src_port == port
         ){
             pend->has_reply = 1;
             pend->reply.http_reply.parts[pend->reply.http_reply.nparts].port = port;

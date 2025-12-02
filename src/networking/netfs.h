@@ -25,5 +25,6 @@ struct NetFS_Connection {
 void netfs_init();
 int netfs_freeConnection(struct NetFS_Connection *conn);
 struct NetFS_Connection *netfs_allocConnection(int type, int requestor_pid);
+int netfs_connectionFill(struct NetFS_Connection *conn, char *buf, size_t bufsize);
 
 #endif

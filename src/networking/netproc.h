@@ -30,6 +30,7 @@ struct netproc_http_request {
     http_reply_callback callback;
     struct NetFS_Connection *conn_dev;
     uint16_t dst_port;
+    uint16_t src_port;
     char *method;
     char *path;
     char *host;

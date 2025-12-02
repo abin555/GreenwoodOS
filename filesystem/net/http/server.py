@@ -1,10 +1,16 @@
 from flask import Flask
 
 app = Flask(__name__)
+count = 0
 
 @app.route("/")
 def hello_world():
-    return "<p>Hello, World!</p>\n<p>This Is So Cool!</p>"
+    global count
+    mesg = ""
+    for i in range(5):
+        mesg += "<p>Aidan Boisvert's HTTP Client</p>\n<p>Count #"+ str(count) +"</p>\n"
+    count = count + 1
+    return mesg
 
 if __name__ == '__main__':
 

@@ -5,7 +5,8 @@
 #include "ip.h"
 #include "tcp.h"
 
-void http_send_request(struct ethernet_driver *driver, uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host);
+//Sends http request, returns source port
+uint16_t http_send_request(struct ethernet_driver *driver, uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host);
 
 bool http_receive_request(struct ethernet_driver *driver, uint16_t port, void *data, size_t data_size);
 

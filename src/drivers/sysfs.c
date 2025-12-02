@@ -103,7 +103,7 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
 }
 
 void sysfs_setCallbacksExtra(struct SysFS_Chardev *cdev,
-    int (*seek_callback)(void *cdev, int offset, int whence),
+    int (*seek_callback)(void *vfs_file, void *cdev, int offset, int whence),
     int (*stat_callback)(void *cdev, void *statbuf)
 ){
     if(cdev == NULL) return;
@@ -308,7 +308,7 @@ int sysfs_seek(void *f, int offset, int whence){
         inode->data.chardev != NULL && 
         inode->data.chardev->seek_callback != NULL
     ){
-        return inode->data.chardev->seek_callback(inode->data.chardev, offset, whence);
+        return inode->data.chardev->seek_callback(file_idx, inode->data.chardev, offset, whence);
     }
 	if(whence == 0){//SEEK_SET
         file_idx->head = offset;

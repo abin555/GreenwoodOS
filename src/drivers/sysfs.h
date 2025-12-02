@@ -14,7 +14,7 @@ struct SysFS_Chardev {
     void (*read_callback)(void *, int offset, int nbytes, int *head);
     int (*write_specialized_callback)(void *cdev, void *buf, int woffset, int nbytes, int *head);
     int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head);
-    int (*seek_callback)(void *cdev, int offset, int whence);
+    int (*seek_callback)(void *vfs_file, void *cdev, int offset, int whence);
     int (*stat_callback)(void *cdev, void *statbuf);
     CDEV_PERMS perms;
 };
@@ -65,7 +65,7 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
     int (*read_specialized_callback)(void *cdev, void *buf, int roffset, int nbytes, int *head)
 );
 void sysfs_setCallbacksExtra(struct SysFS_Chardev *cdev,
-    int (*seek_callback)(void *cdev, int offset, int whence),
+    int (*seek_callback)(void *vfs_file, void *cdev, int offset, int whence),
     int (*stat_callback)(void *cdev, void *statbuf)
 );
 

@@ -4,7 +4,7 @@
 
 int http_reqno = 0;
 
-void http_send_request(struct ethernet_driver *driver __attribute__((unused)), uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host) {
+uint16_t http_send_request(struct ethernet_driver *driver __attribute__((unused)), uint8_t destination_ip[4], uint16_t destination_port, const char *method, const char *path, const char *host) {
     print_serial("http_send_request\n");
     char *request = malloc(1024 * sizeof(char));
     uint16_t source_port = 10101 + http_reqno++;
@@ -16,6 +16,7 @@ void http_send_request(struct ethernet_driver *driver __attribute__((unused)), u
         tcp_send_packet(driver, driver->ipv4.ip, source_port, destination_ip, destination_port, 0, ack, false, true, false, true, request, strlen(request));
         // tcp_close_connection(driver, destination_ip, destination_port, source_port);
     }
+    return source_port;
 
     //free(request);
 }
