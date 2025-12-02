@@ -132,8 +132,9 @@ int netfs_http_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
             request_str = "HTTP REQUEST";
             break;
     }
-    print_serial("[NETFS] HTTP Request Made - \"%s\" from PID %d\n", request_str, task_running_idx);
-    netproc_addToQueue(task_running_idx, request);
+    print_serial("[NETFS] HTTP Request Made - \"%s\" from PID %d, TIDX %d\n", request_str, task_getCurrent()->pid, task_running_idx);
+    print_console(task_getCurrent()->console, "WTF");
+    netproc_addToQueue(task_getCurrent()->pid, request);
     
     *head = 0;
 

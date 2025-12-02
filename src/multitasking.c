@@ -232,6 +232,15 @@ int taskID_fromPID(int pid){
     return -1;
 }
 
+struct task_state *task_fromPID(int pid){
+    return &tasks[taskID_fromPID(pid)];
+}
+
+struct task_state *task_getCurrent(){
+    print_serial("[TASK] Getting current task (TIDX: %d) - 0x%x\n", task_running_idx, &tasks[task_running_idx]);
+    return &tasks[task_running_idx];
+}
+
 void stop_task(int8_t task_idx){
     tasks[task_idx].slot_active = 0;
     if(tasks[task_idx].program_slot != -1){

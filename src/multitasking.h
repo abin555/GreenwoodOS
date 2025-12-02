@@ -94,6 +94,7 @@ void set_schedule(ScheduleType type);
 void set_schedule_task(int taskID, ScheduleType type);
 
 int taskID_fromPID(int pid);
+struct task_state *task_fromPID(int pid);
 
 void task_yield();
 
@@ -109,5 +110,6 @@ void save_task_state(struct task_state *task, struct cpu_state *cpu, struct stac
 void tasking_setup_kernel_stack();
 
 int task_getCurrentID();
+struct task_state *task_getCurrent();
 void os_yield();
 #endif

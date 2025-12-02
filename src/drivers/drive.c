@@ -35,7 +35,7 @@ int drive_read(struct DRIVE *drive, char *buf, uint32_t sector, uint32_t count_s
 		return -1;
 	
 	if(drive->locked) print_serial("[DRIVE SYS] Drive %c is locked\n", drive->identity);
-	while(drive->locked || !drive->ready);
+	//while(drive->locked || !drive->ready);
 
 	drive->locked = 1;
 

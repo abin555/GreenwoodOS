@@ -177,6 +177,7 @@ void __attribute__ ((optimize("-O0"))) tcp_receive_packet(struct ethernet_driver
 
     if (packet->flags.fin) {
         print_serial("tcp_receive_packet: FIN\n");
+        //tcp_send_packet(driver, driver->ipv4.ip, port, ipv4_packet->source_ip, ntohs(packet->source_port), ntohl(packet->acknowledgement_number), ntohl(packet->sequence_number) + 1, false, true, true, false, NULL, 0);
         for (size_t i = 0; i < curr_tcp_syn; i++) {
             if (tcp_syn_cache[i].port == port) {
                 tcp_syn_cache[i].syn = false;
