@@ -13,7 +13,7 @@
 #include "netfs.h"
 
 typedef int (*icmp_echo_reply_callback)(unsigned int packet_size, uint8_t source_ip[4], struct icmp_packet *packet);
-typedef int (*http_reply_callback)(uint16_t port, void *data, size_t data_size);
+typedef int *http_conn_ref;
 
 typedef enum {
     NETPROC_ICMP_ECHO_REQUEST,
@@ -27,7 +27,7 @@ struct netproc_icmp_echo_request {
 
 struct netproc_http_request {
     uint8_t dst_ip[4];
-    http_reply_callback callback;
+    http_conn_ref conn_ref;
     struct NetFS_Connection *conn_dev;
     uint16_t dst_port;
     uint16_t src_port;

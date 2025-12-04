@@ -31,7 +31,7 @@ void split_ip(char *ip, char *ip_parts[4]) {
 }
 
 struct http_request {
-    http_reply_callback callback;
+    http_conn_ref conn_ref;
     int str_len;
     char req[];
 };
@@ -45,6 +45,7 @@ int netfs_http_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
         return 0;
     }
     struct http_request *hreq = buf;
+    if(hreq->conn_ref != NULL) *hreq->conn_ref = -1;
 
     print_serial("Request payload: %d %s\n", hreq->str_len, (char *) hreq->req);
     char *walker = (char *) hreq->req;
@@ -104,7 +105,7 @@ int netfs_http_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
         request.request.http_request.dst_ip[i] = atoi(ip_parts[i]);
     }
     request.request.http_request.dst_port = atoi(port);
-    request.request.http_request.callback = hreq->callback;
+    request.request.http_request.conn_ref = hreq->conn_ref;
     request.request.http_request.method = malloc(strlen(method)+1);
     memcpy(request.request.http_request.method, method, strlen(method));
     request.request.http_request.path = malloc(strlen(path)+1);
@@ -132,9 +133,9 @@ int netfs_http_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
             request_str = "HTTP REQUEST";
             break;
     }
-    print_serial("[NETFS] HTTP Request Made - \"%s\" from PID %d, TIDX %d\n", request_str, task_getCurrent()->pid, task_running_idx);
-    print_console(task_getCurrent()->console, "WTF");
-    netproc_addToQueue(task_getCurrent()->pid, request);
+    struct task_state *current_task = task_getCurrent();
+    print_serial("[NETFS] HTTP Request Made - \"%s\" from PID %d (@ 0x%x \"%s\"), TIDX %d\n", request_str, current_task->pid, current_task, current_task->task_name, task_running_idx);
+    netproc_addToQueue(current_task->pid, request);
     
     *head = 0;
 
@@ -210,8 +211,9 @@ int netfs_icmp_write_spec(void *cdev, void *buf, int woffset, int nbytes, int *h
             request_str = "HTTP REQUEST";
             break;
     }
-    print_serial("[NETFS] ICMP Request Made - \"%s\" from PID %d\n", request_str, task_running_idx);
-    netproc_addToQueue(task_running_idx, *request);
+    struct task_state *current_task = task_getCurrent();
+    print_serial("[NETFS] ICMP Request Made - \"%s\" from PID %d\n", request_str, current_task->pid);
+    netproc_addToQueue(current_task->pid, *request);
     *head = 0;
 
     return nbytes;
@@ -257,6 +259,7 @@ struct NetFS_Connection *netfs_allocConnection(int type, int requestor_pid){
             conn_dev->read_head = conn_dev->buffer;
             conn_dev->write_head = conn_dev->buffer;
             conn_dev->type = type;
+            conn_dev->port = 0xFFFF;
             print_serial("[NETFS] Allocated Connection %d, buffer @ 0x%x\n", i, conn_dev->buffer);
             return conn_dev;
         }
@@ -285,8 +288,12 @@ int netfs_conn_read_spec(void *cdev, void *buf, int roffset, int nbytes, int *he
     print_serial("[NETFS] Read from connection %d from 0x%x:%d of %d @ 0x%x\n", conn->cid, buf, roffset, nbytes, *head);
     if(buf == NULL) return 0;
     size_t avail = conn->write_head - conn->buffer;
-    if((size_t) (roffset + nbytes) > avail) nbytes = avail - roffset;
-    memcpy(buf, conn->buffer + roffset, nbytes);
+    print_serial("[NETFS] %d bytes are available to read 0x%x:0x%x\n", avail, conn->write_head, conn->buffer);
+    //if((size_t) (roffset + nbytes) > avail) nbytes = avail - roffset;
+    //memcpy(buf, conn->buffer + roffset, nbytes);
+    for(size_t i = 0; i < (size_t) nbytes; i++){
+        ((char *) buf)[i] = conn->buffer[i+roffset];
+    }
     *head += nbytes;
     return nbytes;
 }
@@ -325,8 +332,8 @@ int netfs_conn_stat(void *cdev, void *statbuf){
 
     
     memcpy(stat->fs_ownerIden, "NETFS", 6);
-    stat->open_stat = conn->active;
-    if(stat->open_stat)
+    stat->open_stat = conn->pending;
+    if(conn->active)
         stat->size = conn->write_head - conn->buffer;
     else
         stat->size = 0;

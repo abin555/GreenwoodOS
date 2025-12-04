@@ -65,7 +65,7 @@ struct task_state{
     int num_used;
     int pid;//Unique program ID
     int waitpid;//If <= 0, don't worry about it. Otherwise, program does not run until program referenced by pid is ended.
-};
+} __attribute__((packed));
 
 #define MAX_TASKS 30
 #define TASK_STACK_SIZE 0x80000

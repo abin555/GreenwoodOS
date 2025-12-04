@@ -15,12 +15,15 @@ struct NetFS_Connection {
     char *read_head;
     char *write_head;
 
+    uint16_t port;
+
     enum {
         NETFS_Connection_None,
         NETFS_Connection_HTTP
     } type;
 };
 #define NETFS_MAXCONNECTIONS 10
+extern struct NetFS_Connection NetFS_Connections[NETFS_MAXCONNECTIONS];
 
 void netfs_init();
 int netfs_freeConnection(struct NetFS_Connection *conn);

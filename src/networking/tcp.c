@@ -1,5 +1,6 @@
 #include "tcp.h"
 #include "timer.h"
+#include "netfs.h"
 
 static uint32_t syn_c = 0;
 static tcp_listener *tcp_listeners = NULL;
@@ -183,6 +184,12 @@ void __attribute__ ((optimize("-O0"))) tcp_receive_packet(struct ethernet_driver
                 tcp_syn_cache[i].syn = false;
                 tcp_syn_cache[i].ack = 0;
                 break;
+            }
+        }
+
+        for(int i = 0; i < NETFS_MAXCONNECTIONS; i++){
+            if(NetFS_Connections[i].port == port){
+                NetFS_Connections[i].pending = 0;
             }
         }
     }

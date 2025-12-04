@@ -59,6 +59,7 @@ void netproc_task_resume(){
 }
 
 int netproc_addToQueue(int caller_pid, struct netproc_request request){
+    print_serial("[NETPROC] Caller PID: %d\n", caller_pid);
     for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
         struct netproc_req_entry *req = &netproc_queue.entries[i];
         if(req->free && !req->pending){
@@ -67,16 +68,16 @@ int netproc_addToQueue(int caller_pid, struct netproc_request request){
             req->request = request;
             req->pid = caller_pid;
             netproc_queue_needs_attention = 1;
-            void *callback = 0;
+            void *ref_ptr = 0;
             switch(request.type){
                 case NETPROC_ICMP_ECHO_REQUEST:
-                    callback = request.request.icmp_echo_request.callback;
+                    ref_ptr = request.request.icmp_echo_request.callback;
                     break;
                 case NETPROC_HTTP_REQUEST:
-                    callback = request.request.http_request.callback;
+                    ref_ptr = request.request.http_request.conn_ref;
                     break;
             }
-            print_serial("[NETPROC] OS added to queue idx %d, PID %d, callback 0x%x\n", i, req->pid, callback);
+            print_serial("[NETPROC] OS added to queue idx %d, PID %d, callback 0x%x\n", i, req->pid, ref_ptr);
             netproc_task_resume();
             return 0;
         }
@@ -144,12 +145,16 @@ void netprocess_queue(struct CONSOLE *con){
                     char filenamebuf[50];
                     memset(filenamebuf, 0, sizeof(filenamebuf));
                     snprintf(filenamebuf, sizeof(filenamebuf), "-/net/C/conn%d\0", conn_dev->cid);
-                    int proc_connection_fd = task_allocFD(&tasks[req->pid], vfs_open(filenamebuf, VFS_FLAG_READ | VFS_FLAG_WRITE));
-                    print_serial("[NETPROC] Slot %d (PID %d) Opened in \"%s\" FD %d:\n", req->pid, req->pid, task_fromPID(req->pid)->task_name, proc_connection_fd);
+                    struct task_state *target_task = task_fromPID(req->pid);
+                    int sys_conn_fd = vfs_open(filenamebuf, VFS_FLAG_READ | VFS_FLAG_WRITE);
+                    int proc_connection_fd = task_allocFD(target_task, sys_conn_fd);
+                    print_serial("[NETPROC] \"%s\" -> SysFD = %d, TaskFD = %d\n", filenamebuf, sys_conn_fd, proc_connection_fd);
+                    print_serial("[NETPROC] PID %d Opened in \"%s\" FD %d:\n", req->pid, target_task->task_name, proc_connection_fd);
                     for(int j = 0; j < MT_maxDescriptors; j++){
-                        print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, task_fromPID(req->pid)->file_descs[j]);
+                        print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, target_task->file_descs[j]);
                     }
-                    
+                    *req->request.request.http_request.conn_ref = proc_connection_fd;
+                    conn_dev->pending = 1;
                     req->request.request.http_request.src_port = http_send_request(
                         ethernet_getDriver(),
                         req->request.request.http_request.dst_ip,
@@ -158,6 +163,7 @@ void netprocess_queue(struct CONSOLE *con){
                         req->request.request.http_request.path,
                         req->request.request.http_request.host
                     );
+                    conn_dev->port = req->request.request.http_request.src_port;
                     netproc_addToPending(req->pid, req->request);
                     
                     break;
@@ -211,7 +217,7 @@ void netprocess_pending(struct CONSOLE *con){
         else if(pend->request.type == NETPROC_HTTP_REQUEST){
             int actionIdx = ++pend->reply.http_reply.lastAttended;
             PRINT("*** HTTP reply #%d of %d\n", actionIdx, pend->reply.http_reply.nparts);
-            PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.callback));
+            PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
             //list_tasks();
             PRINT("[NETPROC] HTTP Response goes to connection #%d\n", pend->request.request.http_request.conn_dev->cid);
             if(task_fromPID(pend->pid)->slot_active || 1){
@@ -224,8 +230,8 @@ void netprocess_pending(struct CONSOLE *con){
                     select_program(slot);
                 }
 
-                PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.callback));
-                PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.callback, task_running_idx);
+                PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
+                PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.conn_ref, task_running_idx);
                 //viewport->event_handler(viewport, event);
                 netfs_connectionFill(
                     pend->request.request.http_request.conn_dev,
@@ -233,8 +239,8 @@ void netprocess_pending(struct CONSOLE *con){
                     pend->reply.http_reply.parts[actionIdx].size
                 );
                 
-                int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);
-                PRINT("[NETPROC] Result: %d\n", response);
+                //int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);
+                //PRINT("[NETPROC] Result: %d\n", response);
                 task_running_idx = current_task_id;
                 if(tasks[task_running_idx].program_slot != -1){
                     PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);

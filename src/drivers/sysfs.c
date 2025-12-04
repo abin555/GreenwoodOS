@@ -131,7 +131,7 @@ int sysfs_read(void *f, void *buf, int nbytes){
     struct VFS_File *file = f;
     //print_serial("[SYSFS] Reading %d bytes with head at %d and file size %d\n", nbytes, file->head, file->inode.fs.sysfs->data.chardev->buf_size);
     if(file == NULL || buf == NULL || nbytes == 0){
-        print_serial("[SYSFS] Won't Read, doesn't exist, goes nowhere, or is nothing\n");
+        print_serial("[SYSFS] Won't Read, doesn't exist, goes nowhere, or is nothing (0x%x 0x%x %d)\n", f, buf, nbytes);
         return 0;
     }
 
@@ -339,6 +339,7 @@ int sysfs_stat(void *f, void *statbuf){
     if(inode->type != SysFS_Chardev) return -1;
     struct SysFS_Chardev *cdev = inode->data.chardev;
     if(cdev->stat_callback != NULL){
+        //print_serial("[SYSFS] Calling Stat Callback on %s\n", inode->name);
         return cdev->stat_callback(cdev, statbuf);
     }
     return -1;
