@@ -14,16 +14,6 @@ struct http_request {
     char req[];
 };
 
-int has_reply;
-
-int callback(uint16_t port, void *data, size_t data_size) {
-    printf("HTTP callback! - %d %d\n", port, data_size);
-    for(int i = 0; i < data_size; i++){
-        putc(((char *) data)[i], stdout);
-    }
-    return 0;
-}
-
 int main(int argc, char **argv){
     int conn_fd;
     int http_fd = open("/-/net/http", O_WRITE);
@@ -37,8 +27,6 @@ int main(int argc, char **argv){
     hreq->conn_ref = &conn_fd;
     hreq->str_len = strlen(request);
     memcpy(hreq->req, request, hreq->str_len);
-
-    has_reply = 0;
 
     printf("HTTP %s\n",
         hreq->req

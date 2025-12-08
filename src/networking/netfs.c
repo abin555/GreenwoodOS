@@ -269,7 +269,7 @@ struct NetFS_Connection *netfs_allocConnection(int type, int requestor_pid){
 
 int netfs_connectionFill(struct NetFS_Connection *conn, char *buf, size_t bufsize){
     if(conn == NULL || buf == NULL) return -1;
-    print_serial("[NETFS] Filling connection %d buffer!\nBuffer Base @ 0x%x\nBuffer Write @ 0x%x\n", conn->cid, conn->buffer, conn->write_head);
+    print_serial("[NETFS] Filling connection %d buffer with %d bytes!\nBuffer Base @ 0x%x\nBuffer Write @ 0x%x\n", conn->cid, bufsize, conn->buffer, conn->write_head);
     memcpy(conn->write_head, buf, bufsize);
     conn->write_head += bufsize;
     return bufsize;
@@ -333,10 +333,16 @@ int netfs_conn_stat(void *cdev, void *statbuf){
     
     memcpy(stat->fs_ownerIden, "NETFS", 6);
     stat->open_stat = conn->pending;
-    if(conn->active)
-        stat->size = conn->write_head - conn->buffer;
-    else
+    stat->size = conn->write_head - conn->buffer;
+    /*
+    if(conn->active){
+        
+        print_serial("[NETFS] Conn %d is %d bytes\n", conn->cid, stat->size);
+    }
+    else {
         stat->size = 0;
+    }
+    */
     return 0;
 };
 
