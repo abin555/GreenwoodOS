@@ -149,6 +149,7 @@ int buffs_read(void *f, void *buf, int nbytes){
     struct VFS_File *file = f;
     if(file == NULL || buf == NULL || nbytes == 0) return 0;
     struct BUFFS_Inode *buffs = file->inode.fs.fs;
+    print_serial("[BUFFS] Read to 0x%x of %d bytes, head is at %d\n", buf, nbytes, file->head);
     if(buffs->type != BUFFS_File){
         return 0;
     }
@@ -163,6 +164,7 @@ int buffs_write(void *f, void *buf, int nbytes){
     struct VFS_File *file = f;
     if(file == NULL || buf == NULL || nbytes == 0) return 0;
     struct BUFFS_Inode *buffs = file->inode.fs.fs;
+    print_serial("[BUFFS] Write from 0x%x of %d bytes, head is at %d\n", buf, nbytes, file->head);
     if(buffs->type != BUFFS_File){
         return 0;
     }

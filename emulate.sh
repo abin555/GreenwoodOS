@@ -9,8 +9,6 @@ qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -
 -device ide-hd,drive=disk4,bus=ahci.1,bootindex=4 \
 -device ide-hd,drive=disk,bus=ahci.2,bootindex=1 \
 -device ide-hd,drive=disk2,bus=ahci.3,bootindex=3 \
--audiodev pa,id=speaker -machine pcspk-audiodev=speaker \
--audio pa,model=ac97 \
 -device qemu-xhci,id=xhci \
 -rtc base=localtime,clock=host \
 -enable-kvm \
