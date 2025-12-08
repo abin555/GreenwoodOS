@@ -16,14 +16,6 @@ struct http_request {
 
 int has_reply;
 
-int callback(uint16_t port, void *data, size_t data_size) {
-    printf("HTTP callback! - %d %d\n", port, data_size);
-    for(int i = 0; i < data_size; i++){
-        putc(((char *) data)[i], stdout);
-    }
-    return 0;
-}
-
 int main(int argc, char **argv){
     int conn_fd;
     int http_fd = open("/-/net/http", O_WRITE);
@@ -31,12 +23,16 @@ int main(int argc, char **argv){
         printf("Unable to open HTTP file\n");
         return 1;
     }
-
-    char *request = "10.0.1.2 80 GET / localhost";
-    struct http_request *hreq = malloc(sizeof(struct http_request) + strlen(request));
+    if(argc == 1) argv[1] = "10.0.1.2";
+    //char *request = "10.0.1.2 80 GET / localhost";
+    char request_buf[100];
+    snprintf(request_buf, sizeof(request_buf), "%s 80 GET / hostname\0", argv[1]);
+    size_t hreq_size = sizeof(struct http_request) + strlen(request_buf) + 1;
+    struct http_request *hreq = malloc(hreq_size);
+    memset(hreq, 0, hreq_size);
     hreq->conn_ref = &conn_fd;
-    hreq->str_len = strlen(request);
-    memcpy(hreq->req, request, hreq->str_len);
+    hreq->str_len = strlen(request_buf);
+    memcpy(hreq->req, request_buf, hreq->str_len);
 
     has_reply = 0;
 
@@ -44,11 +40,11 @@ int main(int argc, char **argv){
         hreq->req
     );
 
-    write(http_fd, hreq, sizeof(struct http_request) + strlen(request));
+    write(http_fd, hreq, sizeof(struct http_request) + strlen(request_buf));
     close(http_fd);
 
     while(conn_fd == -1){
-
+        yield();
     }
 
     struct stat conn_stat;
@@ -62,7 +58,7 @@ int main(int argc, char **argv){
     char *read_buf = malloc(conn_stat.size+1);
     memset(read_buf, 0, conn_stat.size+1);
     int n = read(conn_fd, read_buf, conn_stat.size);
-    printf("Read %d bytes\n", n);
+    printf("Read %d bytes, len is %d\n", n, strlen(read_buf));
     for(int i = 0; i < n; i++){
         putc(read_buf[i], stdout);
     }
