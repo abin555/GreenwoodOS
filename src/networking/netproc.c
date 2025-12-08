@@ -114,6 +114,54 @@ void netprocess_yield(){
 print_serial(__VA_ARGS__); \
 print_console(con, __VA_ARGS__);
 
+void netproc_queue_icmp(struct CONSOLE *con, struct netproc_req_entry *req){
+    PRINT("[NETPROC] Addressing ICMP Request\n");
+    netproc_addToPending(req->pid, req->request);
+    icmp_echoRequest(
+        ethernet_getDriver(),
+        req->request.request.icmp_echo_request.dst_ip,
+        1, 1, 0, 0
+    );
+}
+
+void netproc_queue_http(struct CONSOLE *con, struct netproc_req_entry *req){
+    PRINT("[NETPROC] Addressing HTTP Request: %d.%d.%d.%d:%d %s %s %s\n",
+        req->request.request.http_request.dst_ip[0],
+        req->request.request.http_request.dst_ip[1],
+        req->request.request.http_request.dst_ip[2],
+        req->request.request.http_request.dst_ip[3],
+        req->request.request.http_request.dst_port,
+        req->request.request.http_request.method,
+        req->request.request.http_request.path,
+        req->request.request.http_request.host
+    );
+    struct NetFS_Connection *conn_dev = netfs_allocConnection(NETFS_Connection_HTTP, req->pid);
+    req->request.request.http_request.conn_dev = conn_dev;
+    char filenamebuf[50];
+    memset(filenamebuf, 0, sizeof(filenamebuf));
+    snprintf(filenamebuf, sizeof(filenamebuf), "-/net/C/conn%d\0", conn_dev->cid);
+    struct task_state *target_task = task_fromPID(req->pid);
+    int sys_conn_fd = vfs_open(filenamebuf, VFS_FLAG_READ | VFS_FLAG_WRITE);
+    int proc_connection_fd = task_allocFD(target_task, sys_conn_fd);
+    print_serial("[NETPROC] \"%s\" -> SysFD = %d, TaskFD = %d\n", filenamebuf, sys_conn_fd, proc_connection_fd);
+    print_serial("[NETPROC] PID %d Opened in \"%s\" FD %d:\n", req->pid, target_task->task_name, proc_connection_fd);
+    for(int j = 0; j < MT_maxDescriptors; j++){
+        print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, target_task->file_descs[j]);
+    }
+    *req->request.request.http_request.conn_ref = proc_connection_fd;
+    conn_dev->pending = 1;
+    req->request.request.http_request.src_port = http_send_request(
+        ethernet_getDriver(),
+        req->request.request.http_request.dst_ip,
+        req->request.request.http_request.dst_port,
+        req->request.request.http_request.method,
+        req->request.request.http_request.path,
+        req->request.request.http_request.host
+    );
+    conn_dev->port = req->request.request.http_request.src_port;
+    netproc_addToPending(req->pid, req->request);
+}
+
 void netprocess_queue(struct CONSOLE *con){
     PRINT("[NETPROC] Addressing Queue\n");
     for(int i = 0; i < NETACTION_QUEUE_LEN; i++){
@@ -121,56 +169,90 @@ void netprocess_queue(struct CONSOLE *con){
         if(req->pending && !req->free){
             switch(req->request.type){
                 case NETPROC_ICMP_ECHO_REQUEST:
-                    PRINT("[NETPROC] Addressing ICMP Request\n");
-                    netproc_addToPending(req->pid, req->request);
-                    icmp_echoRequest(
-                        ethernet_getDriver(),
-                        req->request.request.icmp_echo_request.dst_ip,
-                        1, 1, 0, 0
-                    );
+                    netproc_queue_icmp(con, req);
                     break;
                 case NETPROC_HTTP_REQUEST:
-                    PRINT("[NETPROC] Addressing HTTP Request: %d.%d.%d.%d:%d %s %s %s\n",
-                        req->request.request.http_request.dst_ip[0],
-                        req->request.request.http_request.dst_ip[1],
-                        req->request.request.http_request.dst_ip[2],
-                        req->request.request.http_request.dst_ip[3],
-                        req->request.request.http_request.dst_port,
-                        req->request.request.http_request.method,
-                        req->request.request.http_request.path,
-                        req->request.request.http_request.host
-                    );
-                    struct NetFS_Connection *conn_dev = netfs_allocConnection(NETFS_Connection_HTTP, req->pid);
-                    req->request.request.http_request.conn_dev = conn_dev;
-                    char filenamebuf[50];
-                    memset(filenamebuf, 0, sizeof(filenamebuf));
-                    snprintf(filenamebuf, sizeof(filenamebuf), "-/net/C/conn%d\0", conn_dev->cid);
-                    struct task_state *target_task = task_fromPID(req->pid);
-                    int sys_conn_fd = vfs_open(filenamebuf, VFS_FLAG_READ | VFS_FLAG_WRITE);
-                    int proc_connection_fd = task_allocFD(target_task, sys_conn_fd);
-                    print_serial("[NETPROC] \"%s\" -> SysFD = %d, TaskFD = %d\n", filenamebuf, sys_conn_fd, proc_connection_fd);
-                    print_serial("[NETPROC] PID %d Opened in \"%s\" FD %d:\n", req->pid, target_task->task_name, proc_connection_fd);
-                    for(int j = 0; j < MT_maxDescriptors; j++){
-                        print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, target_task->file_descs[j]);
-                    }
-                    *req->request.request.http_request.conn_ref = proc_connection_fd;
-                    conn_dev->pending = 1;
-                    req->request.request.http_request.src_port = http_send_request(
-                        ethernet_getDriver(),
-                        req->request.request.http_request.dst_ip,
-                        req->request.request.http_request.dst_port,
-                        req->request.request.http_request.method,
-                        req->request.request.http_request.path,
-                        req->request.request.http_request.host
-                    );
-                    conn_dev->port = req->request.request.http_request.src_port;
-                    netproc_addToPending(req->pid, req->request);
-                    
+                    netproc_queue_http(con, req);
                     break;
             }
             req->pending = 0;
             req->free = 1;
         }
+    }
+}
+
+void netproc_pending_icmp(struct CONSOLE *con, struct netproc_pend_entry *pend){
+    PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
+    list_tasks();
+    if(task_fromPID(pend->pid)->slot_active){
+        int current_task_id = task_running_idx;
+        task_running_idx = taskID_fromPID(pend->pid);
+        int slot = task_get_slot(task_running_idx);
+        PRINT("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
+        if(tasks[task_running_idx].program_slot != -1){
+            PRINT("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
+            select_program(slot);
+        }
+
+        PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
+        
+        PRINT("[NETPROC] Processing ICMP Callback to 0x%x on PID %d\n", pend->request.request.icmp_echo_request.callback, task_running_idx);
+        //viewport->event_handler(viewport, event);
+        int response = pend->request.request.icmp_echo_request.callback(pend->reply.icmp_reply.packet_size, pend->reply.icmp_reply.source_ip, pend->reply.icmp_reply.packet);
+        PRINT("[NETPROC] Result: %d\n", response);
+        task_running_idx = current_task_id;
+        if(tasks[task_running_idx].program_slot != -1){
+            PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
+            select_program(task_get_slot(task_running_idx));
+        }
+    }
+    else{
+        PRINT("[NETPROC] Error: PID %d no longer running\n", pend->pid);
+    }
+    pend->free = 1;
+    pend->has_reply = 0;
+}
+
+void netproc_pending_http(struct CONSOLE *con, struct netproc_pend_entry *pend){
+    int actionIdx = ++pend->reply.http_reply.lastAttended;
+    PRINT("*** HTTP reply #%d of %d\n", actionIdx, pend->reply.http_reply.nparts);
+    PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
+    //list_tasks();
+    PRINT("[NETPROC] HTTP Response goes to connection #%d\n", pend->request.request.http_request.conn_dev->cid);
+    if(task_fromPID(pend->pid)->slot_active || 1){
+        int current_task_id = task_running_idx;
+        task_running_idx = taskID_fromPID(pend->pid);
+        int slot = task_get_slot(task_running_idx);
+        PRINT("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
+        if(tasks[task_running_idx].program_slot != -1){
+            PRINT("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
+            select_program(slot);
+        }
+
+        PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
+        PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.conn_ref, task_running_idx);
+        //viewport->event_handler(viewport, event);
+        netfs_connectionFill(
+            pend->request.request.http_request.conn_dev,
+            pend->reply.http_reply.parts[actionIdx].buf,
+            pend->reply.http_reply.parts[actionIdx].size
+        );
+        
+        //int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);
+        //PRINT("[NETPROC] Result: %d\n", response);
+        task_running_idx = current_task_id;
+        if(tasks[task_running_idx].program_slot != -1){
+            PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
+            select_program(task_get_slot(task_running_idx));
+        }
+    }
+    else{
+        PRINT("[NETPROC] Error: PID %d no longer running\n", pend->pid);
+    }
+    if(pend->reply.http_reply.lastAttended == pend->reply.http_reply.nparts){
+        pend->free = 1;
+        pend->has_reply = 0;
+        PRINT("[NETPROC] Http finished\n");
     }
 }
 
@@ -184,77 +266,10 @@ void netprocess_pending(struct CONSOLE *con){
         if(!pend->has_reply) continue;
 
         if(pend->request.type == NETPROC_ICMP_ECHO_REQUEST){
-            PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
-            list_tasks();
-            if(task_fromPID(pend->pid)->slot_active){
-                int current_task_id = task_running_idx;
-                task_running_idx = taskID_fromPID(pend->pid);
-                int slot = task_get_slot(task_running_idx);
-                PRINT("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
-                if(tasks[task_running_idx].program_slot != -1){
-                    PRINT("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
-                    select_program(slot);
-                }
-
-                PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.icmp_echo_request.callback));
-                
-                PRINT("[NETPROC] Processing ICMP Callback to 0x%x on PID %d\n", pend->request.request.icmp_echo_request.callback, task_running_idx);
-                //viewport->event_handler(viewport, event);
-                int response = pend->request.request.icmp_echo_request.callback(pend->reply.icmp_reply.packet_size, pend->reply.icmp_reply.source_ip, pend->reply.icmp_reply.packet);
-                PRINT("[NETPROC] Result: %d\n", response);
-                task_running_idx = current_task_id;
-                if(tasks[task_running_idx].program_slot != -1){
-                    PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
-                    select_program(task_get_slot(task_running_idx));
-                }
-            }
-            else{
-                PRINT("[NETPROC] Error: PID %d no longer running\n", pend->pid);
-            }
-            pend->free = 1;
-            pend->has_reply = 0;
+            netproc_pending_icmp(con, pend);
         }
         else if(pend->request.type == NETPROC_HTTP_REQUEST){
-            int actionIdx = ++pend->reply.http_reply.lastAttended;
-            PRINT("*** HTTP reply #%d of %d\n", actionIdx, pend->reply.http_reply.nparts);
-            PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
-            //list_tasks();
-            PRINT("[NETPROC] HTTP Response goes to connection #%d\n", pend->request.request.http_request.conn_dev->cid);
-            if(task_fromPID(pend->pid)->slot_active || 1){
-                int current_task_id = task_running_idx;
-                task_running_idx = taskID_fromPID(pend->pid);
-                int slot = task_get_slot(task_running_idx);
-                PRINT("New PID Running: %d Old: %d\n", task_running_idx, current_task_id);
-                if(tasks[task_running_idx].program_slot != -1){
-                    PRINT("PID %d Selecting Program Slot %d\n", task_running_idx, slot);
-                    select_program(slot);
-                }
-
-                PRINT("0x%x\n", get_physical((uint32_t) pend->request.request.http_request.conn_ref));
-                PRINT("[NETPROC] Processing HTTP Callback to 0x%x on PID %d\n", pend->request.request.http_request.conn_ref, task_running_idx);
-                //viewport->event_handler(viewport, event);
-                netfs_connectionFill(
-                    pend->request.request.http_request.conn_dev,
-                    pend->reply.http_reply.parts[actionIdx].buf,
-                    pend->reply.http_reply.parts[actionIdx].size
-                );
-                
-                //int response = pend->request.request.http_request.callback(pend->reply.http_reply.parts[actionIdx].port, pend->reply.http_reply.parts[actionIdx].buf, pend->reply.http_reply.parts[actionIdx].size);
-                //PRINT("[NETPROC] Result: %d\n", response);
-                task_running_idx = current_task_id;
-                if(tasks[task_running_idx].program_slot != -1){
-                    PRINT("Selecting Program Slot %d\n", tasks[task_running_idx].program_slot);
-                    select_program(task_get_slot(task_running_idx));
-                }
-            }
-            else{
-                PRINT("[NETPROC] Error: PID %d no longer running\n", pend->pid);
-            }
-            if(pend->reply.http_reply.lastAttended == pend->reply.http_reply.nparts){
-                pend->free = 1;
-                pend->has_reply = 0;
-                PRINT("[NETPROC] Http finished\n");
-            }
+            netproc_pending_http(con, pend);
         }
     }
     task_lock = 0;
