@@ -279,7 +279,7 @@ void task_end(){
         tasks[task_running_idx].console = NULL;
         tasks[task_running_idx].own_console = false;
     }
-    print_serial("[TASK] Task %d:%s Ended\n", task_running_idx, tasks[task_running_idx].task_name);
+    print_serial("[TASK] Task %d:%s Ended - 0x%x\n", task_running_idx, tasks[task_running_idx].task_name, tasks[task_running_idx].registers.eax);
 	/*
     if(tasks[task_running_idx].program_slot == -1)
         free((void *) tasks[task_running_idx].stack_region);

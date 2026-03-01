@@ -30,6 +30,7 @@ struct Viewport make_viewport(int w, int h, char *title){
 }
 
 void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
+    uint8_t decorator = !(viewport->options & VP_OPT_NODECORATOR);
     if(viewport == NULL || window == NULL) return;
     if(viewport->minimized){
         fillRect(
@@ -60,48 +61,68 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
         );
     }
     else{
-        fillRect(
-            0x0,
-            0xBBBBBB,
-            viewport->loc.x,
-            viewport->loc.y,
-            viewport->loc.x + viewport->loc.w,
-            viewport->loc.y + VIEWPORT_HEADER_HEIGHT,
-            window->backbuffer,
-            window->width
-        );
-        if(viewport->backbuf == NULL || viewport->buf_size == 0){
+        if(decorator){
             fillRect(
                 0x0,
-                0x222222,
+                0xBBBBBB,
                 viewport->loc.x,
-                viewport->loc.y+10,
+                viewport->loc.y,
                 viewport->loc.x + viewport->loc.w,
-                viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT,
+                viewport->loc.y + VIEWPORT_HEADER_HEIGHT,
                 window->backbuffer,
                 window->width
             );
+            if(viewport->backbuf == NULL || viewport->buf_size == 0){
+                fillRect(
+                    0x0,
+                    0x222222,
+                    viewport->loc.x,
+                    viewport->loc.y+10,
+                    viewport->loc.x + viewport->loc.w,
+                    viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT,
+                    window->backbuffer,
+                    window->width
+                );
+            }
+            else{
+                viewport_draw_buf(viewport, window);
+            }
+            buf_putChar(
+                window->backbuffer,
+                viewport->loc.x + viewport->loc.w - 16,
+                viewport->loc.y + 1,
+                '-',
+                0xFFFFFF,
+                0xFF
+            );
+            buf_putChar(
+                window->backbuffer,
+                viewport->loc.x + viewport->loc.w - 8,
+                viewport->loc.y + 1,
+                'X',
+                0xFFFFFF,
+                0xFF0000
+            );
         }
-        else{
-            viewport_draw_buf(viewport, window);
+        else {
+            if(viewport->backbuf == NULL || viewport->buf_size == 0){
+                fillRect(
+                    0x0,
+                    0x222222,
+                    viewport->loc.x,
+                    viewport->loc.y+10,
+                    viewport->loc.x + viewport->loc.w,
+                    viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT,
+                    window->backbuffer,
+                    window->width
+                );
+            }
+            else{
+                viewport_draw_buf(viewport, window);
+            }
         }
-
-        buf_putChar(
-            window->backbuffer,
-            viewport->loc.x + viewport->loc.w - 16,
-            viewport->loc.y + 1,
-            '-',
-            0xFFFFFF,
-            0xFF
-        );
-        buf_putChar(
-            window->backbuffer,
-            viewport->loc.x + viewport->loc.w - 8,
-            viewport->loc.y + 1,
-            'X',
-            0xFFFFFF,
-            0xFF0000
-        );
+        
+        
         if((viewport->options & VP_OPT_RESIZE) != 0){
             buf_putChar(
                 window->backbuffer,
@@ -113,17 +134,18 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
             );
         }        
     }
-
-    for(int i = 0; viewport->title[i] != '\0' && viewport->title != NULL; i++){
-        buf_putChar(
-            window->backbuffer,
-            viewport->loc.x+i*8+2,
-            viewport->loc.y+2,
-            viewport->title[i],
-            0x0,
-            0xBBBBBB
-        );
-    }
+    if(decorator){
+        for(int i = 0; viewport->title[i] != '\0' && viewport->title != NULL; i++){
+            buf_putChar(
+                window->backbuffer,
+                viewport->loc.x+i*8+2,
+                viewport->loc.y+2,
+                viewport->title[i],
+                0x0,
+                0xBBBBBB
+            );
+        }
+    }    
 }
 
 void viewport_toggle_size(struct Viewport *viewport){
@@ -197,6 +219,7 @@ void vp_draw_char(struct Viewport *vp, int x, int y, char c, uint32_t fg, uint32
 
 bool getViewportTitleClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
+    if(viewport->options & VP_OPT_NODECORATOR) return false;
     if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y && y < viewport->loc.y + VIEWPORT_HEADER_HEIGHT) return true;
     return false;
 }

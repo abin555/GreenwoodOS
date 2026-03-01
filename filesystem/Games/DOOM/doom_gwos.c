@@ -173,10 +173,10 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 
 char *getenv(const char *var){
   if(!strcmp(var, "HOME")){
-      return "/A/DOOM";
+      return "/A/Games/DOOM";
   }
   else if(!strcmp(var, "DOOMWADDIR")){
-    return "/A/DOOM";
+    return "/A/Games/DOOM";
   }
   else{
     printf("UNKNOWN ENV: %s\n", var);

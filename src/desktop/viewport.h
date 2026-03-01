@@ -19,8 +19,9 @@ typedef enum {
 } VIEWPORT_EVENT_TYPE;
 
 typedef enum {
-    VP_OPT_NONE = 0,
-    VP_OPT_RESIZE = 1
+    VP_OPT_NONE = 0b0,
+    VP_OPT_RESIZE = 0b1,
+    VP_OPT_NODECORATOR = 0b10
 } VIEWPORT_OPTIONS;
 
 struct Viewport {
