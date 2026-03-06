@@ -20,7 +20,7 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.frontbuf = NULL;
     viewport.buf_size = 0;
     viewport.owner_program_slot = tasks[task_running_idx].program_slot;
-    viewport.owner_task_id = task_running_idx;
+    viewport.owner_task_id = tasks[task_running_idx].pid;
     viewport.event_handler = NULL;
     viewport.ascii = '\0';
     viewport.click_events_enabled = false;
@@ -454,11 +454,18 @@ void viewport_add_event_handler(struct Viewport *viewport, void (*handler)(struc
 void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event){
     if(viewport == NULL || viewport->event_handler == NULL) return;
     //print_serial("[VIEWPORT] Sending event %d to viewport %s (SLOT %d) @ 0x%x\n", event, viewport->title, viewport->owner_program_slot, viewport->event_handler);
+
+    int vp_task_id = taskID_fromPID(viewport->owner_task_id);
+    if(vp_task_id == -1){
+        viewport_close(global_viewport_list, viewport);
+        return;
+    }
+
     task_lock = 1;
     int current_task_id = task_running_idx;
 
     if(viewport->owner_program_slot != -1){
-        task_running_idx = viewport->owner_task_id;
+        task_running_idx = vp_task_id;
         select_program(viewport->owner_program_slot);
     }
     

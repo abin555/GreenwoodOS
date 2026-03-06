@@ -82,13 +82,16 @@ int main(int argc, char **argv){
     read(screen_fd, &conf, sizeof(struct DesktopConfig));
     printf("[TBAR] Screen is %dx%d\n", conf.screen_w, conf.screen_h);
 
+    width = TBAR_MAXICONS * TBAR_HEIGHT;
+    height = TBAR_HEIGHT;
+
     struct DesktopConfig mutDesktopConfig = conf;
-    mutDesktopConfig.vp_root_x = 0;
+    mutDesktopConfig.vp_root_x = (conf.screen_w / 2) - (width / 2);
     mutDesktopConfig.vp_root_y = conf.screen_h-(TBAR_HEIGHT+10);
     lseek(screen_fd, 0, SEEK_SET);
     write(screen_fd, &mutDesktopConfig, sizeof(mutDesktopConfig));
 
-    width = conf.screen_w;
+    width = TBAR_MAXICONS * TBAR_HEIGHT;
     height = TBAR_HEIGHT;
 
     struct Viewport *tbar_vp = vp_open(width, height, "Taskbar");
@@ -123,9 +126,10 @@ int main(int argc, char **argv){
         fseek(mouse, 0, SEEK_SET);
         fread(&mouseStatus, sizeof(mouseStatus), 1, mouse);
 
+        int relx = mouseStatus.pos.x - tbar_vp->loc.x;
         int rely = mouseStatus.pos.y - tbar_vp->loc.y;
         if(rely > 0){
-            int idx = (mouseStatus.pos.x / TBAR_HEIGHT) - 1;
+            int idx = (relx / TBAR_HEIGHT) - 1;
             printf("%d %d %d Clicked on %s\n", mouseStatus.pos.x, rely, idx, tbar->entries[idx].name);
             exec(tbar->entries[idx].exec_filename, 0, NULL);
         }

@@ -46,7 +46,7 @@ IconBMP *tbar_mkIcon(char *filename){
     FILE *icon_file = fopen(filename, "r");
     if(icon_file == NULL) return NULL;
     fclose(icon_file);
-    tbar_mkResizedIcon(filename, TBAR_HEIGHT, TBAR_HEIGHT);
+    tbar_mkResizedIcon(filename, ICON_SIZE, ICON_SIZE);
     icon_file = fopen(RSIZE_FILE, "r");
     if(icon_file == NULL) return NULL;
 
@@ -60,10 +60,10 @@ IconBMP *tbar_mkIcon(char *filename){
 }
 
 void tbar_drawIcon(int idx, IconBMP *icon, uint32_t *backbuf, uint32_t width, uint32_t height){
-    int x = idx*TBAR_HEIGHT;
-    for(int i = 0; i < TBAR_HEIGHT; i++){
-        for(int j = 0; j < TBAR_HEIGHT; j++){
-            backbuf[x + j + i * width] = (*icon)[i][j];
+    int x = idx*ICON_SIZE + ((TBAR_HEIGHT - TBAR_MAXICONS) / 2);
+    for(int i = 0; i < ICON_SIZE; i++){
+        for(int j = 0; j < ICON_SIZE; j++){
+            backbuf[x + (j + ((TBAR_HEIGHT - TBAR_MAXICONS) / 2)) + i * width] = (*icon)[i][j];
         }
     }
 }

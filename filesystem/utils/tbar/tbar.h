@@ -4,8 +4,10 @@
 #include <stdint.h>
 
 #define TBAR_HEIGHT 28
+#define ICON_SIZE 24
+#define TBAR_MAXICONS 6
 
-typedef uint32_t IconBMP[TBAR_HEIGHT][TBAR_HEIGHT] ;
+typedef uint32_t IconBMP[ICON_SIZE][ICON_SIZE] ;
 
 struct TaskbarEntry {
     char *name;
