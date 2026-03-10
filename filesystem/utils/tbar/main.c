@@ -103,11 +103,13 @@ int main(int argc, char **argv){
     bufsize = sizeof(uint32_t*) * width * height;
     backbuf = malloc(bufsize);
     vp_set_buffer(tbar_vp, backbuf, bufsize);
-
     
-
+    for(int i = 0; i < width * height; i++){
+        backbuf[i] = 0x00d1d1d1;
+    }
+    
     for(int i = 0; i < tbar->numEntries; i++){
-        tbar_drawIcon(i+1, tbar->entries[i].icon, backbuf, width, height);
+        tbar_drawIcon(i, tbar->entries[i].icon, backbuf, width, height);
     }
     vp_copy(tbar_vp);
 
