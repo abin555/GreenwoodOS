@@ -93,4 +93,7 @@ int vfs_chdir(struct DIRECTORY *dir, char *path);
 int vfs_ftruncate(int fd, unsigned int length);
 int vfs_stat(int fd, void *statbuf);
 
+int vfs_meta_countRoot();
+int vfs_meta_getRoot(int idx, struct VFS_Inode **dst_inode_ptr);
+
 #endif

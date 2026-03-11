@@ -32,6 +32,7 @@ int vfprintf(FILE *file, const char *fmt, va_list listpd){
 	double d;
 	char *s_arg;
 	char *b;
+	char c;
 	int ntok = 0;
 	if(file == NULL) return 0;
 	while(*fmt != '\0'){
@@ -60,6 +61,11 @@ int vfprintf(FILE *file, const char *fmt, va_list listpd){
 					ntok += fwrite(b, strlen(b)+1, 1, file);
 					break;
 				case 'F':
+					break;
+				case 'c':
+					c = (char) va_arg(listpd, int);
+					s[0] = c;
+					ntok += fwrite(s, 1, 1, file);
 					break;
 			}
 			fmt++;

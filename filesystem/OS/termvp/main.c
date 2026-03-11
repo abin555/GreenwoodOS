@@ -29,6 +29,11 @@ void draw_cursor(int idx);
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event);
 
 int main(int argc, char **argv){
+	if(argc == 2){
+		run_command(argv[1]);
+		return 0;
+	}
+
 	puts("Terminal!\n");
 	set_schedule(ALWAYS);
 	vp = vp_open(WIDTH, HEIGHT, "GWOS Terminal");

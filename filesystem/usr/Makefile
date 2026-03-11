@@ -24,7 +24,11 @@ build_math:
 	cp ./fdlibm/libm.a ./lib/libm.a
 	cp ./fdlibm/fdlibm.h ./include/math.h
 
-build: build_libc build_math
+build_gwoslib:
+	make -C ./libgwos_src build
+	cp ./libgwos_src/libgwos.a ./lib/libgwos.a
+
+build: build_libc build_math build_gwoslib
 	echo "Built"
 
 clean:

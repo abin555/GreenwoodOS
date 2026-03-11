@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/kernfns.h>
+#include <gwos/kernel_fn.h>
 #include <string.h>
 
 #include "hooks.h"
@@ -63,3 +64,32 @@ int hooks_load(){
     }
     return 0;
 }
+
+/*
+
+int hooks_load(){
+    FILE *kernel_fn_file = kernel_fn_ready();
+    if(kernel_fn_file != NULL){
+        vfs_addFS = kernel_fn_get(kernel_fn_file, "vfs_addFS")->fn;
+        kmalloc = kernel_fn_get(kernel_fn_file, "kmalloc")->fn;
+        print_serial = kernel_fn_get(kernel_fn_file, "print_serial")->fn;
+        get_task_id = kernel_fn_get(kernel_fn_file, "get_task_id")->fn;
+        MEM_findRegionIdx = kernel_fn_get(kernel_fn_file, "MEM_findRegionIdx")->fn;
+        MEM_reserveRegionBlock = kernel_fn_get(kernel_fn_file, "MEM_reserveRegionBlock")->fn;
+        MEM_freeRegionBlock = kernel_fn_get(kernel_fn_file, "MEM_freeRegionBlock")->fn;
+    }
+    fclose(kernel_fn_file);
+    if(
+        vfs_addFS == NULL ||
+        print_serial == NULL ||
+        kmalloc == NULL ||
+        MEM_findRegionIdx == NULL ||
+        MEM_reserveRegionBlock == NULL ||
+        MEM_freeRegionBlock == NULL
+    ){
+        printf("Critical Error, undefined symbols!\n");
+        return 1;
+    }
+    return 0;
+}
+*/

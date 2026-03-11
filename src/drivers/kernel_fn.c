@@ -33,6 +33,8 @@ void kernel_fn_init(){
     kernel_fn_add(MEM_findRegionIdx, 1, "MEM_findRegionIdx");
     kernel_fn_add(MEM_reserveRegionBlock, 4, "MEM_reserveRegionBlock");
     kernel_fn_add(MEM_freeRegion, 2, "MEM_freeRegionBlock");
+    kernel_fn_add(vfs_meta_countRoot, 0, "vfs_meta_countRoot");
+    kernel_fn_add(vfs_meta_getRoot, 2, "vfs_meta_getRoot");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){

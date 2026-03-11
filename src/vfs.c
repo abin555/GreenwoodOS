@@ -349,3 +349,14 @@ int vfs_stat(int fd, void *statbuf){
     }
     return -1;
 }
+
+int vfs_meta_countRoot(){
+    return VFS.num_inodes;   
+}
+int vfs_meta_getRoot(int idx, struct VFS_Inode **dst_inode_ptr){
+    if(idx >= 0 && idx < vfs_meta_countRoot() && dst_inode_ptr != NULL){
+        *dst_inode_ptr = &VFS.inodes[idx];
+        return 0;
+    }
+    return 1;
+}
