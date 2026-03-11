@@ -15,7 +15,7 @@ int main(int argc, char **argv){
     }
     fseek(f, 0, SEEK_END);
     int size = ftell(f);
-    printf("Size %d\n", size);
+    //printf("Size %d\n", size);
     fseek(f, 0, SEEK_SET);
     int remaining = size;
     for(int i = 0; i < (size / bufsize)+1; i++){

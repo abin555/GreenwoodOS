@@ -338,8 +338,7 @@ int buffs_truncate(void *f, unsigned int len){
         print_serial("[BUFFS] Error, not a file\n");
         return -1;
     }
-    size_t new_page_count = len / 0x400000;
-    if(new_page_count == 0) new_page_count = 1;
+    size_t new_page_count = (len / 0x400000) + 1;
     struct BUFFS_file *bfs_file = inode->file;
     if(new_page_count == bfs_file->num_pages){//Number of reserved pages is the same, only update structure.
         bfs_file->size = len;
