@@ -62,13 +62,15 @@ void term_draw(struct Terminal *term){
     memset(term->buf, 0, term->bufsize);
     int x = 0;
     int y = 0;
+    uint32_t fg = 0xFFFFFF;
+    uint32_t bg = 0x000000;
     for(int i = 0; i < term->text_buf_len && y < term->term_h-1; i++){
         if(term->text_buf[i] == '\n'){
             x = 0;
             y++;
             continue;
         }
-        vp_drawChar(term->vp, x*term->char_size, y*term->char_size, term->text_buf[i], 0xFFFFFF, 0x000000);
+        vp_drawChar(term->vp, x*term->char_size, y*term->char_size, term->text_buf[i], (i == term->cursor_idx) ? bg : fg, (i == term->cursor_idx) ? fg : bg);
         x++;
         if(x == term->term_w-1){
             x = 0;
@@ -91,6 +93,7 @@ void term_resize(struct Terminal *term, int vp_w, int vp_h){
     term->buf = memory_requestRegion(sizeof(uint32_t) * term->vp_w * term->vp_h);
     vp_set_buffer(term->vp, term->buf, term->bufsize);
     term_draw(term);
+    vp_copy(term->vp);
     set_schedule(ALWAYS);
 }
 

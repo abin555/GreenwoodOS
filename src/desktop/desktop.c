@@ -56,7 +56,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     print_console(kernel_console, "Starting Desktop Environment!\n");
 
     background = loadBigBitmap(BACKGROUND_FILE, window->width, window->height);
-    struct Bitmap blockDevice = loadBitmap("A/OS/icons/block-device.tga\0");
 
     desktopConfig = (struct DesktopConfig) {
         10, 10, //VP origins are at (10,10)
@@ -101,19 +100,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
 
     struct Icon icons[numIcons];
-    memset(icons, 0, sizeof(struct Icon) * numIcons);
-    
-    /*
-    for(int i = 0; i < numIcons; i++){
-        char folderLabel[5] = {'F','O','L','D',0};
-        icons[i] = generateIcon(folder, 25 + i * 35, 25, folder.width, folder.height, folderLabel);
-    }
-    */
-    for(int i = 0; i < drive_count && i < numIcons; i++){
-        char driveLabel[2] = {drives[i]->identity, 0};
-        icons[i] = generateIcon(blockDevice, 25 + i * 35, 25, blockDevice.width, blockDevice.height, driveLabel);
-    }
-    
+    memset(icons, 0, sizeof(struct Icon) * numIcons);    
 
     print_serial("[DESKTOP] Global Viewport is at %x\n", &global_viewport_list);
     print_serial("[DESKTOP] Global Viewport points to %x\n", global_viewport_list);
@@ -125,7 +112,9 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     viewport_init_sys(global_viewport_list);
 
     print_serial("\n\n[SYS] User Programs Start!\n\n");
-    exec("/A/OS/init/init.elf", 0, NULL, NULL);
+    int pid = exec("/A/OS/init/init.elf", 0, NULL, NULL);
+    tasks[task_running_idx].waitpid = pid;
+    os_yield();
 
     struct {
         int startX;
@@ -146,9 +135,6 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     while(1){
         task_lock = 1;
         drawBackground(background, window);
-        
-        for(int i = 0; i < numIcons; i++)  
-            drawIcon(&icons[i], window);
         
         viewport_draw_all(global_viewport_list, window);
 

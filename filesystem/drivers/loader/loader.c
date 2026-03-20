@@ -482,13 +482,15 @@ int main(int argc, char **argv){
     lseek(service_fd, 0, SEEK_SET);
     void *service_address = memory_requestRegion(service_size);
     printf("Loading to 0x%x %d bytes\n", service_address, service_size);
+	char serviceName[100];
+	snprintf(serviceName, sizeof(serviceName), "Service-%s\n", argv[1]);
     if(elf_check_supported(service_fd)){
         uint32_t entry = elf_get_entry_addr(service_fd);
 		elf_load(service_fd, service_address);
         close(service_fd);
         //*((uint32_t *) (service_address + 0x365c)) = (uint32_t) service_address;
 
-        int pid = manual_task(service_address + entry, "Service");
+        int pid = manual_task(service_address + entry, serviceName);
 		if(wait){
 			waitpid(pid);
 		}

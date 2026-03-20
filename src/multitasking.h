@@ -61,6 +61,7 @@ struct task_state{
     void (*keyboard_event_handler)(char);
     bool own_window;
     bool own_console;
+    char auto_stdinout;
     int file_descs[MT_maxDescriptors];
     int num_used;
     int pid;//Unique program ID

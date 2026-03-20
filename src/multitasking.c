@@ -134,10 +134,12 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
         task->file_descs[j] = -1;
     }
     if(file_ctx == NULL){
+        task->auto_stdinout = 1;
         task->file_descs[0] = vfs_openRel(&task->currentDirectory, "/-/sys/kbd", VFS_FLAG_READ);
         task->file_descs[1] = vfs_openRel(&task->currentDirectory, "/-/dev/console", VFS_FLAG_WRITE);
     }
     else {
+        task->auto_stdinout = 0;
         for(int i = 0; i < file_ctx->num_fds; i++){
             print_serial("[TASK] Association #%d - Creator FD %d -> Child FD %d\n", i, file_ctx->fds[i].creator_fd, file_ctx->fds[i].new_fd);
             task->file_descs[file_ctx->fds[i].new_fd] = tasks[task_running_idx].file_descs[file_ctx->fds[i].creator_fd];
@@ -263,33 +265,34 @@ void stop_task(int8_t task_idx){
 }
 
 void task_end(){
-    tasks[task_running_idx].slot_active = 0;
-    if(tasks[task_running_idx].program_slot != -1){
-        program_slot_status[tasks[task_running_idx].program_slot] = false;
-        if(tasks[task_running_idx].window != NULL && tasks[task_running_idx].own_window == true){
-            window_close(tasks[task_running_idx].window);
-            print_serial("[TASK] %d %s Closed Window\n", task_running_idx, tasks[task_running_idx].task_name);
+    struct task_state *task = &tasks[task_running_idx];
+    task->slot_active = 0;
+    if(task->program_slot != -1){
+        program_slot_status[task->program_slot] = false;
+        if(task->window != NULL && task->own_window == true){
+            window_close(task->window);
+            print_serial("[TASK] %d %s Closed Window\n", task_running_idx, task->task_name);
         }
-        tasks[task_running_idx].window = NULL;
-        tasks[task_running_idx].own_window = false;
-        if(tasks[task_running_idx].console != NULL && tasks[task_running_idx].own_console == true){
-            console_close(tasks[task_running_idx].console);
-            print_serial("[TASK] %d %s Closed Console\n", task_running_idx, tasks[task_running_idx].task_name);
+        task->window = NULL;
+        task->own_window = false;
+        if(task->console != NULL && task->own_console == true){
+            console_close(task->console);
+            print_serial("[TASK] %d %s Closed Console\n", task_running_idx, task->task_name);
         }
-        tasks[task_running_idx].console = NULL;
-        tasks[task_running_idx].own_console = false;
+        task->console = NULL;
+        task->own_console = false;
     }
-    print_serial("[TASK] Task %d:%s Ended - 0x%x\n", task_running_idx, tasks[task_running_idx].task_name, tasks[task_running_idx].registers.eax);
+    print_serial("[TASK] Task %d:%s Ended - 0x%x\n", task_running_idx, task->task_name, task->registers.eax);
 	/*
-    if(tasks[task_running_idx].program_slot == -1)
-        free((void *) tasks[task_running_idx].stack_region);
+    if(task->program_slot == -1)
+        free((void *) task->stack_region);
     else 
-        freeProgramSlot(tasks[task_running_idx].program_slot);
+        freeProgramSlot(task->program_slot);
     */
 
-    for(int i = 0; i < MT_maxDescriptors; i++){
-        if(tasks[task_running_idx].file_descs[i] != -1){
-            vfs_close(tasks[task_running_idx].file_descs[i]);
+    for(int i = (task->auto_stdinout ? 0 : 2); i < MT_maxDescriptors; i++){
+        if(task->file_descs[i] != -1){
+            vfs_close(task->file_descs[i]);
         }
     }
     
