@@ -131,11 +131,13 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 				case 0x69:
 					if(KBD_flags.special){
 						//print_serial("End!\n");
+						
 						for(int i = 0; i < MAX_TASKS; i++){
-							if(tasks[i].window == &windows[window_selected]){
+							if(tasks[i].window == &windows[window_selected] && tasks[i].pid > 3){
 								stop_task(i);
 							}
 						}
+						
 						//reboot();
 					}
 					break;

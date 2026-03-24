@@ -121,6 +121,10 @@ int main(int argc, int argv[]){
     env_set(env, make_sym("PAIR?"), make_builtin(builtin_pair));
     env_set(env, make_sym("REAL"), make_builtin(builtin_real));
     env_set(env, make_sym("EXEC"), make_builtin(builtin_exec));
+    env_set(env, make_sym("WAITPID"), make_builtin(builtin_waitpid));
+    env_set(env, make_sym("OPEN"), make_builtin(builtin_open));
+    env_set(env, make_sym("CLOSE"), make_builtin(builtin_close));
+    env_set(env, make_sym("WRITE"), make_builtin(builtin_write));
 
     if(init_driver()){
         printf("Error setting up driver!\n");

@@ -422,6 +422,7 @@ int builtin_real(Atom args, Atom *result){
 }
 
 #include <sys/task.h>
+#include <exec/exec.h>
 int builtin_exec(struct Atom args, struct Atom *result){
     int n_args = 0;
     struct Atom args_walker = args;
@@ -446,12 +447,72 @@ int builtin_exec(struct Atom args, struct Atom *result){
         args_walker = cdr(args_walker);
     }
     argv[n_args] = NULL;
-    int pid = exec(argv[0], n_args, argv);
+    //int pid = exec(argv[0], n_args, argv);
+    EXEC_CTX ctx = exec_createCTX();
+    exec_setProgram(ctx, argv[0]);
+    exec_setARGC(ctx, n_args);
+    for(int i = 0; i < n_args; i++){
+        exec_setARGV(ctx, i, argv[i]);
+    }
+    int pid = exec_child(ctx);
     
     *result = make_int(pid);
     return Error_OK;
 }
 
 int builtin_waitpid(struct Atom args, struct Atom *result){
-    
+    if(nilp(args)){
+        return Error_Args;
+    }
+    Atom arg = car(args);
+    if(arg.type == Atom_INT){
+        waitpid(arg.value.integer);
+        *result = make_int(1);
+        return Error_OK;
+    }
+    *result = make_int(0);
+    return Error_OK;    
+}
+
+#include <sys/io.h>
+
+int builtin_open(struct Atom args, struct Atom *result){
+    if(nilp(args)){
+        return Error_Args;
+    }
+    Atom arg = car(args);
+    if(arg.type == Atom_STRING){
+        int fd = open(arg.value.string, O_READ | O_WRITE);
+        *result = make_int(fd);
+        return Error_OK;
+    }
+    return Error_Args;
+}
+
+int builtin_close(struct Atom args, struct Atom *result){
+    if(nilp(args)){
+        return Error_Args;
+    }
+    Atom arg = car(args);
+    if(arg.type == Atom_INT){
+        close(arg.value.integer);
+        *result = nil;
+        return Error_OK;
+    }
+    return Error_Args;
+}
+
+int builtin_write(struct Atom args, struct Atom *result){
+    if(nilp(args)){
+        return Error_Args;
+    }
+    Atom fd, buf, len;
+    fd = car(args);
+    buf = car(cdr(args));
+    if(fd.type == Atom_INT && buf.type == Atom_STRING){
+        int len = strlen(buf.value.string);
+        write(fd.value.integer, buf.value.string, len);
+    }
+    *result = nil;
+    return Error_OK;
 }

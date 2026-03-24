@@ -14,6 +14,8 @@
 #include "pcspeaker.h"
 #include "system_calls.h"
 
+void beep();
+
 void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head){
     if(buf == NULL) return;
     struct SysFS_Chardev *serial = buf;
@@ -22,6 +24,13 @@ void sysroot_serial_write_callback(void *buf, int offset, int nbytes, int *head)
         write_serial(serial->buf[offset+i]);
     }
     *head = 0;
+}
+
+int beep_write_cback(void *cdev __attribute__((unused)), void *buf __attribute__((unused)), int woffset __attribute__((unused)), int nbytes, int *head){
+    print_serial("[BEEP]\n");
+    beep();
+    *head = 0;
+    return nbytes;
 }
 
 struct SysFS_Inode *sysroot_init(){
@@ -72,6 +81,20 @@ struct SysFS_Inode *sysroot_init(){
             CDEV_READ
         )
     );
+    struct SysFS_Chardev *beep_cdev = sysfs_createCharDevice(
+        " ",
+        1,
+        CDEV_WRITE
+    );
+    sysfs_setCallbacks(beep_cdev,
+        NULL,
+        NULL,
+        beep_write_cback,
+        NULL
+    );
+    struct SysFS_Inode *pcspeaker_beep = sysfs_mkcdev("beep",
+        beep_cdev
+    );
 
     sysfs_addChild(devs, serial);
     sysfs_addChild(devs, console);
@@ -84,6 +107,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
     sysfs_addChild(systems, pcspeaker);
+    sysfs_addChild(systems, pcspeaker_beep);
     sysfs_addChild(systems, window_bar_cdev);
     sysfs_addChild(systems, MEM_sysfs_createMapFile());
     sysfs_addChild(root, devs);

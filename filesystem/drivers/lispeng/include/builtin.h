@@ -21,5 +21,9 @@ int builtin_pair(Atom args, Atom *result);
 int builtin_real(Atom args, Atom *result);
 int builtin_vp_open(Atom args, Atom *result);
 int builtin_exec(Atom args, Atom *result);
+int builtin_waitpid(struct Atom args, struct Atom *result);
+int builtin_open(struct Atom args, struct Atom *result);
+int builtin_close(struct Atom args, struct Atom *result);
+int builtin_write(struct Atom args, struct Atom *result);
 
 #endif

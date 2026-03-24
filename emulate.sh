@@ -1,5 +1,6 @@
 qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -d int,cpu_reset,guest_errors \
--audiodev none,id=snd0 -device ac97,audiodev=snd0 \
+-audiodev pa,id=snd0 -device ac97,audiodev=snd0 \
+-machine pcspk-audiodev=snd0 \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
 -drive id=disk3,file=fstest.img,if=none,format=raw \
 -drive id=disk4,file=fsos.img,if=none,format=raw \
