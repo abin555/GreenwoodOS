@@ -26,5 +26,7 @@ void exit(int code);
 void srand(unsigned int seed);
 int rand();
 int strtol(const char *nptr, char **endptr, register int base);
+unsigned long strtoul(const char *nptr, char **endptr, int base);
+void qsort(void *base, size_t n, size_t size, typeof(int (const void*, const void*)) *compar);
 
 #endif

@@ -8,5 +8,6 @@ typedef int pid_t;
 
 typedef int intptr_t;
 typedef unsigned int uintptr_t;
+typedef int off_t;
 
 #endif

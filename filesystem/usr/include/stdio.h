@@ -22,6 +22,10 @@ typedef struct FILE FILE;
 typedef long unsigned int size_t;
 #endif
 
+#define BUFSIZ 1000
+#define EOF -1
+#define FILENAME_MAX 300
+
 FILE *fopen(const char *pathname, const char *mode);
 int fprintf(FILE *, const char *, ...);
 int fflush(FILE *);
@@ -48,8 +52,22 @@ int fputc(int c, FILE *stream);
 int putc(int c, FILE *stream);
 int putchar(int c);
 
+int fgetc(FILE *stream);
+char *fgets(char s[], int size, FILE *stream);
+int ferror(FILE *stream);
+void perror(const char *s);
+
+int remove(const char *path);
+
+int ungetc(int c, FILE *stream);
+
+int sscanf(const char *str, const char *format, ...);
+
+int fileno(FILE *stream);
+
 #include <stdarg.h>
 int vfprintf(FILE *stream, const char *format, va_list apq);
+int vsprintf(const char *str, const char *format, va_list apq);
 
 
 #endif

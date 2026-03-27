@@ -74,6 +74,82 @@ int vfprintf(FILE *file, const char *fmt, va_list listpd){
 	return ntok;
 }
 
+int vsprintf(const char *str, const char *fmt, va_list listpd){
+	char s[40];
+	int num;
+	unsigned int unum;
+	float f;
+	double d;
+	char *s_arg;
+	char *b;
+	char c;
+	int ntok = 0;
+	int idx = 0;
+	if(str == NULL) return 0;
+	char *buf = str;
+	while(*fmt != '\0'){
+		if(*fmt != '%'){
+			buf[idx++] = *fmt;
+			ntok += 1;
+			fmt++;
+		}
+		else{
+			fmt++;
+			switch(*fmt){
+				case '%':
+					//ntok += fwrite("%", 1, 1, file);
+					buf[idx++] = '%';
+					ntok++;
+					break;
+				case 'd':
+					num = va_arg(listpd, int);
+					b = itoa(num, s, 10);
+					//ntok += fwrite(b, strlen(b)+1, 1, file);
+					for(int i = 0; i < strlen(b); i++){
+						buf[idx++] = b[i];
+						ntok++;
+					}
+					break;
+				case 's':
+					s_arg = va_arg(listpd, char *);
+					//ntok += fwrite(s_arg, strlen(s_arg)+1, 1, file);
+					for(int i = 0; i < strlen(s_arg); i++){
+						buf[idx++] = s_arg[i];
+						ntok++;
+					}
+					break;
+				case 'x':
+					unum = va_arg(listpd, unsigned int);
+					b = utoa(num, s, 16);
+					//ntok += fwrite(b, strlen(b)+1, 1, file);
+					for(int i = 0; i < strlen(b); i++){
+						buf[idx++] = b[i];
+						ntok++;
+					}
+					break;
+				case 'F':
+					break;
+				case 'c':
+					c = (char) va_arg(listpd, int);
+					s[0] = c;
+					//ntok += fwrite(s, 1, 1, file);
+					buf[idx++] = c;
+					ntok++;
+					break;
+			}
+			fmt++;
+		}
+	}
+	buf[idx++] = '\0';
+	return ntok;
+}
+
+int sprintf(char *str, const char *format, ...){
+	va_list listpd;
+	va_start(listpd, format);
+	return vsprintf(str, format, listpd);
+}
+
 int fprintf(FILE *file, const char *fmt, ...){
 	va_list listpd;
 	va_start(listpd, fmt);
@@ -278,4 +354,46 @@ int snprintf(char *str, size_t size, const char *format, ...){
 		}
 	}
 	return n;
+}
+
+int fgetc(FILE *stream){
+	char buf[1];
+	int n = fread(buf, sizeof(buf), 1, stream);
+	if(n == 0) return EOF;
+	if(buf[0] == '\0') return EOF;
+	return buf[0];
+}
+
+char *fgets(char s[], int size, FILE *stream){
+	if(s == NULL || stream == NULL) return NULL;
+	char c = 0;
+	int n = 0;
+	for(int i = 0; i < size-1; i++){
+		c = fgetc(stream);
+		if(c == EOF) break;
+		s[n++] = c;
+		if(c == '\n') break;
+	}
+	return s;
+}
+
+int remove(const char *path){
+	return 0;
+}
+
+int fileno(FILE *stream){
+	return stream->fd;
+}
+
+void perror(const char *s){
+	if(s == NULL) s = "n/a";
+	printf("%s: PERROR\n", s);
+}
+
+int fflush(FILE *stream){
+	return 0;
+}
+
+int ferror(FILE *stream){
+	return 0;
 }
