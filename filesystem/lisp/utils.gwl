@@ -2,4 +2,5 @@
 (defun img (x) (exec "/A/utils/image/image.elf" x))
 (defun bliss () (bg "/A/Pictures/bliss.tga"))
 (defun vaporwave () (bg "/A/Pictures/vaporwave.tga"))
+(defun beep () (write 1 7))
 (exit)

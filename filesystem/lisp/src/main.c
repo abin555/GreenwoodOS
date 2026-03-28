@@ -99,9 +99,9 @@ int main(int argc, char **argv){
 
         char c = readbuf[0];
 
-        if (c == '\n' || c == '\r') {
+        if (c == '\n') {
             printf("\n");
-            termbuf[idx] = '\0';
+            //termbuf[idx] = '\0';
             p = termbuf;
             err = read_expr(p, &p, &expr);
 
@@ -134,7 +134,7 @@ int main(int argc, char **argv){
             if (idx > 0) {
                 idx--;
                 termbuf[idx] = '\0';
-                fwrite("\b \b", 1, 3, stdout); /* erase the character visually */
+                fwrite("\b", 1, 3, stdout); /* erase the character visually */
             }
 
         } else {

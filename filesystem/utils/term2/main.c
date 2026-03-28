@@ -10,6 +10,7 @@
 #include <sys/stat.h>
 #include <exec/exec.h>
 #include <string.h>
+#include <sys/window.h>
 
 #define TERM_W 80
 #define TERM_H 24
@@ -55,6 +56,7 @@ typedef struct {
  * Terminal
  * ────────────────────────────────────────────── */
 struct Terminal {
+    int window_mode;
     /* logical dimensions (columns × rows, *including* border) */
     int term_w;
     int term_h;
@@ -81,6 +83,9 @@ struct Terminal {
     uint32_t bufsize;
     uint32_t *buf;
     struct Viewport *vp;
+    struct WINDOW *win;
+
+    FILE *beepFile;
 };
 
 struct Terminal *g_term;
@@ -560,6 +565,10 @@ static void term_process_byte(struct Terminal *term, unsigned char c) {
                         cursor_advance(term);
                     break;
                 }
+                case '\a': {
+                    putc('B', term->beepFile);
+                    break;
+                }
                 case 0x08: /* BS – backspace */
                     if (term->cursor_x > 0) {
                         term->cursor_x--;
@@ -664,37 +673,54 @@ static void term_process_byte(struct Terminal *term, unsigned char c) {
     }
 }
 
-struct Terminal *term_init(void) {
+struct Terminal *term_init(int window_mode) {
     struct Terminal *term = malloc(sizeof(struct Terminal));
     memset(term, 0, sizeof(struct Terminal));
-
-    term->term_w   = TERM_W;
-    term->term_h   = TERM_H;
+    term->window_mode = window_mode;
     term->char_size = CHAR_SCALE;
     term->attr_fg  = 0xFFFFFF;
     term->attr_bg  = 0x000000;
     term->cursor_x = 0;
     term->cursor_y = 0;
-
-    term->cells = calloc(TERM_W * TERM_H, sizeof(Cell));
-    cells_clear_all(term);
-
     term->ansi.state = ANSI_STATE_NORMAL;
+    if(window_mode){
+        term->win = window_open("GWOS Term", 1);
+        term->vp_w = term->win->width;
+        term->vp_h = term->win->height;
+        term->term_w = term->vp_w / term->char_size;
+        term->term_h = term->vp_h / term->char_size;
+        term->bufsize = sizeof(uint32_t) * term->win->width * term->win->height;
+        term->buf = term->win->backbuffer;
+        term->vp = NULL;
+        term->cells = calloc(term->term_w * term->term_h, sizeof(Cell));
+        cells_clear_all(term);
+    }
+    else{
+        term->term_w   = TERM_W;
+        term->term_h   = TERM_H;
 
-    term->vp_w    = term->term_w * term->char_size;
-    term->vp_h    = term->term_h * term->char_size;
-    term->bufsize = sizeof(uint32_t) * term->vp_w * term->vp_h;
-    term->buf     = memory_requestRegion(term->bufsize);
-    term->vp      = vp_open(term->vp_w, term->vp_h, "GWOS Terminal 2");
+        term->cells = calloc(TERM_W * TERM_H, sizeof(Cell));
+        cells_clear_all(term);
 
-    vp_add_event_handler(term->vp, term_ev_handler);
-    vp_set_buffer(term->vp, term->buf, term->bufsize);
-    vp_set_options(term->vp, VP_OPT_RESIZE);
+
+        term->vp_w    = term->term_w * term->char_size;
+        term->vp_h    = term->term_h * term->char_size;
+        term->bufsize = sizeof(uint32_t) * term->vp_w * term->vp_h;
+        term->buf     = memory_requestRegion(term->bufsize);
+        term->vp      = vp_open(term->vp_w, term->vp_h, "GWOS Terminal 2");
+
+        vp_add_event_handler(term->vp, term_ev_handler);
+        vp_set_buffer(term->vp, term->buf, term->bufsize);
+        vp_set_options(term->vp, VP_OPT_RESIZE);
+    }
+    
+
+    term->beepFile = fopen("/-/sys/beep", "w");
     return term;
 }
 
 int main(int argc, char **argv) {
-    g_term = term_init();
+    g_term = term_init(0);
 
     int ch_stdout_pipe[2];
     int ch_stdin_pipe[2]; 
@@ -728,11 +754,17 @@ int main(int argc, char **argv) {
     int  needs_redraw = 0;
 
     while (1) {
-        if (g_term->vp->ascii != '\0') {
-            writebuf[0] = g_term->vp->ascii;
-            write(ch_stdin_pipe[0], writebuf, 1);
-            g_term->vp->ascii = '\0';
+        if(g_term->window_mode){
+            
         }
+        else{
+            if (g_term->vp->ascii != '\0') {
+                writebuf[0] = g_term->vp->ascii;
+                write(ch_stdin_pipe[0], writebuf, 1);
+                g_term->vp->ascii = '\0';
+            }    
+        }
+        
 
         int n = read(ch_stdout_pipe[1], readbuf, sizeof(readbuf));
         if (n > 0) {
