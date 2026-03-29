@@ -31,6 +31,7 @@ void exception_gpf(struct cpu_state *cpu __attribute__((unused)), struct stack_s
 	stop_task(task_running_idx);
 	//override_state_return = true;
 	//most_recent_int_stack_state.eip = (uint32_t) &exception_holding;
+	switch_to_task(&tasks[task_running_idx], &tasks[0], task_running_idx, 0);
 	return;
 }
 

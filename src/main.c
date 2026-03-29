@@ -153,7 +153,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     PCI_init();
     IRQ_OFF;
-    kbd_init(0xFF);
+    kbd_init(1000);
     mouse_init();
     ps2_init();
     timer_init(2);

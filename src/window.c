@@ -70,8 +70,8 @@ void window_render_bar(){
 }
 
 void window_copy_buffer(struct WINDOW *window){
-	struct IVec2 mousePos = mouse_getPos();
-	window_draw_cursor(mousePos.x, mousePos.y);
+	//struct IVec2 mousePos = mouse_getPos();
+	//window_draw_cursor(mousePos.x, mousePos.y);
 	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
 }
 

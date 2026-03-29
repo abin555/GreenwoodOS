@@ -109,6 +109,7 @@ int main(int argc, char **argv){
             if(readbuf[0] == '\n'){
                 command_buf[cmd_idx] = '\0';
                 
+				printf("\n");
                 run_command(command_buf);
 				printf("\n");
 

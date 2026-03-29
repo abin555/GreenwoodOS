@@ -41,6 +41,7 @@ extern char window_bar_text[WINDOW_BAR_SIZE];
 
 void window_render_bar();
 void window_init();
+void window_draw_cursor(int x, int y);
 struct WINDOW *window_open(char *name, bool copyPromptOnly);
 void window_close(struct WINDOW *window);
 void window_copy_buffer(struct WINDOW *window);

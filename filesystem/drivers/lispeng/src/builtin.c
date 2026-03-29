@@ -513,6 +513,12 @@ int builtin_write(struct Atom args, struct Atom *result){
         int len = strlen(buf.value.string);
         write(fd.value.integer, buf.value.string, len);
     }
+    else if(fd.type == Atom_INT && buf.type == Atom_INT){
+        char cbuf[2];
+        cbuf[0] = buf.value.integer;
+        cbuf[1] = 0;
+        write(fd.value.integer, cbuf, 1);
+    }
     *result = nil;
     return Error_OK;
 }
