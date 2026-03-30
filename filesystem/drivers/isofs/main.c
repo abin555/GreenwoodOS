@@ -218,7 +218,7 @@ int iso9660_vfs_read(void *f, void *buf, int nbytes){
 
 int iso9660_vfs_seek(void *f, int offset, int whence){
     struct VFS_File *file_idx = f;
-	//print_serial("[EXT2] Seek %d to %d\n", whence, offset);
+	//print_serial("[ISOFS Driver] Seek %d to %d\n", whence, offset);
 	if(whence == 0){//SEEK_SET
         file_idx->head = offset;
     }

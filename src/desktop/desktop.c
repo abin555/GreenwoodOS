@@ -49,7 +49,7 @@ void screen_write_callback(void *cdev, int offset, int nbytes, int *head){
 int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unused)), char **argv __attribute__((unused))){
     struct WINDOW *window = window_open("DESKTOP", true);
     struct task_state *window_task = &tasks[task_running_idx];
-    window_task->keyboard_event_handler = desktop_kbd_event;
+    //window_task->keyboard_event_handler = desktop_kbd_event;
     window_task->window = window;
     window_task->console = kernel_console;
     set_schedule(ALWAYS);
@@ -132,7 +132,21 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
 
     set_schedule(ONFOCUS);
 
+    struct KBD_flags KBD_bak;
+    struct KBD_flags KBD;
+
+    int kbd_flags_fd = vfs_open("-/sys/kbdFlags", VFS_FLAG_READ);
+    vfs_seek(kbd_flags_fd, 0, 0);
+    vfs_read(kbd_flags_fd, (void *) &KBD_bak, sizeof(KBD_bak));
+
     while(1){
+        vfs_seek(kbd_flags_fd, 0, 0);
+        vfs_read(kbd_flags_fd, (void *) &KBD, sizeof(KBD));
+        if(KBD.tick != KBD_bak.tick){
+            desktop_kbd_event(&KBD, KBD.key);
+            KBD_bak = KBD;
+        }
+
         task_lock = 1;
         drawBackground(background, window);
         
@@ -209,15 +223,15 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
     }
 }
 
-void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
+void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags, char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
-    if(KBD_flags.ctrl && ascii == 'T'){
+    if(flags->ctrl && ascii == 'T'){
         exec("/A/utils/term2/term2.elf", 0, NULL, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'E'){
+    else if(flags->ctrl && ascii == 'E'){
         exec("/A/utils/explorer/explorer.elf", 0, NULL, NULL);
     }
-    else if(KBD_flags.ctrl && ascii == 'M'){
+    else if(flags->ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
             if(global_viewport_list->elements[i].inUse){
                 if(!global_viewport_list->elements[i].vp->minimized)
@@ -232,3 +246,4 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(char ascii){
         }
     }
 }
+

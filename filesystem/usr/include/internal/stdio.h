@@ -8,6 +8,7 @@ struct FILE {
 	union {
 		int fd;
 	};
+	int ungetc_buf;
 };
 
 extern struct FILE **fileListing;

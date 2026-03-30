@@ -11,6 +11,8 @@
 #include <exec/exec.h>
 #include <string.h>
 #include <sys/window.h>
+#include <sys/keyboard.h>
+#include "font.h"
 
 #define TERM_W 80
 #define TERM_H 24
@@ -185,6 +187,7 @@ static void cursor_advance(struct Terminal *term) {
 /* ──────────────────────────────────────────────
  * Drawing
  * ────────────────────────────────────────────── */
+
 static void term_draw_border(struct Terminal *term) {
     int cs = term->char_size;
     for (int x = 0; x < term->term_w; x++)
@@ -207,11 +210,22 @@ void term_draw(struct Terminal *term) {
             int is_cursor = (x == term->cursor_x && y == term->cursor_y);
             uint32_t fg = is_cursor ? c->bg : c->fg;
             uint32_t bg = is_cursor ? c->fg : c->bg;
-            vp_drawChar(term->vp, x * cs, y * cs, c->ch ? c->ch : ' ', fg, bg);
+            if(term->window_mode){
+                font_drawChar(term->win->backbuffer, term->win->width, x*cs, y*cs, fg, bg, c->ch ? c->ch : ' ');
+            }
+            else{
+                vp_drawChar(term->vp, x * cs, y * cs, c->ch ? c->ch : ' ', fg, bg);
+            }            
         }
     }
-    term_draw_border(term);
-    vp_copy(term->vp);
+    if(!term->window_mode){
+       term_draw_border(term);
+       vp_copy(term->vp);
+    }
+    else{
+        window_update();
+    }
+    
 }
 
 /* ──────────────────────────────────────────────
@@ -684,6 +698,7 @@ struct Terminal *term_init(int window_mode) {
     term->cursor_y = 0;
     term->ansi.state = ANSI_STATE_NORMAL;
     if(window_mode){
+        font_load();
         term->win = window_open("GWOS Term", 1);
         term->vp_w = term->win->width;
         term->vp_h = term->win->height;
@@ -720,7 +735,13 @@ struct Terminal *term_init(int window_mode) {
 }
 
 int main(int argc, char **argv) {
-    g_term = term_init(0);
+    int mode = 0;
+    if(argc == 2){
+        if(!strcmp(argv[1], "-w")){
+            mode = 1;
+        }
+    }
+    g_term = term_init(mode);
 
     int ch_stdout_pipe[2];
     int ch_stdin_pipe[2]; 
@@ -753,9 +774,30 @@ int main(int argc, char **argv) {
     char writebuf[1];
     int  needs_redraw = 0;
 
+    FILE *kbd_flags_file;
+    struct KBD_flags KBD_bak;
+    struct KBD_flags KBD;
+
+    if(g_term->window_mode){
+        kbd_flags_file = fopen("/-/sys/kbdFlags", "r");
+        if(kbd_flags_file == NULL){
+            printf("Fatal, kbd flags file dne\n");
+        }
+        fread(&KBD_bak, sizeof(KBD_bak), 1, kbd_flags_file);
+        fseek(kbd_flags_file, 0, SEEK_SET);
+    }
+
     while (1) {
         if(g_term->window_mode){
-            
+            fread(&KBD, sizeof(KBD), 1, kbd_flags_file);
+            fseek(kbd_flags_file, 0, SEEK_SET);
+            if(KBD.tick != KBD_bak.tick){
+                if(KBD.key != '\0'){
+                    writebuf[0] = KBD.key;
+                    write(ch_stdin_pipe[0], writebuf, 1);
+                }
+                KBD_bak = KBD;
+            }
         }
         else{
             if (g_term->vp->ascii != '\0') {

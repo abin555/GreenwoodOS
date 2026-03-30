@@ -419,3 +419,12 @@ char *strdup(const char *s){
   strcpy(str, s);
   return str;
 }
+
+char *strpbrk(const char *s, const char *accept)
+{
+    for (; *s != '\0'; s++)
+        for (const char *a = accept; *a != '\0'; a++)
+            if (*s == *a)
+                return (char *)s;
+    return NULL;
+}

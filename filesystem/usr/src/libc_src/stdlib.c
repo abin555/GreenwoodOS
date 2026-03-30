@@ -371,3 +371,45 @@ void abort(void){
     
   }
 }
+
+void qsort(void *base, size_t nmemb, size_t size,
+           int (*compar)(const void *, const void *))
+{
+    if (nmemb <= 1)
+        return;
+
+    char *arr = (char *)base;
+
+    /* Use middle element as pivot to avoid worst case on sorted input */
+    char *pivot = arr + (nmemb / 2) * size;
+    char *left  = arr;
+    char *right = arr + (nmemb - 1) * size;
+
+    while (left <= right) {
+        while (compar(left,  pivot) < 0) left  += size;
+        while (compar(right, pivot) > 0) right -= size;
+
+        if (left <= right) {
+            /* Swap left and right elements */
+            for (size_t i = 0; i < size; i++) {
+                char tmp   = left[i];
+                left[i]    = right[i];
+                right[i]   = tmp;
+            }
+
+            /* Keep pivot pointer tracking the pivot element after swaps */
+            if (pivot == left)        pivot = right;
+            else if (pivot == right)  pivot = left;
+
+            left  += size;
+            right -= size;
+        }
+    }
+
+    /* Recursively sort the two partitions */
+    size_t left_nmemb  = (right - arr) / size + 1;
+    size_t right_nmemb = nmemb - (left - arr) / size;
+
+    qsort(arr,  left_nmemb,  size, compar);
+    qsort(left, right_nmemb, size, compar);
+}

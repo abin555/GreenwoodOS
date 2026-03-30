@@ -12,6 +12,23 @@
 
 char **args;
 
+struct Alias {
+	char *match;
+	char *result;
+};
+
+struct Alias alias[] = {
+	{"nasm", "/A/utils/nasm.elf"},
+	{"lisp", "/A/lisp/lisp.elf"},
+	{"tmgr", "/A/utils/task/taskmgr.elf"},
+	{"edit", "/A/utils/editor/editor.elf"},
+	{"netstat", "/A/net/netstat/netstat.elf"},
+	{"ping", "/A/net/ping/ping.elf"},
+	{"setbg", "/A/utils/setbg_scale/setbg_scale.elf"},
+	{"tga", "/A/utils/image/image.elf"},
+	{"gif", "/A/utils/gif/gif.elf"}
+};
+
 void run_command(char *cmd){
 	int fullsize = 0;
 	while(cmd[fullsize] != 0){
@@ -74,6 +91,13 @@ void run_command(char *cmd){
         printf("\033[2J\033[H");
     }
 	else{
+		for(int i = 0; i < sizeof(alias) / sizeof(struct Alias); i++){
+			if(!strcmp(cmd, alias[i].match)){
+				cmd = alias[i].result;
+				break;
+			}
+		}
+		
 		EXEC_CTX ctx = exec_createCTX();
         exec_setProgram(ctx, cmd);
 		exec_setFDCount(ctx, 2);

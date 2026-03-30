@@ -58,6 +58,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 	char justSpecial = 0;
 	keyboard_buffer_size = 255;
 	if(source != PS2_KBD) return;
+	KBD_flags.tick++;
 	if(keyboard_ASCIIBuffer == NULL || keyboard_KEYBuffer == NULL){
 		print_serial("%d - 0x%x 0x%x\n", keyboard_buffer_size, keyboard_ASCIIBuffer, keyboard_KEYBuffer);
 		keyboard_ASCIIBuffer = malloc(keyboard_buffer_size);
@@ -100,7 +101,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 			
 			KBD_ascii_buffer_idx++;
 			keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-			kbd_callEventHandler(KBD_flags.key);
+			//kbd_callEventHandler(KBD_flags.key);
 		}
 		else{
 			switch(scancode){
@@ -149,7 +150,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x11;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x11);
+						//kbd_callEventHandler(0x11);
 						if(KBD_flags.ctrl){
 							mouse_update(-2, 0, (struct MouseButtons) {0, 0, 0});
 						}
@@ -163,7 +164,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x12;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x12);
+						//kbd_callEventHandler(0x12);
 						if(KBD_flags.ctrl){
 							mouse_update(2, 0, (struct MouseButtons) {0, 0, 0});
 						}
@@ -177,7 +178,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x13;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x13);
+						//kbd_callEventHandler(0x13);
 						if(KBD_flags.ctrl){
 							mouse_update(0, 2, (struct MouseButtons) {0, 0, 0});
 						}
@@ -191,7 +192,7 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0x14;
 						KBD_ascii_buffer_idx++;
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
-						kbd_callEventHandler(0x14);
+						//kbd_callEventHandler(0x14);
 						if(KBD_flags.ctrl){
 							mouse_update(0, -2, (struct MouseButtons) {0, 0, 0});
 						}
@@ -297,6 +298,15 @@ void *kbdTxt_createCDEV(){
 		NULL,
 		NULL,
 		kbdTxt_read
+	);
+	return (void *) kbd_cdev;
+}
+
+void *kbdFlags_createCDEV(){
+	struct SysFS_Chardev *kbd_cdev = sysfs_createCharDevice(
+		(char *) &KBD_flags,
+		sizeof(KBD_flags),
+		CDEV_READ
 	);
 	return (void *) kbd_cdev;
 }

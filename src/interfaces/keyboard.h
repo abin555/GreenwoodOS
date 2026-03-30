@@ -34,6 +34,7 @@ struct KBD_flags{
 	uint8_t release;
 	uint8_t special;
 	char key;
+	uint32_t tick;
 };
 
 extern struct KBD_flags KBD_flags;
@@ -52,4 +53,5 @@ int getArrow();
 
 void *kbd_createCDEV();
 void *kbdTxt_createCDEV();
+void *kbdFlags_createCDEV();
 #endif

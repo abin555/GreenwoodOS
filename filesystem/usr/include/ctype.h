@@ -17,15 +17,7 @@ int isgraph(int), islower(int), isprint(int), ispunct(int);
 int isspace(int), isupper(int), isxdigit(int);
 int tolower(int), toupper(int);
 
-extern const short *_Ctype, *_Tolower, *_Toupper;
+//extern const short *_Ctype, *_Tolower, *_Toupper;
 
-#define isalnum(c) (_Ctype[(int) c] & (_DI|_LO|_UP|_XA))
-#define iscntrl(c) (_Ctype[(int) c] & (_BB|_CN))
-#define isgraph(c) (_Ctype[(int) c] & (_DI|_LO|_PU|_UP|XA))
-#define islower(c) (_Ctype[(int) c] & (_LO))
-#define isprint(c) (_Ctype[(int) c] & (_DI|_LO|_PU|SP|_UP|_XA))
-#define ispunct(c) (_Ctype[(int) c] & (_DI|_LO|_UP|_XA))
-#define isspace(c) (_Ctype[(int) c] & (_DI|_LO|_UP|_XA))
-#define isxdigit(c) (_Ctype[(int) c] & (_DI|_LO|_UP|_XA))
 
 #endif

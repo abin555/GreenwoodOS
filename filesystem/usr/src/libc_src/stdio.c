@@ -3,6 +3,7 @@
 #include <string.h>
 #include <sys/io.h>
 #include <internal/stdio.h>
+#include <ctype.h>
 
 #define MAX_FILE_LISTING 10
 struct FILE **fileListing;
@@ -12,6 +13,7 @@ FILE *internal_createFileFD(int fd){
 	FILE *file = malloc(sizeof(FILE));
 	file->file_type = FILE_fd;
 	file->fd = fd;
+	file->ungetc_buf = -1;
 	return file;
 }
 
@@ -357,6 +359,11 @@ int snprintf(char *str, size_t size, const char *format, ...){
 }
 
 int fgetc(FILE *stream){
+	if (stream->ungetc_buf != -1) {
+        int c = stream->ungetc_buf;
+        stream->ungetc_buf = -1;
+        return c;
+    }
 	char buf[1];
 	int n = fread(buf, sizeof(buf), 1, stream);
 	if(n == 0) return EOF;
@@ -396,4 +403,195 @@ int fflush(FILE *stream){
 
 int ferror(FILE *stream){
 	return 0;
+}
+
+int ungetc(int c, FILE *stream)
+{
+    if (c == EOF)
+        return EOF;
+
+    if (stream->ungetc_buf != -1)
+        return EOF;   /* buffer already full, only 1 pushback guaranteed by standard */
+
+    stream->ungetc_buf = (unsigned char)c;
+    return (unsigned char)c;
+}
+
+int sscanf(const char *str, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+
+    const char *s = str;
+    int matched = 0;
+
+    for (const char *f = fmt; *f != '\0'; f++) {
+
+        /* Whitespace in format matches any amount of whitespace in input */
+        if (isspace(*f)) {
+            while (isspace(*s))
+                s++;
+            continue;
+        }
+
+        /* Non-conversion literal character must match exactly */
+        if (*f != '%') {
+            if (*s != *f)
+                goto done;
+            s++;
+            continue;
+        }
+
+        /* Step over '%' */
+        f++;
+
+        /* Parse optional width */
+        int width = 0;
+        while (isdigit(*f)) {
+            width = width * 10 + (*f - '0');
+            f++;
+        }
+
+        switch (*f) {
+
+        /* Signed decimal integer: %d */
+        case 'd': {
+            while (isspace(*s))
+                s++;
+
+            if (*s == '\0')
+                goto done;
+
+            int neg = 0;
+            if (*s == '-') { neg = 1; s++; }
+            else if (*s == '+') { s++; }
+
+            if (!isdigit(*s))
+                goto done;
+
+            int value = 0;
+            int digits = 0;
+            while (isdigit(*s) && (width == 0 || digits < width)) {
+                value = value * 10 + (*s - '0');
+                s++;
+                digits++;
+            }
+
+            *va_arg(ap, int *) = neg ? -value : value;
+            matched++;
+            break;
+        }
+
+        /* Unsigned decimal integer: %u */
+        case 'u': {
+            while (isspace(*s))
+                s++;
+
+            if (*s == '\0')
+                goto done;
+
+            if (!isdigit(*s))
+                goto done;
+
+            unsigned int value = 0;
+            int digits = 0;
+            while (isdigit(*s) && (width == 0 || digits < width)) {
+                value = value * 10 + (*s - '0');
+                s++;
+                digits++;
+            }
+
+            *va_arg(ap, unsigned int *) = value;
+            matched++;
+            break;
+        }
+
+        /* Hexadecimal integer: %x */
+        case 'x':
+        case 'X': {
+            while (isspace(*s))
+                s++;
+
+            if (*s == '\0')
+                goto done;
+
+            /* Skip optional 0x prefix */
+            if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
+                s += 2;
+
+            unsigned int value = 0;
+            int digits = 0;
+            while ((width == 0 || digits < width)) {
+                unsigned int nibble;
+                if (*s >= '0' && *s <= '9')      nibble = *s - '0';
+                else if (*s >= 'a' && *s <= 'f') nibble = *s - 'a' + 10;
+                else if (*s >= 'A' && *s <= 'F') nibble = *s - 'A' + 10;
+                else break;
+                value = value * 16 + nibble;
+                s++;
+                digits++;
+            }
+
+            if (digits == 0)
+                goto done;
+
+            *va_arg(ap, unsigned int *) = value;
+            matched++;
+            break;
+        }
+
+        /* String (non-whitespace sequence): %s */
+        case 's': {
+            while (isspace(*s))
+                s++;
+
+            if (*s == '\0')
+                goto done;
+
+            char *out = va_arg(ap, char *);
+            int chars = 0;
+            while (*s != '\0' && !isspace(*s) && (width == 0 || chars < width)) {
+                *out++ = *s++;
+                chars++;
+            }
+
+            if (chars == 0)
+                goto done;
+
+            *out = '\0';
+            matched++;
+            break;
+        }
+
+        /* Single character: %c */
+        case 'c': {
+            /* %c does NOT skip whitespace */
+            if (*s == '\0')
+                goto done;
+
+            int count = (width == 0) ? 1 : width;
+            char *out = va_arg(ap, char *);
+            for (int i = 0; i < count && *s != '\0'; i++)
+                *out++ = *s++;
+
+            matched++;
+            break;
+        }
+
+        /* Literal percent: %% */
+        case '%': {
+            if (*s != '%')
+                goto done;
+            s++;
+            break;
+        }
+
+        default:
+            goto done;
+        }
+    }
+
+done:
+    va_end(ap);
+    return matched;
 }
