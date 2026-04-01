@@ -189,10 +189,8 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
     return VP_None;
 }
 
-__attribute__((section(".text")))
 struct ViewportList *global_viewport_list;
 
-__attribute__((section(".text")))
 struct ViewportFunctions global_viewport_functions = {
     viewport_indirect_open,
     viewport_indirect_close,
@@ -266,7 +264,7 @@ struct Viewport *viewport_indirect_open(int w, int h, char *title){
     return viewport_open(global_viewport_list, w, h, title_ptr);
 }
 
-struct Viewport *__attribute__ ((optimize("-O3"))) viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
+struct Viewport * viewport_open(struct ViewportList *viewport_list, int w, int h, char *title){
     //printf("[VIEWPORT] Open Window W: %d H: %d Title: %s\n", w, h, title);
     if(w > (int) fb_width || h > (int) fb_height || w < 0 || h < 0) return NULL;
     int element_idx = -1;
@@ -299,7 +297,7 @@ void viewport_indirect_close(struct Viewport *viewport){
     viewport_close(global_viewport_list, viewport);
 }
 
-void __attribute__ ((optimize("-O3"))) viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
+void  viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport){
     if(viewport == NULL) return;
     viewport->open = false;
     viewport->event_handler = NULL;
@@ -323,7 +321,7 @@ void __attribute__ ((optimize("-O3"))) viewport_close(struct ViewportList *viewp
     //printf("[VP] Close\n");
 }
 
-void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
+void  viewport_move_element_to_front(struct ViewportList *viewport_list, int element_idx){
     if(element_idx == 0) return;
     for(int i = element_idx; i > 0; i--){
         struct ViewportList_element temp = viewport_list->elements[i - 1];
@@ -335,7 +333,7 @@ void __attribute__ ((optimize("-O3"))) viewport_move_element_to_front(struct Vie
     return;
 }
 
-void __attribute__ ((optimize("-O3"))) viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
+void  viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window){
     for(int i = viewport_list->count - 1; i >= 0; i--){
         if(!viewport_list->elements[i].inUse){
             //printf("[VIEWPORT] %d not in use\n", i);
@@ -353,7 +351,7 @@ void __attribute__ ((optimize("-O3"))) viewport_draw_all(struct ViewportList *vi
     }
 }
 
-struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_click(struct ViewportList *viewport_list, int x, int y){
+struct Viewport_Interaction  viewport_process_click(struct ViewportList *viewport_list, int x, int y){
     struct Viewport_Interaction interaction = {
         VP_None,
         NULL
@@ -390,7 +388,7 @@ struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_c
     return interaction;
 }
 
-void __attribute__ ((optimize("-O3"))) viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y){
+void  viewport_set_position(struct Viewport *viewport, struct WINDOW *window, int x, int y){
     if(viewport == NULL) return;
     viewport->loc.x = x;
     viewport->loc.y = y;
@@ -401,7 +399,7 @@ void __attribute__ ((optimize("-O3"))) viewport_set_position(struct Viewport *vi
     if(viewport->loc.y + viewport->loc.h >= (int) window->height) viewport->loc.y = window->height - viewport->loc.h;
 }
 
-bool __attribute__ ((optimize("-O3"))) getViewportBodyClick(struct Viewport *viewport, int x, int y){
+bool  getViewportBodyClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
     if(x > viewport->loc.x && x < viewport->loc.x + viewport->loc.w && y > viewport->loc.y + VIEWPORT_HEADER_HEIGHT && y < viewport->loc.y + viewport->loc.h + VIEWPORT_HEADER_HEIGHT) return true;
     return false;
@@ -415,7 +413,7 @@ void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t b
     viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
 }
 
-void __attribute__ ((optimize("-O3"))) viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
+void  viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
     uint32_t x = (uint32_t) viewport->loc.x;
     uint32_t y = (uint32_t) viewport->loc.y + VIEWPORT_HEADER_HEIGHT;
     uint32_t w = (uint32_t) viewport->loc.w;
@@ -465,11 +463,14 @@ void viewport_send_event(struct Viewport *viewport, VIEWPORT_EVENT_TYPE event){
     if(viewport == NULL || viewport->event_handler == NULL) return;
     //printf("[VIEWPORT] Sending event %d to viewport %s (SLOT %d) @ 0x%x\n", event, viewport->title, viewport->owner_program_slot, viewport->event_handler);
 
+    
     int vp_task_id = taskID_fromPID(viewport->owner_task_id);
+    /*
     if(vp_task_id == -1){
         viewport_close(global_viewport_list, viewport);
         return;
     }
+    */
 
     task_lock(1);
     int current_task_id = task_getCurrentID();

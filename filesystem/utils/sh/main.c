@@ -38,6 +38,14 @@ void run_command(char *cmd){
 		return;
 	}
 	fullsize++;
+
+
+	int cancel_wait = 0;
+	if(cmd[0] == '&'){
+		fullsize--;
+		cmd++;
+		cancel_wait = 1;
+	}
 	
 	char *command;
 	int argc = 1;
@@ -109,7 +117,7 @@ void run_command(char *cmd){
         }
         int pid = exec_child(ctx);
         if(pid > 0){
-            waitpid(pid);
+            if(!cancel_wait) waitpid(pid);
         }
         else{
             printf("Error, unknown command: %s\n", cmd);
@@ -143,7 +151,7 @@ int main(int argc, char **argv){
                 cmd_idx = 0;
                 printf("\033[32m%s\033[0m> ", path);
             }
-            else if(readbuf[0] == 8){
+            else if(readbuf[0] == 8 && cmd_idx > 0){
                 char *backspace_msg = "\b";
                 fwrite(backspace_msg, 1, 1, stdout);
                 command_buf[--cmd_idx] = '\0';

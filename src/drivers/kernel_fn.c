@@ -39,7 +39,7 @@ void kernel_fn_init(){
     kernel_fn_add(task_getCurrentID, 0, "task_getCurrentID");
     kernel_fn_add(task_setRunningID, 1, "task_setRunningID");
     kernel_fn_add(task_get_slot, 1, "task_get_slot");
-    kernel_fn_add(task_getCurrentPID, 1, "task_setRunningID");
+    kernel_fn_add(task_getCurrentPID, 1, "task_getCurrentPID");
     kernel_fn_add(taskID_fromPID, 1, "taskID_fromPID");
     kernel_fn_add(buf_putChar, 1, "buf_putChar");
     kernel_fn_add(buf_w_putChar, 1, "buf_w_putChar");

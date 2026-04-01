@@ -54,13 +54,6 @@ struct SysFS_Inode *sysroot_init(){
     struct SysFS_Inode *kbd = sysfs_mkcdev("kbd", kbd_createCDEV());
     struct SysFS_Inode *kbdTxt = sysfs_mkcdev("kbdTxt", kbdTxt_createCDEV());
     struct SysFS_Inode *kbdFlags = sysfs_mkcdev("kbdFlags", kbdFlags_createCDEV());
-    struct SysFS_Inode *viewport = sysfs_mkcdev("viewport", 
-        sysfs_createCharDevice(
-            (char *) &global_viewport_functions,
-            sizeof(global_viewport_functions),
-            CDEV_READ
-        )
-    );
     struct SysFS_Inode *window_bar_cdev = sysfs_mkcdev("winbar", 
         sysfs_createCharDevice(
             (char *) window_bar_text,
@@ -106,7 +99,6 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(systems, kbd);
     sysfs_addChild(systems, kbdTxt);
     sysfs_addChild(systems, kbdFlags);
-    sysfs_addChild(systems, viewport);
     sysfs_addChild(systems, font);
     sysfs_addChild(systems, pcspeaker);
     sysfs_addChild(systems, pcspeaker_beep);

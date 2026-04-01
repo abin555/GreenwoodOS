@@ -700,6 +700,7 @@ struct Terminal *term_init(int window_mode) {
     if(window_mode){
         font_load();
         term->win = window_open("GWOS Term", 1);
+        set_schedule(ONFOCUS);
         term->vp_w = term->win->width;
         term->vp_h = term->win->height;
         term->term_w = term->vp_w / term->char_size;

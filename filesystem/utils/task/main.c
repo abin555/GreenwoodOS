@@ -122,6 +122,15 @@ int main(int argc, char **argv){
     FILE *task_file = fopen("/-/proc/task", "rw");
     struct Context taskContext;
     
+    updateTaskContext(task_file, &taskContext);
+
+    if(argc == 2 && !strcmp(argv[1], "-l")){
+        for(int i = 0; i < taskContext.ntasks; i++){
+            printf("%d %c - %s\n", taskContext.taskInfo[i].pid, sched_to_char(taskContext.taskInfo[i].schedule_type), taskContext.taskInfo[i].name);
+        }
+        return 0;
+    }
+
     gui_setup();
     struct WindowContext *context = gui_makeContext("Task MGR", 25*8, 30*8, 10, 0x0);
     struct GUIBar *mainBar = gui_makeBar(context->width, 12, 0xc9c9c9, 0xb9b9b9, 4);
@@ -147,7 +156,7 @@ int main(int argc, char **argv){
 
     struct Location textBox = {5*8, 13, context->viewport->loc.w - 24, context->viewport->loc.h - 24};
 
-    updateTaskContext(task_file, &taskContext);
+    
     float scroll_ministep = 0.0f;
     int scroll_step = 0;
     int reload_step = 0;

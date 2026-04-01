@@ -10,6 +10,7 @@
 #include <sys/task.h>
 #include <sys/io.h>
 #include <sys/mouse.h>
+#include <sys/sysfs.h>
 
 #include "bitmap.h"
 #include "desktop_shared.h"
@@ -17,7 +18,7 @@
 #include "viewport.h"
 #include "hooks.h"
 
-#define BACKGROUND_FILE "/A/Pictures/norway.tga\0"
+#define BACKGROUND_FILE "/A/Pictures/skyline.tga\0"
 
 void __attribute__ ((optimize("-O3"))) drawBackground(struct Bitmap bitmap, struct WINDOW *window){
     if(bitmap.bitmap == NULL || window == NULL) return;
@@ -110,6 +111,60 @@ int main(int argc, char **argv){
 
     viewport_init_sys(global_viewport_list, win);
 
+    FILE *metaFile = fopen("/-/fsCTRL", "r");
+    if(metaFile == NULL){
+        printf("Cannot open file!\n");
+        return 1;
+    }
+    struct SysFS_Meta meta;
+    fread(&meta, sizeof(meta), 1, metaFile);
+    fclose(metaFile);
+
+    struct SysFS_Inode *sys = meta.find(meta.root, "sys\0", NULL);
+    if(sys != NULL){
+        struct SysFS_Inode *desktopCDEV = meta.mkcdev(
+            "desktopBG",
+            meta.createCdev(
+                (char *) &background,
+                sizeof(background),
+                CDEV_READ | CDEV_WRITE
+            )
+        );
+        meta.setCallbacks(desktopCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) desktopbg_write_callback, NULL, NULL, NULL);
+        meta.addChild(sys, desktopCDEV);
+        /*
+        struct SysFS_Inode *cursorCDEV = sysfs_mkcdev(
+            "cursorBM",
+            sysfs_createCharDevice(
+                (char *) &cursor_bitmap_s,
+                sizeof(cursor_bitmap_s),
+                CDEV_READ | CDEV_WRITE
+            )
+        );
+        sysfs_setCallbacks(cursorCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) cursorbmap_write_callback, NULL, NULL, NULL);
+        sysfs_addChild(sys, cursorCDEV);
+        */
+        struct SysFS_Inode *screenCDEV = meta.mkcdev(
+            "screen",
+            meta.createCdev(
+                (char *) &desktopConfig,
+                sizeof(desktopConfig),
+                CDEV_READ | CDEV_WRITE
+            )
+        );
+        meta.setCallbacks(screenCDEV->data.chardev, (void (*)(void *, int offset, int nbytes, int *head)) screen_write_callback, NULL, NULL, NULL);
+        meta.addChild(sys, screenCDEV);
+
+        struct SysFS_Inode *viewport = meta.mkcdev("viewport", 
+            meta.createCdev(
+                (char *) &global_viewport_functions,
+                sizeof(global_viewport_functions),
+                CDEV_READ
+            )
+        );
+        meta.addChild(sys, viewport);
+    }
+
     struct {
         int startX;
         int startY;
@@ -132,8 +187,6 @@ int main(int argc, char **argv){
     int kbd_flags_fd = open("/-/sys/kbdFlags", O_READ);
     lseek(kbd_flags_fd, 0, 0);
     read(kbd_flags_fd, (void *) &KBD_bak, sizeof(KBD_bak));
-
-    viewport_indirect_open(100, 100, "FOO TEST");
 
     while(1){
         task_lock(1);
