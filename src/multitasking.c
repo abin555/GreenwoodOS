@@ -464,6 +464,15 @@ int task_getCurrentID(){
     return task_running_idx;
 }
 
+int task_setRunningID(int id){
+    task_running_idx = id;
+    return task_running_idx;
+}
+
+int task_getCurrentPID(){
+    return tasks[task_running_idx].pid;
+}
+
 void os_yield(){
 	register uint32_t eax asm("eax") __attribute__((unused));
 	eax = 0x34;

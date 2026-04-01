@@ -100,8 +100,13 @@ void kernel_task(int argc, char **argv){
 
     proc_fs_init();
     
-    start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);
+    //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);
     MEM_printRegions();
+    char *term2_args[] = {
+        "term2.elf",
+        "-w"
+    };
+    exec("/A/utils/term2/term2.elf", 2, term2_args, NULL);
 
     task_lock = 0;
     set_schedule(NEVER);

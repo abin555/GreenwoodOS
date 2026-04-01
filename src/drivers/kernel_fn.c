@@ -35,6 +35,15 @@ void kernel_fn_init(){
     kernel_fn_add(MEM_freeRegion, 2, "MEM_freeRegionBlock");
     kernel_fn_add(vfs_meta_countRoot, 0, "vfs_meta_countRoot");
     kernel_fn_add(vfs_meta_getRoot, 2, "vfs_meta_getRoot");
+    kernel_fn_add(select_program, 1, "select_program");
+    kernel_fn_add(task_getCurrentID, 0, "task_getCurrentID");
+    kernel_fn_add(task_setRunningID, 1, "task_setRunningID");
+    kernel_fn_add(task_get_slot, 1, "task_get_slot");
+    kernel_fn_add(task_getCurrentPID, 1, "task_setRunningID");
+    kernel_fn_add(taskID_fromPID, 1, "taskID_fromPID");
+    kernel_fn_add(buf_putChar, 1, "buf_putChar");
+    kernel_fn_add(buf_w_putChar, 1, "buf_w_putChar");
+    kernel_fn_add(window_draw_cursor, 2, "window_draw_cursor");
 }
 
 void kernel_fn_add(void *fn, int n_args, char *name){

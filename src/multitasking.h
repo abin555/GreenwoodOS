@@ -112,5 +112,7 @@ void tasking_setup_kernel_stack();
 
 int task_getCurrentID();
 struct task_state *task_getCurrent();
+int task_setRunningID(int id);
+int task_getCurrentPID();
 void os_yield();
 #endif
