@@ -28,6 +28,7 @@ struct exec_spec_ctx {
 int exec(char *filename, int argc, char **argv);
 int exec_spec(struct exec_spec_ctx *ctx);
 void waitpid(int pid);//Program does not run while given pid is alive.
+int pidAlive(int pid);
 void set_schedule(ScheduleType type);
 void yield();
 void task_lock(int state);

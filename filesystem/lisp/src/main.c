@@ -130,11 +130,11 @@ int main(int argc, char **argv){
             idx = 0;
             memset(termbuf, 0, sizeof(termbuf));
 
-        } else if (c == 8 || c == 127) { /* backspace or DEL */
+        } else if (c == 8 || c == 127) {
             if (idx > 0) {
                 idx--;
                 termbuf[idx] = '\0';
-                fwrite("\b", 1, 3, stdout); /* erase the character visually */
+                fwrite("\b", 1, 1, stdout);
             }
 
         } else {

@@ -65,3 +65,12 @@ int manual_task(void *address, char *name){
 	asm("int 0x80");
 	return (int) ebx;
 }
+
+int pidAlive(int pid){
+	register uint32_t eax asm("eax");
+	register uint32_t ebx asm("ebx");
+	ebx = (uint32_t) pid;
+	eax = SYSCALL_PIDALIVE;
+	asm("int 0x80");
+	return (int) ebx;
+}

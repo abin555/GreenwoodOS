@@ -333,6 +333,13 @@ void syscall_exec_spec(struct cpu_state *cpu __attribute__((unused)), struct tas
 	cpu->eax = exec_spec(ctx);
 }
 
+void syscall_pidAlive(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	if(taskID_fromPID((int) cpu->ebx) != -1) cpu->ebx = 1;
+	else cpu->ebx = 0;
+	//print_serial("[SYSCALL] PID %d is alive\n")
+	return;
+}
+
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
 	memset(syscall_functions, 0, sizeof(syscall_functions));
@@ -382,6 +389,7 @@ void init_syscalls(){
 	syscall_set(0x42, syscall_dup2);
 	syscall_set(0x43, syscall_exec_spec);
 	syscall_set(0x44, syscall_fstat);
+	syscall_set(0x45, syscall_pidAlive);
 
 	interrupt_add_handle(0x80, syscall_callback);
 }

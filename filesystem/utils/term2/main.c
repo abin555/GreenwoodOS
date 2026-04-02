@@ -788,7 +788,7 @@ int main(int argc, char **argv) {
         fseek(kbd_flags_file, 0, SEEK_SET);
     }
 
-    while (1) {
+    while (pidAlive(child_pid)) {
         if(g_term->window_mode){
             fread(&KBD, sizeof(KBD), 1, kbd_flags_file);
             fseek(kbd_flags_file, 0, SEEK_SET);
@@ -824,4 +824,12 @@ int main(int argc, char **argv) {
         if (n <= 0)
             yield();
     }
+
+    if(g_term->window_mode){
+        //window_close(g_term->win);
+    }
+    else{
+        vp_close(g_term->vp);
+    }
+    return 0;
 }

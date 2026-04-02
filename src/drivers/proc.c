@@ -18,6 +18,7 @@ enum PROC_CMD {
     PROC_GET_TASK = 1,
     PROC_PAUSE_TASK = 2,
     PROC_RESUME_TASK = 3,
+    PROC_KILL_TASK = 4,
 };
 
 struct PROC_Request {
@@ -74,6 +75,12 @@ int proc_task_write_callback(void *cdev, void *buf, int woffset, int nbytes, int
     } 
     else if(req.cmd == PROC_RESUME_TASK){
         tasks[req.task_id].schedule_type = ALWAYS;
+        return nbytes;
+    }
+    else if(req.cmd == PROC_KILL_TASK){
+        print_serial("[PROC] Killing %d\n", req.task_id);
+        int task_id = taskID_fromPID(req.task_id);
+        stop_task(task_id);
         return nbytes;
     }
     else {
@@ -157,6 +164,8 @@ int proc_task_read_callback(void *cdev, void *buf, int roffset, int nbytes, int 
         case PROC_PAUSE_TASK:
             break;
         case PROC_RESUME_TASK:
+            break;
+        case PROC_KILL_TASK:
             break;
     }
     *head = 0;

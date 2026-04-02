@@ -234,6 +234,14 @@ int main(int argc, char** argv){
     switch(c){
       case '\0':
         break;
+      case 't':
+        if(vp->options == VP_OPT_NODECORATOR){
+          vp_set_options(vp, VP_OPT_NONE);
+        }
+        else{
+          vp_set_options(vp, VP_OPT_NODECORATOR);
+        }
+        break;
       case 'e':
         rotateObjZ(&obj, 0.1f);
         break;

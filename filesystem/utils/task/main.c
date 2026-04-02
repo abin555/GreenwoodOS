@@ -11,6 +11,7 @@ enum PROC_CMD {
     PROC_GET_TASK = 1,
     PROC_PAUSE_TASK = 2,
     PROC_RESUME_TASK = 3,
+    PROC_KILL_TASK = 4,
 };
 
 struct PROC_Request {
@@ -65,6 +66,13 @@ void resume_task(FILE *task_file, int tid){
     struct PROC_Request req_task;
     req_task.cmd = PROC_RESUME_TASK;
     req_task.task_id = tid;
+    fwrite(&req_task, sizeof(req_task), 1, task_file);
+}
+
+void kill_task(FILE *task_file, int pid){
+    struct PROC_Request req_task;
+    req_task.cmd = PROC_KILL_TASK;
+    req_task.task_id = pid;
     fwrite(&req_task, sizeof(req_task), 1, task_file);
 }
 
@@ -128,6 +136,25 @@ int main(int argc, char **argv){
         for(int i = 0; i < taskContext.ntasks; i++){
             printf("%d %c - %s\n", taskContext.taskInfo[i].pid, sched_to_char(taskContext.taskInfo[i].schedule_type), taskContext.taskInfo[i].name);
         }
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-k")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Killing %d - %s\n", pid, tinfo->name);
+        kill_task(task_file, pid);
         return 0;
     }
 

@@ -42,4 +42,5 @@
 #define SYSCALL_DUP2FD 0x42
 #define SYSCALL_EXEC_SPEC 0x43
 #define SYSCALL_FSTAT 0x44
+#define SYSCALL_PIDALIVE 0x45
 #endif

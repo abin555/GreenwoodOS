@@ -29,6 +29,8 @@ struct Alias alias[] = {
 	{"gif", "/A/utils/gif/gif.elf"}
 };
 
+int running;
+
 void run_command(char *cmd){
 	int fullsize = 0;
 	while(cmd[fullsize] != 0){
@@ -98,6 +100,9 @@ void run_command(char *cmd){
     else if(!strcmp(args[0], "clear")){
         printf("\033[2J\033[H");
     }
+	else if(!strcmp(args[0], "exit")){
+		running = 0;
+	}
 	else{
 		for(int i = 0; i < sizeof(alias) / sizeof(struct Alias); i++){
 			if(!strcmp(cmd, alias[i].match)){
@@ -135,7 +140,8 @@ int main(int argc, char **argv){
     char command_buf[100];
     int cmd_idx = 0;
 
-    while(1){
+	running = 1;
+    while(running){
         int n = read(0, readbuf, 1);
         if(n > 0){
             if(readbuf[0] == '\n'){
