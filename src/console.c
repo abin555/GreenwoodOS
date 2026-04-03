@@ -230,6 +230,7 @@ struct CONSOLE *console_open(struct WINDOW *window){
 
 struct CONSOLE *console_open_vp(struct Viewport *vp){
 	struct CONSOLE *console = NULL;
+	return console;
 	for(int i = 0; i < MAX_CONSOLE; i++){
 		if(!consoles[i].active){
 			console = &consoles[i];
@@ -418,6 +419,6 @@ void print_console(struct CONSOLE *console, char *msg, ...){
 		}
 	}*/
 	if(console->view_type == CONSOLE_VIEWPORT){
-		viewport_copy_buffer(console->viewport);
+		//viewport_copy_buffer(console->viewport);
 	}
 }

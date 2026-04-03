@@ -36,11 +36,7 @@ OBJECTS = \
 		src/utils.o \
 		src/drivers/elf.o \
 		src/drivers/pcspeaker.o \
-		src/desktop/desktop.o \
 		src/desktop/bitmap.o \
-		src/desktop/gfx.o \
-		src/desktop/icon.o \
-		src/desktop/viewport.o \
 		src/stacktrace.o \
 		src/rtc.o \
 		src/drivers/hda.o \
