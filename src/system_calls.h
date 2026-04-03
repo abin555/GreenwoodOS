@@ -18,8 +18,13 @@
 
 typedef void (*(syscall_fn))(struct cpu_state *cpu, struct task_state *task);
 
+typedef struct Syscall {
+    syscall_fn fn;
+    char *name;
+} Syscall;
+
 void init_syscalls();
-void syscall_set(uint8_t call_id, syscall_fn fn);
+void syscall_set(uint8_t call_id, syscall_fn fn, char *name);
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused)));
 
 
@@ -29,5 +34,6 @@ struct SyscallHook {
 };
 
 void *syscall_init_hooks();
+void *syscall_init_debug();
 
 #endif

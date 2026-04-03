@@ -14,7 +14,7 @@ void exception_divide_by_zero(struct cpu_state *cpu __attribute__((unused)), str
 void exception_invalid_opcode(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	print_serial("Invalid Opcode @ 0x%x\n", stack->eip);
 	print_console(tasks[task_running_idx].console, "Invalid Opcode @ 0x%x\n", stack->eip);
-	print_stack_trace(cpu->ebx, 10);
+	print_stack_trace(cpu->ebp, 10);
 	stop_task(task_running_idx);
 	override_state_return = true;
 	most_recent_int_stack_state.eip = (uint32_t) &exception_holding;

@@ -1,5 +1,6 @@
 #include "stacktrace.h"
 #include "memory.h"
+#include "multitasking.h"
 
 struct stackframe;
 struct stackframe {
@@ -22,6 +23,7 @@ void print_stack_trace(uint32_t ebp, unsigned int maxFrames){
     {
         // Unwind to previous stack frame
         print_serial("%d  0x%x 0:0x%x 1:0x%x 2:0x%x 3:0x%x\n", frame, stk->frame.eip, stk->data[0], stk->data[1], stk->data[2], stk->data[3]);
+        if((void *) stk->frame.eip == task_end) break;
         stk = stk->frame.ebp;
     }
 }

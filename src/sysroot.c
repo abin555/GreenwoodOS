@@ -107,6 +107,7 @@ struct SysFS_Inode *sysroot_init(){
     sysfs_addChild(root, devs);
     sysfs_addChild(root, systems);
     sysfs_addChild(root, sysfs_createMetaFile(root));
-    sysfs_addChild(systems, syscall_init_hooks());
+    //sysfs_addChild(systems, syscall_init_hooks());
+    sysfs_addChild(systems, syscall_init_debug());
     return root;
 }

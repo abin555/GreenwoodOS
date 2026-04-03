@@ -1,6 +1,10 @@
 #include "system_calls.h"
 
-syscall_fn syscall_functions[0xFF];
+Syscall syscall_functions[0xFF];
+struct syscall_debug {
+	int enabled;
+	int pid;
+} syscall_debug;
 
 void syscall_window_open(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	struct WINDOW *window = window_open((char *) cpu->ebx, cpu->ecx);
@@ -340,69 +344,78 @@ void syscall_pidAlive(struct cpu_state *cpu __attribute__((unused)), struct task
 	return;
 }
 
+#define set(ID, FN) syscall_set(ID, FN, #FN)
+
 void init_syscalls(){
 	print_serial("[SYSCALL] Init\n");
 	memset(syscall_functions, 0, sizeof(syscall_functions));
-	syscall_set(0x01, syscall_window_open);
-	syscall_set(0x02, syscall_window_close);
-	syscall_set(0x03, syscall_window_copy);
-	syscall_set(0x04, syscall_buf_putChar);
-	syscall_set(0x05, syscall_getc_blk);
-	syscall_set(0x06, syscall_exec);
-	syscall_set(0x07, syscall_set_schedule);
-	syscall_set(0x08, syscall_print_to_console);
-	syscall_set(0x09, syscall_console_open);
-	syscall_set(0x0A, syscall_console_close);
-	syscall_set(0x0B, syscall_kmalloc);
-	syscall_set(0x0C, syscall_console_printargs);
-	syscall_set(0x12, syscall_chdir);
-	syscall_set(0x13, syscall_get_dir);
-	syscall_set(0x17, syscall_get_kernel_feature);
-	syscall_set(0x1A, syscall_creatdir);
-	syscall_set(0x1D, syscall_srand);
-	syscall_set(0x1E, syscall_rand);
-	syscall_set(0x1F, syscall_exit);
-	syscall_set(0x20, syscall_mem_request);
-	//syscall_set(0x21, syscall_keyboard_add_event);
-	syscall_set(0x23, syscall_mem_reserve);
-	syscall_set(0x26, syscall_start_task);
-	syscall_set(0x28, syscall_get_pcspeaker);
-	syscall_set(0x29, syscall_get_timerticks);
-	syscall_set(0x2A, syscall_mouse_event);
-	syscall_set(0x2B, syscall_mem_free);
-	//syscall_set(0x2C, syscall_end_event);
-	syscall_set(0x2E, syscall_console_open_vp);
-	syscall_set(0x30, syscall_get_vfsListDir);
-	syscall_set(0x32, syscall_task_lock);
-	syscall_set(0x34, syscall_yield);
-	syscall_set(0x35, syscall_open);
-	syscall_set(0x36, syscall_close);
-	syscall_set(0x37, syscall_read);
-	syscall_set(0x38, syscall_write);
-	syscall_set(0x39, syscall_seek);
-	syscall_set(0x3A, syscall_creat);
-	syscall_set(0x3B, syscall_dupfd);
-	syscall_set(0x3C, syscall_fork);
-	syscall_set(0x3F, syscall_truncate);
-	syscall_set(0x40, syscall_wait);
-	syscall_set(0x41, syscall_pipe);
-	syscall_set(0x42, syscall_dup2);
-	syscall_set(0x43, syscall_exec_spec);
-	syscall_set(0x44, syscall_fstat);
-	syscall_set(0x45, syscall_pidAlive);
+	set(0x01, syscall_window_open);
+	set(0x02, syscall_window_close);
+	set(0x03, syscall_window_copy);
+	set(0x04, syscall_buf_putChar);
+	set(0x05, syscall_getc_blk);
+	set(0x06, syscall_exec);
+	set(0x07, syscall_set_schedule);
+	set(0x08, syscall_print_to_console);
+	set(0x09, syscall_console_open);
+	set(0x0A, syscall_console_close);
+	set(0x0B, syscall_kmalloc);
+	set(0x0C, syscall_console_printargs);
+	set(0x12, syscall_chdir);
+	set(0x13, syscall_get_dir);
+	set(0x17, syscall_get_kernel_feature);
+	set(0x1A, syscall_creatdir);
+	set(0x1D, syscall_srand);
+	set(0x1E, syscall_rand);
+	set(0x1F, syscall_exit);
+	set(0x20, syscall_mem_request);
+	//set(0x21, syscall_keyboard_add_event);
+	set(0x23, syscall_mem_reserve);
+	set(0x26, syscall_start_task);
+	set(0x28, syscall_get_pcspeaker);
+	set(0x29, syscall_get_timerticks);
+	set(0x2A, syscall_mouse_event);
+	set(0x2B, syscall_mem_free);
+	//set(0x2C, syscall_end_event);
+	set(0x2E, syscall_console_open_vp);
+	set(0x30, syscall_get_vfsListDir);
+	set(0x32, syscall_task_lock);
+	set(0x34, syscall_yield);
+	set(0x35, syscall_open);
+	set(0x36, syscall_close);
+	set(0x37, syscall_read);
+	set(0x38, syscall_write);
+	set(0x39, syscall_seek);
+	set(0x3A, syscall_creat);
+	set(0x3B, syscall_dupfd);
+	set(0x3C, syscall_fork);
+	set(0x3F, syscall_truncate);
+	set(0x40, syscall_wait);
+	set(0x41, syscall_pipe);
+	set(0x42, syscall_dup2);
+	set(0x43, syscall_exec_spec);
+	set(0x44, syscall_fstat);
+	set(0x45, syscall_pidAlive);
+
+	syscall_debug = (struct syscall_debug) {0, -1};
 
 	interrupt_add_handle(0x80, syscall_callback);
 }
 
-void syscall_set(uint8_t call_id, syscall_fn fn){
-	syscall_functions[call_id] = fn;
+void syscall_set(uint8_t call_id, syscall_fn fn, char *name){
+	syscall_functions[call_id].fn = fn;
+	syscall_functions[call_id].name = name;
 }
 
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
 	//IRQ_OFF;
 	struct task_state *task = &tasks[task_running_idx];
-	if(syscall_functions[cpu->eax] != NULL){
-		syscall_functions[cpu->eax](cpu, task);
+	if(syscall_functions[cpu->eax].fn != NULL){
+		if(syscall_debug.enabled && task->pid == syscall_debug.pid){
+			print_serial("[SYSCALL] 0x%x (%s) - from 0x%x EBX: 0x%x ECX: 0x%x EDX: 0x%x\n", cpu->eax, syscall_functions[cpu->eax].name, stack->eip, cpu->ebx, cpu->ecx, cpu->edx);
+			print_stack_trace(cpu->ebp, 15);
+		}
+		syscall_functions[cpu->eax].fn(cpu, task);
 	}
 	else{
 		print_serial("[SYSCALL] Invalid call to syscall id %d from process pid %d (@0x%x)\n", cpu->eax, task->pid, stack->eip);
@@ -415,7 +428,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 #include <vfs.h>
 
 struct SyscallHook syscall_hook_buf;
-
+/*
 int syscall_hooks_read(void *cdev, void *buf, int roffset, int nbytes, int *head){
 	struct SysFS_Chardev *syscall_cdev = cdev;
 	if(buf == NULL) return -1;
@@ -453,4 +466,37 @@ void *syscall_init_hooks(){
 	);
 
 	return sysfs_mkcdev("syscall", syscall_cdev);
+}
+*/
+
+
+void syscall_dbg_write(void *cdev, int offset, int nbytes, int *head){
+	(void) offset;
+	(void) nbytes;
+	struct SysFS_Chardev *syscall_cdev = cdev;
+	struct task_state *task = &tasks[task_running_idx];
+	if(syscall_cdev->buf[0]){
+		syscall_debug.enabled = 1;
+		syscall_debug.pid = task->pid;
+	}
+	else{
+		syscall_debug.enabled = 0;
+	}
+	*head = 0;
+}
+
+void *syscall_init_debug(){
+	char *buf = malloc(2);
+	struct SysFS_Chardev *syscall_dbg_cdev = sysfs_createCharDevice(
+		buf,
+		2,
+		CDEV_WRITE
+	);
+	sysfs_setCallbacks(syscall_dbg_cdev,
+		syscall_dbg_write,
+		NULL,
+		NULL,
+		NULL
+	);
+	return sysfs_mkcdev("syscall_dbg", syscall_dbg_cdev);
 }
