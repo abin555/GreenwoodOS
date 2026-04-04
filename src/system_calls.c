@@ -213,7 +213,7 @@ void syscall_mouse_event(struct cpu_state *cpu __attribute__((unused)), struct t
 }
 
 void syscall_mem_free(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	print_serial("[SYSCALL] Free Region\n");
+	//print_serial("[SYSCALL] Free Region\n");
 	MEM_freeRegionBlock(cpu->ebx, cpu->ecx);
 }
 
@@ -245,7 +245,7 @@ void syscall_yield(struct cpu_state *cpu __attribute__((unused)), struct task_st
 
 void syscall_open(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	cpu->eax = (unsigned int) task_allocFD(task, vfs_openRel(&task->currentDirectory, (char *) cpu->ebx, (int) cpu->ecx));
-	print_serial("[SYSCALL] Opened \"%s\" into process FD %d, SYS FD %d\n", (char *) cpu->ebx, (int) cpu->eax, tasks[task_running_idx].file_descs[cpu->eax]);
+	//print_serial("[SYSCALL] Opened \"%s\" into process FD %d, SYS FD %d\n", (char *) cpu->ebx, (int) cpu->eax, tasks[task_running_idx].file_descs[cpu->eax]);
 }
 
 void syscall_close(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
@@ -290,7 +290,7 @@ void syscall_fstat(struct cpu_state *cpu __attribute__((unused)), struct task_st
 
 void syscall_wait(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	int id = task_getCurrentID();
-	print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
+	//print_serial("[SYSCALL] Program %d requests to wait until PID %d ends\n", tasks[id].pid, cpu->ebx);
 	tasks[id].waitpid = cpu->ebx;
 }
 

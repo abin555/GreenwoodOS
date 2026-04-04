@@ -141,7 +141,7 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
     else {
         task->auto_stdinout = 0;
         for(int i = 0; i < file_ctx->num_fds; i++){
-            print_serial("[TASK] Association #%d - Creator FD %d -> Child FD %d\n", i, file_ctx->fds[i].creator_fd, file_ctx->fds[i].new_fd);
+            //print_serial("[TASK] Association #%d - Creator FD %d -> Child FD %d\n", i, file_ctx->fds[i].creator_fd, file_ctx->fds[i].new_fd);
             task->file_descs[file_ctx->fds[i].new_fd] = tasks[task_running_idx].file_descs[file_ctx->fds[i].creator_fd];
         }
     }
@@ -149,6 +149,7 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
     task->pid = pid_counter++;
     retpid = task->pid;
     task->waitpid = 0;
+    /*
     print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", task->task_name, task_idx, task->registers.esp, task->registers.ebp, task->pid);
     for(int j = 0; j < MT_maxDescriptors; j++){
         print_serial("[TASK] \t Proc FD %d -> Sys FD %d\n", j, task->file_descs[j]);
@@ -158,7 +159,7 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
         if(argv == NULL || argv[i] == NULL) continue;
         print_serial("\t%d - %s\n", i, argv[i]);
     }
-
+    */
     return retpid;
 }
 
@@ -456,7 +457,7 @@ int task_dupFD(struct task_state *task, int fd){
 
 int task_get_slot(int task_idx){
     int slot = tasks[task_idx].program_slot;
-    print_serial("[TASK] Got slot %d\n", slot);
+    //print_serial("[TASK] Got slot %d\n", slot);
     return slot;
 }
 

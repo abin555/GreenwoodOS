@@ -66,9 +66,9 @@ int exec(char *filename, int argc, char **argv, void *vctx){
 		}	
 		else{
 			int slot = program_findSlot();
-			print_serial("Loading Program %s to slot %d\n", filename, slot);
+			//print_serial("Loading Program %s to slot %d\n", filename, slot);
 			uint32_t entry = elf_get_entry_addr(file);
-			print_serial("[PROGRAM] Is ELF Format, entry @ 0x%x!\n", entry);
+			//print_serial("[PROGRAM] Is ELF Format, entry @ 0x%x!\n", entry);
 			memset((void *) (program_region_virt_base + PROGRAM_MAX_SIZE*slot), 0, PROGRAM_MAX_SIZE);
 			elf_load(file, (void *) (program_region_virt_base + PROGRAM_MAX_SIZE*slot));
 			//vfs_read(file, (char *) (program_region_virt_base + 0x400000*slot), size);
@@ -84,7 +84,7 @@ int exec(char *filename, int argc, char **argv, void *vctx){
 		vfs_close(file);
 		pid = start_task(0, slot, argc, argv, filename, file_ctx);
 	}
-	print_serial("[EXEC] New Program PID is %d\n", pid);
+	//print_serial("[EXEC] New Program PID is %d\n", pid);
 	return pid;
 	//print_serial("[EXEC] Program started!\n\n");
 }

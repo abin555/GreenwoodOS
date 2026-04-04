@@ -207,7 +207,7 @@ int MEM_virtualIsValid(uint32_t address){
 
 int MEM_findRegionIdx(uint32_t size){
 	int needed_blocks = calculateBlocks(size);
-	print_serial("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
+	//print_serial("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
 	//printk("Looking for Memory region of size %x = %x blocks\n", size, needed_blocks);
 	int check_idx = -1;
 	int check_count = -1;
@@ -223,7 +223,7 @@ int MEM_findRegionIdx(uint32_t size){
 		}
 		check_count++;
 		if(check_count == needed_blocks){
-			print_serial("Found region of size %x at idx %x to %x\n", size, i, MEMORY_REGIONS[i].physical_addr);
+			//print_serial("Found region of size %x at idx %x to %x\n", size, i, MEMORY_REGIONS[i].physical_addr);
 			return check_idx;
 		}
 	}

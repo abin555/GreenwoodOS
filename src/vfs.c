@@ -107,7 +107,7 @@ int vfs_openRel(struct DIRECTORY *dir, char *path, int flags){
 }
 
 int vfs_open(char *path, int flags){
-    print_serial("[VFS] Opening %s\n", path);
+    //print_serial("[VFS] Opening %s\n", path);
     if(path == NULL) return -1;
     char driveLetter = path[0];
     path += 2;
@@ -151,7 +151,7 @@ int vfs_open(char *path, int flags){
 
 void vfs_close(int fd){
     if(fd == -1) return;
-    print_serial("[VFS] Closing FD %d\n", fd);
+    //print_serial("[VFS] Closing FD %d\n", fd);
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(file_idx->inode.type == VFS_PIPE){
         if(pipe_close(file_idx->inode.fs.pipe, file_idx->inode.flags)){

@@ -31,7 +31,7 @@ int sysfs_addChild(struct SysFS_Inode *parent, struct SysFS_Inode *child){
     if(parent->data.dir.numChildren == (sizeof(parent->data.dir.children) / sizeof(parent->data.dir.children[0]))) return 2;
     parent->data.dir.children[parent->data.dir.numChildren++] = child;
     child->parent = parent;
-    print_serial("[SYSFS] Added Child \"%s\" to Parent \"%s\"\n", child->name, parent->name);
+    //print_serial("[SYSFS] Added Child \"%s\" to Parent \"%s\"\n", child->name, parent->name);
     return 0;
 }
 
@@ -49,7 +49,7 @@ struct SysFS_Inode *sysfs_mkdir(char *dirname){
     );
     sysfs->data.dir.numChildren = 0;
     sysfs->parent = NULL;
-    print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
+    //print_serial("[SYSFS] Created Directory \"%s\"\n", sysfs->name);
     return sysfs;
 }
 
@@ -62,7 +62,7 @@ struct SysFS_Inode *sysfs_mkcdev(char *name, struct SysFS_Chardev *cdev){
     sysfs->namelen = strlen(name) < 20 ? strlen(name) : 19;
     sysfs->data.chardev = cdev;
     sysfs->parent = NULL;
-    print_serial("[SYSFS] Created Character Device File \"%s\" @ 0x%x\n", sysfs->name, sysfs->data.chardev);
+    //print_serial("[SYSFS] Created Character Device File \"%s\" @ 0x%x\n", sysfs->name, sysfs->data.chardev);
     return sysfs;
 }
 
@@ -71,7 +71,7 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     struct SysFS_Chardev *cdev = malloc(sizeof(struct SysFS_Chardev));
     if(cdev == NULL) return NULL;
     cdev->owner_pid = task_running_idx;
-    print_serial("[SYSFS] Creating Character Device with owner %d slot %d\n", cdev->owner_pid, tasks[cdev->owner_pid].program_slot);
+    //print_serial("[SYSFS] Creating Character Device with owner %d slot %d\n", cdev->owner_pid, tasks[cdev->owner_pid].program_slot);
     cdev->buf = buf;
     cdev->buf_size = buf_size;
     cdev->perms = perms;
@@ -79,7 +79,7 @@ struct SysFS_Chardev *sysfs_createCharDevice(char *buf, int buf_size, CDEV_PERMS
     cdev->read_callback = NULL;
     cdev->write_specialized_callback = NULL;
     cdev->read_specialized_callback = NULL;
-    print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
+    //print_serial("[SYSFS] Created CDEV of size %d\n", cdev->buf_size);
     return cdev;
 }
 
@@ -94,12 +94,14 @@ void sysfs_setCallbacks(struct SysFS_Chardev *cdev,
     cdev->read_callback = read_callback;
     cdev->write_specialized_callback = write_specialized_callback;
     cdev->read_specialized_callback = read_specialized_callback;
+    /*
     print_serial("%x %x %x %x\n",
         cdev->write_callback,
         cdev->read_callback,
         cdev->write_specialized_callback,
         cdev->read_specialized_callback
     );
+    */
 }
 
 void sysfs_setCallbacksExtra(struct SysFS_Chardev *cdev,
