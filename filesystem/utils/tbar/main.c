@@ -56,7 +56,7 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
 }
 
 int main(int argc, char **argv){
-    freopen("/-/dev/serial", "rw", stdout);
+    //freopen("/-/dev/serial", "rw", stdout);
 
     struct Taskbar *tbar = tbar_init();
     if(argc == 2){
@@ -73,7 +73,7 @@ int main(int argc, char **argv){
         printf("Read file!\n");
         struct TokenStream s = lex(buf, size);
         printf("Lexed!\n");
-        printTokenStream(s);
+        //printTokenStream(s);
         parse(tbar, &s);
     }
 

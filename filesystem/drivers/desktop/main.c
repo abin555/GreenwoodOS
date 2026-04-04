@@ -11,6 +11,7 @@
 #include <sys/io.h>
 #include <sys/mouse.h>
 #include <sys/sysfs.h>
+#include <exec/exec.h>
 
 #include "bitmap.h"
 #include "desktop_shared.h"
@@ -180,6 +181,12 @@ int main(int argc, char **argv){
     };
 
     set_schedule(ONFOCUS);
+
+    EXEC_CTX proc_ctx = exec_createCTX();
+    exec_setProgram(proc_ctx, "/A/OS/init/init.elf");
+    exec_setARGC(proc_ctx, 2);
+    exec_setARGV(proc_ctx, 1, "/A/OS/desktop_init.ini");
+    int child_pid = exec_child(proc_ctx);
 
     struct KBD_flags KBD_bak;
     struct KBD_flags KBD;

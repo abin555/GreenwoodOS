@@ -151,10 +151,15 @@ void run(struct Program *p){
 }
 
 int main(int argc, char **argv){
+    char *init_fn = "/A/OS/autostart.ini";
+    if(argc == 2){
+        init_fn = argv[1];
+    }
+
     freopen("/-/dev/serial", "w", stdout);
-    FILE *autostart = fopen("/A/OS/autostart.ini", "r");
+    FILE *autostart = fopen(init_fn, "r");
     if(autostart == NULL){
-        printf("[INIT] Unable to open autostart.ini file!\n");
+        printf("[INIT] Unable to open %s\n", init_fn);
         return 1;
     }
 

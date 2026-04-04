@@ -134,7 +134,7 @@ int main(int argc, char **argv){
 
     if(argc == 2 && !strcmp(argv[1], "-l")){
         for(int i = 0; i < taskContext.ntasks; i++){
-            printf("%d %c - %s\n", taskContext.taskInfo[i].pid, sched_to_char(taskContext.taskInfo[i].schedule_type), taskContext.taskInfo[i].name);
+            printf("%d %c %d - %s\n", taskContext.taskInfo[i].pid, sched_to_char(taskContext.taskInfo[i].schedule_type), taskContext.taskInfo[i].slot, taskContext.taskInfo[i].name);
         }
         return 0;
     }

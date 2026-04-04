@@ -102,7 +102,7 @@ struct TokenStream lex(char *s, int len){
                 memset(str_buf, 0, len+1);
                 strncpy(str_buf, str_start, len);
                 stream.tokens[stream.ntokens++] = type_createStr(str_buf);
-                printf("STR \"%s\"\n", str_buf);
+                //printf("STR \"%s\"\n", str_buf);
             }
             else{
                 err = 1;
