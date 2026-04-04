@@ -40,9 +40,17 @@ struct SysFS_Inode *pcifs_driverListTxt(){
     return file;
 }
 
+struct SysFS_Inode *pcifs_devicesStruct(){
+    size_t cdev_bufsize = PCI_numDevices * sizeof(struct PCI_device*);
+    struct SysFS_Chardev *cdev = sysfs_createCharDevice((char *) PCI_devices, cdev_bufsize, CDEV_READ);
+    struct SysFS_Inode *file = sysfs_mkcdev("devices", cdev);
+    return file;
+}
+
 struct SysFS_Inode *pcifs_init(){
     struct SysFS_Inode *pci_dir = sysfs_mkdir("pci");
     sysfs_addChild(pci_dir, pcifs_deviceListTxt());
     sysfs_addChild(pci_dir, pcifs_driverListTxt());
+    sysfs_addChild(pci_dir, pcifs_devicesStruct());
     return pci_dir;
 }

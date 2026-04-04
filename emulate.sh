@@ -7,7 +7,6 @@ qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log
 -drive id=disk2,file=filesystem.iso,if=none,format=raw \
 -device ahci,id=ahci \
 -device ide-hd,drive=disk3,bus=ahci.0,bootindex=2 \
--device ide-hd,drive=disk4,bus=ahci.1,bootindex=4 \
 -device ide-hd,drive=disk,bus=ahci.2,bootindex=1 \
 -device ide-hd,drive=disk2,bus=ahci.3,bootindex=3 \
 -device qemu-xhci,id=xhci \
@@ -17,4 +16,5 @@ qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log
 -device rtl8139,netdev=mynet0 \
 -object filter-dump,id=f1,netdev=mynet0,file=netdump.dat \
 -smp sockets=1,cores=2,threads=1 \
--device usb-ehci,id=ehci
+-device usb-ehci,id=ehci \
+-device usb-storage,bus=xhci.0,drive=disk4
