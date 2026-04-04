@@ -46,11 +46,11 @@ void hda_init(struct PCI_driver *driver){
 		return;
 	}
 	
-	MEM_reserveRegion((uint32_t) driver->BAR[0], (uint32_t) driver->BAR[0], DRIVER);
-	MEM_reserveRegion((uint32_t) driver->BAR[0]+0x400000, (uint32_t) driver->BAR[0]+0x400000, DRIVER);
+	MEM_reserveRegion((uint32_t) driver->device->BAR[0], (uint32_t) driver->device->BAR[0], DRIVER);
+	MEM_reserveRegion((uint32_t) driver->device->BAR[0]+0x400000, (uint32_t) driver->device->BAR[0]+0x400000, DRIVER);
 	return;
 
-	hdaDriver.base = driver->BAR[0];
+	hdaDriver.base = driver->device->BAR[0];
 	hdaDriver.commType = HDA_UNINITALIZED;
 	hdaDriver.initialized = false;
 	uint32_t ticks;

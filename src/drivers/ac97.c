@@ -8,7 +8,7 @@ void ac97_check_headphone_connection_change();
 
 struct audio_driver *ac97_init(struct PCI_driver *driver){
 	print_serial("[AC97] Init: \"%s\"\n", driver->name);
-    print_serial("[AC97] BAR: 0x%x 0x%x\n", driver->BAR[0], driver->BAR[1]);
+    print_serial("[AC97] BAR: 0x%x 0x%x\n", driver->device->BAR[0], driver->device->BAR[1]);
 	struct audio_driver *audio = malloc(sizeof(struct audio_driver));
 
     pci_enable_io_busmastering(driver->device->bus, driver->device->slot, driver->device->device);
@@ -24,17 +24,17 @@ struct audio_driver *ac97_init(struct PCI_driver *driver){
     print_serial("[AC97] Int #%d\n", audio->int_number);
 	audio->deviceType = AUDIO_AC97;
 
-	if(driver->BAR[0] & 0x1){
+	if(driver->device->BAR[0] & 0x1){
         audio->bar_type = 1;
     }
     else{
         audio->bar_type = 0;
     }
-    print_serial("[AC97] BAR Type: %d - 0x%x 0x%x\n", audio->bar_type, driver->BAR[0], driver->BAR[1]);
+    print_serial("[AC97] BAR Type: %d - 0x%x 0x%x\n", audio->bar_type, driver->device->BAR[0], driver->device->BAR[1]);
 
-	audio->nam_base = driver->BAR[0] & (~0x3);
-	audio->nabm_base = driver->BAR[1] & (~0x3);
-    audio->mem_base = driver->BAR[0] & (~0xf);
+	audio->nam_base = driver->device->BAR[0] & (~0x3);
+	audio->nabm_base = driver->device->BAR[1] & (~0x3);
+    audio->mem_base = driver->device->BAR[0] & (~0xf);
 
     struct AC97_driver *ac97 = malloc(sizeof(struct AC97_driver));
     audio->device.ac97 = ac97;

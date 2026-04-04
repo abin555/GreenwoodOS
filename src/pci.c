@@ -41,6 +41,8 @@ void PCI_probe(){
 				pdev->progIF = progIF;
 				pdev->driver = NULL;
 
+				PCI_load_BAR(pdev);
+
 				PCI_devices[PCI_numDevices] = pdev;
 				PCI_numDevices++;
 				PCI_initDevice(pdev);
@@ -77,7 +79,7 @@ void PCI_initDevice(struct PCI_device *pdev){
 			print_serial("\n");
 			pdriver = (struct PCI_driver *)malloc(sizeof(struct PCI_driver));
 			pdriver->name = "USB Device";
-			pdriver->init_driver = USB_initialize;
+			pdriver->init_driver = NULL;
 			goto generic_installation;
 			break;
 		case 0x0106://AHCI Controller
@@ -120,9 +122,8 @@ void PCI_initDevice(struct PCI_device *pdev){
 		pdev->slot,
 		pdev->device
 	);
-	PCI_load_BAR(pdriver);
 	for(int i = 0; i < 6; i++){
-		print_serial("[PCI BARs] 0x%x\n", pdriver->BAR[i]);
+		print_serial("[PCI BARs] 0x%x\n", pdev->BAR[i]);
 	}
 
 	PCI_drivers[PCI_numDrivers] = pdriver;
@@ -254,14 +255,14 @@ uint32_t PCI_getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint
 	}
 }
 
-void PCI_load_BAR(struct PCI_driver *driver){
+void PCI_load_BAR(struct PCI_device *device){
 	for(int bar = 0; bar < 6; bar++){
 		uint32_t bar_data = PCI_getDeviceBar(
-			driver->device->bus,
-			driver->device->slot,
-			driver->device->device,
+			device->bus,
+			device->slot,
+			device->device,
 			bar
 		);
-		driver->BAR[bar] = bar_data;
+		device->BAR[bar] = bar_data;
 	}
 }

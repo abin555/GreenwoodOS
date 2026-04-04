@@ -20,18 +20,18 @@ void initialize_AHCI(struct PCI_driver *driver){
 	}
 	//create_page_entry(AHCI_BASE, AHCI_BASE, 0x83);
 	//create_page_entry(AHCI_BASE+0x400000, AHCI_BASE+0x400000, 0x83);
-	//create_page_entry((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], 0x83);
+	//create_page_entry((uint32_t) driver->device->BAR[5], (uint32_t) driver->device->BAR[5], 0x83);
 	int blockIDX = MEM_findRegionIdx(0x400000);
 	//MEM_reserveRegion(AHCI_BASE, AHCI_BASE, DRIVER);
 	//MEM_reserveRegion(AHCI_BASE+0x400000, AHCI_BASE+0x400000, DRIVER);
 	AHCI_BASE = MEM_reserveRegionBlock(blockIDX, 0x400000, 0, DRIVER);//Identity Map AHCI_BASE
-	print_serial("[AHCI Driver] BAR: 0x%x New Base: 0x%x\n", driver->BAR[5], AHCI_BASE);
-	MEM_reserveRegion((uint32_t) driver->BAR[5], (uint32_t) driver->BAR[5], DRIVER);
-	MEM_reserveRegion((uint32_t) driver->BAR[5]+0x400000, (uint32_t) driver->BAR[5]+0x400000, DRIVER);
+	print_serial("[AHCI Driver] BAR: 0x%x New Base: 0x%x\n", driver->device->BAR[5], AHCI_BASE);
+	MEM_reserveRegion((uint32_t) driver->device->BAR[5], (uint32_t) driver->device->BAR[5], DRIVER);
+	MEM_reserveRegion((uint32_t) driver->device->BAR[5]+0x400000, (uint32_t) driver->device->BAR[5]+0x400000, DRIVER);
 	//MEM_printRegions();
 
-    //print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->BAR[5], driver->interrupt);
-    ABAR = (volatile HBA_MEM *)driver->BAR[5];
+    //print_serial("[AHCI Driver] AHCI Driver %d BAR: 0x%x INT: %d\n\0", driver->device->progIF, driver->device->BAR[5], driver->interrupt);
+    ABAR = (volatile HBA_MEM *)driver->device->BAR[5];
     Drive_PORTS = (HBA_PORT **)malloc(32 * sizeof(HBA_PORT));
     AHCI_int_trigger = false;
     print_serial("[AHCI Driver] Ver: %x\n\0", ABAR->vs);

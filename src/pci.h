@@ -60,6 +60,8 @@ struct PCI_device{
 	uint32_t slot;
 	uint32_t device;
 
+	uint32_t BAR[6];
+
 	uint8_t configuration_offset;
 	struct PCI_driver *driver;
 };
@@ -68,7 +70,6 @@ struct PCI_driver{
 	char *name;
 	int driverID;
 	struct PCI_device *device;
-	uint32_t BAR[6];
 	uint8_t interrupt;
 	void *driver_data;
 	void (*init_driver)(struct PCI_driver *);
@@ -100,5 +101,5 @@ uint8_t PCI_getDeviceInterrupt(uint16_t bus, uint16_t device, uint16_t function)
 uint32_t PCI_getDeviceBar(uint16_t bus, uint16_t device, uint16_t function, uint16_t bar);
 void pci_enable_io_busmastering(uint32_t bus, uint32_t device, uint32_t function);
 
-void PCI_load_BAR(struct PCI_driver *driver);
+void PCI_load_BAR(struct PCI_device *device);
 #endif

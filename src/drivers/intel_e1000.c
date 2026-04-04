@@ -424,7 +424,7 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     driver->driver_data = ether;
     ether->pci = driver;
 
-    if(driver->BAR[0] & 0x1){
+    if(driver->device->BAR[0] & 0x1){
         ether->bar_type = 1;
     }
     else{
@@ -432,8 +432,8 @@ struct ethernet_driver *e1000_init(struct PCI_driver *driver){
     }
     print_serial("[E1000] BAR Type: %d\n", ether->bar_type);
 
-    ether->io_base = driver->BAR[0] & ~1;
-    ether->mem_base = driver->BAR[0] & ~3;
+    ether->io_base = driver->device->BAR[0] & ~1;
+    ether->mem_base = driver->device->BAR[0] & ~3;
     MEM_reserveRegion((uint32_t) ether->mem_base, (uint32_t) ether->mem_base, DRIVER);
 
     ether->private_page_base = (void *) MEM_reserveRegionBlock(MEM_findRegionIdx(PAGE_SIZE), PAGE_SIZE, 0, DRIVER);

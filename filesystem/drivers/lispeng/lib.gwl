@@ -39,3 +39,4 @@
 )
 (defun ! (x) (if (= x 1) 1 (* x (! (- x 1)))))
 (defun shell (cmd) (exec "/A/OS/termvp/term.elf" cmd))
+(define do (lambda (expr n) (if (= n 0) '() (cons (eval expr) (do expr (- n 1))))))

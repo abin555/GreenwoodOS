@@ -3,7 +3,7 @@
 
 void *ehci_initialize(struct PCI_driver *usb){
     if(usb == NULL) return NULL;
-    struct ehci_capregs *capregs = (void *) usb->BAR[0];
+    struct ehci_capregs *capregs = (void *) usb->device->BAR[0];
     print_serial(
         "[EHCI] Init\n"
         "CAPLENGTH: %d\n"

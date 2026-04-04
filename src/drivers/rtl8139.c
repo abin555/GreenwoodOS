@@ -155,7 +155,7 @@ struct ethernet_driver *rtl8139_init(struct PCI_driver *driver){
     driver->driver_data = ether;
     ether->pci = driver;
 
-    if(driver->BAR[0] & 0x1){
+    if(driver->device->BAR[0] & 0x1){
         ether->bar_type = 1;
     }
     else{
@@ -163,8 +163,8 @@ struct ethernet_driver *rtl8139_init(struct PCI_driver *driver){
     }
     print_serial("[RTL8139] BAR Type: %d\n", ether->bar_type);
 
-    ether->io_base = driver->BAR[0] & (~0x3);
-    ether->mem_base = driver->BAR[0] & (~0xf);
+    ether->io_base = driver->device->BAR[0] & (~0x3);
+    ether->mem_base = driver->device->BAR[0] & (~0xf);
 
     print_serial("[RTL8139] Use %s based access (base: 0x%x)\n", (ether->bar_type) ? "mem" : "port", (ether->bar_type != 0) ? ether->io_base : ether->mem_base);
 
