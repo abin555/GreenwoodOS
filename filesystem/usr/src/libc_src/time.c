@@ -1,9 +1,39 @@
 #include <time.h>
 #include <sys/io.h>
 #include <stddef.h>
+#include <stdlib.h>
 
-size_t strftime(char s[], size_t max, const char *format, const struct tm *tm){
-    
+size_t strftime(char *s, size_t max, const char *format, const struct tm *tm)
+{
+    size_t n = 0;
+    while (*format && n < max - 1) {
+        if (*format != '%') {
+            s[n++] = *format++;
+            continue;
+        }
+        format++;
+        char buf[16];
+        const char *p = buf;
+        switch (*format) {
+            case 'Y': itoa(tm->tm_year + 1900, buf, 10); break;
+            case 'm': itoa(tm->tm_mon + 1, buf, 10);
+                      if (tm->tm_mon + 1 < 10) { buf[1]=buf[0]; buf[0]='0'; buf[2]='\0'; } break;
+            case 'd': itoa(tm->tm_mday, buf, 10);
+                      if (tm->tm_mday < 10) { buf[1]=buf[0]; buf[0]='0'; buf[2]='\0'; } break;
+            case 'H': itoa(tm->tm_hour, buf, 10);
+                      if (tm->tm_hour < 10) { buf[1]=buf[0]; buf[0]='0'; buf[2]='\0'; } break;
+            case 'M': itoa(tm->tm_min, buf, 10);
+                      if (tm->tm_min < 10) { buf[1]=buf[0]; buf[0]='0'; buf[2]='\0'; } break;
+            case 'S': itoa(tm->tm_sec, buf, 10);
+                      if (tm->tm_sec < 10) { buf[1]=buf[0]; buf[0]='0'; buf[2]='\0'; } break;
+            default:  buf[0] = '%'; buf[1] = *format; buf[2] = '\0'; break;
+        }
+        while (*p && n < max - 1)
+            s[n++] = *p++;
+        format++;
+    }
+    s[n] = '\0';
+    return n;
 }
 
 time_t time(time_t *tloc){

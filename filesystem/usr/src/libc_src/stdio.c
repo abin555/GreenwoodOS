@@ -204,28 +204,32 @@ int fclose(FILE *stream){
 	return 0;
 }
 
-size_t fwrite(const void *ptr, size_t size, size_t n, FILE *stream){
-	if(stream == NULL || ptr == NULL) return 0;
-	int n_wrote = 0;
-	for(int i = 0; i < n; i++){
-		if(stream->file_type == FILE_fd){
-			int nstep = write(stream->fd, (void *) ptr, size);
-			n_wrote += nstep;
-			/*
-			if(nstep < size){
-				if(feof(stream)){
-					int csize = ftell(stream);
-					int missing = size*n - n_wrote;
-					ftruncate(stream->fd, csize + missing);
-				}
-			}
-			*/
-		}
-		else{
+size_t fwrite(const void *ptr, size_t size, size_t n, FILE *stream)
+{
+    if(stream == NULL || ptr == NULL) return 0;
 
-		}
-	}
-	return n_wrote;
+    const unsigned char *p = (const unsigned char *)ptr;
+    size_t n_wrote = 0;
+    size_t head = ftell(stream);
+    size_t fsize;
+
+    fseek(stream, 0, SEEK_END);
+    fsize = ftell(stream);
+    fseek(stream, head, SEEK_SET);
+
+    if(fsize < head + size * n){
+        ftruncate(stream->fd, head + size * n);
+    }
+
+    for(size_t i = 0; i < n; i++){
+        if(stream->file_type == FILE_fd){
+            int nstep = write(stream->fd, p, size);
+            if(nstep <= 0) break;
+            p += size;
+            n_wrote++;
+        }
+    }
+    return n_wrote;
 }
 
 size_t fread(void *ptr, size_t size, size_t n, FILE *stream){
@@ -345,6 +349,16 @@ int snprintf(char *str, size_t size, const char *format, ...){
 					}
 					break;
 				}
+				case 'X':{
+					char val = va_arg(listpd, int);
+					s = itoa(val, wbuf, 16);
+					int l = strlen(s);
+					for(int i = 0; i < l && n < size; i++){
+						str[idx++] = s[i];
+						n++;
+					}
+					break;
+				}
 				case 'c':{
 					char val = (char) va_arg(listpd, int);
 					str[idx++] = val;
@@ -355,7 +369,8 @@ int snprintf(char *str, size_t size, const char *format, ...){
 			format++;
 		}
 	}
-	return n;
+	str[idx] = '\0';
+	return idx;
 }
 
 int fgetc(FILE *stream){
