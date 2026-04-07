@@ -258,6 +258,11 @@ void syscall_read(struct cpu_state *cpu __attribute__((unused)), struct task_sta
 }
 
 void syscall_write(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	if(syscall_debug.enabled && task->pid == syscall_debug.pid){
+		print_serial("[SYSCALL] Writing: ");
+		for(int i = 0; i < (int) cpu->edx; i++) print_serial("%c", ((char *) cpu->ecx)[i]);
+		print_serial("\n");
+	}
 	cpu->eax = (unsigned int) vfs_write(task_getSysFD(task, (int) cpu->ebx), (void *) cpu->ecx, (int) cpu->edx);
 }
 
