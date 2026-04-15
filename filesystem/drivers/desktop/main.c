@@ -80,6 +80,22 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags
         if(global_viewport_list->elements[0].vp == NULL) return;
         if(!global_viewport_list->elements[0].vp->minimized){
             global_viewport_list->elements[0].vp->ascii = (char) ascii;
+            switch(flags->arrow){
+                default:
+                    break;
+                case UP:
+                    global_viewport_list->elements[0].vp->ascii = 19;
+                    break;
+                case DOWN:
+                    global_viewport_list->elements[0].vp->ascii = 20;
+                    break;
+                case LEFT:
+                    global_viewport_list->elements[0].vp->ascii = 17;
+                    break;
+                case RIGHT:
+                    global_viewport_list->elements[0].vp->ascii = 18;
+                    break;
+            }
         }
     }
     

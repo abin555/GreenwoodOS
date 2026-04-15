@@ -13,6 +13,7 @@ extern uint32_t program_region_phys_base;
 extern uint32_t program_region_virt_base;
 
 void program_init();
+int program_findSlot();
 void select_program(int program_slot);
 int exec(char *filename, int argc, char **argv, void *vctx);
 

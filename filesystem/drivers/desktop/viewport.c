@@ -142,7 +142,7 @@ void draw_viewport(struct Viewport *viewport, struct WINDOW *window){
         }        
     }
     if(decorator){
-        for(int i = 0; viewport->title[i] != '\0' && viewport->title != NULL; i++){
+        for(int i = 0; viewport->title != NULL && viewport->title[i] != '\0'; i++){
             buf_putChar(
                 window->backbuffer,
                 viewport->loc.x+i*8+2,
@@ -161,10 +161,10 @@ void viewport_toggle_size(struct Viewport *viewport){
         viewport->minimized_w = viewport->loc.w;
         viewport->minimized_h = viewport->loc.h;
         int title_len = 0;
-        char *title_counter = viewport->title;
-        while(title_counter[title_len] && title_len < 50){
-            title_len++;
-        }
+
+        char *p = viewport->title;
+        while(*p && title_len < 50){ p++; title_len++; }
+        
         viewport->loc.w = (8*title_len) + 3*8;
         viewport->loc.h = 8;
         viewport_send_event(viewport, VP_MINIMIZE);
@@ -313,9 +313,7 @@ void  viewport_close(struct ViewportList *viewport_list, struct Viewport *viewpo
     }
     if(drop_idx == -1) return;
     for(int i = drop_idx; i < viewport_list->count; i++){
-        struct ViewportList_element temp = viewport_list->elements[i+1];
-        viewport_list->elements[i+1] = viewport_list->elements[i];
-        viewport_list->elements[i] = temp;
+        viewport_list->elements[i] = viewport_list->elements[i + 1];
     }
     viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
     //printf("[VP] Close\n");
@@ -498,6 +496,7 @@ void viewport_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options){
 
 bool getViewportResizeClick(struct Viewport *viewport, int x, int y){
     if(viewport == NULL) return false;
+    if(viewport->minimized) return false;  // ADD THIS
     if(
         x > viewport->loc.x + viewport->loc.w && 
         x < viewport->loc.x + viewport->loc.w + 8 && 
