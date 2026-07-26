@@ -114,3 +114,12 @@ int dup2(int oldfd, int newfd){
 	asm("int 0x80");
 	return (int) eax;
 }
+
+unsigned int *getTimerTickHandle(){
+	unsigned int *tick_handle;
+	register unsigned int eax asm("eax");
+	eax = 0x29;
+	asm("int 0x80");
+	tick_handle = (unsigned int *) eax;
+	return tick_handle;
+}

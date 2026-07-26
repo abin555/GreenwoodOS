@@ -22,6 +22,7 @@ typedef struct {
 } __attribute__((packed)) tga_header_t;
 
 int main(int argc, char **argv){
+    freopen("/-/dev/serial", "w+", stdout);
     if(argc != 5){
         printf("Usage: resize [in file] [outfile] [outsize x] [outsize y]\n");
         return 1;
@@ -32,6 +33,8 @@ int main(int argc, char **argv){
     char *osizey_str = argv[4];
     int osizex = atoi(osizex_str);
     int osizey = atoi(osizey_str);
+
+    printf("[RSIZE UTIL] IN: \"%s\" OUT: \"%s\" W: %d H: %d\n", infile_name, outfile_name, osizex, osizey);
 
     tga_header_t infile_header;
     tga_header_t outfile_header;

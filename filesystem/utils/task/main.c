@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/vp.h>
 #include <sys/task.h>
+#include <sys/io.h>
 #include "gui.h"
 
 enum PROC_CMD {
@@ -183,7 +184,10 @@ int main(int argc, char **argv){
 
     struct Location textBox = {5*8, 13, context->viewport->loc.w - 24, context->viewport->loc.h - 24};
 
-    
+    uint32_t *timer_ticks = getTimerTickHandle();
+
+    uint32_t start_tick = *timer_ticks;
+
     float scroll_ministep = 0.0f;
     int scroll_step = 0;
     int reload_step = 0;
@@ -208,12 +212,20 @@ int main(int argc, char **argv){
             struct PROC_Response_Task_Info *tinfo = &taskContext.taskInfo[i];
             render_taskInfo(tinfo, scroll_step, context, &textBox, &hovered_tid);
         }
-        scroll_ministep += 0.02f;
+        uint32_t now_tick = *timer_ticks;
+        if(now_tick - start_tick >= 25){
+            scroll_ministep += 0.02f;
+            start_tick = now_tick;
+            scroll_step++;
+            reload_step++;
+        }
+        /*
         if(scroll_ministep > 1.0f){
             scroll_ministep = 0.0f;
             scroll_step++;
             reload_step++;
         }
+        */
         if(reload_step == 4){
             updateTaskContext(task_file, &taskContext);
             reload_step = 0;

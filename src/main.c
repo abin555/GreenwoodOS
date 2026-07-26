@@ -90,15 +90,15 @@ void kernel_task(int argc, char **argv){
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
     audio_init();    
-    IDT_dump();
+    //IDT_dump();
 
-
+    /*
     udp_init();
     dhcp_init(ethernet_getDriver());
     tcp_init();
     netfs_init();
     netproc_init();
-
+    */
     proc_fs_init();
     
     //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);

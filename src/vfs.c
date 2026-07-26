@@ -142,6 +142,7 @@ int vfs_open(char *path, int flags){
     file_idx->status = 0;
     file_idx->inode = inode;
     file_idx->head = 0;
+    print_serial("[VFS] Opened %s to FD %d\n", path, fd);
     return fd;
 
     fail:;
