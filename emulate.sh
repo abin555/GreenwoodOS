@@ -1,4 +1,4 @@
-qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -d int,cpu_reset,guest_errors \
+qemu-system-i386 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log -d int,cpu_reset,guest_errors \
 -audiodev pa,id=snd0 -device ac97,audiodev=snd0 \
 -machine pcspk-audiodev=snd0 \
 -drive id=disk,file=./GreenwoodOS.iso,if=none,format=raw \
@@ -17,4 +17,5 @@ qemu-system-x86_64 -s -boot order=c -m 2G -monitor stdio -serial file:serial.log
 -object filter-dump,id=f1,netdev=mynet0,file=netdump.dat \
 -smp sockets=1,cores=2,threads=1 \
 -device usb-ehci,id=ehci \
--device usb-storage,bus=xhci.0,drive=disk4
+-device usb-storage,bus=xhci.0,drive=disk4 \
+-debugcon file:qemu.log

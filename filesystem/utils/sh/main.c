@@ -27,7 +27,8 @@ struct Alias alias[] = {
 	{"setbg", "/A/utils/setbg_scale/setbg_scale.elf"},
 	{"tga", "/A/utils/image/image.elf"},
 	{"gif", "/A/utils/gif/gif.elf"},
-	{"ld", "/A/utils/ezld/bin/ezld"}
+	{"ld", "/A/utils/ezld/bin/ezld"},
+	{"cat", "/A/utils/cat/cat.elf"}
 };
 
 int running;

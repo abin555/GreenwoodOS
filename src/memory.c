@@ -180,7 +180,7 @@ void MEM_printRegions(){
 				case STACK:
 					type = "  STACK    ";
 			}
-			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
+			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x (0x%x)\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr, page_directory[get_page_index_from_addr(MEMORY_REGIONS[i].virtual_addr)]);
 			//print_console(kernel_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}

@@ -139,7 +139,7 @@ int main(int argc, char **argv){
         }
         return 0;
     }
-    else if(argc == 3 && !strcmp(argv[1], "-k")){
+    else if(argc == 3 && (!strcmp(argv[1], "-k") || !strcmp(argv[1], "-kill"))){
         int pid = atoi(argv[2]);
 
         struct PROC_Response_Task_Info *tinfo = NULL;
@@ -156,6 +156,44 @@ int main(int argc, char **argv){
 
         printf("Killing %d - %s\n", pid, tinfo->name);
         kill_task(task_file, pid);
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-pause")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Pausing %d - %s\n", pid, tinfo->name);
+        pause_task(task_file, pid);
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-resume")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Resuming %d - %s\n", pid, tinfo->name);
+        resume_task(task_file, pid);
         return 0;
     }
 

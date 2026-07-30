@@ -290,45 +290,95 @@ struct DirectoryListing vfs_taskListDirectory(char *path){
 }
 
 int vfs_chdir(struct DIRECTORY *dir, char *path){
-	/*
-	Manipulates the task currentDirectory string.
-	Everything is appended to the string except for:
-	./ is ignored, and removed.
-	../ removed until the previous / and continues
-	- Note, ensure that ../ to idx 0 is covered.
-	*/
-	int path_size = 0;
-	//char workbuf[100];
-	while(path[path_size] != 0){
-		path_size++;
-	}
-	if(path[0] == '/'){//Absolute Directory
+    /*
+    Manipulates the task currentDirectory string.
+    Everything is appended to the string except for:
+    ./ is ignored, and removed.
+    ../ removed until the previous / and continues
+    - Note, ensure that ../ to idx 0 is covered.
+    */
+    int path_size = 0;
+    while(path[path_size] != 0){
+        path_size++;
+    }
+
+    if(path[0] == '/'){//Absolute Directory
         char driveLetter = path[1];
         struct VFS_Inode *root = vfs_findRoot(driveLetter);
         if(root == NULL){
             return 1;
         }
         struct VFS_Inode inode = vfs_followLink(root, path + 3);
-		if(inode.isValid == 1){
-			memset(dir->path, 0 , sizeof(dir->path));
-			memcpy(dir->path, path+1, path_size-1);
-			if(dir->path[path_size-2] != '/') dir->path[path_size-1] = '/';
-			return 0;
-		}
-		else{
-			return 1;
-		}
-	}
-	else{//Relative Directory
-		if(path[0] == '.' && path[1] == '.' && path[2] == '\0'){
-			int last_slash = 0;
-			for(int i = 0; dir->path[i] != 0 && i < (int) sizeof(dir->path); i++) last_slash++;
-			for(int i = last_slash-2; dir->path[i] != '/'; i--) last_slash = i;
-			dir->path[last_slash] = '\0';
-			return 0;
-		}
-	}
-	return 1;
+        if(inode.isValid == 1){
+            memset(dir->path, 0 , sizeof(dir->path));
+            memcpy(dir->path, path+1, path_size-1);
+            if(dir->path[path_size-2] != '/') dir->path[path_size-1] = '/';
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
+    else{//Relative Directory
+        char newpath[sizeof(dir->path)];
+        memcpy(newpath, dir->path, sizeof(newpath));
+
+        int len = 0;
+        while(newpath[len] != 0 && len < (int)sizeof(newpath)) len++;
+
+        int i = 0;
+        while(i < path_size){
+            int seg_start = i;
+            while(path[i] != '/' && path[i] != 0) i++;
+            int seg_len = i - seg_start;
+            if(path[i] == '/') i++; //consume the slash
+
+            if(seg_len == 0){
+                continue; //empty segment, e.g. "a//b"
+            }
+
+            if(seg_len == 1 && path[seg_start] == '.'){
+                continue; //"./" - ignore
+            }
+
+            if(seg_len == 2 && path[seg_start] == '.' && path[seg_start+1] == '.'){
+                //"../" - strip back to the previous '/'
+                if(len <= 2){
+                    //already at drive root (e.g. "C/"), nothing above it
+                    continue;
+                }
+                int j = len - 2; //step behind the trailing '/'
+                while(j > 0 && newpath[j] != '/') j--;
+                len = j + 1; //keep the '/'
+                newpath[len] = '\0';
+                continue;
+            }
+
+            //normal path component - append it
+            if(len + seg_len + 1 >= (int)sizeof(newpath)) return 1; //too long
+            memcpy(newpath + len, path + seg_start, seg_len);
+            len += seg_len;
+            newpath[len] = '/';
+            len++;
+            newpath[len] = '\0';
+        }
+
+        char driveLetter = newpath[0];
+        struct VFS_Inode *root = vfs_findRoot(driveLetter);
+        if(root == NULL){
+            return 1;
+        }
+        struct VFS_Inode inode = vfs_followLink(root, newpath + 2);
+        if(inode.isValid == 1){
+            memset(dir->path, 0, sizeof(dir->path));
+            memcpy(dir->path, newpath, len);
+            return 0;
+        }
+        else{
+            return 1;
+        }
+    }
+    return 1;
 }
 
 int vfs_ftruncate(int fd, unsigned int length){

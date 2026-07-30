@@ -36,6 +36,7 @@
 #include "kernel_fn.h"
 #include "proc.h"
 #include "loader.h"
+#include "ap_startup.h"
 
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
@@ -90,6 +91,8 @@ void kernel_task(int argc, char **argv){
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
     audio_init();    
+
+    ap_hold = 1;
     //IDT_dump();
 
     /*
@@ -158,7 +161,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     acpi_parseMADT();
     
     
-    //apic_startCores();
+    apic_startCores();
 
     //tasking_setup_kernel_stack();
 

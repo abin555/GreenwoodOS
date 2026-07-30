@@ -102,8 +102,9 @@ void apic_startCores(){
       }
       int block = MEM_findRegionIdx(0x7D00);
       apic_coreInfo.stack_regions[i] = MEM_reserveRegionBlock(block, 0x7D00, 0, STACK);
+      print_serial("Core %d stack is at 0x%x\n", coreid, apic_coreInfo.stack_regions[i]);
    }
-
+   MEM_printRegions();
    print_serial("BSP ID: %d, aprunning: %d\n", bspid, aprunning);
 
    create_page_entry(0x8000, 0x8000, 0x83);
@@ -115,12 +116,14 @@ void apic_startCores(){
    for(int i = 0; i < apic_coreInfo.numcores; i++){
       print_serial("[APIC] %d cpus started\n", aprunning);
       uint32_t coreid = apic_coreInfo.ids[i];
-      apic_stack_top = apic_coreInfo.stack_regions[i] + 0x7D00;
+      
+      //apic_stack_top = 0x1807D00;
       print_serial("Starting Core: %d (#%d)\n", coreid, i);
       if(coreid == bspid){
          print_serial("Is boot core, skipping\n");
          continue;
       }
+      apic_stack_top = apic_coreInfo.stack_regions[i] + 0x7D00;
       writeAPICRegister(0x280, 0);
       writeAPICRegister(0x310, readAPICRegister(0x310) | (coreid << 24));
       writeAPICRegister(0x300, (readAPICRegister(0x300) & 0xFFF00000) | 0x00C500);
