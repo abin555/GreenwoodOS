@@ -410,6 +410,7 @@ void init_syscalls(){
 void syscall_set(uint8_t call_id, syscall_fn fn, char *name){
 	syscall_functions[call_id].fn = fn;
 	syscall_functions[call_id].name = name;
+	syscall_functions[call_id].calls = 0;
 }
 
 void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stack_state *stack __attribute__((unused))){
@@ -420,6 +421,7 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 			print_serial("[SYSCALL] 0x%x (%s) - from 0x%x EBX: 0x%x ECX: 0x%x EDX: 0x%x\n", cpu->eax, syscall_functions[cpu->eax].name, stack->eip, cpu->ebx, cpu->ecx, cpu->edx);
 			print_stack_trace(cpu->ebp, 15);
 		}
+		++syscall_functions[cpu->eax].calls;
 		syscall_functions[cpu->eax].fn(cpu, task);
 	}
 	else{
@@ -427,6 +429,15 @@ void syscall_callback(struct cpu_state *cpu __attribute__((unused)), struct stac
 	}
 	//IRQ_RES;
 	return;	
+}
+
+void syscall_print_stats(){
+	print_serial("[SYSCALL] Statistics:\n");
+	for(int i = 0; i < 0xFF; i++){
+		if(syscall_functions[i].fn == NULL) continue;
+		if(syscall_functions[i].calls == 0) continue;
+		print_serial("\t%d \"%s\" => %d calls\n", i, syscall_functions[i].name, syscall_functions[i].calls);
+	}
 }
 
 #include <sysfs.h>

@@ -347,6 +347,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
     most_recent_int_cpu_state.esi = new_task->registers.esi;
     most_recent_int_cpu_state.edi = new_task->registers.edi;
     most_recent_int_cpu_state.esp = new_task->registers.esp;
+    //print_serial("[TASK] Switch %d to %d\n", old_task->pid, new_task->pid);
 }
 
 

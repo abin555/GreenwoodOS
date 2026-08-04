@@ -147,4 +147,6 @@ extern void int_handler_53();
 
 extern void int_handler_128();
 
+void print_irq_count();
+
 #endif

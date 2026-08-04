@@ -212,7 +212,7 @@ int main(int argc, char **argv){
     read(kbd_flags_fd, (void *) &KBD_bak, sizeof(KBD_bak));
 
     while(1){
-        task_lock(1);
+        //task_lock(1);
         lseek(kbd_flags_fd, 0, 0);
         read(kbd_flags_fd, (void *) &KBD, sizeof(KBD));
         if(KBD.tick != KBD_bak.tick){
@@ -291,7 +291,7 @@ int main(int argc, char **argv){
         window_draw_cursor(mouse.pos.x, mouse.pos.y);
         
         window_update();
-        task_lock(0);
+        //task_lock(0);
         yield();
     }
 

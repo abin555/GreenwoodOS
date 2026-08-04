@@ -1,5 +1,8 @@
 #include "interrupts.h"
 #include "descriptor_table.h"
+#include "stddef.h"
+
+extern void syscall_print_stats();
 
 struct IDTDescriptor idt_descriptors[INTERRUPT_DESCRIPTOR_COUNT] = {0};
 struct IDT idt;
@@ -11,6 +14,21 @@ unsigned int INT_currentInterrupt;
 
 extern uint32_t saved_stack_ebp;
 extern uint32_t saved_stack_esp;
+
+uint64_t irq_count;
+uint64_t irq_entry_count[INTERRUPT_DESCRIPTOR_COUNT];
+
+void print_irq_count(){
+	print_serial("[IRQ] !!! There have been %d IRQs\n", irq_count);
+	print_serial("\t");
+	for(int i = 0; i < INTERRUPT_DESCRIPTOR_COUNT; i++){
+		if(interrupt_handlers[i] != NULL){
+			print_serial("%d => %d, ", i, irq_entry_count[i]);
+		}
+	}
+	print_serial("\n");
+	syscall_print_stats();
+}
 
 void pic_acknowledge(unsigned int interrupt){
 
@@ -153,6 +171,8 @@ void interrupts_install_idt()
 	idt.address = (uint32_t) &idt_descriptors;
 	idt.size = sizeof(struct IDTDescriptor) * INTERRUPT_DESCRIPTOR_COUNT;
 	print_serial("Loading IDT at 0x%x of size %x\n", idt.address, idt.size);
+	irq_count = 0;
+	for(int i = 0; i < INTERRUPT_DESCRIPTOR_COUNT; i++) irq_entry_count[i] = 0;
 	load_idt((uint32_t) &idt);
 
 	IRQ_RES;
@@ -162,6 +182,8 @@ void interrupts_install_idt()
 struct cpu_state most_recent_int_cpu_state;
 struct stack_state most_recent_int_stack_state;
 bool override_state_return = false;
+
+
 
 void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stack_state stack){
 	most_recent_int_cpu_state = cpu;
@@ -173,7 +195,8 @@ void interrupt_handler(struct cpu_state cpu, unsigned int interrupt, struct stac
 	#endif
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip);
 	//print_serial("Saved ESP: 0x%x Saved EBP: 0x%x Int: %d Current EBP: 0x%x Current ESP: 0x%x EIP: 0x%x Saved EIP: 0x%x\n", saved_stack_esp, saved_stack_ebp, interrupt, cpu.ebp, cpu.esp, stack.eip, funny_stack->eip);
-	
+	irq_count++;
+	irq_entry_count[interrupt]++;
 	if((uint32_t) interrupt_handlers[interrupt]){
 		interrupt_handlers[interrupt](&cpu, &stack);
 		
