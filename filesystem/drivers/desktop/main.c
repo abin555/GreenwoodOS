@@ -103,7 +103,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags
 
 int main(int argc, char **argv){
     hooks_load();
-    struct WINDOW *win = window_open("Desktop", 0);
+    struct WINDOW *win = window_open("Desktop", 1);
     set_schedule(ONFOCUS);
 
     FILE *mouseFile = fopen("/-/sys/mouse", "r");

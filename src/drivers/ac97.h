@@ -66,6 +66,7 @@ struct AC97_driver {
     uint8_t free_entry;
     uint8_t playing_state;
     uint8_t selected_output;
+    uint8_t entry_count;
     uint8_t aux_out_number_of_volume_steps;
     uint16_t nam_base;
     uint16_t nabm_base;

@@ -132,7 +132,7 @@ void wav_refill_buffer(uint8_t *buffer)
         number_of_frames_to_convert = playing_audio->sample_rate;
     }
 
-    print_serial("[WAV] There are %d frames to convert\n", number_of_frames_to_convert);
+    //print_serial("[WAV] There are %d frames to convert\n", number_of_frames_to_convert);
 
     for (uint32_t i = 0; i < number_of_frames_to_convert; i++)
     {

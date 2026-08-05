@@ -12,10 +12,7 @@ struct audio_driver *ac97_init(struct PCI_driver *driver){
 	struct audio_driver *audio = malloc(sizeof(struct audio_driver));
 
     pci_enable_io_busmastering(driver->device->bus, driver->device->slot, driver->device->device);
-    if (!(inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL) & 0x1)) {
-        print_serial("[AC97] Enabling DMA Engine\n");
-        outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL, 0x1);
-    }
+    
 
     IRQ_clear_mask(driver->interrupt);
 
@@ -36,7 +33,13 @@ struct audio_driver *ac97_init(struct PCI_driver *driver){
 	audio->nabm_base = driver->device->BAR[1] & (~0x3);
     audio->mem_base = driver->device->BAR[0] & (~0xf);
 
+    if (!(inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL) & 0x1)) {
+        print_serial("[AC97] Enabling DMA Engine\n");
+        outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CONTROL, 0x1);
+    }
+
     struct AC97_driver *ac97 = malloc(sizeof(struct AC97_driver));
+    memset(ac97, 0, sizeof(struct AC97_driver));
     audio->device.ac97 = ac97;
 
     ac97->private_page = (void *) get_virtual(MEM_reserveRegionBlock(MEM_findRegionIdx(0x40000), 0x40000, 0, DRIVER));
@@ -263,28 +266,22 @@ void ac97_play_pcm_data_in_loop(struct audio_driver *audio, uint16_t sample_rate
     outdw(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_BUFFER_BASE_ADDRESS, (uint32_t) ac97->buffer_memory_pointer);
 
     // fill buffer entries
-    uint32_t sound_memory = get_physical((uint32_t)pcm_data);
-    uint32_t sound_length = (sound_buffer_refilling_info->buffer_size * 2);
-    print_serial("[AC97] Sound length is %d\n", sound_length);
-    for (uint32_t i = 0; i < 32; i++)
-    {
-        if (sound_length > 0x2000 * 2)
-        {
-            ac97->buffer_memory_pointer[i].sample_memory = sound_memory;
-            ac97->buffer_memory_pointer[i].number_of_samples = 0x2000;
-            sound_memory += 0x2000 * 2;
-            sound_length -= 0x2000 * 2;
-            print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
-        }
-        else
-        {
-            ac97->buffer_memory_pointer[i].sample_memory = sound_memory;
-            ac97->buffer_memory_pointer[i].number_of_samples = ((sound_length / 2) & 0xFFFE);
-            ac97->buffer_memory_pointer[i].interrupt_on_completion = 1;
-            print_serial("[AC97] Buffer %d sample = 0x%x num = %d\n", i, ac97->buffer_memory_pointer[i].sample_memory, ac97->buffer_memory_pointer[i].number_of_samples);
-            break;
+    uint32_t half = sound_buffer_refilling_info->buffer_size;
+    uint32_t phys = get_physical((uint32_t)pcm_data);
+    uint32_t base_len = (half / 16) & ~3u;        // whole stereo frames
+    uint32_t i = 0;
+
+    for (uint32_t h = 0; h < 2; h++) {
+        uint32_t off = 0;
+        for (uint32_t k = 0; k < 16; k++, i++) {
+            uint32_t len = (k == 15) ? (half - off) : base_len;
+            ac97->buffer_memory_pointer[i].sample_memory = phys + (h * half) + off;
+            ac97->buffer_memory_pointer[i].number_of_samples = len / 2;
+            ac97->buffer_memory_pointer[i].interrupt_on_completion = (k == 15);
+            off += len;
         }
     }
+    ac97->entry_count = 32;
 
     print_serial("[AC97] Start stream position: 0x%x\n", ac97_get_actual_stream_position(audio));
 
@@ -302,30 +299,36 @@ void task_ac97_play_buffer_in_loop() {
     struct audio_driver *audio = audio_drivers[selected_dev];
     if(audio == NULL || audio->deviceType != AUDIO_AC97) return;
     //print_serial("[AC97] Playing\n");
-    //struct AC97_driver *ac97 = audio->device.ac97;
+    struct AC97_driver *ac97 = audio->device.ac97;
     //print_serial("[AC97] Index %d\n", inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY));
     //update Last Valid Entry register for all entries to be valid
-    outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_LAST_VALID_ENTRY, (inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY)-1) & 0x1F);
+
+    //outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_LAST_VALID_ENTRY, (inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY)-1) & 0x1F);
+
+    uint8_t civ = inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY);
+    uint8_t lvi = (civ + ac97->entry_count - 1) % ac97->entry_count;
+    outb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_LAST_VALID_ENTRY, lvi);
 }
 
 uint32_t ac97_get_actual_stream_position(struct audio_driver *audio){
     if(audio == NULL || audio->deviceType != AUDIO_AC97) return 0;
     struct AC97_driver *ac97 = audio->device.ac97;
-    uint32_t number_of_processed_bytes = 0;
 
-    //add already played buffers
-    uint32_t current_entry = inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY);
-    for(uint32_t i=0; i< current_entry; i++) {
-        number_of_processed_bytes += ac97->buffer_memory_pointer[i].number_of_samples*2;
-    }
-    uint32_t current_entry_position = indw(audio->nabm_base + 0x8);
-    //print_serial("[AC97] Current Entry is %d Current Position is %d\n", current_entry, current_entry_position);
-    //add actual entry position
-    number_of_processed_bytes += (ac97->buffer_memory_pointer[current_entry].number_of_samples*2 - current_entry_position*2);
+    uint8_t civ, civ2;
+    uint16_t picb;
+    do {
+        civ  = inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY);
+        picb = indw(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENT_ENTRY_POSITION) & 0xFFFF;
+        civ2 = inb(audio->nabm_base + AC97_NABM_IO_PCM_OUTPUT_CURRENTLY_PROCESSED_ENTRY);
+    } while (civ != civ2);
 
+    if (civ >= ac97->entry_count) return 0;
 
-    //print_serial("[AC97] Stream Position: 0x%x\n", number_of_processed_bytes);
-    return number_of_processed_bytes;
+    uint32_t bytes = 0;
+    for (uint32_t i = 0; i < civ; i++)
+        bytes += ac97->buffer_memory_pointer[i].number_of_samples * 2;
+    bytes += (ac97->buffer_memory_pointer[civ].number_of_samples - picb) * 2;
+    return bytes;
 }
 
 void ac97_stop_sound(struct audio_driver *audio) {

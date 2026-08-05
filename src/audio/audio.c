@@ -126,23 +126,24 @@ void audio_play_refilling(uint8_t *source, uint32_t source_len, uint32_t pcmFull
 void task_refill_sound_buffer(){
     //print_serial("[AUDIO] Refilling Buffer\n");
     // calculate how many bytes were played
+    uint32_t position = audio_get_actual_stream_position();
     if (sound_buffer_refilling_info->actually_playing_buffer == SOUND_BUFFER_0){
-        if (audio_get_actual_stream_position() < sound_buffer_refilling_info->buffer_size){
-            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + audio_get_actual_stream_position());
+        if (position < sound_buffer_refilling_info->buffer_size){
+            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + position);
         }
         else{
             sound_buffer_refilling_info->played_bytes_by_finished_buffers += sound_buffer_refilling_info->buffer_size;
-            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + audio_get_actual_stream_position() - sound_buffer_refilling_info->buffer_size);
+            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + position - sound_buffer_refilling_info->buffer_size);
             sound_buffer_refilling_info->actually_playing_buffer = SOUND_BUFFER_1;
         }
     }
     else{
-        if (audio_get_actual_stream_position() >= sound_buffer_refilling_info->buffer_size){
-            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + audio_get_actual_stream_position() - sound_buffer_refilling_info->buffer_size);
+        if (position >= sound_buffer_refilling_info->buffer_size){
+            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + position - sound_buffer_refilling_info->buffer_size);
         }
         else{
             sound_buffer_refilling_info->played_bytes_by_finished_buffers += sound_buffer_refilling_info->buffer_size;
-            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + audio_get_actual_stream_position());
+            sound_buffer_refilling_info->played_bytes = (sound_buffer_refilling_info->played_bytes_by_finished_buffers + position);
             sound_buffer_refilling_info->actually_playing_buffer = SOUND_BUFFER_0;
         }
     }
@@ -168,7 +169,7 @@ void task_refill_sound_buffer(){
             sound_buffer_refilling_info->fill_buffer(pcm_data);
             sound_buffer_refilling_info->last_filled_buffer = SOUND_BUFFER_0;
         }
-        asm("wbinvd"); // flush processor cache to RAM to be sure sound card will read correct data
+        //asm("wbinvd"); // flush processor cache to RAM to be sure sound card will read correct data
     }
 }
 
