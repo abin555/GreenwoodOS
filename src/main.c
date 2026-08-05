@@ -37,6 +37,8 @@
 #include "proc.h"
 #include "loader.h"
 
+extern int kernel_stats(int argc, char **argv);
+
 void kernel_task(int argc, char **argv){
     print_serial("Kernel Continuing Boot ARGC %x ARGV %x\n", argc, argv);
     task_lock = 1;
@@ -111,12 +113,10 @@ void kernel_task(int argc, char **argv){
     exec("/A/utils/term2/term2.elf", 2, term2_args, NULL);
     */
     loader_init();
-
     exec("/A/OS/init/init.elf", 0, NULL, NULL);
 
     task_lock = 0;
     set_schedule(NEVER);
-    //task_yield();
     while(1){
         
     }
@@ -169,7 +169,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     ps2_init();
     timer_init(1);
     multitask_init();
-    timer_attach(10, print_irq_count);
+    //timer_attach(10, print_irq_count);
     IRQ_RES;
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel", NULL);

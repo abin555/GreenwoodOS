@@ -24,7 +24,7 @@ struct Alias alias[] = {
 	{"edit", "/A/utils/editor/editor.elf"},
 	{"netstat", "/A/net/netstat/netstat.elf"},
 	{"ping", "/A/net/ping/ping.elf"},
-	{"setbg", "/A/utils/setbg_scale/setbg_scale.elf"},
+	{"bg", "/A/utils/setbg_scale/setbg_scale.elf"},
 	{"tga", "/A/utils/image/image.elf"},
 	{"gif", "/A/utils/gif/gif.elf"},
 	{"ld", "/A/utils/ezld/bin/ezld"}

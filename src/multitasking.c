@@ -236,7 +236,9 @@ int taskID_fromPID(int pid){
 }
 
 struct task_state *task_fromPID(int pid){
-    return &tasks[taskID_fromPID(pid)];
+    int task_idx = taskID_fromPID(pid);
+    if(task_idx == -1) return NULL;
+    return &tasks[task_idx];
 }
 
 struct task_state *task_getCurrent(){
@@ -369,7 +371,7 @@ void __attribute__ ((optimize("-O3"))) task_callback(){
         }
     }
     if(!task_available){
-        //print_serial("[TASK] Somehow, there are no tasks available...\n");
+        print_serial("[TASK] Somehow, there are no tasks available...\n");
         return;
     }
     int8_t next_idx = running_idx + 1;

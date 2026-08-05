@@ -132,11 +132,22 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 				case 0x69:
 					if(KBD_flags.special){
 						//print_serial("End!\n");
-						
-						for(int i = 0; i < MAX_TASKS; i++){
-							if(tasks[i].window == &windows[window_selected] && tasks[i].pid > 3){
-								stop_task(i);
+						if(!KBD_flags.ctrl){
+							for(int i = 0; i < MAX_TASKS; i++){
+								if(tasks[i].window == &windows[window_selected] && tasks[i].pid > 3){
+									stop_task(i);
+								}
 							}
+						}
+						else{
+							char *term2_args[] = {
+								"term2.elf",
+								"-w",
+								"-w",
+								NULL
+							};
+							exec("/A/utils/term2/term2.elf", 2, term2_args, NULL);
+							task_lock = 0;
 						}
 						
 						//reboot();

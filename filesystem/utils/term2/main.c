@@ -737,9 +737,13 @@ struct Terminal *term_init(int window_mode) {
 
 int main(int argc, char **argv) {
     int mode = 0;
-    if(argc == 2){
-        if(!strcmp(argv[1], "-w")){
+    char *executable = "/A/utils/sh/sh.elf";
+    if(argc >= 2){
+        if(!strcmp(argv[argc-1], "-w")){
             mode = 1;
+        }
+        if(argc-1 != 1){
+            executable = strdup(argv[1]);
         }
     }
     g_term = term_init(mode);
@@ -760,7 +764,7 @@ int main(int argc, char **argv) {
     printf("Pipe open stat:  %d\n",  pipe_stat.open_stat);
 
     EXEC_CTX proc_ctx = exec_createCTX();
-    exec_setProgram(proc_ctx, "/A/utils/sh/sh.elf");
+    exec_setProgram(proc_ctx, executable);
     //exec_setProgram(proc_ctx, "/A/lisp/lisp.elf");
     exec_setARGC(proc_ctx, 0);
     exec_setFDCount(proc_ctx, 2);

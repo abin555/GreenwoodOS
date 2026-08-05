@@ -63,3 +63,11 @@ void buf_write_cell(uint32_t *buf, uint32_t w, uint32_t index, char c, uint32_t 
         }
     }
 }
+
+void buf_print(uint32_t *buf, uint32_t x, uint32_t y, char *str, uint32_t fg, uint32_t bg){
+    int i = 0;
+    while(str[i] != '\0'){
+        buf_putChar(buf, x + i*CHAR_W, y, str[i], fg, bg);
+        i++;
+    }
+}
