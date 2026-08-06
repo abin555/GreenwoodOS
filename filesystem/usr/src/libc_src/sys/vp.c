@@ -19,8 +19,8 @@ void vp_init(){
     if(vp_file != -1){
         read(vp_file, &vp_functions, sizeof(struct ViewportFunctions));
         sys_vp_initialized = 1;
+        close(vp_file);
     }
-    close(vp_file);
 }
 
 struct Viewport *vp_open(int w, int h, char *title){

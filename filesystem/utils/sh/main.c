@@ -28,7 +28,8 @@ struct Alias alias[] = {
 	{"tga", "/A/utils/image/image.elf"},
 	{"gif", "/A/utils/gif/gif.elf"},
 	{"ld", "/A/utils/ezld/bin/ezld"},
-	{"cat", "/A/utils/cat/cat.elf"}
+	{"cat", "/A/utils/cat/cat.elf"},
+	{"drvrload", "/A/drivers/loader.elf"}
 };
 
 int running;

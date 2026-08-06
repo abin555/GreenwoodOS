@@ -249,7 +249,7 @@ void syscall_open(struct cpu_state *cpu __attribute__((unused)), struct task_sta
 }
 
 void syscall_close(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
-	vfs_close(task_getSysFD(task, (int) cpu->ebx));
+	vfs_close(task_getSysFD(task, *((int*) &cpu->ebx)));
 	task_freeFD(task, (int) cpu->ebx);
 }
 

@@ -150,8 +150,9 @@ int vfs_open(char *path, int flags){
 }
 
 void vfs_close(int fd){
-    if(fd == -1) return;
-    //print_serial("[VFS] Closing FD %d\n", fd);
+    if(fd < 0 || fd > VFS_maxFiles) return;
+    print_serial("[VFS] Closing FD %d\n", fd);
+
     struct VFS_File *file_idx = &VFS_fileTable[fd];
     if(file_idx->inode.type == VFS_PIPE){
         if(pipe_close(file_idx->inode.fs.pipe, file_idx->inode.flags)){

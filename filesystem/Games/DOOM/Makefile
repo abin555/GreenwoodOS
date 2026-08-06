@@ -1,5 +1,5 @@
 CC = i386-gwos-gcc
-CFLAGS = -c -O0
+CFLAGS = -c -g -O0
 INCLUDE_PATH = -I./include/
 PROG = DOOM
 

@@ -312,7 +312,7 @@ int main(int argc, char **argv){
   doom_init(1, doom_argv, 0);
   task_lock(0);
 
-  if(argc == 2 && !strcmp(argv[1], "-w")){
+  if(argc == 2){
     window_mode = 1;
   }
   else{
