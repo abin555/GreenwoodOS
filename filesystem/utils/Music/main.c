@@ -66,7 +66,7 @@ int main(int argc, char **argv){
     int size;
     int music_fd = open(argv[1], O_READ);
     if(music_fd != -1){
-        size = lseek(music_fd, 0, 2) / 2;
+        size = lseek(music_fd, 0, 2);
         lseek(music_fd, 0, 0);
         file_buf = (void*) memory_requestRegion(size);
         read(music_fd, file_buf, size);

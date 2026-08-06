@@ -6,11 +6,10 @@
 #include <sys/io.h>
 #include <sys/task.h>
 #include <sys/memory.h>
+#include <sys/window.h>
 //#define DOOM_IMPLEMENTATION
 #include "PureDOOM.h"
 
-#define START_W 320
-#define START_H 200
 #define MAXSCALE 3
 
 unsigned int WIDTH;
@@ -22,6 +21,8 @@ int running;
 
 struct ViewportFunctions *vp_funcs;
 struct Viewport *window;
+struct WINDOW *os_window;
+char window_mode; //0 => viewport, 1 => os window
 
 struct KeyData{
   char current_c;
@@ -147,16 +148,16 @@ void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){
       set_schedule(NEVER);
       break;
     case VP_RESIZE:
-      if(vp->resizeLoc.w < START_W || vp->resizeLoc.h < START_H) break;
+      if(vp->resizeLoc.w < SCREENWIDTH || vp->resizeLoc.h < SCREENHEIGHT) break;
       WIDTH = vp->resizeLoc.w;
       HEIGHT = vp->resizeLoc.h;
-      if(WIDTH > START_W * MAXSCALE) WIDTH = START_W * MAXSCALE;
-      if(HEIGHT > START_W * MAXSCALE) HEIGHT = START_W * MAXSCALE;
+      if(WIDTH > SCREENWIDTH * MAXSCALE) WIDTH = SCREENWIDTH * MAXSCALE;
+      if(HEIGHT > SCREENWIDTH * MAXSCALE) HEIGHT = SCREENWIDTH * MAXSCALE;
       if(WIDTH <= HEIGHT){
-        HEIGHT = WIDTH * ((float) START_H / (float) START_W);
+        HEIGHT = WIDTH * ((float) SCREENHEIGHT / (float) SCREENWIDTH);
       }
       else if(HEIGHT > WIDTH){
-        WIDTH = HEIGHT * ((float) START_W / (float) START_H);
+        WIDTH = HEIGHT * ((float) SCREENWIDTH / (float) SCREENHEIGHT);
       }
 
       vp_set_buffer(
@@ -304,17 +305,38 @@ int main(int argc, char **argv){
 
   printf("DOOM starting init\n\n\0");
   task_lock(1);
-  doom_init(argc, argv, 0);
+  char *doom_argv[2] = {
+    "doom.elf",
+    NULL
+  };
+  doom_init(1, doom_argv, 0);
   task_lock(0);
 
+  if(argc == 2 && !strcmp(argv[1], "-w")){
+    window_mode = 1;
+  }
+  else{
+    window_mode = 0;
+  }
+
   running = 1;
-  window = vp_open(WIDTH, HEIGHT, "DOOM");
-  window->loc.x = 400-160;
-  window->loc.y = 300-120;
-  vp_add_event_handler(window, event_handler);
-  frontbuf = memory_requestRegion(SCALE * START_W * START_H * MAXSCALE);
-  vp_set_buffer(window, frontbuf, WIDTH * HEIGHT * SCALE);
-  vp_set_options(window, VP_OPT_RESIZE);
+  if(!window_mode){
+    window = vp_open(WIDTH, HEIGHT, "DOOM");
+    window->loc.x = 400-160;
+    window->loc.y = 300-120;
+    vp_add_event_handler(window, event_handler);
+    frontbuf = memory_requestRegion(SCALE * SCREENWIDTH * SCREENHEIGHT * MAXSCALE);
+    vp_set_buffer(window, frontbuf, WIDTH * HEIGHT * SCALE);
+    vp_set_options(window, VP_OPT_RESIZE);
+  }
+  else{
+    os_window = window_open("DOOM", 1);
+    frontbuf = os_window->backbuffer;
+    WIDTH = os_window->width;
+    HEIGHT = os_window->height;
+    set_schedule(ONFOCUS);
+  }
+  
   //addEndCallback(end_callback);
 
   uint32_t* framebuffer;
@@ -333,21 +355,30 @@ int main(int argc, char **argv){
     resize_buf(
       frontbuf,
       framebuffer,
-      START_W,
-      START_H,
+      SCREENWIDTH,
+      SCREENHEIGHT,
       WIDTH,
       HEIGHT
     );
     
-    //memcpy(frontbuf, framebuffer, SCALE * START_W * START_H);
+    //memcpy(frontbuf, framebuffer, SCALE * SCREENWIDTH * SCREENHEIGHT);
     task_lock(0);
 
-    vp_copy(window);
-    for(int i = 0; i < 0x8FFFFF; i++){}
-    //yield();
+    if(!window_mode){
+      vp_copy(window);
+    }
+    else{
+      window_update(os_window);
+    }
+    //for(int i = 0; i < 0x8FFFFF; i++){}
+    yield();
   }
 
-  vp_close(window);
+  if(!window_mode)
+    vp_close(window);
+  else
+    window_close(os_window);
+
   close(rtc_fd);
-  memory_returnRegion(frontbuf, SCALE * START_W * START_H * MAXSCALE);
+  memory_returnRegion(frontbuf, SCALE * SCREENWIDTH * SCREENHEIGHT * MAXSCALE);
 }

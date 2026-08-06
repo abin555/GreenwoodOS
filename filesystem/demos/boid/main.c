@@ -69,9 +69,11 @@ int main(int argc, char **argv){
     int ticks = 0;
     while(running){
         if(ticks % 10 == 0){
+            task_lock(1);
             for(int i = 0; i < BOIDS; i++){
                 updateBoid(flock[i], flock, BOIDS, ((double) ticks) / 100.0f);
             }
+            task_lock(0);
 
             memset(main_buf, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
             //drawLine(main_vp, 0, 0, WIDTH, HEIGHT, 0xFFFFFF);
