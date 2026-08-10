@@ -162,6 +162,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     
     
     apic_startCores();
+    
 
     //tasking_setup_kernel_stack();
 
