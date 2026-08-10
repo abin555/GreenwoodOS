@@ -36,6 +36,7 @@
 #include "kernel_fn.h"
 #include "proc.h"
 #include "loader.h"
+#include "ap_startup.h"
 
 extern int kernel_stats(int argc, char **argv);
 
@@ -92,15 +93,17 @@ void kernel_task(int argc, char **argv){
     memcpy(kernel_task->currentDirectory.path, kernel_path, sizeof(kernel_path));
 
     audio_init();    
-    IDT_dump();
 
+    ap_hold = 1;
+    //IDT_dump();
 
-    //udp_init();
-    //dhcp_init(ethernet_getDriver());
-    //tcp_init();
-    //netfs_init();
-    //netproc_init();
-
+    /*
+    udp_init();
+    dhcp_init(ethernet_getDriver());
+    tcp_init();
+    netfs_init();
+    netproc_init();
+    */
     proc_fs_init();
     
     //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);
@@ -158,7 +161,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     acpi_parseMADT();
     
     
-    //apic_startCores();
+    apic_startCores();
 
     //tasking_setup_kernel_stack();
 

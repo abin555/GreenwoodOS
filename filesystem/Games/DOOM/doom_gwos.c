@@ -351,6 +351,8 @@ int main(int argc, char **argv){
 
   uint32_t* framebuffer;
 
+  unsigned int *tick_handle = getTimerTickHandle();
+
   while(running){
     //task_lock(1);
     doom_update();
@@ -380,7 +382,11 @@ int main(int argc, char **argv){
     else{
       window_update(os_window);
     }
-    //for(int i = 0; i < spin_ticks; i++){}
+    //for(int i = 0; i < 0x8FFFFF; i++){}
+    unsigned int tick_now = *tick_handle;
+    while(*tick_handle < tick_now+2){
+
+    }
     //yield();
   }
 

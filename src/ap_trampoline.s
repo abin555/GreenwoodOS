@@ -17,7 +17,7 @@ _L8010_GDT_table:
     dd 0x0000FFFF           ; flat code descriptor (lower 4 bytes)
     dd 0x00CF9A00           ; flat code descriptor (upper 4 bytes)
     dd 0x0000FFFF           ; flat data descriptor (lower 4 bytes)
-    dd 0x008F9200           ; flat data descriptor (upper 4 bytes)
+    dd 0x00CF9200           ; flat data descriptor (upper 4 bytes)
     dd 0x00000068           ; tss descriptor (lower 4 bytes)
     dd 0x00CF8900           ; tss descriptor (upper 4 bytes)
 
@@ -41,6 +41,9 @@ bits 32
 _L8060:
     mov ax, 0x10
     mov ds, ax
+    mov es, ax
+    mov fs, ax
+    mov gs, ax
     mov ss, ax
     
     mov al, 'A'
@@ -64,20 +67,17 @@ _L8060:
     shr ebx, 24
     mov edi, ebx
 
-    ; setup 32k stack for this core
-    shl ebx, 15
-    mov esp, apic_stack_top
-    sub esp, ebx
-
-    push edi
+    mov esp, [apic_stack_top]
 
 .wait_bsp:
     pause
-    ;cmp byte [apic_bspdone], 0
-    ;je .wait_bsp
+    cmp byte [apic_bspdone], 0
+    je .wait_bsp
 
     lock inc byte [aprunning]
 
     ; jump into C code
+    mov edi, eax
     mov edi, ebx
-    jmp 0x08:ap_startup
+    push ebx
+    call 0x08:ap_startup

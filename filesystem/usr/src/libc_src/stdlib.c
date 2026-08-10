@@ -3,6 +3,7 @@
 #include <sys/memory.h>
 #include <ctype.h>
 #include <sys/syscall.h>
+#include <sys/task.h>
 
 struct STDLIB_Memory {
     void *region_base;
@@ -34,7 +35,11 @@ void *malloc(size_t size){
     void *addr = heap.head;
     heap.head += size+0x10;
     if(heap.head >= memory.region_base + memory.region_size){
-      printf("Alloc Error Out of Memory!\n");
+      //printf("Alloc Error Out of Memory! (size = 0x%x - head @ 0x%x base @ 0x%x reg_size = 0x%x)\n", size, heap.head, memory.region_base, memory.region_size);
+      heap.head -= size+0x10;
+      return memory_requestRegion(size);
+      //exit(2);
+      //yield();
       while(1){
 
       }

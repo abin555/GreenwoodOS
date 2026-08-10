@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/vp.h>
 #include <sys/task.h>
+#include <sys/io.h>
 #include "gui.h"
 
 enum PROC_CMD {
@@ -138,7 +139,7 @@ int main(int argc, char **argv){
         }
         return 0;
     }
-    else if(argc == 3 && !strcmp(argv[1], "-k")){
+    else if(argc == 3 && (!strcmp(argv[1], "-k") || !strcmp(argv[1], "-kill"))){
         int pid = atoi(argv[2]);
 
         struct PROC_Response_Task_Info *tinfo = NULL;
@@ -155,6 +156,44 @@ int main(int argc, char **argv){
 
         printf("Killing %d - %s\n", pid, tinfo->name);
         kill_task(task_file, pid);
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-pause")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Pausing %d - %s\n", pid, tinfo->name);
+        pause_task(task_file, pid);
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-resume")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Resuming %d - %s\n", pid, tinfo->name);
+        resume_task(task_file, pid);
         return 0;
     }
 
@@ -183,7 +222,10 @@ int main(int argc, char **argv){
 
     struct Location textBox = {5*8, 13, context->viewport->loc.w - 24, context->viewport->loc.h - 24};
 
-    
+    uint32_t *timer_ticks = getTimerTickHandle();
+
+    uint32_t start_tick = *timer_ticks;
+
     float scroll_ministep = 0.0f;
     int scroll_step = 0;
     int reload_step = 0;
@@ -208,12 +250,20 @@ int main(int argc, char **argv){
             struct PROC_Response_Task_Info *tinfo = &taskContext.taskInfo[i];
             render_taskInfo(tinfo, scroll_step, context, &textBox, &hovered_tid);
         }
-        scroll_ministep += 0.02f;
+        uint32_t now_tick = *timer_ticks;
+        if(now_tick - start_tick >= 25){
+            scroll_ministep += 0.02f;
+            start_tick = now_tick;
+            scroll_step++;
+            reload_step++;
+        }
+        /*
         if(scroll_ministep > 1.0f){
             scroll_ministep = 0.0f;
             scroll_step++;
             reload_step++;
         }
+        */
         if(reload_step == 4){
             updateTaskContext(task_file, &taskContext);
             reload_step = 0;

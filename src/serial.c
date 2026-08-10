@@ -107,6 +107,7 @@ int is_transmit_empty() {
 int fb_idx;
 int fb_idxy = 0;
 int serial_debug_mode = 0;
+
 void write_serial(char a) {
   while (is_transmit_empty() == 0);
   #ifdef OS_DEBUG

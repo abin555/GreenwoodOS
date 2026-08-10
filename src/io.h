@@ -6,6 +6,10 @@
 #define IRQ_OFF { asm volatile ("cli"); }
 #define IRQ_RES { asm volatile ("sti"); }
 
+static inline void debug_byte(uint8_t b) {
+    __asm__ volatile ("out 0xE9, al" :: "a"(b));
+}
+
 //extern void outb(unsigned short port, unsigned char data);
 static inline void outb(uint16_t portid, uint8_t value){
 	asm volatile("out dx, al": :"d" (portid), "a" (value & 0xFF));

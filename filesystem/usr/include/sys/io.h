@@ -22,4 +22,6 @@ int pipe(int fildesc[2]);
 int dup(int oldfd);
 int dup2(int oldfd, int newfd);
 
+unsigned int *getTimerTickHandle();
+
 #endif

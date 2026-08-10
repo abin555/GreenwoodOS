@@ -21,6 +21,13 @@ typedef struct {
   unsigned char pixeltype;          // must be 40
 } __attribute__((packed)) tga_header_t;
 
+struct DesktopConfig {
+    int vp_root_x;
+    int vp_root_y;
+    int screen_w;
+    int screen_h;
+};
+
 struct Viewport *vp;
 int running = 1;
 
@@ -52,7 +59,12 @@ int main(int argc, char **argv){
     print_arg("Image Height is %d\n", header->h);
     */
 
-    if(header->w >= 800 || header->h >= 600){
+    int screen_fd = open("/-/sys/screen", O_READ | O_WRITE);
+    struct DesktopConfig conf;
+    read(screen_fd, &conf, sizeof(struct DesktopConfig));
+    close(screen_fd);
+
+    if(header->w >= conf.screen_w || header->h >= conf.screen_h){
         struct WINDOW *window = window_open("Image Viewer", 0);
         uint32_t *buffer = window->backbuffer;
 
