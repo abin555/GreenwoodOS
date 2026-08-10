@@ -312,6 +312,16 @@ int main(int argc, char **argv){
   doom_init(1, doom_argv, 0);
   task_lock(0);
 
+  int sec, usec;
+  uint32_t ticks = 0;
+  impl_gettime(&sec, &usec);
+  int sec_start = sec;
+  while(sec < sec_start + 2){
+    impl_gettime(&sec, &usec);
+    ++ticks;
+  }
+  uint32_t spin_ticks = ticks;
+
   if(argc == 2){
     window_mode = 1;
   }
@@ -342,15 +352,15 @@ int main(int argc, char **argv){
   uint32_t* framebuffer;
 
   while(running){
-    task_lock(1);
+    //task_lock(1);
     doom_update();
-    task_lock(0);
+    //task_lock(0);
     fread(key_pressed_map, sizeof(key_pressed_map), 1, kbd);
     fseek(kbd, 0, SEEK_SET);
     handle_key();
     framebuffer = (uint32_t *) doom_get_framebuffer(4 /* RGBA */);
 
-    task_lock(1);
+    //task_lock(1);
     
     resize_buf(
       frontbuf,
@@ -362,7 +372,7 @@ int main(int argc, char **argv){
     );
     
     //memcpy(frontbuf, framebuffer, SCALE * SCREENWIDTH * SCREENHEIGHT);
-    task_lock(0);
+    //task_lock(0);
 
     if(!window_mode){
       vp_copy(window);
@@ -370,8 +380,8 @@ int main(int argc, char **argv){
     else{
       window_update(os_window);
     }
-    //for(int i = 0; i < 0x8FFFFF; i++){}
-    yield();
+    //for(int i = 0; i < spin_ticks; i++){}
+    //yield();
   }
 
   if(!window_mode)

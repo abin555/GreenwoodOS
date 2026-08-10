@@ -31,6 +31,7 @@ void multitask_init(){
         task_stack_array[i] = task_stack_base + (TASK_STACK_SIZE * i);
         cpu_fxsave(task_fxsave_region[i]);
     }
+    //task_running_idx = 0;
 }
 
 void multitask_start(){
@@ -149,6 +150,7 @@ int start_task(void *address, int8_t program_slot, int argc, char **argv, char* 
     task->pid = pid_counter++;
     retpid = task->pid;
     task->waitpid = 0;
+    task->cpu_usage_count = 0;
     /*
     print_serial("[TASK] Added Task \"%s\" to queue at %d (ESP: 0x%x, EBP: 0x%x) PID #%d\n", task->task_name, task_idx, task->registers.esp, task->registers.ebp, task->pid);
     for(int j = 0; j < MT_maxDescriptors; j++){
@@ -354,6 +356,7 @@ void __attribute__ ((optimize("-O3"))) switch_to_task(struct task_state* old_tas
 
 
 void __attribute__ ((optimize("-O3"))) task_callback(){
+    tasks[task_running_idx].cpu_usage_count++;
     if(task_lock) return;
     int8_t running_idx=-1;
     for(int i = 0; i < MAX_TASKS; i++){
@@ -481,4 +484,19 @@ void os_yield(){
 	register uint32_t eax asm("eax") __attribute__((unused));
 	eax = 0x34;
 	asm("int 0x80");
+}
+
+uint64_t task_get_totalUsageCounts(){
+    uint64_t count = 0;;
+    for(int i = 0; i < MAX_TASKS; i++){
+        struct task_state *task = &tasks[i];
+        if(task->slot_active) count += task->cpu_usage_count;
+    }
+    return count;
+}
+
+uint64_t task_get_usageCount(int pid){
+    struct task_state *task = task_fromPID(pid);
+    if(task == NULL) return 0;
+    return task->cpu_usage_count;
 }

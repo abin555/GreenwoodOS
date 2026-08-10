@@ -125,6 +125,7 @@ int main(int argc, int argv[]){
     env_set(env, make_sym("OPEN"), make_builtin(builtin_open));
     env_set(env, make_sym("CLOSE"), make_builtin(builtin_close));
     env_set(env, make_sym("WRITE"), make_builtin(builtin_write));
+    env_set(env, make_sym("CLEAR_STR"), make_builtin(builtin_clear_str));
 
     if(init_driver()){
         printf("Error setting up driver!\n");

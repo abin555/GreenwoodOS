@@ -66,6 +66,7 @@ struct task_state{
     int num_used;
     int pid;//Unique program ID
     int waitpid;//If <= 0, don't worry about it. Otherwise, program does not run until program referenced by pid is ended.
+    uint64_t cpu_usage_count;
 } __attribute__((packed));
 
 #define MAX_TASKS 30
@@ -115,4 +116,7 @@ struct task_state *task_getCurrent();
 int task_setRunningID(int id);
 int task_getCurrentPID();
 void os_yield();
+
+uint64_t task_get_totalUsageCounts();
+uint64_t task_get_usageCount(int pid);
 #endif

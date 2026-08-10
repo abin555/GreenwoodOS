@@ -70,7 +70,7 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags
     
     else if(flags->ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
-            if(global_viewport_list->elements[i].inUse){
+            if(global_viewport_list->elements[i].inUse && !(global_viewport_list->elements[i].vp->options & VP_OPT_NODECORATOR)){
                 if(!global_viewport_list->elements[i].vp->minimized)
                     viewport_toggle_size(global_viewport_list->elements[i].vp);
             }

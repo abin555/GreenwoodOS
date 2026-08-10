@@ -25,5 +25,6 @@ int builtin_waitpid(struct Atom args, struct Atom *result);
 int builtin_open(struct Atom args, struct Atom *result);
 int builtin_close(struct Atom args, struct Atom *result);
 int builtin_write(struct Atom args, struct Atom *result);
+int builtin_clear_str(struct Atom args, struct Atom *result);
 
 #endif

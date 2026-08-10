@@ -522,3 +522,8 @@ int builtin_write(struct Atom args, struct Atom *result){
     *result = nil;
     return Error_OK;
 }
+
+int builtin_clear_str(struct Atom args, struct Atom *result){
+    *result = make_string("\033[2J\033[H");
+    return Error_OK;
+}
