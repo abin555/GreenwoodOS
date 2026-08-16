@@ -45,10 +45,45 @@ int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE ty
 	MEMORY_REGIONS[idx].type = type;
 	MEMORY_REGIONS[idx].physical_addr = physical;
 	MEMORY_REGIONS[idx].virtual_addr = virtual & 0xFFC00000;
+	MEMORY_REGIONS[idx].owner_pid = -1;
 
 	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
 	create_page_entry(physical, virtual, flag);
 	return 0;
+}
+
+int MEM_reserveOwned(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type, int owner_pid){
+	physical &= 0xFFC00000;
+	uint32_t idx = physical >> 22;
+	uint32_t flag;
+	switch(type){
+		case FRAMEBUFFER:
+			flag = 0x93;
+		break;
+		default:
+			flag = 0x83;
+		break;
+	}
+	//if(!MEMORY_REGIONS[idx].available && !MEMORY_REGIONS[idx].exists && type != FRAMEBUFFER) return -1;
+	MEMORY_REGIONS[idx].exists = 1;
+	MEMORY_REGIONS[idx].available = 0;
+	MEMORY_REGIONS[idx].type = type;
+	MEMORY_REGIONS[idx].physical_addr = physical;
+	MEMORY_REGIONS[idx].virtual_addr = virtual & 0xFFC00000;
+	MEMORY_REGIONS[idx].owner_pid = owner_pid;
+	print_serial("[MEM] Region reserved by PID %d\n", owner_pid);
+
+	//print_serial("[MEM] Reserved Region of Type %x at physical 0x%x and virtual 0x%x Flag: %x Region IDX: %x\n", type, physical, virtual, flag, idx);
+	create_page_entry(physical, virtual, flag);
+	return 0;
+}
+
+void MEM_freeAllOwnedRegions(int owner_pid){
+	for(int i = 0; i < MEMORY_NUM_REGIONS; i++){
+		if(MEMORY_REGIONS[i].owner_pid != -1 && MEMORY_REGIONS[i].owner_pid == owner_pid){
+			MEM_freeRegion(MEMORY_REGIONS[i].virtual_addr);
+		}
+	}
 }
 
 void MEM_freeRegion(uint32_t virtual){
@@ -58,6 +93,7 @@ void MEM_freeRegion(uint32_t virtual){
 			//print_serial("[MEM] Freeing Memory @ 0x%x\n", virtual);
 			MEMORY_REGIONS[i].exists = 1;
 			MEMORY_REGIONS[i].available = 1;
+			MEMORY_REGIONS[i].owner_pid = -1;
 			delete_page_entry(virtual);
 			break;
 		}
@@ -180,7 +216,7 @@ void MEM_printRegions(){
 				case STACK:
 					type = "  STACK    ";
 			}
-			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x (0x%x)\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr, page_directory[get_page_index_from_addr(MEMORY_REGIONS[i].virtual_addr)]);
+			print_serial("[MEM] Region %x is type [ %s ] at PHYS: 0x%x VIRT: 0x%x (0x%x) OWNER: %d\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr, page_directory[get_page_index_from_addr(MEMORY_REGIONS[i].virtual_addr)], MEMORY_REGIONS[i].owner_pid);
 			//print_console(kernel_console, "[MEM] Region %d is type [%s] at PHYS: 0x%x VIRT: 0x%x\n", i, type, MEMORY_REGIONS[i].physical_addr, MEMORY_REGIONS[i].virtual_addr);
 		}
 	}
@@ -236,6 +272,16 @@ uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, M
 	if(virtual_base == 0) virtual_base = start_physical;
 	for(int i = 0; i < needed_blocks; i++){
 		MEM_reserveRegion(start_physical + i * PAGE_SIZE, virtual_base + i * PAGE_SIZE, type);
+	}
+	return start_physical;
+}
+
+uint32_t MEM_reserveOwnedRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type, int owner_pid){
+	uint32_t start_physical = idx * PAGE_SIZE;
+	int needed_blocks = calculateBlocks(size);
+	if(virtual_base == 0) virtual_base = start_physical;
+	for(int i = 0; i < needed_blocks; i++){
+		MEM_reserveOwned(start_physical + i * PAGE_SIZE, virtual_base + i * PAGE_SIZE, type, owner_pid);
 	}
 	return start_physical;
 }

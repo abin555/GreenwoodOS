@@ -40,5 +40,5 @@
 (defun ! (x) (if (= x 1) 1 (* x (! (- x 1)))))
 (define do (lambda (expr n) (if (= n 0) '() (cons (eval expr) (do expr (- n 1))))))
 (defun clear () (write 1 (clear_str)))
-(defun sh () (exec "/A/utils/sh/sh.elf"))
+(defun sh () (waitpid (exec "/A/utils/sh/sh.elf")))
 (exec "/A/utils/term2/term2.elf" "/A/lisp/lisp.elf" "-w")

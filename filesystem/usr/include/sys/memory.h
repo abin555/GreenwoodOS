@@ -2,6 +2,7 @@
 #define SYS_MEMORY_H
 
 void *memory_requestRegion(unsigned int size);
+void *memory_requestRegionUnOwned(unsigned int size);
 void memory_returnRegion(void *region, unsigned int size);
 
 typedef enum {

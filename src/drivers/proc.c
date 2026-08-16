@@ -19,6 +19,7 @@ enum PROC_CMD {
     PROC_PAUSE_TASK = 2,
     PROC_RESUME_TASK = 3,
     PROC_KILL_TASK = 4,
+    PROC_FOCUS_TASK = 5,
 };
 
 struct PROC_Request {
@@ -75,6 +76,10 @@ int proc_task_write_callback(void *cdev, void *buf, int woffset, int nbytes, int
     } 
     else if(req.cmd == PROC_RESUME_TASK){
         tasks[req.task_id].schedule_type = ALWAYS;
+        return nbytes;
+    }
+    else if(req.cmd == PROC_FOCUS_TASK){
+        tasks[req.task_id].schedule_type = ONFOCUS;
         return nbytes;
     }
     else if(req.cmd == PROC_KILL_TASK){
@@ -164,6 +169,8 @@ int proc_task_read_callback(void *cdev, void *buf, int roffset, int nbytes, int 
         case PROC_PAUSE_TASK:
             break;
         case PROC_RESUME_TASK:
+            break;
+        case PROC_FOCUS_TASK:
             break;
         case PROC_KILL_TASK:
             break;

@@ -300,6 +300,8 @@ void task_end(){
             vfs_close(task->file_descs[i]);
         }
     }
+
+    MEM_freeAllOwnedRegions(task->pid);
     
 	while(1){}
 }

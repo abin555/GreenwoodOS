@@ -150,6 +150,7 @@ int main(int argc, int argv[]){
     eval_expr(expr, env, &result);
     load_file(env, "/A/drivers/lispeng/lib.gwl");
     
+    exit(0);
     printf("Moving into the background!\n");
     set_schedule(NEVER);
     yield();

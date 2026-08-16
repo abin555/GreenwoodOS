@@ -1,6 +1,6 @@
 #include "vfs.h"
 
-#define VFS_maxFiles 200
+#define VFS_maxFiles 500
 struct VFS_File VFS_fileTable[VFS_maxFiles];
 
 #define VFS_maxRootInodes 10

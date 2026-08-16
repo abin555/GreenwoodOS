@@ -97,16 +97,14 @@ void kernel_task(int argc, char **argv){
     ap_hold = 1;
     //IDT_dump();
 
-    /*
     udp_init();
     dhcp_init(ethernet_getDriver());
     tcp_init();
     netfs_init();
     netproc_init();
-    */
+    
     proc_fs_init();
     
-    //start_task(desktop_viewer, -1, 0xDEADBEEF, NULL, "Desktop", NULL);
     MEM_printRegions();
     /*
     char *term2_args[] = {
@@ -174,6 +172,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     timer_init(1);
     multitask_init();
     //timer_attach(10, print_irq_count);
+    IRQ_RES;
     IRQ_RES;
 
     start_task(kernel_task, -1, 0xDEADBEEF, NULL, "Kernel", NULL);

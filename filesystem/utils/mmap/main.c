@@ -24,6 +24,7 @@ struct memory_region{
 	MEMORY_REGION_TYPE type;
 	uint32_t physical_addr;
 	uint32_t virtual_addr;
+    int owner_pid;
 };
 
 void load_state(int fd, int size, struct memory_region *region_state){

@@ -30,6 +30,7 @@ struct memory_region{
 	MEMORY_REGION_TYPE type;
 	uint32_t physical_addr;
 	uint32_t virtual_addr;
+	int owner_pid;//-1 => UNOWNED REGION, all other values match PID
 };
 
 void memset(void *address, uint8_t value, uint32_t size);
@@ -37,11 +38,14 @@ void memcpy(void *dest, void* src, int size);
 void memfcpy(void* target, void* source, uint32_t size);
 
 int MEM_reserveRegion(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type);
+int MEM_reserveOwned(uint32_t physical, uint32_t virtual, MEMORY_REGION_TYPE type, int owner_pid);
+void MEM_freeAllOwnedRegions(int owner_pid);
 void MEM_freeRegion(uint32_t virtual);
 void MEM_populateRegions();
 int MEM_virtualIsValid(uint32_t address);
 int MEM_findRegionIdx(uint32_t size);
 uint32_t MEM_reserveRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type);
+uint32_t MEM_reserveOwnedRegionBlock(int idx, uint32_t size, uint32_t virtual_base, MEMORY_REGION_TYPE type, int owner_pid);
 void MEM_freeRegionBlock(uint32_t virtual, uint32_t size);
 
 void MEM_printRegions();

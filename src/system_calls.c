@@ -173,6 +173,16 @@ void syscall_exit(struct cpu_state *cpu __attribute__((unused)), struct task_sta
 
 void syscall_mem_request(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
 	int block = MEM_findRegionIdx(cpu->ebx);
+	uint32_t addr;
+	if(task->program_slot == -1)
+		addr = MEM_reserveRegionBlock(block, cpu->ebx, 0, PROGRAM);
+	else
+		addr = MEM_reserveOwnedRegionBlock(block, cpu->ebx, 0, PROGRAM, task->pid);
+	cpu->eax = addr;
+}
+
+void syscall_mem_request_unowned(struct cpu_state *cpu __attribute__((unused)), struct task_state *task __attribute__((unused))){
+	int block = MEM_findRegionIdx(cpu->ebx);
 	uint32_t addr = MEM_reserveRegionBlock(block, cpu->ebx, 0, PROGRAM);
 	cpu->eax = addr;
 }
@@ -374,6 +384,7 @@ void init_syscalls(){
 	set(0x1E, syscall_rand);
 	set(0x1F, syscall_exit);
 	set(0x20, syscall_mem_request);
+	set(0x22, syscall_mem_request_unowned);
 	//set(0x21, syscall_keyboard_add_event);
 	set(0x23, syscall_mem_reserve);
 	set(0x26, syscall_start_task);

@@ -1,6 +1,7 @@
 #include "keyboard.h"
 #include "vfs.h"
 #include "sysfs.h"
+#include "system_calls.h"
 
 uint32_t keyboard_buffer_size;
 uint8_t *keyboard_KEYBuffer = NULL;
@@ -205,7 +206,10 @@ void kbd_recieveScancode(uint8_t scancode, KBD_SOURCE source){
 						keyboard_ASCIIBuffer[KBD_ascii_buffer_idx] = 0;
 						//kbd_callEventHandler(0x14);
 						if(KBD_flags.ctrl){
-							mouse_update(0, -2, (struct MouseButtons) {0, 0, 0});
+							//mouse_update(0, -2, (struct MouseButtons) {0, 0, 0});
+							syscall_print_stats();
+							MEM_printRegions();
+							
 						}
 					}
 					break;

@@ -480,7 +480,7 @@ int main(int argc, char **argv){
     }
     int service_size = lseek(service_fd, 0, SEEK_END);
     lseek(service_fd, 0, SEEK_SET);
-    void *service_address = memory_requestRegion(service_size);
+    void *service_address = memory_requestRegionUnOwned(service_size);
     printf("Loading to 0x%x %d bytes\n", service_address, service_size);
 	char serviceName[100];
 	snprintf(serviceName, sizeof(serviceName), "Service-%s\0\0", argv[1]);

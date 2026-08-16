@@ -72,7 +72,7 @@ void window_render_bar(){
 void window_copy_buffer(struct WINDOW *window){
 	//struct IVec2 mousePos = mouse_getPos();
 	//window_draw_cursor(mousePos.x, mousePos.y);
-	memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
+	if(windows[window_selected].active) memfcpy(fb_frontbuffer, window->backbuffer, window_buf_size);
 }
 
 void window_timer_callback(){

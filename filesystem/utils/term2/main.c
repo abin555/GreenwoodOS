@@ -300,15 +300,15 @@ static void term_handle_sgr(struct Terminal *term) {
                         term->attr_fg = term->attr_bg;
                         term->attr_bg = tmp; } break;
             /* Standard 8 foreground colours (30-37) */
-            case 30: term->attr_fg = 0x000000; break;
-            case 31: term->attr_fg = 0xAA0000; break;
-            case 32: term->attr_fg = 0x00AA00; break;
-            case 33: term->attr_fg = 0xAA5500; break;
-            case 34: term->attr_fg = 0x0000AA; break;
-            case 35: term->attr_fg = 0xAA00AA; break;
-            case 36: term->attr_fg = 0x00AAAA; break;
-            case 37: term->attr_fg = 0xAAAAAA; break;
-            case 39: term->attr_fg = 0xFFFFFF; break;  /* default fg */
+            case 30: term->attr_fg =0x000000; break;
+            case 31: term->attr_fg =0xAA0000; break;
+            case 32: term->attr_fg =0x00AA00; break;
+            case 33: term->attr_fg =0xAA5500; break;
+            case 34: term->attr_fg =0x0000AA; break;
+            case 35: term->attr_fg =0xAA00AA; break;
+            case 36: term->attr_fg =0x00AAAA; break;
+            case 37: term->attr_fg =0xAAAAAA; break;
+            case 39: term->attr_fg =0xFFFFFF; break;  /* default fg */
             /* Bright / high-intensity foreground (90-97) */
             case 90: term->attr_fg = 0x555555; break;
             case 91: term->attr_fg = 0xFF5555; break;

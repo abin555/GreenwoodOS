@@ -1,0 +1,3 @@
+(define DOOM "/A/Games/DOOM/DOOM.elf")
+(exec DOOM "-w")
+(exit)

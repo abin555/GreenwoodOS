@@ -380,6 +380,18 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
             printf("Exiting!\n");
             return Error_OK;
         }
+        else if(!strcmp(op.value.symbol, "LOAD")){
+            Atom sym, val;
+            if(nilp(args) || !nilp(cdr(args))){
+                return Error_Args;
+            }
+            sym = car(args);
+            if(sym.type != Atom_STRING || sym.value.string == NULL)
+                return Error_Type;
+            load_file(driver.env, sym.value.string);
+            *result = driver.make_sym("T");
+            return Error_OK;
+        }
     }
 
     //Eval Operator

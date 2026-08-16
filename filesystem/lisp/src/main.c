@@ -90,6 +90,8 @@ int main(int argc, char **argv){
     memset(termbuf, 0, sizeof(termbuf));
     char readbuf[1];
 
+    printf("\033[36mLISP\033[0m> ");
+
     while (running) {
         int n = read(0, readbuf, 1);
         if (n != 1) {
@@ -129,7 +131,7 @@ int main(int argc, char **argv){
 
             idx = 0;
             memset(termbuf, 0, sizeof(termbuf));
-
+            printf("\033[36mLISP\033[0m> ");
         } else if (c == 8 || c == 127) {
             if (idx > 0) {
                 idx--;

@@ -52,6 +52,7 @@ void ap_startup(int apicid){
     fb_putChar(50, 50, 'A', 0x00FF00, 0x000000);
     //window_copy_buffer(ap_win);
     while(1){ 
+        asm("hlt");
         //fb_putChar(x, y, 'A', 0x00FF00, 0x000000);
         if(x > 1000 || x <= 0) vx *= -1;
         if(y > 500 || y <= 0) vy *= -1;

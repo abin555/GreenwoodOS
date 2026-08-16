@@ -13,6 +13,7 @@ enum PROC_CMD {
     PROC_PAUSE_TASK = 2,
     PROC_RESUME_TASK = 3,
     PROC_KILL_TASK = 4,
+    PROC_FOCUS_TASK = 5,
 };
 
 struct PROC_Request {
@@ -59,6 +60,13 @@ void updateTaskContext(FILE *task_file, struct Context *ctx){
 void pause_task(FILE *task_file, int tid){
     struct PROC_Request req_task;
     req_task.cmd = PROC_PAUSE_TASK;
+    req_task.task_id = tid;
+    fwrite(&req_task, sizeof(req_task), 1, task_file);
+}
+
+void focus_task(FILE *task_file, int tid){
+    struct PROC_Request req_task;
+    req_task.cmd = PROC_FOCUS_TASK;
     req_task.task_id = tid;
     fwrite(&req_task, sizeof(req_task), 1, task_file);
 }
@@ -174,7 +182,26 @@ int main(int argc, char **argv){
         }
 
         printf("Pausing %d - %s\n", pid, tinfo->name);
-        pause_task(task_file, pid);
+        pause_task(task_file, tinfo->task_id);
+        return 0;
+    }
+    else if(argc == 3 && !strcmp(argv[1], "-focus")){
+        int pid = atoi(argv[2]);
+
+        struct PROC_Response_Task_Info *tinfo = NULL;
+        for(int i = 0; i < taskContext.ntasks; i++){
+            if(taskContext.taskInfo[i].pid == pid){
+                tinfo = &taskContext.taskInfo[i];
+                break;
+            }
+        }
+        if(tinfo == NULL){
+            printf("Unknown PID %d\n", pid);
+            return 1;
+        }
+
+        printf("Pausing %d - %s\n", pid, tinfo->name);
+        focus_task(task_file, tinfo->task_id);
         return 0;
     }
     else if(argc == 3 && !strcmp(argv[1], "-resume")){
@@ -193,7 +220,7 @@ int main(int argc, char **argv){
         }
 
         printf("Resuming %d - %s\n", pid, tinfo->name);
-        resume_task(task_file, pid);
+        resume_task(task_file, tinfo->task_id);
         return 0;
     }
 

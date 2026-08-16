@@ -85,6 +85,12 @@ void handle_key(){
         case '.':
           doom_key_down(i);
           break;
+        case 'q':
+          doom_key_down(DOOM_KEY_ESCAPE);
+          break;
+        case 'y':
+          doom_key_down(DOOM_KEY_Y);
+          break;
       }
     }
     else if(key_current == 0 && key_prev != 0){
@@ -126,6 +132,12 @@ void handle_key(){
         case ',':
         case '.':
           doom_key_up(i);
+          break;
+        case 'q':
+          doom_key_up(DOOM_KEY_ESCAPE);
+          break;
+        case 'y':
+          doom_key_up(DOOM_KEY_Y);
           break;
       }
     }
