@@ -268,6 +268,7 @@ void print_expr(Atom atom){
 }
 extern int running;
 int eval_expr(Atom expr, Atom *env, Atom *result){
+    static int exit_blocked = 0;
     Atom op, args, p;
     Error err;
 
@@ -376,20 +377,27 @@ int eval_expr(Atom expr, Atom *env, Atom *result){
             return eval_expr(expr, env, result);
         }
         else if(!strcmp(op.value.symbol, "EXIT")){
+            if(exit_blocked) return Error_OK;
             running = 0;
             printf("Exiting!\n");
             return Error_OK;
         }
         else if(!strcmp(op.value.symbol, "LOAD")){
+            exit_blocked = 1;
             Atom sym, val;
             if(nilp(args) || !nilp(cdr(args))){
+                exit_blocked = 0;
                 return Error_Args;
             }
             sym = car(args);
-            if(sym.type != Atom_STRING || sym.value.string == NULL)
+            if(sym.type != Atom_STRING || sym.value.string == NULL){
+                exit_blocked = 0;
                 return Error_Type;
+            }
+                
             load_file(driver.env, sym.value.string);
             *result = driver.make_sym("T");
+            exit_blocked = 0;
             return Error_OK;
         }
     }

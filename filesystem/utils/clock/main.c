@@ -4,9 +4,14 @@
 #include <sys/task.h>
 #include <sys/io.h>
 #include <string.h>
+#include <math.h>
+#include "gfx.h"
 
 #define WIDTH 8*10
 #define HEIGHT 3*8
+
+#define AWIDTH 140
+#define AHEIGHT 140
 
 #define BUF_SIZE WIDTH * HEIGHT * sizeof(uint32_t)
 
@@ -32,24 +37,8 @@ int drawDecimal(int data, int x, int y);
 
 void taskBarClock(int clock_fd);
 
-int main(int argc, char **argv){
-    freopen("/-/dev/serial", "w", stdout);
-
-    int clock_fd = open("/-/dev/RTC", O_READ);
-    if(clock_fd == -1){
-        printf("Unable to open clock RTC file!\n");
-        return 1;
-    }
-
-    if(argc == 2){
-        printf("Clock via taskbar!\n");
-        taskBarClock(clock_fd);
-        close(clock_fd);
-        return 0;
-    }
-
-
-	backbuffer = (uint32_t *) malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
+void digitalClock(int clock_fd){
+    backbuffer = (uint32_t *) malloc(sizeof(uint32_t) * WIDTH * HEIGHT);
     memset(backbuffer, 0, sizeof(uint32_t) * WIDTH * HEIGHT);
 
 	win = vp_open(WIDTH, HEIGHT, "CLOCK");
@@ -69,7 +58,106 @@ int main(int argc, char **argv){
         yield();
 	}
 	vp_close(win);
+}
+
+void drawAngledLine(sGFXctx *ctx, float angle, int centerX, int centerY, float length){
+  int xReal;
+  int yReal;
+
+  float x = cos(angle);
+  float y = sin(angle);
+  
+  xReal = x*(length / 2) + centerX;
+  yReal = y*(length / 2) + centerY;
+  GFX_line(ctx, 0xFFFFFF, centerX, centerY, xReal, yReal);
+}
+
+int numberScreenWidth(int number){
+    int width = 0;
+    while(number > 1){
+        width++;
+        number / 10;
+    }
+    return width * 8;
+}
+
+#define DEG_TO_RAD(deg) (deg * M_PI / 180.0f)
+
+void analogClock(int clock_fd){
+    freopen("/-/dev/serial", "w", stdout);
+    size_t backbuf_size = sizeof(uint32_t) * AWIDTH * AHEIGHT;
+    backbuffer = (uint32_t *) malloc(backbuf_size);
+    memset(backbuffer, 0, backbuf_size);
+
+	win = vp_open(AWIDTH, AHEIGHT, "CLOCK"); 
+	vp_add_event_handler(win, event_handler);
+	vp_set_buffer(win, backbuffer, backbuf_size);
+    win->transparent = 1;
+
+    int cx, cy;
+
+    cx = AWIDTH / 2;
+    cy = AHEIGHT / 2;
+
+    sGFXctx gctx;
+    GFX_fromVP(&gctx, win);
+
+    printf("Doing analog clock!\n");
+
+    float hr_digit_angle = 360.0f / 12.0f;
+
+    running = 1;
+    while(running){      
+        memset(backbuffer, 0, backbuf_size);
+
+        for(int hr = 0; hr < 12; hr++){
+            float x, y;
+            x = cos(DEG_TO_RAD(hr_digit_angle * (hr+1)) - DEG_TO_RAD(90.0f));
+            y = sin(DEG_TO_RAD(hr_digit_angle * (hr+1)) - DEG_TO_RAD(90.0f));
+            int pos_x = x * ((AWIDTH - 24) / 2) + cx;
+            int pos_y = y * ((AHEIGHT - 24) / 2) + cy;
+            pos_x -= 8;
+            pos_y -= 4;
+            drawDecimal(hr+1, (int) pos_x, (int) pos_y);
+        }
+        
+
+        read(clock_fd, &rtc, sizeof(rtc));
+
+        float second_angle = ((float) rtc.second / 60.0f) * 2 * M_PI - DEG_TO_RAD(90.0f);
+        float minute_angle = ((float) rtc.minute / 60.0f) * 2 * M_PI - DEG_TO_RAD(90.0f);
+        float hour_angle = ((float) rtc.hour / 60.0f) * 2 * M_PI - DEG_TO_RAD(90.0f);
+
+        drawAngledLine(&gctx, second_angle, cx, cy, AWIDTH - 58);
+        drawAngledLine(&gctx, minute_angle, cx, cy, AWIDTH - 48);
+        drawAngledLine(&gctx, hour_angle, cx, cy, (AWIDTH / 2) - 24);
+        GFX_circle(&gctx, 0xFFFFFF, cx, cy, (AWIDTH-10) / 2);
+
+        vp_copy(win);
+        yield();
+    }
+}
+
+int main(int argc, char **argv){
+    freopen("/-/dev/serial", "w", stdout);
+
+    int clock_fd = open("/-/dev/RTC", O_READ);
+    if(clock_fd == -1){
+        printf("Unable to open clock RTC file!\n");
+        return 1;
+    }
+
+    if(argc == 2){
+        printf("Clock via taskbar!\n");
+        taskBarClock(clock_fd);
+    }
+    else{
+        //digitalClock(clock_fd);
+        analogClock(clock_fd);
+    }	
+
     close(clock_fd);
+    return 0;
 }
 
 void event_handler(struct Viewport *vp, VIEWPORT_EVENT_TYPE event){

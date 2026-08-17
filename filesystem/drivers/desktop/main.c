@@ -59,6 +59,8 @@ void screen_write_callback(void *cdev, int offset, int nbytes, int *head){
     *head = 0;
 }
 
+bool grabbingMode = false;
+
 void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags, char ascii){
     //print_serial("[DESKTOP] Kbd callback - %c\n", (char) ascii);
     if(flags->ctrl && ascii == 'T'){
@@ -67,7 +69,9 @@ void __attribute__ ((optimize("-O3"))) desktop_kbd_event(struct KBD_flags *flags
     else if(flags->ctrl && ascii == 'E'){
         exec("/A/utils/explorer/explorer.elf", 0, NULL);
     }
-    
+    else if(flags->ctrl && ascii == 'G'){
+        grabbingMode = !grabbingMode;
+    }    
     else if(flags->ctrl && ascii == 'M'){
         for(int i = 0; i < global_viewport_list->count; i++){
             if(global_viewport_list->elements[i].inUse && !(global_viewport_list->elements[i].vp->options & VP_OPT_NODECORATOR)){
@@ -186,7 +190,12 @@ int main(int argc, char **argv){
         int startX;
         int startY;
         char dragging;
-        int dragType;//0 = icon, 1 = viewport, 2 = resize
+        enum {
+            VP_DRAG_NONE = -1,
+            VP_DRAG_ICON = 0,
+            VP_DRAG_VIEWPORT = 1,
+            VP_DRAG_RESIZE = 2,
+        } dragType;//0 = icon, 1 = viewport, 2 = resize
         struct Viewport *selected_vp;
     } ClickDrag = {
         0,
@@ -224,42 +233,42 @@ int main(int argc, char **argv){
         viewport_draw_all(global_viewport_list, win);
 
         if(mouse.buttons.left && !ClickDrag.dragging){
-            struct Viewport_Interaction vp_interaction = viewport_process_click(global_viewport_list, mouse.pos.x, mouse.pos.y);
+            struct Viewport_Interaction vp_interaction = viewport_process_click(global_viewport_list, mouse.pos.x, mouse.pos.y, grabbingMode);
             if(vp_interaction.clickType == VP_Close && vp_interaction.vp != NULL){
                 viewport_close(global_viewport_list, vp_interaction.vp);
             }
-            else if(vp_interaction.clickType == VP_Header && vp_interaction.vp != NULL){
+            else if((vp_interaction.clickType == VP_Header || (grabbingMode && vp_interaction.clickType == VP_Body)) && vp_interaction.vp != NULL){
                 ClickDrag.selected_vp = vp_interaction.vp;
                 ClickDrag.selected_vp->oldLoc = ClickDrag.selected_vp->loc;
-                ClickDrag.dragType = 1;
+                ClickDrag.dragType = VP_DRAG_VIEWPORT;
             }
-            else if(vp_interaction.clickType == VP_Scale && vp_interaction.vp != NULL){
+            else if(vp_interaction.clickType == VP_Resize && vp_interaction.vp != NULL){
                 ClickDrag.selected_vp = vp_interaction.vp;
-                ClickDrag.dragType = 2;
+                ClickDrag.dragType = VP_DRAG_RESIZE;
             }
             ClickDrag.dragging = 1;
             ClickDrag.startX = mouse.pos.x;
             ClickDrag.startY = mouse.pos.y;
         }
         if(!mouse.buttons.left && ClickDrag.dragging) {
-            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == 2){
+            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == VP_DRAG_RESIZE){
                 ClickDrag.selected_vp->resizeLoc.w = mouse.pos.x - ClickDrag.selected_vp->loc.x;
                 ClickDrag.selected_vp->resizeLoc.h = mouse.pos.y - ClickDrag.selected_vp->loc.y;
                 viewport_send_event(ClickDrag.selected_vp, VP_RESIZE);
             }
             ClickDrag.dragging = 0;
-            ClickDrag.dragType = -1;
+            ClickDrag.dragType = VP_DRAG_NONE;
             ClickDrag.selected_vp = NULL;
         }
 
         if(ClickDrag.dragging){
-            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == 1){
+            if(ClickDrag.selected_vp != NULL && ClickDrag.dragType == VP_DRAG_VIEWPORT){
                 viewport_set_position(ClickDrag.selected_vp, win,
                     ClickDrag.selected_vp->oldLoc.x - (ClickDrag.startX - mouse.pos.x),
                     ClickDrag.selected_vp->oldLoc.y - (ClickDrag.startY - mouse.pos.y)
                 );
             }
-            else if(ClickDrag.dragType == 2){
+            else if(ClickDrag.dragType == VP_DRAG_RESIZE){
                 drawRect(
                     0xFF0000,
                     0x000000,
@@ -271,7 +280,7 @@ int main(int argc, char **argv){
                     win->width
                 );
             }
-            else if(ClickDrag.dragType == 1){
+            else if(ClickDrag.dragType == VP_DRAG_VIEWPORT){
                 drawRect(
                     0x0000FF,
                     0x0000DD,

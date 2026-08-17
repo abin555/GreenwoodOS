@@ -164,7 +164,7 @@ int __attribute__ ((optimize("-O3"))) desktop_viewer(int argc __attribute__((unu
                 ClickDrag.selected_vp->oldLoc = ClickDrag.selected_vp->loc;
                 ClickDrag.dragType = 1;
             }
-            else if(vp_interaction.clickType == VP_Scale && vp_interaction.vp != NULL){
+            else if(vp_interaction.clickType == VP_MinMAx && vp_interaction.vp != NULL){
                 ClickDrag.selected_vp = vp_interaction.vp;
                 ClickDrag.dragType = 2;
             }

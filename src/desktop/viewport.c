@@ -173,7 +173,7 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
     if(!getViewportTitleClick(viewport, x, y)) return VP_None;
     if(x > viewport->loc.x + viewport->loc.w - 16 && x < viewport->loc.x + viewport->loc.w - 8){
         viewport_toggle_size(viewport);
-        return VP_Scale;
+        return VP_MinMAx;
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){
         viewport_send_event(viewport, VP_EXIT);
@@ -371,7 +371,7 @@ struct Viewport_Interaction __attribute__ ((optimize("-O3"))) viewport_process_c
         }
         else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0 && vp->minimized == 0){
             print_serial("[DESKTOP] Resize Interaction!\n");
-            interaction.clickType = VP_Scale;
+            interaction.clickType = VP_MinMAx;
             interaction.vp = vp;
             viewport_move_element_to_front(viewport_list, i);
             return interaction;

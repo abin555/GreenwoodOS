@@ -148,7 +148,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
 
     alloc_init();
     
-    
+    /*
     if(GRUB_ACPI_NEW){
         acpi_init(GRUB_ACPI_NEW->rsdp);
     }
@@ -160,7 +160,7 @@ int kmain(unsigned int magic, unsigned long magic_addr){
     
     
     apic_startCores();
-    
+    */
 
     //tasking_setup_kernel_stack();
 

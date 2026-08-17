@@ -70,7 +70,7 @@ int main(int argc, char **argv){
         lseek(music_fd, 0, 0);
         file_buf = (void*) memory_requestRegion(size);
         read(music_fd, file_buf, size);
-        audio.set_volume(100);
+        //audio.set_volume(100);
         audio.wav_play(audio.wav_read(file_buf, size), 0);
     }
     else{

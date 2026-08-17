@@ -5,6 +5,7 @@
 #include <sys/vp.h>
 #include <sys/task.h>
 #include <sys/memory.h>
+#include <sys/io.h>
 
 #include "gif_lib.h"
 
@@ -41,6 +42,7 @@ int readgif(GifFileType *gif_file, GifByteType *byte, int len){
 
 uint32_t *viewbuf;
 GifRowType *ScreenBuffer;
+uint32_t *sys_timer;
 
 void GIF_CopyImageToViewport(GifFileType *gif, int image_idx){
 	SavedImage *image = &gif->SavedImages[image_idx];
@@ -78,11 +80,16 @@ void GIF_CopyImageToViewport(GifFileType *gif, int image_idx){
 			}
 		}
 	}
-
+	/*
 	for(int i = 0; i < 0xFFFFF; i++){
 		for(int j = 0; j < 4*gcb.DelayTime; j++){
 
 		}
+	}
+	*/
+	uint32_t start = *sys_timer;
+	while(*sys_timer < start + gcb.DelayTime){
+		yield();
 	}
 }
 
@@ -113,6 +120,8 @@ int main(int argc, char **argv){
 	viewbuf = malloc(gif->SWidth * gif->SHeight * 4);
 	vp_set_buffer(vp, viewbuf, gif->SWidth * gif->SHeight * 4);
 	vp_add_event_handler(vp, event_handler);
+
+	sys_timer = getTimerTickHandle();
 
 	int image_idx = 0;
 	running = 1;

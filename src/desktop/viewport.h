@@ -67,7 +67,7 @@ struct ViewportList {
 typedef enum {
     VP_None,
     VP_Header,
-    VP_Scale,
+    VP_MinMAx,
     VP_Close,
     VP_Body
 } VIEWPORT_CLICK_TYPE;

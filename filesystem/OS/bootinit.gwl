@@ -1,0 +1,6 @@
+(defun drvrload (driver) (exec "/A/drivers/loader.elf" driver))
+(waitpid (drvrload "/A/drivers/buffs/buffs.elf"))
+(drvrload "/A/drivers/desktop/desktop.elf")
+(exec "/A/utils/term2/term2.elf" "-w")
+(load "/A/lisp/utils.gwl")
+(bg "/A/AJB/pool.tga")

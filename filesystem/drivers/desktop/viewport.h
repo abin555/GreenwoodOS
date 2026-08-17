@@ -68,9 +68,10 @@ struct ViewportList {
 typedef enum {
     VP_None,
     VP_Header,
-    VP_Scale,
+    VP_MinMAx,
     VP_Close,
-    VP_Body
+    VP_Body,
+    VP_Resize
 } VIEWPORT_CLICK_TYPE;
 
 struct Viewport_Interaction{
@@ -102,7 +103,7 @@ struct Viewport *viewport_open(struct ViewportList *viewport_list, int w, int h,
 void viewport_indirect_close(struct Viewport *viewport);
 void viewport_close(struct ViewportList *viewport_list, struct Viewport *viewport);
 void viewport_move_element_to_front(struct ViewportList *viewport_list, int elemIdx);
-struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y);
+struct Viewport_Interaction viewport_process_click(struct ViewportList *viewport_list, int x, int y, bool occlude_body_events);
 void viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *window);
 void viewport_set_options(struct Viewport *vp, VIEWPORT_OPTIONS options);
 

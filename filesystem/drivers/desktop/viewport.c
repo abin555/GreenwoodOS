@@ -9,6 +9,8 @@
 
 uint32_t fb_width, fb_height;
 
+uint32_t frontbuf_size;
+
 struct Viewport make_viewport(int w, int h, char *title){
     struct Viewport viewport;
     task_lock(1);
@@ -23,7 +25,12 @@ struct Viewport make_viewport(int w, int h, char *title){
     viewport.minimized_w = viewport.loc.w;
     viewport.minimized_h = viewport.loc.h;
     viewport.backbuf = NULL;
-    viewport.frontbuf = NULL;
+
+    int block = MEM_findRegionIdx(frontbuf_size);
+    uint32_t addr = MEM_reserveRegionBlock(block, frontbuf_size, 0, 8);
+
+    viewport.frontbuf = (uint32_t*) addr;
+
     viewport.buf_size = 0;
     viewport.owner_program_slot = task_get_slot(task_getCurrentID());
     viewport.owner_task_id = task_getCurrentPID();
@@ -180,7 +187,7 @@ VIEWPORT_CLICK_TYPE viewport_handle_title_click_event(struct Viewport *viewport,
     if(!getViewportTitleClick(viewport, x, y)) return VP_None;
     if(x > viewport->loc.x + viewport->loc.w - 16 && x < viewport->loc.x + viewport->loc.w - 8){
         viewport_toggle_size(viewport);
-        return VP_Scale;
+        return VP_MinMAx;
     }
     else if(x > viewport->loc.x + viewport->loc.w - 8 && x < viewport->loc.x + viewport->loc.w){
         viewport_send_event(viewport, VP_EXIT);
@@ -241,10 +248,11 @@ void viewport_init_sys(struct ViewportList *viewport_list, struct WINDOW *win){
 
     printf("[VIEWPORT] Init System %x %d %d\n", viewport_list, viewport_list->max, viewport_list->count);
 
-    int block = MEM_findRegionIdx(MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t));
-    uint32_t addr = MEM_reserveRegionBlock(block, MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t), 0, 8);
+    frontbuf_size = fb_width * fb_height * sizeof(uint32_t);
 
-    viewport_list->frontbuf_region = (uint32_t *) addr;
+    //int block = MEM_findRegionIdx(MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t));
+    //uint32_t addr = MEM_reserveRegionBlock(block, MAX_VIEWPORTS * fb_width * fb_height * sizeof(uint32_t), 0, 8);
+    //viewport_list->frontbuf_region = (uint32_t *) addr;
     //MEM_printRegions();
 
     for(int i = 0; i < viewport_list->max; i++){
@@ -315,6 +323,7 @@ void  viewport_close(struct ViewportList *viewport_list, struct Viewport *viewpo
     for(int i = drop_idx; i < viewport_list->count; i++){
         viewport_list->elements[i] = viewport_list->elements[i + 1];
     }
+    MEM_freeRegionBlock((uint32_t) viewport->frontbuf, frontbuf_size);
     viewport_send_event(viewport_list->elements[0].vp, VP_FOCUSED);
     //printf("[VP] Close\n");
 }
@@ -349,7 +358,7 @@ void  viewport_draw_all(struct ViewportList *viewport_list, struct WINDOW *windo
     }
 }
 
-struct Viewport_Interaction  viewport_process_click(struct ViewportList *viewport_list, int x, int y){
+struct Viewport_Interaction  viewport_process_click(struct ViewportList *viewport_list, int x, int y, bool occlude_body_events){
     struct Viewport_Interaction interaction = {
         VP_None,
         NULL
@@ -371,13 +380,14 @@ struct Viewport_Interaction  viewport_process_click(struct ViewportList *viewpor
         else if(getViewportBodyClick(vp, x, y)){
             interaction.clickType = VP_Body;
             interaction.vp = vp;
-            viewport_move_element_to_front(viewport_list, i);
-            if(vp->click_events_enabled) viewport_send_event(vp, VP_CLICK);
+            if(!occlude_body_events){
+                viewport_move_element_to_front(viewport_list, i);
+                if(vp->click_events_enabled) viewport_send_event(vp, VP_CLICK);
+            }            
             return interaction;
         }
-        else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0 && vp->minimized == 0){
-            printf("[DESKTOP] Resize Interaction!\n");
-            interaction.clickType = VP_Scale;
+        else if(getViewportResizeClick(vp, x, y) && (vp->options & VP_OPT_RESIZE) != 0 && vp->minimized == false){
+            interaction.clickType = VP_Resize;
             interaction.vp = vp;
             viewport_move_element_to_front(viewport_list, i);
             return interaction;
@@ -407,8 +417,8 @@ void viewport_set_buffer(struct Viewport *viewport, uint32_t *buffer, uint32_t b
     if(viewport == NULL || buffer == NULL) return;
     viewport->backbuf = buffer;
     viewport->buf_size = buf_size;
-    int frontbuf_idx = viewport - global_viewport_list->viewports;
-    viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
+    //int frontbuf_idx = viewport - global_viewport_list->viewports;
+    //viewport->frontbuf = global_viewport_list->frontbuf_region + (fb_width * fb_height * frontbuf_idx);
 }
 
 void  viewport_draw_buf(struct Viewport *viewport, struct WINDOW *window){
