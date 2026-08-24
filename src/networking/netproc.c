@@ -10,7 +10,7 @@
 #include "arp.h"
 #include "dhcp.h"
 #include "icmp.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 
 #define NETACTION_QUEUE_LEN 100
 

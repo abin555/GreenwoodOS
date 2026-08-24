@@ -47,9 +47,10 @@ struct task_file_ctx {
     struct task_file_association fds[];
 };
 
+
 struct task_state{
     struct task_registers registers;
-    int program_slot;//0-9 Represents a slot with a need to switch the program slot context; | value of -1 means this is a kernel task with no page change needed.
+    int program_slot; // value of -1 means this is a kernel task with no page change needed.
     char *task_name;
     uint8_t slot_active;
     uint8_t slot_running;

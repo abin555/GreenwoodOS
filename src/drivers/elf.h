@@ -4,7 +4,7 @@
 #include "stdint.h"
 #include "serial.h"
 #include "memory.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "program.h"
 #include "allocator.h"
 #include "vfs.h"

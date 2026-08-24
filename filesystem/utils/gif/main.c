@@ -94,12 +94,17 @@ void GIF_CopyImageToViewport(GifFileType *gif, int image_idx){
 }
 
 int main(int argc, char **argv){
+	freopen("/-/dev/serial", "w", stdout);
 	if(argc < 2){
+		printf("Not enough args!\n");
 		return 1;
 	}
 	nreads = 0;
 	FILE *gif_file = fopen(argv[1], "r");
-	if(gif_file == NULL) return 1;
+	if(gif_file == NULL){
+		printf("Unable to open %s\n", argv[1]);
+		return 1;
+	}
 	fseek(gif_file, 0, SEEK_END);
 	int size = ftell(gif_file);
 	fseek(gif_file, 0, SEEK_SET);

@@ -7,7 +7,7 @@
 #include "serial.h"
 #include "framebuffer.h"
 #include "window.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "program.h"
 
 extern uint32_t keyboard_buffer_size;

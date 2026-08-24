@@ -1,6 +1,6 @@
 #include "program.h"
 #include "elf.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "vfs.h"
 #include "loader.h"
 
@@ -39,7 +39,7 @@ int program_findSlot(){
 
 int exec(char *filename, int argc, char **argv, void *vctx){
 	//struct task_file_ctx *file_ctx = vctx;
-	print_serial("\n[EXEC] Starting Program %s\n", filename);	
+	print_serial("\n[EXEC] Starting Program %s (argc = %d)\n", filename, argc);
 
 	//struct FILE *file = fopen_rel(&tasks[task_running_idx].currentDirectory, filename);
 	int file = vfs_openRel(&tasks[task_running_idx].currentDirectory, filename, VFS_FLAG_READ);

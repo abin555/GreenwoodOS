@@ -1,7 +1,7 @@
 #include "kernel_fn.h"
 #include "vfs.h"
 #include "sysroot.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 
 struct kernel_fn_list kernel_fn_list;
 

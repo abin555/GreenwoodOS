@@ -285,7 +285,7 @@ struct DirectoryListing vfs_listDirectory(struct DIRECTORY *dir, char *path){
     return listing;
 }
 
-#include "multitasking.h"
+#include "task/multitasking.h"
 struct DirectoryListing vfs_taskListDirectory(char *path){
     return vfs_listDirectory(&tasks[task_running_idx].currentDirectory, path);
 }

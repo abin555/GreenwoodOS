@@ -1,6 +1,6 @@
 #include "console.h"
 #include "sysfs.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "utils.h"
 
 struct CONSOLE consoles[MAX_CONSOLE] = {0};

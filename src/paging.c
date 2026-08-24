@@ -1,7 +1,7 @@
 #include "paging.h"
 #include "utils.h"
 #include "console.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 
 uint32_t *page_directory;
 

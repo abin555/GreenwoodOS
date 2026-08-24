@@ -4,7 +4,7 @@
 #include "memory.h"
 #include "utils.h"
 #include "vfs.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 
 struct SysFS_Inode *sysfs_createRoot(){
     struct SysFS_Inode *sysfs = malloc(sizeof(struct SysFS_Inode));

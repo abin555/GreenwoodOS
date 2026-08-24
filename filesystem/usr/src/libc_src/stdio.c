@@ -5,7 +5,7 @@
 #include <internal/stdio.h>
 #include <ctype.h>
 
-#define MAX_FILE_LISTING 10
+#define MAX_FILE_LISTING 50
 struct FILE **fileListing;
 int openFiles;
 
@@ -19,7 +19,7 @@ FILE *internal_createFileFD(int fd){
 
 void init_stdio(){
 	fileListing = malloc(sizeof(FILE *) * MAX_FILE_LISTING);
-	memset(fileListing, 0, sizeof(fileListing));
+	memset(fileListing, 0, sizeof(FILE *) * MAX_FILE_LISTING);
 	fileListing[0] = internal_createFileFD(0);
 	fileListing[1] = internal_createFileFD(1);
 	fileListing[2] = fileListing[1];
@@ -181,13 +181,19 @@ FILE *fopen(const char *pathname, const char *mode){
 	for(i = 0; i < MAX_FILE_LISTING; i++){
 		if(fileListing[i] == NULL) break;
 	}
-	if(i == MAX_FILE_LISTING) return NULL;
+	if(i == MAX_FILE_LISTING){
+		printf("Maximum files reached!\n");
+		return NULL;
+	}
 	int fd = open((char *) pathname, O_READ | O_WRITE);
 	if(fd == -1){
 		printf("fopen fail\n");
 		return NULL;
 	}
 	fileListing[i] = internal_createFileFD(fd);
+	if(fileListing[i] == NULL){
+		printf("Major problem making File!\n");
+	}
 	return fileListing[i];
 }
 

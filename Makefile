@@ -21,7 +21,7 @@ OBJECTS = \
 		src/ps2.o \
 		src/interfaces/keyboard.o \
 		src/interfaces/mouse.o \
-		src/multitasking.o \
+		src/task/multitasking.o \
 		src/drivers/ahci.o \
 		src/drivers/drive.o \
 		src/drivers/FAT32.o \

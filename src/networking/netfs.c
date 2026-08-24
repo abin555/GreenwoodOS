@@ -9,7 +9,7 @@
 #include "arp.h"
 #include "dhcp.h"
 #include "icmp.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "netproc.h"
 #include "utils.h"
 

@@ -1,7 +1,7 @@
 #include "window.h"
 #include "interrupts.h"
 #include "system_calls.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "framebuffer.h"
 
 int kernel_stats(int argc, char **argv){

@@ -93,6 +93,7 @@ void analogClock(int clock_fd){
 	vp_add_event_handler(win, event_handler);
 	vp_set_buffer(win, backbuffer, backbuf_size);
     win->transparent = 1;
+    win->options |= VP_OPT_NODECORATOR;
 
     int cx, cy;
 
@@ -109,6 +110,10 @@ void analogClock(int clock_fd){
     running = 1;
     while(running){      
         memset(backbuffer, 0, backbuf_size);
+        GFX_line(&gctx, 0xFFFFFF, 0, 0, win->loc.w, 0);
+        GFX_line(&gctx, 0xFFFFFF, 0, 0, 0, win->loc.h);
+        GFX_line(&gctx, 0xFFFFFF, win->loc.w-1, 0, win->loc.w-1, win->loc.h-1);
+        GFX_line(&gctx, 0xFFFFFF, 0, win->loc.h-1, win->loc.w-1, win->loc.h-1);
 
         for(int hr = 0; hr < 12; hr++){
             float x, y;

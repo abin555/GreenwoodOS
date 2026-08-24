@@ -10,6 +10,11 @@
 #include <sys/stat.h>
 #include <stdlib.h>
 
+#define TERM_COLOR_GREEN "\033[32m"
+#define TERM_COLOR_RED	 "\033[35m"
+#define TERM_COLOR_WHITE "\033[39m"
+#define TERM_COLOR_RESET "\033[0m"
+
 char **args;
 
 struct Alias {
@@ -85,7 +90,13 @@ void run_command(char *cmd){
 		}
 		struct DirectoryListing dir = getDirectoryListing(path);
 		for(int i = 0; i < dir.num_entries; i++){
-			puts(dir.entries[i].filename);
+			unsigned int type = dir.entries[i].type;
+			if(type == 0){
+				printf(TERM_COLOR_RED "%s" TERM_COLOR_RESET "\n", dir.entries[i].filename);
+			}
+			else if(type == 1){
+				printf(TERM_COLOR_WHITE "%s" TERM_COLOR_RESET "\n", dir.entries[i].filename);
+			}
 		}
 	}
 	else if(!strcmp(args[0], "mkdir")){
@@ -137,7 +148,7 @@ int main(int argc, char **argv){
     char dirBuf[20];
     char *path = getcwd(dirBuf, sizeof(dirBuf));
 
-    printf("\033[32m%s\033[0m> ", path);
+    printf(TERM_COLOR_GREEN "%s" TERM_COLOR_RESET "> ", path);
     char readbuf[10];
 
     char command_buf[100];

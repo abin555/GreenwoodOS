@@ -1,6 +1,6 @@
 #include "stacktrace.h"
 #include "memory.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 
 struct stackframe;
 struct stackframe {

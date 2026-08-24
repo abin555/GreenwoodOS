@@ -2,7 +2,7 @@
 #define DESKTOP_H
 
 #include "drive.h"
-#include "multitasking.h"
+#include "task/multitasking.h"
 #include "framebuffer.h"
 #include "keyboard.h"
 #include "window.h"
